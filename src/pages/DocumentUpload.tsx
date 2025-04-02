@@ -362,16 +362,10 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
       <PortalNav />
-      <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <img src={austLogo} alt="AUST Logo" className="h-16 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold mb-2">Document Upload</h1>
-            <p className="text-gray-600">Please complete all required sections and upload necessary documents</p>
-          </div>
-          
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>

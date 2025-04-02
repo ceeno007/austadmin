@@ -492,8 +492,8 @@ const Programs = () => {
                     onClick={() =>
                       navigate(
                         `/view-pdf?src=${encodeURIComponent(
-                          tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf
-                        )}`
+                          tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf || ''
+                        )}&title=${encodeURIComponent(selectedProgram || 'Program Handbook')}`
                       )
                     }
                     className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"

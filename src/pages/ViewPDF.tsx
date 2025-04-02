@@ -31,6 +31,9 @@ const ViewPDF = () => {
     );
   }
 
+  // Construct the full PDF URL
+  const fullPdfUrl = pdfSrc.startsWith('/') ? pdfSrc : `/${pdfSrc}`;
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -45,11 +48,20 @@ const ViewPDF = () => {
             </Button>
           </div>
           <div className="bg-white rounded-lg shadow-md p-4">
-            <iframe
-              title="PDF Viewer"
-              src={`https://docs.google.com/gview?url=${window.location.origin}${pdfSrc}&embedded=true`}
+            <object
+              data={fullPdfUrl}
+              type="application/pdf"
               className="w-full h-[80vh] border-0 rounded-lg"
-            />
+            >
+              <div className="text-center p-4">
+                <p className="mb-4">It appears you don't have a PDF plugin for this browser.</p>
+                <Button asChild>
+                  <a href={fullPdfUrl} className="flex items-center">
+                    Download PDF
+                  </a>
+                </Button>
+              </div>
+            </object>
           </div>
         </div>
       </main>
