@@ -1,11 +1,18 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Book, GraduationCap, Building, Phone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import austLogo from "@/assets/images/austlogo.webp";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    if (path === "/" && location.pathname !== "/") return false;
+    return location.pathname.startsWith(path);
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,31 +25,58 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <img 
-                src="/lovable-uploads/6a1e28f7-230a-4381-a505-3a8a8586f90c.png" 
+                src={austLogo} 
                 alt="AUST Logo" 
-                className="h-12 w-12 object-contain"
+                className="h-12 w-auto object-contain"
               />
-              <span className="ml-2 text-xl font-clash-display font-bold">AUST Abuja</span>
             </Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="font-medium hover:text-primary transition-colors">Home</Link>
-            <Link to="/about" className="font-medium hover:text-primary transition-colors flex items-center gap-1">
-              <Book className="h-4 w-4" />
+            <Link 
+              to="/" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/about" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/about") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
               About
             </Link>
-            <Link to="/programs" className="font-medium hover:text-primary transition-colors flex items-center gap-1">
-              <GraduationCap className="h-4 w-4" />
+            <Link 
+              to="/programs" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/programs") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
               Programs
             </Link>
-            <Link to="/campus" className="font-medium hover:text-primary transition-colors flex items-center gap-1">
-              <Building className="h-4 w-4" />
+            <Link 
+              to="/campus" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/campus") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
               Campus Life
             </Link>
-            <Link to="/contact" className="font-medium hover:text-primary transition-colors flex items-center gap-1">
-              <Phone className="h-4 w-4" />
+            <Link 
+              to="/contact" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/contact") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
               Contact
             </Link>
           </div>
@@ -75,18 +109,50 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 invisible'} overflow-hidden`}>
         <div className="container mx-auto px-4 py-4 space-y-4">
-          <Link to="/" className="block font-medium hover:text-primary">Home</Link>
-          <Link to="/about" className="block font-medium hover:text-primary flex items-center">
-            <Book className="h-4 w-4 mr-2" /> About
+          <Link 
+            to="/" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            Home
           </Link>
-          <Link to="/programs" className="block font-medium hover:text-primary flex items-center">
-            <GraduationCap className="h-4 w-4 mr-2" /> Programs
+          <Link 
+            to="/about" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/about") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            About
           </Link>
-          <Link to="/campus" className="block font-medium hover:text-primary flex items-center">
-            <Building className="h-4 w-4 mr-2" /> Campus Life
+          <Link 
+            to="/programs" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/programs") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            Programs
           </Link>
-          <Link to="/contact" className="block font-medium hover:text-primary flex items-center">
-            <Phone className="h-4 w-4 mr-2" /> Contact
+          <Link 
+            to="/campus" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/campus") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            Campus Life
+          </Link>
+          <Link 
+            to="/contact" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/contact") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            Contact
           </Link>
           <div className="flex flex-col space-y-3 pt-2">
             <Button asChild variant="outline">

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -14,6 +13,11 @@ import About from "./pages/About";
 import Programs from "./pages/Programs";
 import CampusLife from "./pages/CampusLife";
 import Contact from "./pages/Contact";
+import ViewPDF from "./pages/ViewPDF";
+import DocumentUpload from "./pages/DocumentUpload";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Sitemap from "./pages/Sitemap";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -32,10 +36,15 @@ const App: React.FC = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/application" element={<ApplicationForm />} />
+              <Route path="/documents" element={<DocumentUpload />} />
               <Route path="/about" element={<About />} />
               <Route path="/programs" element={<Programs />} />
               <Route path="/campus" element={<CampusLife />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/view-pdf" element={<ViewPDF />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/sitemap" element={<Sitemap />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

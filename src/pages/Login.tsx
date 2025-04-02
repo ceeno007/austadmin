@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import austLogo from "@/assets/images/austlogo.webp";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,8 +22,10 @@ const Login = () => {
     // Simulate login process
     setTimeout(() => {
       setIsLoading(false);
+      // Store user's name (in a real app, this would come from the backend)
+      localStorage.setItem("userName", email.split("@")[0]);
       toast.success("Login successful!");
-      navigate("/application");
+      navigate("/documents");
     }, 1500);
   };
 
@@ -36,8 +38,12 @@ const Login = () => {
         
         <Card className="border-none shadow-lg">
           <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-r from-uni-purple to-uni-blue flex items-center justify-center text-white font-bold text-xl mb-2">
-              U
+            <div className="mx-auto mb-2">
+              <img 
+                src={austLogo} 
+                alt="AUST Logo" 
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
             <CardDescription>

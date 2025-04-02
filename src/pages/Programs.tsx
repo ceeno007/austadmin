@@ -1,246 +1,511 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Check, X, FileText } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Programs = () => {
+  const navigate = useNavigate();
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("undergraduate");
 
-  const programs = {
+  const tabs = {
     undergraduate: [
       {
-        title: "B.Sc. Computer Science and Engineering",
+        title: "B.Sc. Software Engineering",
+        duration: "4 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1606484940182-215764b22841?auto=format&fit=crop&w=800&q=80",
+        description: "Focus on software development methodologies, tools, and systems design.",
+        requirements: [
+          "Five SSC credits including English, Mathematics, Physics/Data Processing",
+          "UTME Subjects: Mathematics, Physics, and one other Science subject",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+      },
+      {
+        title: "B.Sc. Computer Science",
+        duration: "4 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
         description: "Develop skills in algorithms, software engineering, and computer systems.",
-        requirements: ["SSCE or equivalent with credits in Mathematics, Physics, and English", "JAMB score of 200+ or Direct Entry", "Computer literacy"],
-        id: "cse"
+        requirements: [
+          "Five SSC credits including English, Mathematics, Physics/Data Processing",
+          "UTME Subjects: Mathematics, Physics, and one other Science subject",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
       },
       {
-        title: "B.Sc. Petroleum Engineering",
-        description: "Learn about exploration, production, and management of oil and gas resources.",
-        requirements: ["SSCE or equivalent with credits in Mathematics, Physics, Chemistry, and English", "JAMB score of 200+ or Direct Entry", "Technical aptitude"],
-        id: "pe"
+        title: "B.Eng. Petroleum and Energy Resources Engineering",
+        duration: "5 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        description: "Explore oil and gas engineering principles and practices.",
+        requirements: [
+          "Five SSC credits including Physics, Chemistry, Mathematics, and English",
+          "UTME Subjects: Chemistry, Mathematics, Physics",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
       },
       {
-        title: "B.Sc. Materials Science and Engineering",
-        description: "Study the properties, structure, and applications of various materials.",
-        requirements: ["SSCE or equivalent with credits in Mathematics, Physics, Chemistry, and English", "JAMB score of 200+ or Direct Entry"],
-        id: "mse"
+        title: "B.Sc. Accounting",
+        duration: "4 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1581092919534-6c2e1b3dcd75?auto=format&fit=crop&w=800&q=80",
+        description: "Gain expertise in financial reporting, auditing, and corporate accounting principles.",
+        requirements: [
+          "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
+          "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+      },
+      {
+        title: "B.Sc. Business Administration",
+        duration: "4 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+        description: "Understand organizational behavior, management, and entrepreneurship strategies.",
+        requirements: [
+          "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
+          "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+      },
+      {
+        title: "B.Eng. Civil Engineering",
+        duration: "5 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1503437313881-503a91226422?auto=format&fit=crop&w=800&q=80",
+        description: "Design and construct infrastructure like roads, bridges, and water systems.",
+        requirements: [
+          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
+          "UTME Subjects: Mathematics, Physics, Chemistry",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+      },
+      {
+        title: "B.Eng. Materials & Metallurgical Engineering",
+        duration: "5 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1517586979037-5dff5562d13c?auto=format&fit=crop&w=800&q=80",
+        description: "Learn the development and application of metallic and composite materials.",
+        requirements: [
+          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
+          "UTME Subjects: Mathematics, Physics, Chemistry",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+      },
+      {
+        title: "B.Eng. Mechanical Engineering",
+        duration: "5 years",
+        schoolFees: "₦2,212,727 per session",
+        image: "https://images.unsplash.com/photo-1599940824395-432a20de0f3c?auto=format&fit=crop&w=800&q=80",
+        description: "Apply physics and materials science for the design and analysis of mechanical systems.",
+        requirements: [
+          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
+          "UTME Subjects: Mathematics, Physics, Chemistry",
+          "JAMB score of 200+"
+        ],
+        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
       }
     ],
     postgraduate: [
       {
-        title: "M.Sc. Computer Science",
-        description: "Advanced study in algorithms, AI, machine learning, and software engineering.",
-        requirements: ["B.Sc. in Computer Science or related field with 2:1 minimum", "Programming experience", "English proficiency"],
-        id: "mscs"
+        title: "M.Sc. Applied Statistics",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1559028012-aaacef290f68?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
-        title: "M.Sc. Petroleum Engineering",
-        description: "Advanced concepts in oil exploration, drilling technologies, and energy economics.",
-        requirements: ["B.Sc. in Petroleum Engineering or related field with 2:1 minimum", "Industry experience preferred", "English proficiency"],
-        id: "mspe"
+        title: "M.Sc. Applied Statistics",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1559028012-aaacef290f68?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Aerospace Engineering",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1483817101829-339b08e8d83f?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Aerospace Engineering",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Computer Science",
+        duration: "2 years",
+        schoolFees: "₦2,500,000",
+        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+        description: "Advanced study of computer science principles and research methodologies.",
+        requirements: [
+          "First Class or Second Class Upper",
+          "Relevant Bachelor's Degree",
+          "Research Proposal",
+          "Academic Transcripts",
+          "Reference Letters"
+        ],
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Computer Science [Class of 2025].pdf"
       },
       {
         title: "Ph.D. Computer Science",
-        description: "Research-focused doctorate in specialized areas of computer science.",
-        requirements: ["M.Sc. in Computer Science or related field", "Research proposal", "English proficiency"],
-        id: "phdcs"
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
-        title: "Ph.D. Materials Science and Engineering",
-        description: "Advanced research in materials science, nanotechnology, and sustainable materials.",
-        requirements: ["M.Sc. in Materials Science or related field", "Research proposal", "English proficiency"],
-        id: "phdmse"
+        title: "M.Sc. Geoinformatics & GIS",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1581093448794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Geoinformatics & GIS",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1532738217436-5272611b4f9f?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Taught Masters in Management of Information Technology",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Management of Information Technology",
+        duration: "2 years",
+        schoolFees: "₦2,500,000",
+        image: "https://images.unsplash.com/photo-1526540694076-6201d1f9182e?auto=format&fit=crop&w=800&q=80",
+        description: "Study the intersection of business and technology management.",
+        requirements: [
+          "First Class or Second Class Upper",
+          "Relevant Bachelor's Degree",
+          "Research Proposal",
+          "Academic Transcripts",
+          "Reference Letters"
+        ],
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Management of Information Technology [Class of 2025].pdf"
+      },
+      {
+        title: "M.Sc. Materials Science & Engineering",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1588941626140-29e1ca6d77f4?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Materials Science & Engineering",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1588616858642-b79ac5fcd8f2?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Taught Masters in Mathematical Modeling",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1570531598473-2a41e825d4e1?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Mathematical Modeling",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1570531598473-2a41e825d4e1?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "PGD Petroleum Engineering",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Petroleum Engineering",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Petroleum Engineering",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Taught Masters in Public Administration",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1589994967218-4ab8e5349ef1?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Public Administration",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1589994967218-4ab8e5349ef1?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Taught Masters in Public Policy",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Public Policy",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Pure & Applied Mathematics",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1550534791-0ce37b23806a?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Pure & Applied Mathematics",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1550534791-0ce37b23806a?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Space Physics",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1599864130116-6c83ac089e69?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Space Physics",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1599864130116-6c83ac089e69?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Systems Engineering",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1596495577886-d920f1ccfadc?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Systems Engineering",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1596495577886-d920f1ccfadc?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "M.Sc. Theoretical & Applied Physics",
+        duration: "1.5 years",
+        schoolFees: "₦1,800,000 total",
+        image: "https://images.unsplash.com/photo-1600478626004-af387bb3ed20?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+      },
+      {
+        title: "Ph.D. Theoretical & Applied Physics",
+        duration: "3 years",
+        schoolFees: "₦4,200,000 total",
+        image: "https://images.unsplash.com/photo-1600478626004-af387bb3ed20?auto=format&fit=crop&w=800&q=80",
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       }
     ],
     jupeb: [
       {
         title: "JUPEB Science",
-        description: "One-year pre-university program focused on sciences for direct entry.",
-        requirements: ["SSCE or equivalent with credits in relevant subjects", "JAMB registration", "Entrance examination"],
-        id: "jupebsci"
-      },
-      {
-        title: "JUPEB Engineering",
-        description: "One-year pre-university program tailored for engineering pathways.",
-        requirements: ["SSCE or equivalent with credits in Mathematics, Physics, and Chemistry", "JAMB registration", "Entrance examination"],
-        id: "jupebeng"
+        duration: "1 year",
+        schoolFees: "₦1,343,000 total",
+        image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80",
+        description: "Pre-degree program to prepare students for direct entry into science programs.",
+        requirements: [
+          "SSCE credits in relevant science subjects",
+          "Entrance exam",
+          "Application form completion"
+        ],
+        pdf: "/pdfs/2024-2025 School of Foundation & Remedial Studies Fees.pdf"
       }
     ]
   };
 
-  const handleProgramClick = (id: string) => {
-    setSelectedProgram(id === selectedProgram ? null : id);
+  const getLabel = (title) => {
+    if (title.toLowerCase().includes("ph.d.")) return "Ph.D.";
+    if (title.toLowerCase().includes("m.sc") || title.toLowerCase().includes("taught")) return "Masters";
+    if (title.toLowerCase().includes("pgd")) return "PGD";
+    return null;
+  };
+
+  const getImage = (program) =>
+    program.image ||
+    "https://images.unsplash.com/photo-1521790366320-5f62b5b3f210?auto=format&fit=crop&w=800&q=80";
+  const getDescription = (program) =>
+    program.description ||
+    "Explore our advanced curriculum designed to equip students with academic and practical skills.";
+  const getRequirements = (program) =>
+    program.requirements || [
+      "Bachelor's degree or equivalent",
+      "Program-specific prerequisites",
+      "English proficiency",
+    ];
+
+  const handleProgramClick = (title: string) => {
+    setSelectedProgram(selectedProgram === title ? null : title);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Academic <span className="text-[#FF5500]">Programs</span>
-              </h1>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                AUST Abuja offers a wide range of accredited programs designed to prepare students 
-                for leadership roles in science, technology, engineering, and mathematics.
-              </p>
-            </div>
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Explore Our <span className="text-[#FF5500]">Programs</span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              AUST provides dynamic, forward-thinking programs through Undergraduate, Postgraduate, and JUPEB categories.
+            </p>
           </div>
         </section>
-        
+
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
-            <Tabs defaultValue="undergraduate" className="max-w-4xl mx-auto">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="undergraduate">Undergraduate Programs</TabsTrigger>
-                <TabsTrigger value="postgraduate">Postgraduate Programs</TabsTrigger>
-                <TabsTrigger value="jupeb">JUPEB Programs</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="undergraduate">
-                <div className="bg-gray-50 p-6 rounded-xl">
-                  <h2 className="text-2xl font-bold mb-4">Undergraduate Programs</h2>
-                  <p className="text-gray-600 mb-8">
-                    Our undergraduate programs provide a strong foundation in science and engineering, 
-                    preparing students for successful careers in these fields.
-                  </p>
-                  
-                  <div className="space-y-6">
-                    {programs.undergraduate.map((program) => (
-                      <div 
-                        key={program.id}
-                        className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => handleProgramClick(program.id)}
-                      >
-                        <h3 className="text-xl font-bold mb-2">{program.title}</h3>
-                        <p className="text-gray-600 mb-2">{program.description}</p>
-                        
-                        {selectedProgram === program.id && (
-                          <div className="mt-4 animate-fade-in">
-                            <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
-                            <ul className="list-none space-y-2">
-                              {program.requirements.map((req, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                                  <span>{req}</span>
-                                </li>
-                              ))}
-                            </ul>
-                            <div className="mt-6">
-                              <Button asChild className="bg-[#FF5500] hover:bg-[#e64d00]">
-                                <Link to="/signup" className="flex items-center">
-                                  Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-muted">
+                  <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
+                  <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
+                  <TabsTrigger value="jupeb">JUPEB</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value={activeTab}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tabs[activeTab].map((program, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white border rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition relative"
+                      onClick={() => handleProgramClick(program.title)}
+                    >
+                      <img
+                        src={getImage(program)}
+                        alt={program.title}
+                        className="w-full h-40 object-cover"
+                      />
+                      {activeTab === "postgraduate" && (
+                        <div className="absolute top-2 left-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
+                          {getLabel(program.title)}
+                        </div>
+                      )}
+                      <div className="p-5">
+                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                        <p className="text-sm text-gray-600 mb-1">{getDescription(program)}</p>
+                        <p className="text-xs text-gray-500">
+                          Duration: {program.duration}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Fees: {program.schoolFees}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="postgraduate">
-                <div className="bg-gray-50 p-6 rounded-xl">
-                  <h2 className="text-2xl font-bold mb-4">Postgraduate Programs</h2>
-                  <p className="text-gray-600 mb-8">
-                    Our postgraduate programs offer advanced knowledge and research opportunities 
-                    in specialized areas of science and technology.
-                  </p>
-                  
-                  <div className="space-y-6">
-                    {programs.postgraduate.map((program) => (
-                      <div 
-                        key={program.id}
-                        className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => handleProgramClick(program.id)}
-                      >
-                        <h3 className="text-xl font-bold mb-2">{program.title}</h3>
-                        <p className="text-gray-600 mb-2">{program.description}</p>
-                        
-                        {selectedProgram === program.id && (
-                          <div className="mt-4 animate-fade-in">
-                            <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
-                            <ul className="list-none space-y-2">
-                              {program.requirements.map((req, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                                  <span>{req}</span>
-                                </li>
-                              ))}
-                            </ul>
-                            <div className="mt-6">
-                              <Button asChild className="bg-[#FF5500] hover:bg-[#e64d00]">
-                                <Link to="/signup" className="flex items-center">
-                                  Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="jupeb">
-                <div className="bg-gray-50 p-6 rounded-xl">
-                  <h2 className="text-2xl font-bold mb-4">JUPEB Programs</h2>
-                  <p className="text-gray-600 mb-8">
-                    Our Joint Universities Preliminary Examination Board (JUPEB) programs provide an alternative 
-                    pathway to undergraduate admission.
-                  </p>
-                  
-                  <div className="space-y-6">
-                    {programs.jupeb.map((program) => (
-                      <div 
-                        key={program.id}
-                        className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => handleProgramClick(program.id)}
-                      >
-                        <h3 className="text-xl font-bold mb-2">{program.title}</h3>
-                        <p className="text-gray-600 mb-2">{program.description}</p>
-                        
-                        {selectedProgram === program.id && (
-                          <div className="mt-4 animate-fade-in">
-                            <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
-                            <ul className="list-none space-y-2">
-                              {program.requirements.map((req, idx) => (
-                                <li key={idx} className="flex items-start">
-                                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                                  <span>{req}</span>
-                                </li>
-                              ))}
-                            </ul>
-                            <div className="mt-6">
-                              <Button asChild className="bg-[#FF5500] hover:bg-[#e64d00]">
-                                <Link to="/signup" className="flex items-center">
-                                  Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </TabsContent>
             </Tabs>
           </div>
         </section>
+
+        {selectedProgram && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+            <div className="bg-white w-full max-w-xl p-6 rounded-xl relative animate-fade-in shadow-xl max-h-screen overflow-y-auto">
+              <button
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                onClick={() => setSelectedProgram(null)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <img
+                src={tabs[activeTab].find((p) => p.title === selectedProgram)?.image}
+                alt={selectedProgram}
+                className="w-full h-48 object-cover rounded-lg mb-4"
+              />
+              <h2 className="text-2xl font-bold mb-2">{selectedProgram}</h2>
+              <p className="text-gray-600 mb-2">
+                {tabs[activeTab].find((p) => p.title === selectedProgram)?.description}
+              </p>
+              <p className="text-sm text-gray-500 mb-2">
+                Duration: {tabs[activeTab].find((p) => p.title === selectedProgram)?.duration}
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                School Fees:{" "}
+                {tabs[activeTab].find((p) => p.title === selectedProgram)?.schoolFees}
+              </p>
+              <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
+              <ul className="space-y-1 mb-6">
+                {tabs[activeTab]
+                  .find((p) => p.title === selectedProgram)
+                  ?.requirements?.map((req, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+                      <span>{req}</span>
+                    </li>
+                  ))}
+              </ul>
+              <div className="grid gap-4">
+                <Button
+                  asChild
+                  className="bg-[#FF5500] hover:bg-[#e64d00] w-full"
+                >
+                  <Link to="/signup" className="flex items-center justify-center">
+                    Apply Now <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                {tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf && (
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        `/view-pdf?src=${encodeURIComponent(
+                          tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf
+                        )}`
+                      )
+                    }
+                    className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"
+                  >
+                    <FileText className="w-4 h-4 mr-2" /> View Full Program Handbook
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
-      
       <Footer />
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -94,9 +93,12 @@ const Contact = () => {
                     <div>
                       <h3 className="text-lg font-bold mb-2">Phone Contact</h3>
                       <p className="text-gray-600">
-                        Admissions Office: +234 (0) 9 123 4567<br />
-                        General Inquiries: +234 (0) 9 765 4321<br />
-                        Student Services: +234 (0) 9 987 6543
+                        <a href="tel:+23491234567" className="hover:text-[#FF7A00] transition-colors">
+                          Admissions Office: +234 (0) 9 123 4567
+                        </a><br />
+                        <a href="tel:+23499876543" className="hover:text-[#FF7A00] transition-colors">
+                          Student Services: +234 (0) 9 987 6543
+                        </a>
                       </p>
                     </div>
                   </div>
@@ -110,9 +112,15 @@ const Contact = () => {
                     <div>
                       <h3 className="text-lg font-bold mb-2">Email Addresses</h3>
                       <p className="text-gray-600">
-                        Admissions: admissions@aust.edu.ng<br />
-                        Academic Affairs: academics@aust.edu.ng<br />
-                        Student Support: support@aust.edu.ng
+                        <a href="mailto:admissions@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
+                          Admissions: admissions@aust.edu.ng
+                        </a><br />
+                        <a href="mailto:academics@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
+                          Academic Affairs: academics@aust.edu.ng
+                        </a><br />
+                        <a href="mailto:support@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
+                          Student Support: support@aust.edu.ng
+                        </a>
                       </p>
                     </div>
                   </div>
@@ -127,7 +135,6 @@ const Contact = () => {
                       <h3 className="text-lg font-bold mb-2">Office Hours</h3>
                       <p className="text-gray-600">
                         Monday - Friday: 8:00 AM - 5:00 PM<br />
-                        Saturday: 9:00 AM - 1:00 PM<br />
                         Sunday: Closed
                       </p>
                     </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,6 +12,7 @@ import {
   Gamepad2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import campusLife from "@/assets/images/campusLife.jpg";
 
 const CampusLife = () => {
   return (
@@ -35,7 +35,7 @@ const CampusLife = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000"
+                    src={campusLife}
                     alt="AUST Campus Life"
                     className="w-full h-80 object-cover"
                   />
