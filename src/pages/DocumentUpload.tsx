@@ -77,7 +77,6 @@ interface PostgraduateFormData {
     referee2: { name: string; email: string };
   };
   declaration: boolean;
-  sourceOfInformation: string;
 }
 
 // Add Flutterwave types
@@ -135,7 +134,6 @@ const DocumentUpload = () => {
       referee2: { name: "", email: "" },
     },
     declaration: false,
-    sourceOfInformation: "",
   });
   const [isPaymentMade, setIsPaymentMade] = useState(false);
   const [nationality, setNationality] = useState<"nigerian" | "foreign">("nigerian");
@@ -163,6 +161,13 @@ const DocumentUpload = () => {
       { id: "medical", label: "Medical Certificate", required: true, file: null },
     ],
   });
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
 
   // Add useEffect to show undergraduate popup on mount
   useEffect(() => {
@@ -326,25 +331,15 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
   };
 
   const handleFlutterwavePayment = () => {
-    // For testing purposes, simulate successful payment
-    setIsPaymentMade(true);
-    toast({
-      title: "Payment Successful",
-      description: "You can now proceed with your application.",
-      className: "bg-green-50 text-green-800",
-    });
-
-    // Comment out the actual Flutterwave integration for now
-    /*
     window.FlutterwaveCheckout({
-      public_key: "FLWPUBK_TEST-XXXXXXXXXXXXXXXXXXXXXXXX-X", // Replace with your test public key
+      public_key: "FLWPUBK_TEST-828dea316e78341d46846add516336fb-X",
       tx_ref: `AUST-PG-${Date.now()}`,
       amount: nationality === "nigerian" ? 10000 : 50,
       currency: nationality === "nigerian" ? "NGN" : "USD",
       payment_options: "card,ussd",
       customer: {
-        email: "test@example.com",
-        name: "Test User",
+        email: "applicant@example.com", // Temporary mock email
+        name: `${postgraduateData.personalDetails.surname} ${postgraduateData.personalDetails.firstName}`,
       },
       customizations: {
         title: "AUST Postgraduate Application Fee",
@@ -365,7 +360,6 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
         // Handle when payment modal is closed
       }
     });
-    */
   };
 
   return (
@@ -822,19 +816,125 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="startDate1">Start Date (Month/Year) *</Label>
-                              <Input
-                                id="startDate1"
-                                placeholder="e.g., August/2011"
-                                disabled={!isPaymentMade}
-                              />
+                              <div className="flex gap-2">
+                                <Select
+                                  onValueChange={(value) => {
+                                    const [month, year] = postgraduateData.academicQualifications.qualification1.startDate.split('/');
+                                    setPostgraduateData({
+                                      ...postgraduateData,
+                                      academicQualifications: {
+                                        ...postgraduateData.academicQualifications,
+                                        qualification1: {
+                                          ...postgraduateData.academicQualifications.qualification1,
+                                          startDate: `${value}/${year || ''}`
+                                        }
+                                      }
+                                    });
+                                  }}
+                                  value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[0] || ''}
+                                  disabled={!isPaymentMade}
+                                >
+                                  <SelectTrigger className="w-[140px]">
+                                    <SelectValue placeholder="Month" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {months.map((month) => (
+                                      <SelectItem key={month} value={month}>
+                                        {month}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  onValueChange={(value) => {
+                                    const [month] = postgraduateData.academicQualifications.qualification1.startDate.split('/');
+                                    setPostgraduateData({
+                                      ...postgraduateData,
+                                      academicQualifications: {
+                                        ...postgraduateData.academicQualifications,
+                                        qualification1: {
+                                          ...postgraduateData.academicQualifications.qualification1,
+                                          startDate: `${month || ''}/${value}`
+                                        }
+                                      }
+                                    });
+                                  }}
+                                  value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[1] || ''}
+                                  disabled={!isPaymentMade}
+                                >
+                                  <SelectTrigger className="w-[100px]">
+                                    <SelectValue placeholder="Year" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {years.map((year) => (
+                                      <SelectItem key={year} value={year}>
+                                        {year}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="endDate1">End Date (Month/Year) *</Label>
-                              <Input
-                                id="endDate1"
-                                placeholder="e.g., December/2012"
-                                disabled={!isPaymentMade}
-                              />
+                              <div className="flex gap-2">
+                                <Select
+                                  onValueChange={(value) => {
+                                    const [month, year] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
+                                    setPostgraduateData({
+                                      ...postgraduateData,
+                                      academicQualifications: {
+                                        ...postgraduateData.academicQualifications,
+                                        qualification1: {
+                                          ...postgraduateData.academicQualifications.qualification1,
+                                          endDate: `${value}/${year || ''}`
+                                        }
+                                      }
+                                    });
+                                  }}
+                                  value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[0] || ''}
+                                  disabled={!isPaymentMade}
+                                >
+                                  <SelectTrigger className="w-[140px]">
+                                    <SelectValue placeholder="Month" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {months.map((month) => (
+                                      <SelectItem key={month} value={month}>
+                                        {month}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  onValueChange={(value) => {
+                                    const [month] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
+                                    setPostgraduateData({
+                                      ...postgraduateData,
+                                      academicQualifications: {
+                                        ...postgraduateData.academicQualifications,
+                                        qualification1: {
+                                          ...postgraduateData.academicQualifications.qualification1,
+                                          endDate: `${month || ''}/${value}`
+                                        }
+                                      }
+                                    });
+                                  }}
+                                  value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[1] || ''}
+                                  disabled={!isPaymentMade}
+                                >
+                                  <SelectTrigger className="w-[100px]">
+                                    <SelectValue placeholder="Year" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {years.map((year) => (
+                                      <SelectItem key={year} value={year}>
+                                        {year}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                           </div>
                           <div className="space-y-2">
@@ -1137,38 +1237,6 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             placeholder="Type your full name"
                             disabled={!isPaymentMade}
                           />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Source of Information */}
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="bg-gray-50 border-b">
-                      <CardTitle className="text-xl text-gray-800">How did you hear about us?</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="source">Select Source *</Label>
-                          <Select disabled={!isPaymentMade}>
-                            <SelectTrigger id="source" className="w-full">
-                              <SelectValue placeholder="Select source" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="search">Search Engine</SelectItem>
-                              <SelectItem value="twitter">Social Media Platform: Twitter</SelectItem>
-                              <SelectItem value="facebook">Social Media Platform: Facebook</SelectItem>
-                              <SelectItem value="instagram">Social Media Platform: Instagram</SelectItem>
-                              <SelectItem value="linkedin">Social Media Platform: LinkedIn</SelectItem>
-                              <SelectItem value="radio">Radio</SelectItem>
-                              <SelectItem value="tv">TV</SelectItem>
-                              <SelectItem value="print">Print media</SelectItem>
-                              <SelectItem value="friend">Friend</SelectItem>
-                              <SelectItem value="word">Word of mouth</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                       </div>
                     </CardContent>
