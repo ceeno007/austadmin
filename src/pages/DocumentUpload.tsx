@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, X, CheckCircle2, AlertCircle, Info, AlertTriangle } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Info, AlertTriangle, CreditCard } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import PortalNav from "@/components/PortalNav";
@@ -353,6 +353,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
             description: "You can now proceed with your application.",
             className: "bg-green-50 text-green-800",
           });
+          // Redirect to the document upload page
+          window.location.href = "/document-upload";
         }
       },
       onclose: function() {
@@ -384,22 +386,22 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                 <div className="space-y-8">
                   {/* Payment Container */}
                   {activeTab === "postgraduate" && !isPaymentMade && (
-                    <Card className="p-6 mb-8">
+                    <Card className="border-2 border-[#FF5500]">
                       <CardHeader>
-                        <CardTitle className="text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
-                        <CardDescription className="text-base">
+                        <CardTitle className="text-xl sm:text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
+                        <CardDescription className="text-sm sm:text-base">
                           A non-refundable application fee is required to proceed with your postgraduate application.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6">
                         <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                              <h4 className="font-semibold">Application Fee</h4>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="mb-4 sm:mb-0">
+                              <h4 className="text-base sm:text-lg font-semibold">Application Fee</h4>
                               <p className="text-sm text-gray-600">Required for all postgraduate applications</p>
                             </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-[#FF6B00]">
+                            <div className="text-left sm:text-right">
+                              <p className="text-xl sm:text-2xl font-bold text-[#FF6B00]">
                                 {nationality === "nigerian" ? "₦10,000" : "$50"}
                               </p>
                               <p className="text-sm text-gray-600">
@@ -409,7 +411,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           </div>
                           <div className="p-4 bg-yellow-50 rounded-lg">
                             <div className="flex items-start">
-                              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2" />
+                              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2 flex-shrink-0" />
                               <div>
                                 <h4 className="font-semibold text-yellow-800">Important Notice</h4>
                                 <p className="text-sm text-yellow-700">
@@ -421,7 +423,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         </div>
 
                         <div className="space-y-4">
-                          <div className="flex items-center space-x-4">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                             <Label className="text-base">Select your nationality:</Label>
                             <div className="flex space-x-4">
                               <div className="flex items-center space-x-2">
@@ -447,8 +449,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         <div className="flex justify-center">
                           <Button
                             onClick={handleFlutterwavePayment}
-                            size="sm"
-                            className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white px-8 py-2 text-sm"
+                            size="lg"
+                            className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white px-8 py-2 text-base sm:text-lg"
                           >
                             Pay Application Fee
                           </Button>
@@ -854,560 +856,3 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                                         qualification1: {
                                           ...postgraduateData.academicQualifications.qualification1,
                                           startDate: `${month || ''}/${value}`
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[1] || ''}
-                                  disabled={!isPaymentMade}
-                                >
-                                  <SelectTrigger className="w-[100px]">
-                                    <SelectValue placeholder="Year" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {years.map((year) => (
-                                      <SelectItem key={year} value={year}>
-                                        {year}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="endDate1">End Date (Month/Year) *</Label>
-                              <div className="flex gap-2">
-                                <Select
-                                  onValueChange={(value) => {
-                                    const [month, year] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
-                                    setPostgraduateData({
-                                      ...postgraduateData,
-                                      academicQualifications: {
-                                        ...postgraduateData.academicQualifications,
-                                        qualification1: {
-                                          ...postgraduateData.academicQualifications.qualification1,
-                                          endDate: `${value}/${year || ''}`
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[0] || ''}
-                                  disabled={!isPaymentMade}
-                                >
-                                  <SelectTrigger className="w-[140px]">
-                                    <SelectValue placeholder="Month" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {months.map((month) => (
-                                      <SelectItem key={month} value={month}>
-                                        {month}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <Select
-                                  onValueChange={(value) => {
-                                    const [month] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
-                                    setPostgraduateData({
-                                      ...postgraduateData,
-                                      academicQualifications: {
-                                        ...postgraduateData.academicQualifications,
-                                        qualification1: {
-                                          ...postgraduateData.academicQualifications.qualification1,
-                                          endDate: `${month || ''}/${value}`
-                                        }
-                                      }
-                                    });
-                                  }}
-                                  value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[1] || ''}
-                                  disabled={!isPaymentMade}
-                                >
-                                  <SelectTrigger className="w-[100px]">
-                                    <SelectValue placeholder="Year" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {years.map((year) => (
-                                      <SelectItem key={year} value={year}>
-                                        {year}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="transcript1">Attach Academic Transcripts and Certificate *</Label>
-                            <div className="flex items-center space-x-4">
-                              <Input
-                                id="transcript1"
-                                type="file"
-                                accept=".pdf,image/*"
-                                multiple
-                                className="hidden"
-                                disabled={!isPaymentMade}
-                              />
-                              <Label
-                                htmlFor="transcript1"
-                                className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
-                              >
-                                Upload Files
-                              </Label>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Second Qualification (for PhD only) */}
-                        {postgraduateData.programType === "phd" && (
-                          <div className="space-y-4">
-                            <h3 className="font-semibold">Academic Qualification 2</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                <Label htmlFor="qualification2">Qualification Type</Label>
-                                <Select disabled={!isPaymentMade}>
-                                  <SelectTrigger id="qualification2" className="w-full">
-                                    <SelectValue placeholder="Select qualification" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="msc">MSc</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="cgpa2">CGPA (or its equivalent)</Label>
-                                <Input
-                                  id="cgpa2"
-                                  type="number"
-                                  step="0.01"
-                                  placeholder="Enter CGPA"
-                                  disabled={!isPaymentMade}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="subject2">Subject</Label>
-                                <Input
-                                  id="subject2"
-                                  placeholder="Enter subject"
-                                  disabled={!isPaymentMade}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="institution2">Awarding Institution/University</Label>
-                                <Input
-                                  id="institution2"
-                                  placeholder="Enter institution name"
-                                  disabled={!isPaymentMade}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="startDate2">Start Date (Month/Year)</Label>
-                                <Input
-                                  id="startDate2"
-                                  placeholder="e.g., August/2011"
-                                  disabled={!isPaymentMade}
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="endDate2">End Date (Month/Year)</Label>
-                                <Input
-                                  id="endDate2"
-                                  placeholder="e.g., December/2012"
-                                  disabled={!isPaymentMade}
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="transcript2">Attach Academic Transcripts and Certificate</Label>
-                              <div className="flex items-center space-x-4">
-                                <Input
-                                  id="transcript2"
-                                  type="file"
-                                  accept=".pdf,image/*"
-                                  multiple
-                                  className="hidden"
-                                  disabled={!isPaymentMade}
-                                />
-                                <Label
-                                  htmlFor="transcript2"
-                                  className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
-                                >
-                                  Upload Files
-                                </Label>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Other Qualifications */}
-                        <div className="space-y-2">
-                          <Label htmlFor="otherQualifications">Other Academic Qualifications</Label>
-                          <div className="flex items-center space-x-4">
-                            <Input
-                              id="otherQualifications"
-                              type="file"
-                              accept=".pdf,.doc,.docx,image/*"
-                              className="hidden"
-                              disabled={!isPaymentMade}
-                            />
-                            <Label
-                              htmlFor="otherQualifications"
-                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
-                            >
-                              Upload File
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Statement of Purpose */}
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="bg-gray-50 border-b">
-                      <CardTitle className="text-xl text-gray-800">C. Statement of Purpose</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div className="bg-yellow-50 p-4 rounded-lg">
-                          <p className="text-sm text-yellow-800">
-                            As an applicant, please provide a one page summary of your reason for selecting the course for which you are applying. You should include your interest and experience in this subject area, a brief research proposal (compulsory for all Ph.D. applicants), your reason for choosing the particular course, and how the course of study connects to your future plan.
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="statement">Statement of Purpose</Label>
-                          <Textarea
-                            id="statement"
-                            placeholder="Write your statement of purpose here..."
-                            className="min-h-[200px]"
-                            disabled={!isPaymentMade}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="statementFile">Upload Statement of Purpose</Label>
-                          <div className="flex items-center space-x-4">
-                            <Input
-                              id="statementFile"
-                              type="file"
-                              accept=".pdf,.doc,.docx"
-                              multiple
-                              className="hidden"
-                              disabled={!isPaymentMade}
-                            />
-                            <Label
-                              htmlFor="statementFile"
-                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
-                            >
-                              Upload Files
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Payment Evidence */}
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="bg-gray-50 border-b">
-                      <CardTitle className="text-xl text-gray-800">D. Payment Evidence</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-semibold mb-2">Application Fees (Non-refundable):</h3>
-                          <p className="text-sm text-gray-600">
-                            {nationality === "nigerian" ? "Nigerian applicants: N10,000" : "Foreign applicants: $50"}
-                          </p>
-                          <div className="mt-4">
-                            <h4 className="font-semibold mb-2">Bank Details:</h4>
-                            <p className="text-sm text-gray-600">Account Name: African University of Science and Technology (AUST)</p>
-                            <p className="text-sm text-gray-600">Account Number: 1016087221</p>
-                            <p className="text-sm text-gray-600">Account Type: Naira</p>
-                            <p className="text-sm text-gray-600">Bank: UBA Plc</p>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="paymentEvidence">Attach Payment Evidence *</Label>
-                          <div className="flex items-center space-x-4">
-                            <Input
-                              id="paymentEvidence"
-                              type="file"
-                              accept=".pdf,image/*"
-                              className="hidden"
-                              disabled={!isPaymentMade}
-                            />
-                            <Label
-                              htmlFor="paymentEvidence"
-                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
-                            >
-                              Upload File
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* References */}
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="bg-gray-50 border-b">
-                      <CardTitle className="text-xl text-gray-800">E. Academic References</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div className="bg-yellow-50 p-4 rounded-lg">
-                          <p className="text-sm text-yellow-800">
-                            It is your responsibility to ensure that you provide TWO references to support your application. Your referees must be able to comment on your academic suitability for the program.
-                          </p>
-                        </div>
-
-                        {/* First Referee */}
-                        <div className="space-y-4">
-                          <h3 className="font-semibold">First Referee *</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label htmlFor="referee1Name">Full Name *</Label>
-                              <Input
-                                id="referee1Name"
-                                placeholder="Enter referee's full name"
-                                disabled={!isPaymentMade}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="referee1Email">Email Address *</Label>
-                              <Input
-                                id="referee1Email"
-                                type="email"
-                                placeholder="Enter referee's email address"
-                                disabled={!isPaymentMade}
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Second Referee */}
-                        <div className="space-y-4">
-                          <h3 className="font-semibold">Second Referee *</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label htmlFor="referee2Name">Full Name *</Label>
-                              <Input
-                                id="referee2Name"
-                                placeholder="Enter referee's full name"
-                                disabled={!isPaymentMade}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="referee2Email">Email Address *</Label>
-                              <Input
-                                id="referee2Email"
-                                type="email"
-                                placeholder="Enter referee's email address"
-                                disabled={!isPaymentMade}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Declaration */}
-                  <Card className="shadow-sm border border-gray-200">
-                    <CardHeader className="bg-gray-50 border-b">
-                      <CardTitle className="text-xl text-gray-800">Declaration</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                      <div className="space-y-6">
-                        <div className="bg-yellow-50 p-4 rounded-lg">
-                          <p className="text-sm text-yellow-800">
-                            By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-                          </p>
-                          <ul className="list-disc list-inside text-sm text-yellow-800 mt-2">
-                            <li>cancel my application.</li>
-                            <li>if admitted, be dismissed from the University.</li>
-                            <li>if degree already awarded, rescind degree awarded.</li>
-                          </ul>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="declaration">Full Name (in lieu of signature) *</Label>
-                          <Input
-                            id="declaration"
-                            placeholder="Type your full name"
-                            disabled={!isPaymentMade}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Submit Button */}
-                  <div className="flex justify-end space-x-4">
-                    <Button
-                      variant="outline"
-                      className="border-[#FF6B00] text-[#FF6B00] hover:bg-[#FF6B00]/10"
-                      disabled={!isPaymentMade}
-                    >
-                      Save as Draft
-                    </Button>
-                    <Button
-                      className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
-                      disabled={!isPaymentMade}
-                    >
-                      Submit Application
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
-            ) : (
-              Object.entries(documents).map(([type, fields]) => (
-                <TabsContent key={type} value={type}>
-                  <div className="space-y-6">
-                    {type === "undergraduate" && (
-                      <Card className="shadow-sm border border-gray-200">
-                        <CardHeader className="bg-gray-50 border-b">
-                          <CardTitle className="text-xl text-gray-800">JAMB Application</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                          <div className="space-y-4">
-                            <p className="text-gray-700">
-                              All undergraduate applications must be made through the JAMB E-facility Portal. Please visit the JAMB portal to complete your application process.
-                            </p>
-                            <Button
-                              onClick={() => window.open('https://jamb.gov.ng/efacility', '_blank')}
-                              className="bg-[#FF5500] hover:bg-[#e64d00]"
-                            >
-                              Visit JAMB Portal
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                    
-                    {fields.map((field) => (
-                      <Card key={field.id} className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center justify-between">
-                            <span>{field.label}</span>
-                            {field.required && (
-                              <span className="text-red-500 text-sm">Required</span>
-                            )}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center space-x-4">
-                            {field.file ? (
-                              <>
-                                <div className="flex-1">
-                                  <p className="text-sm text-gray-600">{field.file.name}</p>
-                                  <p className="text-xs text-gray-500">
-                                    {(field.file.size / 1024 / 1024).toFixed(2)} MB
-                                  </p>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleClearFile(type, field.id)}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </>
-                            ) : (
-                              <div className="flex-1">
-                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="h-8 w-8 mb-2 text-gray-500" />
-                                    <p className="mb-2 text-sm text-gray-500">
-                                      <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500">PDF, JPG, or PNG (MAX. 5MB)</p>
-                                  </div>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file && file.size <= 5 * 1024 * 1024) {
-                                        handleFileUpload(type, field.id, file);
-                                      } else {
-                                        toast({
-                                          title: "File Too Large",
-                                          description: "Please upload a file smaller than 5MB",
-                                          variant: "destructive",
-                                          className: "bg-red-50 text-red-800",
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-
-                    <Card className="shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Additional Notes</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Textarea
-                          placeholder="Add any additional information or comments..."
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          className="min-h-[100px]"
-                        />
-                      </CardContent>
-                    </Card>
-
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="outline"
-                        onClick={handleSaveDraft}
-                        className="border-gray-300"
-                      >
-                        Save Draft
-                      </Button>
-                      <Button
-                        onClick={handleSubmit}
-                        className="bg-[#FF5500] hover:bg-[#e64d00]"
-                      >
-                        Submit Application
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-              ))
-            )}
-          </Tabs>
-        </div>
-      </main>
-      <Toaster />
-
-      <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-[#FF5500] flex items-center gap-2">
-              <Info className="h-6 w-6" />
-              {modalContent.title}
-            </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              Please read the following information carefully before proceeding with your application.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 space-y-4 text-gray-700">
-            {modalContent.content.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default DocumentUpload; 
