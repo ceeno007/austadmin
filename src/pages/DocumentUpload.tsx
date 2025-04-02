@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, X, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import PortalNav from "@/components/PortalNav";
@@ -138,6 +138,7 @@ const DocumentUpload = () => {
     sourceOfInformation: "",
   });
   const [isPaymentMade, setIsPaymentMade] = useState(false);
+  const [nationality, setNationality] = useState<"nigerian" | "foreign">("nigerian");
 
   const [documents, setDocuments] = useState<Record<string, DocumentField[]>>({
     undergraduate: [
@@ -338,8 +339,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
     window.FlutterwaveCheckout({
       public_key: "FLWPUBK_TEST-XXXXXXXXXXXXXXXXXXXXXXXX-X", // Replace with your test public key
       tx_ref: `AUST-PG-${Date.now()}`,
-      amount: 10000,
-      currency: "NGN",
+      amount: nationality === "nigerian" ? 10000 : 50,
+      currency: nationality === "nigerian" ? "NGN" : "USD",
       payment_options: "card,ussd",
       customer: {
         email: "test@example.com",
@@ -388,740 +389,718 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
             {activeTab === "postgraduate" ? (
               <TabsContent value="postgraduate">
                 <div className="space-y-8">
-                  {!isPaymentMade ? (
-                    <Card className="shadow-sm border border-gray-200">
-                      <CardHeader className="bg-gray-50 border-b">
-                        <CardTitle className="text-xl text-gray-800">Application Fee Payment</CardTitle>
+                  {/* Payment Container */}
+                  {activeTab === "postgraduate" && !isPaymentMade && (
+                    <Card className="p-6 mb-8">
+                      <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
+                        <CardDescription className="text-base">
+                          A non-refundable application fee is required to proceed with your postgraduate application.
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent className="pt-6">
-                        <div className="space-y-6">
-                          <div className="bg-gray-50 p-6 rounded-lg">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Postgraduate Application Fee</h3>
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600">Application Fee (Non-refundable)</span>
-                                <span className="text-xl font-bold text-[#FF5500]">₦10,000</span>
-                              </div>
-                              <div className="border-t pt-4">
-                                <p className="text-sm text-gray-600 mb-4">
-                                  Please note that this is a non-refundable application fee. The payment must be completed before you can proceed with your application.
+                      <CardContent className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                              <h4 className="font-semibold">Application Fee</h4>
+                              <p className="text-sm text-gray-600">Required for all postgraduate applications</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-[#FF6B00]">
+                                {nationality === "nigerian" ? "₦10,000" : "$50"}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {nationality === "nigerian" ? "Nigerian Applicants" : "International Applicants"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-yellow-50 rounded-lg">
+                            <div className="flex items-start">
+                              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2" />
+                              <div>
+                                <h4 className="font-semibold text-yellow-800">Important Notice</h4>
+                                <p className="text-sm text-yellow-700">
+                                  This fee is non-refundable. Please ensure you have selected the correct nationality before proceeding with payment.
                                 </p>
-                                <div className="flex justify-center">
-                                  <Button
-                                    onClick={handleFlutterwavePayment}
-                                    className="bg-[#FF5500] hover:bg-[#e64d00] px-8 py-2 text-sm"
-                                    size="sm"
-                                  >
-                                    Pay Application Fee
-                                  </Button>
-                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <>
-                      {/* Program Selection */}
-                      <Card className="shadow-sm border border-gray-200">
-                        <CardHeader className="bg-gray-50 border-b">
-                          <CardTitle className="text-xl text-gray-800">Program Selection</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6 pt-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Academic Session</Label>
-                              <Select
-                                value={postgraduateData.academicSession}
-                                onValueChange={(value) => handlePostgraduateChange("academicSession", value)}
-                              >
-                                <SelectTrigger className="w-full bg-white border-gray-300 hover:bg-gray-50">
-                                  <SelectValue placeholder="Select Academic Session" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white">
-                                  <SelectItem value="2024/2025" className="text-gray-700 hover:bg-gray-100">2024/2025 Academic Session</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Program Type</Label>
-                              <Select
-                                value={postgraduateData.programType}
-                                onValueChange={(value) => handlePostgraduateChange("programType", value)}
-                              >
-                                <SelectTrigger className="w-full bg-white border-gray-300 hover:bg-gray-50">
-                                  <SelectValue placeholder="Select Program Type" />
-                                </SelectTrigger>
-                                <SelectContent className="bg-white">
-                                  <SelectItem value="pgd" className="text-gray-700 hover:bg-gray-100">Postgraduate Diploma</SelectItem>
-                                  <SelectItem value="taught" className="text-gray-700 hover:bg-gray-100">Taught Masters</SelectItem>
-                                  <SelectItem value="msc" className="text-gray-700 hover:bg-gray-100">MSc</SelectItem>
-                                  <SelectItem value="phd" className="text-gray-700 hover:bg-gray-100">PhD</SelectItem>
-                                </SelectContent>
-                              </Select>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center space-x-4">
+                            <Label className="text-base">Select your nationality:</Label>
+                            <div className="flex space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroup
+                                  value={nationality}
+                                  onValueChange={(value: "nigerian" | "foreign") => setNationality(value)}
+                                  className="flex space-x-4"
+                                >
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="nigerian" id="nigerian" />
+                                    <Label htmlFor="nigerian" className="text-base">Nigerian</Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="foreign" id="foreign" />
+                                    <Label htmlFor="foreign" className="text-base">International</Label>
+                                  </div>
+                                </RadioGroup>
+                              </div>
                             </div>
                           </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                          <Button
+                            onClick={handleFlutterwavePayment}
+                            size="sm"
+                            className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white px-8 py-2 text-sm"
+                          >
+                            Pay Application Fee
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Program Selection */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">Program Selection</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label className="text-gray-700 font-medium">Program</Label>
+                            <Label htmlFor="academicSession">Academic Session</Label>
+                            <Input
+                              id="academicSession"
+                              value="2024/2025 Academic Session"
+                              disabled
+                              className="bg-gray-50"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="programType">Program Type</Label>
                             <Select
-                              value={postgraduateData.program}
-                              onValueChange={(value) => handlePostgraduateChange("program", value)}
+                              value={postgraduateData.programType}
+                              onValueChange={(value) => handlePostgraduateChange("programType", value)}
+                              disabled={!isPaymentMade}
                             >
-                              <SelectTrigger className="w-full bg-white border-gray-300 hover:bg-gray-50">
-                                <SelectValue placeholder="Select Program" />
+                              <SelectTrigger id="programType" className="w-full">
+                                <SelectValue placeholder="Select program type" />
                               </SelectTrigger>
-                              <SelectContent className="bg-white max-h-[300px]">
-                                <SelectItem value="applied_stats" className="text-gray-700 hover:bg-gray-100">Applied Statistics (MSc only)</SelectItem>
-                                <SelectItem value="aerospace" className="text-gray-700 hover:bg-gray-100">Aerospace Engineering (MSc/PhD)</SelectItem>
-                                <SelectItem value="cs" className="text-gray-700 hover:bg-gray-100">Computer Science (MSc/PhD)</SelectItem>
-                                <SelectItem value="geoinformatics" className="text-gray-700 hover:bg-gray-100">Geoinformatics and GIS (MSc/PhD)</SelectItem>
-                                <SelectItem value="energy" className="text-gray-700 hover:bg-gray-100">Energy Resources Engineering (MSc only)</SelectItem>
-                                <SelectItem value="mit_taught" className="text-gray-700 hover:bg-gray-100">Management of Information Technology (Taught Masters)</SelectItem>
-                                <SelectItem value="mit_msc" className="text-gray-700 hover:bg-gray-100">Management of Information Technology (MSc only)</SelectItem>
-                                <SelectItem value="materials" className="text-gray-700 hover:bg-gray-100">Materials Science & Engineering (MSc/PhD)</SelectItem>
-                                <SelectItem value="math_modeling" className="text-gray-700 hover:bg-gray-100">Mathematical Modeling (MSc only)</SelectItem>
-                                <SelectItem value="petroleum" className="text-gray-700 hover:bg-gray-100">Petroleum Engineering (Postgraduate Diploma/MSc/PhD)</SelectItem>
-                                <SelectItem value="public_admin" className="text-gray-700 hover:bg-gray-100">Public Administration (MSc only)</SelectItem>
-                                <SelectItem value="public_policy" className="text-gray-700 hover:bg-gray-100">Public Policy (MSc only)</SelectItem>
-                                <SelectItem value="pure_math" className="text-gray-700 hover:bg-gray-100">Pure and Applied Mathematics (MSc/PhD)</SelectItem>
-                                <SelectItem value="space_physics" className="text-gray-700 hover:bg-gray-100">Space Physics (MSc/PhD)</SelectItem>
-                                <SelectItem value="systems" className="text-gray-700 hover:bg-gray-100">Systems Engineering (MSc/PhD)</SelectItem>
-                                <SelectItem value="physics" className="text-gray-700 hover:bg-gray-100">Theoretical and Applied Physics (MSc/PhD)</SelectItem>
+                              <SelectContent>
+                                <SelectItem value="pgd">Postgraduate Diploma</SelectItem>
+                                <SelectItem value="taught">Taught Masters</SelectItem>
+                                <SelectItem value="msc">MSc</SelectItem>
+                                <SelectItem value="phd">PhD</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="space-y-2">
+                            <Label htmlFor="program">Select Program</Label>
+                            <Select
+                              value={postgraduateData.program}
+                              onValueChange={(value) => handlePostgraduateChange("program", value)}
+                              disabled={!isPaymentMade}
+                            >
+                              <SelectTrigger id="program" className="w-full">
+                                <SelectValue placeholder="Select program" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="applied_stats">Applied Statistics (MSc only)</SelectItem>
+                                <SelectItem value="aerospace">Aerospace Engineering (MSc/PhD)</SelectItem>
+                                <SelectItem value="cs">Computer Science (MSc/PhD)</SelectItem>
+                                <SelectItem value="geoinformatics">Geoinformatics and GIS (MSc/PhD)</SelectItem>
+                                <SelectItem value="energy">Energy Resources Engineering (MSc only)</SelectItem>
+                                <SelectItem value="mit_taught">Management of Information Technology (Taught Masters)</SelectItem>
+                                <SelectItem value="mit_msc">Management of Information Technology (MSc only)</SelectItem>
+                                <SelectItem value="materials">Materials Science & Engineering (MSc/PhD)</SelectItem>
+                                <SelectItem value="math_modeling">Mathematical Modeling (MSc only)</SelectItem>
+                                <SelectItem value="petroleum">Petroleum Engineering (Postgraduate Diploma/MSc/PhD)</SelectItem>
+                                <SelectItem value="public_admin">Public Administration (MSc only)</SelectItem>
+                                <SelectItem value="public_policy">Public Policy (MSc only)</SelectItem>
+                                <SelectItem value="pure_math">Pure and Applied Mathematics (MSc/PhD)</SelectItem>
+                                <SelectItem value="space_physics">Space Physics (MSc/PhD)</SelectItem>
+                                <SelectItem value="systems">Systems Engineering (MSc/PhD)</SelectItem>
+                                <SelectItem value="physics">Theoretical and Applied Physics (MSc/PhD)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                      {/* Personal Details */}
-                      <Card className="shadow-sm border border-gray-200">
-                        <CardHeader className="bg-gray-50 border-b">
-                          <CardTitle className="text-xl text-gray-800">Personal Details</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6 pt-6">
+                  {/* Personal Details */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">A. Personal Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="passport">Passport Photograph</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="passport"
+                              type="file"
+                              accept="image/*,.pdf"
+                              className="hidden"
+                              disabled={!isPaymentMade}
+                            />
+                            <Label
+                              htmlFor="passport"
+                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                            >
+                              Upload Photo
+                            </Label>
+                          </div>
+                          <p className="text-sm text-gray-500">Supported formats: PDF or image. Max 100 MB.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label htmlFor="surname">Surname *</Label>
+                            <Input
+                              id="surname"
+                              placeholder="Enter your surname"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name *</Label>
+                            <Input
+                              id="firstName"
+                              placeholder="Enter your first name"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="otherNames">Other Names</Label>
+                            <Input
+                              id="otherNames"
+                              placeholder="Enter your other names"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Gender *</Label>
+                            <RadioGroup
+                              disabled={!isPaymentMade}
+                              className="flex space-x-4"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="male" id="male" />
+                                <Label htmlFor="male">Male</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="female" id="female" />
+                                <Label htmlFor="female">Female</Label>
+                              </div>
+                            </RadioGroup>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                            <Input
+                              id="dateOfBirth"
+                              type="date"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="nationality">Nationality *</Label>
+                            <Input
+                              id="nationality"
+                              placeholder="Enter your nationality"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          {nationality === "nigerian" && (
+                            <div className="space-y-2">
+                              <Label htmlFor="stateOfOrigin">State of Origin</Label>
+                              <Input
+                                id="stateOfOrigin"
+                                placeholder="Enter your state of origin"
+                                disabled={!isPaymentMade}
+                              />
+                            </div>
+                          )}
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Telephone / Mobile Number *</Label>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              pattern="[0-9]*"
+                              placeholder="Enter your phone number"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email Address *</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="Enter your email address"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="address">Street Address *</Label>
+                            <Input
+                              id="address"
+                              placeholder="Enter your street address"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City *</Label>
+                            <Input
+                              id="city"
+                              placeholder="Enter your city"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="country">Country *</Label>
+                            <Input
+                              id="country"
+                              placeholder="Enter your country"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Do you have any disabilities/special needs? *</Label>
+                            <RadioGroup
+                              disabled={!isPaymentMade}
+                              className="flex space-x-4"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="yes" id="disability_yes" />
+                                <Label htmlFor="disability_yes">Yes</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="no" id="disability_no" />
+                                <Label htmlFor="disability_no">No</Label>
+                              </div>
+                            </RadioGroup>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="disabilityDescription">If yes, provide a brief description:</Label>
+                            <Textarea
+                              id="disabilityDescription"
+                              placeholder="Describe your disability or special needs"
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Academic Qualifications */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">B. Academic Qualifications</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            Please list all academic qualifications in chronological order. Evidence of qualifications you have completed must be submitted with this application form. A student copy of your academic transcripts and a copy of the certificate/diploma for degrees received (with notarized English translations where applicable) MUST be sent with this application form.
+                          </p>
+                        </div>
+                        
+                        {/* First Qualification */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold">Academic Qualification 1 *</h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Surname *</Label>
+                              <Label htmlFor="qualification1">Qualification Type *</Label>
+                              <Select disabled={!isPaymentMade}>
+                                <SelectTrigger id="qualification1" className="w-full">
+                                  <SelectValue placeholder="Select qualification" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="bsc">BSc</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="grade1">Grade *</Label>
+                              <Select disabled={!isPaymentMade}>
+                                <SelectTrigger id="grade1" className="w-full">
+                                  <SelectValue placeholder="Select grade" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="first">First Class</SelectItem>
+                                  <SelectItem value="second_upper">Second Class Upper</SelectItem>
+                                  <SelectItem value="second_lower">Second Class Lower</SelectItem>
+                                  <SelectItem value="third">Third Class</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="cgpa1">CGPA (or its equivalent) *</Label>
                               <Input
-                                value={postgraduateData.personalDetails.surname}
-                                onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
-                                placeholder="Enter your surname"
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="cgpa1"
+                                type="number"
+                                step="0.01"
+                                placeholder="Enter CGPA"
+                                disabled={!isPaymentMade}
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">First Name *</Label>
+                              <Label htmlFor="subject1">Subject *</Label>
                               <Input
-                                value={postgraduateData.personalDetails.firstName}
-                                onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
-                                placeholder="Enter your first name"
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="subject1"
+                                placeholder="Enter subject"
+                                disabled={!isPaymentMade}
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Other Names</Label>
+                              <Label htmlFor="institution1">Awarding Institution/University *</Label>
                               <Input
-                                value={postgraduateData.personalDetails.otherNames}
-                                onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
-                                placeholder="Enter your other names"
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="institution1"
+                                placeholder="Enter institution name"
+                                disabled={!isPaymentMade}
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Gender *</Label>
-                              <RadioGroup
-                                value={postgraduateData.personalDetails.gender}
-                                onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-                                className="flex space-x-6"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="male" id="male" className="text-[#FF5500]" />
-                                  <Label htmlFor="male" className="text-gray-700">Male</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="female" id="female" className="text-[#FF5500]" />
-                                  <Label htmlFor="female" className="text-gray-700">Female</Label>
-                                </div>
-                              </RadioGroup>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Date of Birth *</Label>
+                              <Label htmlFor="startDate1">Start Date (Month/Year) *</Label>
                               <Input
-                                type="date"
-                                value={postgraduateData.personalDetails.dateOfBirth}
-                                onChange={(e) => handlePersonalDetailsChange("dateOfBirth", e.target.value)}
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="startDate1"
+                                placeholder="e.g., August/2011"
+                                disabled={!isPaymentMade}
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Nationality *</Label>
+                              <Label htmlFor="endDate1">End Date (Month/Year) *</Label>
                               <Input
-                                value={postgraduateData.personalDetails.nationality}
-                                onChange={(e) => handlePersonalDetailsChange("nationality", e.target.value)}
-                                placeholder="Enter your nationality"
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="endDate1"
+                                placeholder="e.g., December/2012"
+                                disabled={!isPaymentMade}
                               />
                             </div>
                           </div>
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Street Address *</Label>
+                          <div className="space-y-2">
+                            <Label htmlFor="transcript1">Attach Academic Transcripts and Certificate *</Label>
+                            <div className="flex items-center space-x-4">
                               <Input
-                                value={postgraduateData.personalDetails.streetAddress}
-                                onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
-                                placeholder="Enter your street address"
-                                className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
+                                id="transcript1"
+                                type="file"
+                                accept=".pdf,image/*"
+                                multiple
+                                className="hidden"
+                                disabled={!isPaymentMade}
                               />
+                              <Label
+                                htmlFor="transcript1"
+                                className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                              >
+                                Upload Files
+                              </Label>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                              <div className="space-y-2">
-                                <Label className="text-gray-700 font-medium">City *</Label>
-                                <Input
-                                  value={postgraduateData.personalDetails.city}
-                                  onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
-                                  placeholder="Enter your city"
-                                  className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-gray-700 font-medium">Country *</Label>
-                                <Input
-                                  value={postgraduateData.personalDetails.country}
-                                  onChange={(e) => handlePersonalDetailsChange("country", e.target.value)}
-                                  placeholder="Enter your country"
-                                  className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-gray-700 font-medium">State of Origin</Label>
-                                <Input
-                                  value={postgraduateData.personalDetails.stateOfOrigin}
-                                  onChange={(e) => handlePersonalDetailsChange("stateOfOrigin", e.target.value)}
-                                  placeholder="Enter your state of origin"
-                                  className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                />
-                              </div>
-                            </div>
+                          </div>
+                        </div>
+
+                        {/* Second Qualification (for PhD only) */}
+                        {postgraduateData.programType === "phd" && (
+                          <div className="space-y-4">
+                            <h3 className="font-semibold">Academic Qualification 2</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-2">
-                                <Label className="text-gray-700 font-medium">Phone Number *</Label>
-                                <Input
-                                  value={postgraduateData.personalDetails.phoneNumber}
-                                  onChange={(e) => handlePersonalDetailsChange("phoneNumber", e.target.value)}
-                                  placeholder="Enter your phone number"
-                                  className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label className="text-gray-700 font-medium">Email Address *</Label>
-                                <Input
-                                  type="email"
-                                  value={postgraduateData.personalDetails.email}
-                                  onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-                                  placeholder="Enter your email address"
-                                  className="border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-gray-700 font-medium">Do you have any disabilities/special needs? *</Label>
-                              <RadioGroup
-                                value={postgraduateData.personalDetails.hasDisabilities}
-                                onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
-                                className="flex space-x-6"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="yes" id="disability_yes" className="text-[#FF5500]" />
-                                  <Label htmlFor="disability_yes" className="text-gray-700">Yes</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="no" id="disability_no" className="text-[#FF5500]" />
-                                  <Label htmlFor="disability_no" className="text-gray-700">No</Label>
-                                </div>
-                              </RadioGroup>
-                              {postgraduateData.personalDetails.hasDisabilities === "yes" && (
-                                <div className="mt-4">
-                                  <Label className="text-gray-700 font-medium">Please describe your disabilities/special needs</Label>
-                                  <Textarea
-                                    value={postgraduateData.personalDetails.disabilityDescription}
-                                    onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
-                                    placeholder="Describe your disabilities or special needs"
-                                    className="mt-2 border-gray-300 focus:border-[#FF5500] focus:ring-[#FF5500]"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Academic Qualifications */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Academic Qualifications</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                          <div className="space-y-4">
-                            <h3 className="font-semibold">Qualification 1</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>Qualification Type *</Label>
-                                <Select
-                                  value={postgraduateData.academicQualifications.qualification1.type}
-                                  onValueChange={(value) => handlePostgraduateChange("academicQualifications", {
-                                    ...postgraduateData.academicQualifications,
-                                    qualification1: {
-                                      ...postgraduateData.academicQualifications.qualification1,
-                                      type: value,
-                                    },
-                                  })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select qualification type" />
+                                <Label htmlFor="qualification2">Qualification Type</Label>
+                                <Select disabled={!isPaymentMade}>
+                                  <SelectTrigger id="qualification2" className="w-full">
+                                    <SelectValue placeholder="Select qualification" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="bsc">BSc</SelectItem>
+                                    <SelectItem value="msc">MSc</SelectItem>
                                     <SelectItem value="other">Other</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <div>
-                                <Label>Grade *</Label>
-                                <Select
-                                  value={postgraduateData.academicQualifications.qualification1.grade}
-                                  onValueChange={(value) => handlePostgraduateChange("academicQualifications", {
-                                    ...postgraduateData.academicQualifications,
-                                    qualification1: {
-                                      ...postgraduateData.academicQualifications.qualification1,
-                                      grade: value,
-                                    },
-                                  })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select grade" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="first">First Class</SelectItem>
-                                    <SelectItem value="second_upper">Second Class Upper</SelectItem>
-                                    <SelectItem value="second_lower">Second Class Lower</SelectItem>
-                                    <SelectItem value="third">Third Class</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>CGPA *</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor="cgpa2">CGPA (or its equivalent)</Label>
                                 <Input
-                                  value={postgraduateData.academicQualifications.qualification1.cgpa}
-                                  onChange={(e) => handlePostgraduateChange("academicQualifications", {
-                                    ...postgraduateData.academicQualifications,
-                                    qualification1: {
-                                      ...postgraduateData.academicQualifications.qualification1,
-                                      cgpa: e.target.value,
-                                    },
-                                  })}
-                                  placeholder="Enter your CGPA"
+                                  id="cgpa2"
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="Enter CGPA"
+                                  disabled={!isPaymentMade}
                                 />
                               </div>
-                              <div>
-                                <Label>Subject *</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor="subject2">Subject</Label>
                                 <Input
-                                  value={postgraduateData.academicQualifications.qualification1.subject}
-                                  onChange={(e) => handlePostgraduateChange("academicQualifications", {
-                                    ...postgraduateData.academicQualifications,
-                                    qualification1: {
-                                      ...postgraduateData.academicQualifications.qualification1,
-                                      subject: e.target.value,
-                                    },
-                                  })}
-                                  placeholder="Enter your subject"
+                                  id="subject2"
+                                  placeholder="Enter subject"
+                                  disabled={!isPaymentMade}
                                 />
                               </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>Awarding Institution/University *</Label>
+                              <div className="space-y-2">
+                                <Label htmlFor="institution2">Awarding Institution/University</Label>
                                 <Input
-                                  value={postgraduateData.academicQualifications.qualification1.institution}
-                                  onChange={(e) => handlePostgraduateChange("academicQualifications", {
-                                    ...postgraduateData.academicQualifications,
-                                    qualification1: {
-                                      ...postgraduateData.academicQualifications.qualification1,
-                                      institution: e.target.value,
-                                    },
-                                  })}
+                                  id="institution2"
                                   placeholder="Enter institution name"
+                                  disabled={!isPaymentMade}
                                 />
                               </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label>Start Date *</Label>
-                                  <Input
-                                    type="month"
-                                    value={postgraduateData.academicQualifications.qualification1.startDate}
-                                    onChange={(e) => handlePostgraduateChange("academicQualifications", {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        startDate: e.target.value,
-                                      },
-                                    })}
-                                  />
-                                </div>
-                                <div>
-                                  <Label>End Date *</Label>
-                                  <Input
-                                    type="month"
-                                    value={postgraduateData.academicQualifications.qualification1.endDate}
-                                    onChange={(e) => handlePostgraduateChange("academicQualifications", {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        endDate: e.target.value,
-                                      },
-                                    })}
-                                  />
-                                </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="startDate2">Start Date (Month/Year)</Label>
+                                <Input
+                                  id="startDate2"
+                                  placeholder="e.g., August/2011"
+                                  disabled={!isPaymentMade}
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="endDate2">End Date (Month/Year)</Label>
+                                <Input
+                                  id="endDate2"
+                                  placeholder="e.g., December/2012"
+                                  disabled={!isPaymentMade}
+                                />
                               </div>
                             </div>
-                            <div>
-                              <Label>Upload Documents *</Label>
-                              <div className="mt-2">
-                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="h-8 w-8 mb-2 text-gray-500" />
-                                    <p className="mb-2 text-sm text-gray-500">
-                                      <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500">PDF or image (MAX. 10MB)</p>
-                                  </div>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file && file.size <= 10 * 1024 * 1024) {
-                                        handlePostgraduateChange("academicQualifications", {
-                                          ...postgraduateData.academicQualifications,
-                                          qualification1: {
-                                            ...postgraduateData.academicQualifications.qualification1,
-                                            documents: file,
-                                          },
-                                        });
-                                      } else {
-                                        toast({
-                                          title: "File Too Large",
-                                          description: "Please upload a file smaller than 10MB",
-                                          variant: "destructive",
-                                          className: "bg-red-50 text-red-800",
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </label>
+                            <div className="space-y-2">
+                              <Label htmlFor="transcript2">Attach Academic Transcripts and Certificate</Label>
+                              <div className="flex items-center space-x-4">
+                                <Input
+                                  id="transcript2"
+                                  type="file"
+                                  accept=".pdf,image/*"
+                                  multiple
+                                  className="hidden"
+                                  disabled={!isPaymentMade}
+                                />
+                                <Label
+                                  htmlFor="transcript2"
+                                  className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                                >
+                                  Upload Files
+                                </Label>
                               </div>
                             </div>
                           </div>
+                        )}
 
-                          {/* Qualification 2 (for PhD only) */}
-                          {postgraduateData.programType === "phd" && (
-                            <div className="space-y-4 pt-6 border-t">
-                              <h3 className="font-semibold">Qualification 2 (MSc)</h3>
-                              {/* Similar structure as Qualification 1 */}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-
-                      {/* Statement of Purpose */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Statement of Purpose</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <p className="text-gray-600">
-                              Please provide a one-page summary of your reason for selecting the course, including your interest and experience in this subject area, a brief research proposal (compulsory for all Ph.D. applicants), your reason for choosing the particular course, and how the course of study connects to your future plan.
-                            </p>
-                            <div>
-                              <Label>Upload Statement of Purpose *</Label>
-                              <div className="mt-2">
-                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="h-8 w-8 mb-2 text-gray-500" />
-                                    <p className="mb-2 text-sm text-gray-500">
-                                      <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500">PDF or document (MAX. 10MB)</p>
-                                  </div>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file && file.size <= 10 * 1024 * 1024) {
-                                        handlePostgraduateChange("statementOfPurpose", file);
-                                      } else {
-                                        toast({
-                                          title: "File Too Large",
-                                          description: "Please upload a file smaller than 10MB",
-                                          variant: "destructive",
-                                          className: "bg-red-50 text-red-800",
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Application Fee */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Application Fee Payment</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <h4 className="font-semibold mb-2">Application Fees (Non-refundable):</h4>
-                              <ul className="list-disc list-inside space-y-1">
-                                <li>Nigerian applicants: N10,000</li>
-                                <li>Foreign applicants: $50</li>
-                              </ul>
-                              <div className="mt-4">
-                                <h4 className="font-semibold mb-2">Bank Details:</h4>
-                                <ul className="list-disc list-inside space-y-1">
-                                  <li>Account Name: African University of Science and Technology (AUST)</li>
-                                  <li>Account Number: 1016087221</li>
-                                  <li>Account Type: Naira</li>
-                                  <li>Bank: UBA Plc</li>
-                                </ul>
-                              </div>
-                            </div>
-                            <div>
-                              <Label>Upload Payment Evidence *</Label>
-                              <div className="mt-2">
-                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="h-8 w-8 mb-2 text-gray-500" />
-                                    <p className="mb-2 text-sm text-gray-500">
-                                      <span className="font-semibold">Click to upload</span> or drag and drop
-                                    </p>
-                                    <p className="text-xs text-gray-500">PDF or image (MAX. 10MB)</p>
-                                  </div>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file && file.size <= 10 * 1024 * 1024) {
-                                        handlePostgraduateChange("applicationFee", file);
-                                      } else {
-                                        toast({
-                                          title: "File Too Large",
-                                          description: "Please upload a file smaller than 10MB",
-                                          variant: "destructive",
-                                          className: "bg-red-50 text-red-800",
-                                        });
-                                      }
-                                    }}
-                                  />
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* References */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Academic References</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <p className="text-gray-600">
-                              Please provide TWO references to support your application. Your referees must be able to comment on your academic suitability for the program.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-4">
-                                <h4 className="font-semibold">Referee 1</h4>
-                                <div>
-                                  <Label>Name</Label>
-                                  <Input
-                                    value={postgraduateData.references.referee1.name}
-                                    onChange={(e) => handlePostgraduateChange("references", {
-                                      ...postgraduateData.references,
-                                      referee1: {
-                                        ...postgraduateData.references.referee1,
-                                        name: e.target.value,
-                                      },
-                                    })}
-                                    placeholder="Enter referee's name"
-                                  />
-                                </div>
-                                <div>
-                                  <Label>Email</Label>
-                                  <Input
-                                    type="email"
-                                    value={postgraduateData.references.referee1.email}
-                                    onChange={(e) => handlePostgraduateChange("references", {
-                                      ...postgraduateData.references,
-                                      referee1: {
-                                        ...postgraduateData.references.referee1,
-                                        email: e.target.value,
-                                      },
-                                    })}
-                                    placeholder="Enter referee's email"
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-4">
-                                <h4 className="font-semibold">Referee 2</h4>
-                                <div>
-                                  <Label>Name</Label>
-                                  <Input
-                                    value={postgraduateData.references.referee2.name}
-                                    onChange={(e) => handlePostgraduateChange("references", {
-                                      ...postgraduateData.references,
-                                      referee2: {
-                                        ...postgraduateData.references.referee2,
-                                        name: e.target.value,
-                                      },
-                                    })}
-                                    placeholder="Enter referee's name"
-                                  />
-                                </div>
-                                <div>
-                                  <Label>Email</Label>
-                                  <Input
-                                    type="email"
-                                    value={postgraduateData.references.referee2.email}
-                                    onChange={(e) => handlePostgraduateChange("references", {
-                                      ...postgraduateData.references,
-                                      referee2: {
-                                        ...postgraduateData.references.referee2,
-                                        email: e.target.value,
-                                      },
-                                    })}
-                                    placeholder="Enter referee's email"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              Note: Your referees will receive an email with a link to submit their references.
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Declaration */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>Declaration</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <div className="flex items-start space-x-2">
-                              <Checkbox
-                                id="declaration"
-                                checked={postgraduateData.declaration}
-                                onCheckedChange={(checked) => handlePostgraduateChange("declaration", checked)}
-                              />
-                              <Label htmlFor="declaration" className="text-sm">
-                                By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-                                <ul className="list-disc list-inside mt-2 space-y-1">
-                                  <li>cancel my application.</li>
-                                  <li>if admitted, be dismissed from the University.</li>
-                                  <li>if degree already awarded, rescind degree awarded.</li>
-                                </ul>
-                              </Label>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Source of Information */}
-                      <Card className="shadow-sm">
-                        <CardHeader>
-                          <CardTitle>How did you hear about us?</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-4">
-                            <RadioGroup
-                              value={postgraduateData.sourceOfInformation}
-                              onValueChange={(value) => handlePostgraduateChange("sourceOfInformation", value)}
-                              className="space-y-2"
+                        {/* Other Qualifications */}
+                        <div className="space-y-2">
+                          <Label htmlFor="otherQualifications">Other Academic Qualifications</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="otherQualifications"
+                              type="file"
+                              accept=".pdf,.doc,.docx,image/*"
+                              className="hidden"
+                              disabled={!isPaymentMade}
+                            />
+                            <Label
+                              htmlFor="otherQualifications"
+                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
                             >
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="search" id="search" />
-                                <Label htmlFor="search">Search Engine</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="twitter" id="twitter" />
-                                <Label htmlFor="twitter">Social Media Platform: Twitter</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="facebook" id="facebook" />
-                                <Label htmlFor="facebook">Social Media Platform: Facebook</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="instagram" id="instagram" />
-                                <Label htmlFor="instagram">Social Media Platform: Instagram</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="linkedin" id="linkedin" />
-                                <Label htmlFor="linkedin">Social Media Platform: LinkedIn</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="radio" id="radio" />
-                                <Label htmlFor="radio">Radio</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="tv" id="tv" />
-                                <Label htmlFor="tv">TV</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="print" id="print" />
-                                <Label htmlFor="print">Print media</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="friend" id="friend" />
-                                <Label htmlFor="friend">Friend</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="word" id="word" />
-                                <Label htmlFor="word">Word of mouth</Label>
-                              </div>
-                            </RadioGroup>
+                              Upload File
+                            </Label>
                           </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Action Buttons */}
-                      <div className="flex justify-end space-x-4">
-                        <Button
-                          variant="outline"
-                          onClick={handleSaveDraft}
-                          className="border-gray-300"
-                        >
-                          Save Draft
-                        </Button>
-                        <Button
-                          onClick={handleSubmit}
-                          className="bg-[#FF5500] hover:bg-[#e64d00]"
-                        >
-                          Submit Application
-                        </Button>
+                        </div>
                       </div>
-                    </>
-                  )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Statement of Purpose */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">C. Statement of Purpose</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            As an applicant, please provide a one page summary of your reason for selecting the course for which you are applying. You should include your interest and experience in this subject area, a brief research proposal (compulsory for all Ph.D. applicants), your reason for choosing the particular course, and how the course of study connects to your future plan.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="statement">Statement of Purpose</Label>
+                          <Textarea
+                            id="statement"
+                            placeholder="Write your statement of purpose here..."
+                            className="min-h-[200px]"
+                            disabled={!isPaymentMade}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="statementFile">Upload Statement of Purpose</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="statementFile"
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              multiple
+                              className="hidden"
+                              disabled={!isPaymentMade}
+                            />
+                            <Label
+                              htmlFor="statementFile"
+                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                            >
+                              Upload Files
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Payment Evidence */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">D. Payment Evidence</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h3 className="font-semibold mb-2">Application Fees (Non-refundable):</h3>
+                          <p className="text-sm text-gray-600">
+                            {nationality === "nigerian" ? "Nigerian applicants: N10,000" : "Foreign applicants: $50"}
+                          </p>
+                          <div className="mt-4">
+                            <h4 className="font-semibold mb-2">Bank Details:</h4>
+                            <p className="text-sm text-gray-600">Account Name: African University of Science and Technology (AUST)</p>
+                            <p className="text-sm text-gray-600">Account Number: 1016087221</p>
+                            <p className="text-sm text-gray-600">Account Type: Naira</p>
+                            <p className="text-sm text-gray-600">Bank: UBA Plc</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="paymentEvidence">Attach Payment Evidence *</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="paymentEvidence"
+                              type="file"
+                              accept=".pdf,image/*"
+                              className="hidden"
+                              disabled={!isPaymentMade}
+                            />
+                            <Label
+                              htmlFor="paymentEvidence"
+                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                            >
+                              Upload File
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* References */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">E. Academic References</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            It is your responsibility to ensure that you provide TWO references to support your application. Your referees must be able to comment on your academic suitability for the program.
+                          </p>
+                          <p className="text-sm text-yellow-800 mt-2">
+                            Please share the following link to your referee for your academic references:{" "}
+                            <a
+                              href="https://forms.gle/RQGByaPVfqsHiPXP9"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              https://forms.gle/RQGByaPVfqsHiPXP9
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Declaration */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">Declaration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+                          </p>
+                          <ul className="list-disc list-inside text-sm text-yellow-800 mt-2">
+                            <li>cancel my application.</li>
+                            <li>if admitted, be dismissed from the University.</li>
+                            <li>if degree already awarded, rescind degree awarded.</li>
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="declaration">Full Name (in lieu of signature) *</Label>
+                          <Input
+                            id="declaration"
+                            placeholder="Type your full name"
+                            disabled={!isPaymentMade}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Source of Information */}
+                  <Card className="shadow-sm border border-gray-200">
+                    <CardHeader className="bg-gray-50 border-b">
+                      <CardTitle className="text-xl text-gray-800">How did you hear about us?</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="source">Select Source *</Label>
+                          <Select disabled={!isPaymentMade}>
+                            <SelectTrigger id="source" className="w-full">
+                              <SelectValue placeholder="Select source" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="search">Search Engine</SelectItem>
+                              <SelectItem value="twitter">Social Media Platform: Twitter</SelectItem>
+                              <SelectItem value="facebook">Social Media Platform: Facebook</SelectItem>
+                              <SelectItem value="instagram">Social Media Platform: Instagram</SelectItem>
+                              <SelectItem value="linkedin">Social Media Platform: LinkedIn</SelectItem>
+                              <SelectItem value="radio">Radio</SelectItem>
+                              <SelectItem value="tv">TV</SelectItem>
+                              <SelectItem value="print">Print media</SelectItem>
+                              <SelectItem value="friend">Friend</SelectItem>
+                              <SelectItem value="word">Word of mouth</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      variant="outline"
+                      className="border-[#FF6B00] text-[#FF6B00] hover:bg-[#FF6B00]/10"
+                      disabled={!isPaymentMade}
+                    >
+                      Save as Draft
+                    </Button>
+                    <Button
+                      className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
+                      disabled={!isPaymentMade}
+                    >
+                      Submit Application
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
             ) : (
