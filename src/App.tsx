@@ -18,6 +18,8 @@ import DocumentUpload from "./pages/DocumentUpload";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Sitemap from "./pages/Sitemap";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App: React.FC = () => {
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/application" element={<ApplicationForm />} />
               <Route path="/documents" element={<DocumentUpload />} />
               <Route path="/about" element={<About />} />
