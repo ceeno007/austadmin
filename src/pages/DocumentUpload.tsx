@@ -1008,17 +1008,54 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <p className="text-sm text-yellow-800">
                             It is your responsibility to ensure that you provide TWO references to support your application. Your referees must be able to comment on your academic suitability for the program.
                           </p>
-                          <p className="text-sm text-yellow-800 mt-2">
-                            Please share the following link to your referee for your academic references:{" "}
-                            <a
-                              href="https://forms.gle/RQGByaPVfqsHiPXP9"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
-                            >
-                              https://forms.gle/RQGByaPVfqsHiPXP9
-                            </a>
-                          </p>
+                        </div>
+
+                        {/* First Referee */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold">First Referee *</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <Label htmlFor="referee1Name">Full Name *</Label>
+                              <Input
+                                id="referee1Name"
+                                placeholder="Enter referee's full name"
+                                disabled={!isPaymentMade}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="referee1Email">Email Address *</Label>
+                              <Input
+                                id="referee1Email"
+                                type="email"
+                                placeholder="Enter referee's email address"
+                                disabled={!isPaymentMade}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Second Referee */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold">Second Referee *</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <Label htmlFor="referee2Name">Full Name *</Label>
+                              <Input
+                                id="referee2Name"
+                                placeholder="Enter referee's full name"
+                                disabled={!isPaymentMade}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="referee2Email">Email Address *</Label>
+                              <Input
+                                id="referee2Email"
+                                type="email"
+                                placeholder="Enter referee's email address"
+                                disabled={!isPaymentMade}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
