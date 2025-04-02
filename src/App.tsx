@@ -10,6 +10,10 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ApplicationForm from "./pages/ApplicationForm";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Programs from "./pages/Programs";
+import CampusLife from "./pages/CampusLife";
+import Contact from "./pages/Contact";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const App: React.FC = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/application" element={<ApplicationForm />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/programs" element={<Programs />} />
+              <Route path="/campus" element={<CampusLife />} />
+              <Route path="/contact" element={<Contact />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

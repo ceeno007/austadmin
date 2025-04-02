@@ -30,16 +30,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 263 49% 59%; /* Purple */
+    --primary: 24 100% 50%; /* AUST Orange */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 184 91% 42%; /* Teal/Turquoise */
+    --secondary: 32 100% 50%; /* AUST Gold */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 35 91% 52%; /* Orange */
+    --accent: 16 83% 31%; /* AUST Dark Orange */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -47,9 +47,14 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 263 49% 59%;
+    --ring: 24 100% 50%;
 
     --radius: 1rem;
+    
+    /* AUST Brand Colors */
+    --uni-orange: #FF5500;
+    --uni-dark-orange: #CC4400;
+    --uni-gold: #FFA500;
   }
 
   * {
@@ -65,11 +70,11 @@
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-uni-purple via-uni-blue to-uni-green bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#FF5500] via-[#FF7A00] to-[#FFA500] bg-clip-text text-transparent;
   }
   
   .gradient-bg {
-    @apply bg-gradient-to-r from-uni-purple/90 via-uni-blue/90 to-uni-green/90;
+    @apply bg-gradient-to-r from-[#FF5500]/90 via-[#FF7A00]/90 to-[#FFA500]/90;
   }
 
   .card-hover {
@@ -97,7 +102,7 @@
 @layer components {
   .hero-pattern {
     background-color: #ffffff;
-    background-image: radial-gradient(#9b51e0 0.5px, #ffffff 0.5px);
+    background-image: radial-gradient(#FF5500 0.5px, #ffffff 0.5px);
     background-size: 18px 18px;
   }
   
