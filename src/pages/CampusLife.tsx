@@ -9,10 +9,13 @@ import {
   Library, 
   Users, 
   Dumbbell, 
-  Gamepad2
+  Gamepad2,
+  CheckCircle2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import campusLife from "@/assets/images/campusLife.jpg";
+import research from "@/assets/images/research.jpg";
+import housing from "@/assets/images/housing.jpg";
 
 const CampusLife = () => {
   return (
@@ -95,7 +98,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1574914629385-46e8f86810d9?q=80&w=1000"
+                    src={research}
                     alt="Research Facilities"
                     className="w-full h-full object-cover"
                   />
@@ -108,15 +111,16 @@ const CampusLife = () => {
                     <h3 className="text-xl font-bold">Research Facilities</h3>
                   </div>
                   <p className="text-gray-600">
-                    Our specialized labs and research centers enable groundbreaking discoveries and innovations.
+                    Our research facilities are equipped with cutting-edge technology and resources to support innovative research across various disciplines:
                   </p>
+                
                 </CardContent>
               </Card>
               
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1555438987-8267a219d1f0?q=80&w=1000"
+                    src={housing}
                     alt="Student Housing"
                     className="w-full h-full object-cover"
                   />

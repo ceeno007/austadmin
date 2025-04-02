@@ -14,7 +14,8 @@ import {
   Brain,
   Rocket,
   Shield,
-  Leaf
+  Leaf,
+  CheckCircle2
 } from "lucide-react";
 
 const About = () => {

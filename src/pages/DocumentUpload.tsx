@@ -13,7 +13,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import PortalNav from "@/components/PortalNav";
 import austLogo from "@/assets/images/austlogo.webp";
-import Footer from "@/components/Footer";
 import {
   Dialog,
   DialogContent,
@@ -1385,7 +1384,6 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
           </Tabs>
         </div>
       </main>
-      <Footer />
       <Toaster />
 
       <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>

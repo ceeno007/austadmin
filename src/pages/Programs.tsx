@@ -17,7 +17,7 @@ const Programs = () => {
         title: "B.Sc. Software Engineering",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1606484940182-215764b22841?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
         description: "Focus on software development methodologies, tools, and systems design.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -30,7 +30,7 @@ const Programs = () => {
         title: "B.Sc. Computer Science",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
         description: "Develop skills in algorithms, software engineering, and computer systems.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -69,7 +69,7 @@ const Programs = () => {
         title: "B.Sc. Business Administration",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         description: "Understand organizational behavior, management, and entrepreneurship strategies.",
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
@@ -82,7 +82,7 @@ const Programs = () => {
         title: "B.Eng. Civil Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1503437313881-503a91226422?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         description: "Design and construct infrastructure like roads, bridges, and water systems.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -123,7 +123,7 @@ const Programs = () => {
         title: "M.Sc. Applied Statistics",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1559028012-aaacef290f68?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
@@ -137,21 +137,21 @@ const Programs = () => {
         title: "M.Sc. Aerospace Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1483817101829-339b08e8d83f?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Aerospace Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Computer Science",
         duration: "2 years",
         schoolFees: "₦2,500,000",
-        image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
         description: "Advanced study of computer science principles and research methodologies.",
         requirements: [
           "First Class or Second Class Upper",
@@ -166,35 +166,35 @@ const Programs = () => {
         title: "Ph.D. Computer Science",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Geoinformatics & GIS",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581093448794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Geoinformatics & GIS",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1532738217436-5272611b4f9f?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Taught Masters in Management of Information Technology",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Management of Information Technology",
         duration: "2 years",
         schoolFees: "₦2,500,000",
-        image: "https://images.unsplash.com/photo-1526540694076-6201d1f9182e?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         description: "Study the intersection of business and technology management.",
         requirements: [
           "First Class or Second Class Upper",
@@ -209,133 +209,133 @@ const Programs = () => {
         title: "M.Sc. Materials Science & Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1588941626140-29e1ca6d77f4?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Materials Science & Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1588616858642-b79ac5fcd8f2?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Taught Masters in Mathematical Modeling",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1570531598473-2a41e825d4e1?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Mathematical Modeling",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1570531598473-2a41e825d4e1?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "PGD Petroleum Engineering",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Petroleum Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Petroleum Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Taught Masters in Public Administration",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1589994967218-4ab8e5349ef1?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Public Administration",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1589994967218-4ab8e5349ef1?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Taught Masters in Public Policy",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Public Policy",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Pure & Applied Mathematics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1550534791-0ce37b23806a?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Pure & Applied Mathematics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1550534791-0ce37b23806a?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Space Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1599864130116-6c83ac089e69?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Space Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1599864130116-6c83ac089e69?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Systems Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1596495577886-d920f1ccfadc?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Systems Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1596495577886-d920f1ccfadc?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Theoretical & Applied Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1600478626004-af387bb3ed20?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Theoretical & Applied Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1600478626004-af387bb3ed20?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       }
     ],
