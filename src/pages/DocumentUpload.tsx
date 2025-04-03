@@ -95,6 +95,10 @@ const DocumentUpload = () => {
     // Get user name from localStorage
     return localStorage.getItem("userName") || "User";
   });
+  const [programType, setProgramType] = useState(() => {
+    // Get program type from localStorage
+    return localStorage.getItem("programType") || "undergraduate";
+  });
   const [notes, setNotes] = useState("");
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [modalContent, setModalContent] = useState({
@@ -193,9 +197,10 @@ const DocumentUpload = () => {
 
   // Add useEffect to set active tab based on program type
   useEffect(() => {
-    const programType = localStorage.getItem("programType");
-    if (programType) {
-      setActiveTab(programType);
+    const storedProgramType = localStorage.getItem("programType");
+    if (storedProgramType) {
+      setProgramType(storedProgramType);
+      setActiveTab(storedProgramType);
     }
   }, []);
 
@@ -469,16 +474,39 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
     }
   };
 
+  // Function to check if a tab should be disabled
+  const isTabDisabled = (tab: string) => {
+    return tab !== programType;
+  };
+
   return (
     <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
       <PortalNav userName={userName} />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
-              <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
-              <TabsTrigger value="jupeb">JUPEB</TabsTrigger>
+              <TabsTrigger 
+                value="undergraduate" 
+                disabled={isTabDisabled("undergraduate")}
+                className={isTabDisabled("undergraduate") ? "opacity-50 cursor-not-allowed" : ""}
+              >
+                Undergraduate
+              </TabsTrigger>
+              <TabsTrigger 
+                value="postgraduate" 
+                disabled={isTabDisabled("postgraduate")}
+                className={isTabDisabled("postgraduate") ? "opacity-50 cursor-not-allowed" : ""}
+              >
+                Postgraduate
+              </TabsTrigger>
+              <TabsTrigger 
+                value="jupeb" 
+                disabled={isTabDisabled("jupeb")}
+                className={isTabDisabled("jupeb") ? "opacity-50 cursor-not-allowed" : ""}
+              >
+                JUPEB
+              </TabsTrigger>
             </TabsList>
 
             {activeTab === "postgraduate" ? (

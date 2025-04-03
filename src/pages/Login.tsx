@@ -32,33 +32,24 @@ const Login = () => {
       password
     })
       .then((data) => {
-        console.log("Login response:", data); // Log the full response
+        console.log("Login response:", data);
         
         if (!data.access_token) {
           throw new Error("No access token received");
         }
         
-        // Store the access token
+        // Store user information
         localStorage.setItem("accessToken", data.access_token);
-        console.log("Access token stored in localStorage");
+        localStorage.setItem("userName", data.user.full_name);
+        localStorage.setItem("programType", data.user.program);
+        console.log("User data stored in localStorage");
         
         // Show success message
         toast.success("Login successful!");
         
         // Navigate to the correct route
-        console.log("Attempting to navigate to /document-upload");
-        // First try the /documents route
+        console.log("Attempting to navigate to /documents");
         navigate("/documents", { replace: true });
-        
-        // If that doesn't work, try the alternative route after a short delay
-        setTimeout(() => {
-          const currentPath = window.location.pathname;
-          console.log("Current path after navigation:", currentPath);
-          if (currentPath === "/login") {
-            console.log("First navigation failed, trying alternative route");
-            navigate("/document-upload", { replace: true });
-          }
-        }, 100);
       })
       .catch((error) => {
         console.error("Login error details:", error);
