@@ -1088,13 +1088,63 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="country">Country *</Label>
-                          <Input
-                            id="country"
-                            placeholder="Enter your country"
-                            value={nationality === "nigerian" ? "Nigeria" : postgraduateData.personalDetails.country}
-                            onChange={(e) => handlePersonalDetailsChange("country", e.target.value)}
-                            disabled={!isFieldEnabled("postgraduate", "country") || nationality === "nigerian"}
-                          />
+                          <Select
+                            value={postgraduateData.personalDetails.country}
+                            onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+                            disabled={!isPaymentMade || nationality === "nigerian"}
+                          >
+                            <SelectTrigger id="country" className="w-full">
+                              <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Nigeria">Nigeria</SelectItem>
+                              <SelectItem value="Ghana">Ghana</SelectItem>
+                              <SelectItem value="Kenya">Kenya</SelectItem>
+                              <SelectItem value="South Africa">South Africa</SelectItem>
+                              <SelectItem value="Tanzania">Tanzania</SelectItem>
+                              <SelectItem value="Uganda">Uganda</SelectItem>
+                              <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+                              <SelectItem value="Zambia">Zambia</SelectItem>
+                              <SelectItem value="Malawi">Malawi</SelectItem>
+                              <SelectItem value="Mozambique">Mozambique</SelectItem>
+                              <SelectItem value="Angola">Angola</SelectItem>
+                              <SelectItem value="Botswana">Botswana</SelectItem>
+                              <SelectItem value="Namibia">Namibia</SelectItem>
+                              <SelectItem value="Lesotho">Lesotho</SelectItem>
+                              <SelectItem value="Eswatini">Eswatini</SelectItem>
+                              <SelectItem value="Cameroon">Cameroon</SelectItem>
+                              <SelectItem value="Gabon">Gabon</SelectItem>
+                              <SelectItem value="Congo">Congo</SelectItem>
+                              <SelectItem value="DR Congo">DR Congo</SelectItem>
+                              <SelectItem value="Central African Republic">Central African Republic</SelectItem>
+                              <SelectItem value="Chad">Chad</SelectItem>
+                              <SelectItem value="Sudan">Sudan</SelectItem>
+                              <SelectItem value="South Sudan">South Sudan</SelectItem>
+                              <SelectItem value="Ethiopia">Ethiopia</SelectItem>
+                              <SelectItem value="Eritrea">Eritrea</SelectItem>
+                              <SelectItem value="Djibouti">Djibouti</SelectItem>
+                              <SelectItem value="Somalia">Somalia</SelectItem>
+                              <SelectItem value="Burundi">Burundi</SelectItem>
+                              <SelectItem value="Rwanda">Rwanda</SelectItem>
+                              <SelectItem value="Senegal">Senegal</SelectItem>
+                              <SelectItem value="Gambia">Gambia</SelectItem>
+                              <SelectItem value="Guinea">Guinea</SelectItem>
+                              <SelectItem value="Guinea-Bissau">Guinea-Bissau</SelectItem>
+                              <SelectItem value="Sierra Leone">Sierra Leone</SelectItem>
+                              <SelectItem value="Liberia">Liberia</SelectItem>
+                              <SelectItem value="Côte d'Ivoire">Côte d'Ivoire</SelectItem>
+                              <SelectItem value="Mali">Mali</SelectItem>
+                              <SelectItem value="Burkina Faso">Burkina Faso</SelectItem>
+                              <SelectItem value="Niger">Niger</SelectItem>
+                              <SelectItem value="Benin">Benin</SelectItem>
+                              <SelectItem value="Togo">Togo</SelectItem>
+                              <SelectItem value="Mauritania">Mauritania</SelectItem>
+                              <SelectItem value="Cape Verde">Cape Verde</SelectItem>
+                              <SelectItem value="São Tomé and Príncipe">São Tomé and Príncipe</SelectItem>
+                              <SelectItem value="Equatorial Guinea">Equatorial Guinea</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label>Do you have any disabilities/special needs? *</Label>
@@ -1809,6 +1859,270 @@ Please ensure that the referee's email address is an official institutional or c
               </div>
             ) : (
               <div className="space-y-6">
+                {/* JAMB Notice Card for Undergraduate */}
+                {programType === "undergraduate" && (
+                  <Card className="shadow-sm border-2 border-[#FF5500]">
+                    <CardHeader className="bg-[#FFF5EE] border-b">
+                      <CardTitle className="text-xl text-[#FF5500] flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5" />
+                        Important JAMB Admission Notice
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <p className="text-sm text-yellow-800">
+                            <strong>Please note:</strong> The African University of Science and Technology (AUST) requires all undergraduate applicants to first obtain admission through the Joint Admissions and Matriculation Board (JAMB) before completing this document upload form.
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-gray-800">JAMB Admission Process:</h3>
+                          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
+                            <li>Register for JAMB UTME/DE examination</li>
+                            <li>Select AUST as your first choice institution</li>
+                            <li>Take the JAMB examination</li>
+                            <li>Meet the minimum cutoff mark (140 for 2024/2025)</li>
+                            <li>Receive admission from JAMB</li>
+                            <li>Then complete this document upload form</li>
+                          </ol>
+                        </div>
+                        
+                        <div className="flex justify-center pt-2">
+                          <Button 
+                            className="bg-[#FF5500] hover:bg-[#FF5500]/90 text-white"
+                            onClick={() => window.open('https://jamb.gov.ng/efacility', '_blank')}
+                          >
+                            Go to JAMB Portal
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Personal Information Card for Undergraduate and JUPEB */}
+                <Card className="shadow-sm border border-gray-200">
+                  <CardHeader className="bg-gray-50 border-b">
+                    <CardTitle className="text-xl text-gray-800">Personal Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="surname">Surname *</Label>
+                          <Input
+                            id="surname"
+                            placeholder="Enter your surname"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="firstName">First Name *</Label>
+                          <Input
+                            id="firstName"
+                            placeholder="Enter your first name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="otherNames">Other Names</Label>
+                          <Input
+                            id="otherNames"
+                            placeholder="Enter your other names"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Gender *</Label>
+                          <RadioGroup
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="male" id="male" />
+                              <Label htmlFor="male">Male</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="female" id="female" />
+                              <Label htmlFor="female">Female</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                          <Input
+                            id="dateOfBirth"
+                            type="date"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="nationality">Nationality *</Label>
+                          <Select>
+                            <SelectTrigger id="nationality" className="w-full">
+                              <SelectValue placeholder="Select your nationality" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white">
+                              <SelectItem value="nigeria" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Nigeria</SelectItem>
+                              <SelectItem value="ghana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ghana</SelectItem>
+                              <SelectItem value="kenya" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Kenya</SelectItem>
+                              <SelectItem value="south_africa" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Africa</SelectItem>
+                              <SelectItem value="tanzania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Tanzania</SelectItem>
+                              <SelectItem value="uganda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Uganda</SelectItem>
+                              <SelectItem value="zimbabwe" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zimbabwe</SelectItem>
+                              <SelectItem value="zambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zambia</SelectItem>
+                              <SelectItem value="malawi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Malawi</SelectItem>
+                              <SelectItem value="mozambique" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mozambique</SelectItem>
+                              <SelectItem value="angola" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Angola</SelectItem>
+                              <SelectItem value="botswana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Botswana</SelectItem>
+                              <SelectItem value="namibia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Namibia</SelectItem>
+                              <SelectItem value="lesotho" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Lesotho</SelectItem>
+                              <SelectItem value="eswatini" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eswatini</SelectItem>
+                              <SelectItem value="cameroon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cameroon</SelectItem>
+                              <SelectItem value="gabon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gabon</SelectItem>
+                              <SelectItem value="congo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Congo</SelectItem>
+                              <SelectItem value="drc" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">DR Congo</SelectItem>
+                              <SelectItem value="central_african_republic" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Central African Republic</SelectItem>
+                              <SelectItem value="chad" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Chad</SelectItem>
+                              <SelectItem value="sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sudan</SelectItem>
+                              <SelectItem value="south_sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Sudan</SelectItem>
+                              <SelectItem value="ethiopia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ethiopia</SelectItem>
+                              <SelectItem value="eritrea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eritrea</SelectItem>
+                              <SelectItem value="djibouti" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Djibouti</SelectItem>
+                              <SelectItem value="somalia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Somalia</SelectItem>
+                              <SelectItem value="burundi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burundi</SelectItem>
+                              <SelectItem value="rwanda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Rwanda</SelectItem>
+                              <SelectItem value="senegal" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Senegal</SelectItem>
+                              <SelectItem value="gambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gambia</SelectItem>
+                              <SelectItem value="guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea</SelectItem>
+                              <SelectItem value="guinea_bissau" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea-Bissau</SelectItem>
+                              <SelectItem value="sierra_leone" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sierra Leone</SelectItem>
+                              <SelectItem value="liberia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Liberia</SelectItem>
+                              <SelectItem value="cote_divoire" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Côte d'Ivoire</SelectItem>
+                              <SelectItem value="mali" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mali</SelectItem>
+                              <SelectItem value="burkina_faso" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burkina Faso</SelectItem>
+                              <SelectItem value="niger" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Niger</SelectItem>
+                              <SelectItem value="benin" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Benin</SelectItem>
+                              <SelectItem value="togo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Togo</SelectItem>
+                              <SelectItem value="mauritania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mauritania</SelectItem>
+                              <SelectItem value="cape_verde" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cape Verde</SelectItem>
+                              <SelectItem value="sao_tome" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">São Tomé and Príncipe</SelectItem>
+                              <SelectItem value="equatorial_guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Equatorial Guinea</SelectItem>
+                              <SelectItem value="other" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Telephone / Mobile Number *</Label>
+                          <Input
+                            id="phone"
+                            type="tel"
+                            pattern="[0-9]*"
+                            placeholder="Enter your phone number"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email Address *</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="Enter your email address"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="address">Street Address *</Label>
+                          <Input
+                            id="address"
+                            placeholder="Enter your street address"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="city">City *</Label>
+                          <Input
+                            id="city"
+                            placeholder="Enter your city"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="country">Country *</Label>
+                          <Select>
+                            <SelectTrigger id="country" className="w-full">
+                              <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Nigeria">Nigeria</SelectItem>
+                              <SelectItem value="Ghana">Ghana</SelectItem>
+                              <SelectItem value="Kenya">Kenya</SelectItem>
+                              <SelectItem value="South Africa">South Africa</SelectItem>
+                              <SelectItem value="Tanzania">Tanzania</SelectItem>
+                              <SelectItem value="Uganda">Uganda</SelectItem>
+                              <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
+                              <SelectItem value="Zambia">Zambia</SelectItem>
+                              <SelectItem value="Malawi">Malawi</SelectItem>
+                              <SelectItem value="Mozambique">Mozambique</SelectItem>
+                              <SelectItem value="Angola">Angola</SelectItem>
+                              <SelectItem value="Botswana">Botswana</SelectItem>
+                              <SelectItem value="Namibia">Namibia</SelectItem>
+                              <SelectItem value="Lesotho">Lesotho</SelectItem>
+                              <SelectItem value="Eswatini">Eswatini</SelectItem>
+                              <SelectItem value="Cameroon">Cameroon</SelectItem>
+                              <SelectItem value="Gabon">Gabon</SelectItem>
+                              <SelectItem value="Congo">Congo</SelectItem>
+                              <SelectItem value="DR Congo">DR Congo</SelectItem>
+                              <SelectItem value="Central African Republic">Central African Republic</SelectItem>
+                              <SelectItem value="Chad">Chad</SelectItem>
+                              <SelectItem value="Sudan">Sudan</SelectItem>
+                              <SelectItem value="South Sudan">South Sudan</SelectItem>
+                              <SelectItem value="Ethiopia">Ethiopia</SelectItem>
+                              <SelectItem value="Eritrea">Eritrea</SelectItem>
+                              <SelectItem value="Djibouti">Djibouti</SelectItem>
+                              <SelectItem value="Somalia">Somalia</SelectItem>
+                              <SelectItem value="Burundi">Burundi</SelectItem>
+                              <SelectItem value="Rwanda">Rwanda</SelectItem>
+                              <SelectItem value="Senegal">Senegal</SelectItem>
+                              <SelectItem value="Gambia">Gambia</SelectItem>
+                              <SelectItem value="Guinea">Guinea</SelectItem>
+                              <SelectItem value="Guinea-Bissau">Guinea-Bissau</SelectItem>
+                              <SelectItem value="Sierra Leone">Sierra Leone</SelectItem>
+                              <SelectItem value="Liberia">Liberia</SelectItem>
+                              <SelectItem value="Côte d'Ivoire">Côte d'Ivoire</SelectItem>
+                              <SelectItem value="Mali">Mali</SelectItem>
+                              <SelectItem value="Burkina Faso">Burkina Faso</SelectItem>
+                              <SelectItem value="Niger">Niger</SelectItem>
+                              <SelectItem value="Benin">Benin</SelectItem>
+                              <SelectItem value="Togo">Togo</SelectItem>
+                              <SelectItem value="Mauritania">Mauritania</SelectItem>
+                              <SelectItem value="Cape Verde">Cape Verde</SelectItem>
+                              <SelectItem value="São Tomé and Príncipe">São Tomé and Príncipe</SelectItem>
+                              <SelectItem value="Equatorial Guinea">Equatorial Guinea</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Do you have any disabilities/special needs? *</Label>
+                          <RadioGroup
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yes" id="disability_yes" />
+                              <Label htmlFor="disability_yes">Yes</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="no" id="disability_no" />
+                              <Label htmlFor="disability_no">No</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="disabilityDescription">If yes, provide a brief description:</Label>
+                          <Textarea
+                            id="disabilityDescription"
+                            placeholder="Describe your disability or special needs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Document Upload Section */}
                 {documents[programType].map((field) => (
                   <Card key={field.id} className="shadow-sm">
                     <CardHeader>
