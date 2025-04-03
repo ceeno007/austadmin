@@ -136,6 +136,7 @@ const DocumentUpload = () => {
   });
   const [isPaymentMade, setIsPaymentMade] = useState(false);
   const [nationality, setNationality] = useState<"nigerian" | "foreign">("nigerian");
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, boolean>>({});
 
   const [documents, setDocuments] = useState<Record<string, DocumentField[]>>({
     undergraduate: [
@@ -208,6 +209,24 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
         doc.id === fieldId ? { ...doc, file } : doc
       ),
     }));
+    
+    // Update uploaded files status
+    setUploadedFiles(prev => ({
+      ...prev,
+      [`${programType}_${fieldId}`]: true
+    }));
+    
+    // If payment receipt is uploaded, enable all fields
+    if (programType === "postgraduate" && fieldId === "fee") {
+      setIsPaymentMade(true);
+    }
+    
+    // Show success toast
+    toast({
+      title: "File uploaded successfully",
+      description: `${file.name} has been uploaded.`,
+      className: "bg-green-50 text-green-800",
+    });
   };
 
   const handleClearFile = (programType: string, fieldId: string) => {
@@ -217,6 +236,35 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
         doc.id === fieldId ? { ...doc, file: null } : doc
       ),
     }));
+    
+    // Update uploaded files status
+    setUploadedFiles(prev => ({
+      ...prev,
+      [`${programType}_${fieldId}`]: false
+    }));
+    
+    // If payment receipt is removed, disable all fields
+    if (programType === "postgraduate" && fieldId === "fee") {
+      setIsPaymentMade(false);
+    }
+    
+    // Show info toast
+    toast({
+      title: "File removed",
+      description: "The file has been removed.",
+      className: "bg-blue-50 text-blue-800",
+    });
+  };
+
+  const isFieldEnabled = (programType: string, fieldId: string) => {
+    // For postgraduate section, enable fields if payment receipt is uploaded
+    if (programType === "postgraduate") {
+      if (fieldId === "fee") return true; // Payment receipt is always enabled
+      // Enable all fields if payment receipt is uploaded
+      return uploadedFiles[`${programType}_fee`] === true;
+    }
+    // For other sections, enable fields if any required file is uploaded
+    return Object.values(uploadedFiles).some(value => value === true);
   };
 
   const handlePostgraduateChange = (field: string, value: any) => {
@@ -348,6 +396,19 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
       callback: function(payment: any) {
         if (payment.status === "successful") {
           setIsPaymentMade(true);
+          
+          // If nationality is Nigerian, set country to Nigeria in personal details
+          if (nationality === "nigerian") {
+            setPostgraduateData(prev => ({
+              ...prev,
+              personalDetails: {
+                ...prev.personalDetails,
+                nationality: "nigeria",
+                country: "Nigeria"
+              }
+            }));
+          }
+          
           toast({
             title: "Payment Successful",
             description: "You can now proceed with your application.",
@@ -359,6 +420,23 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
         // Handle when payment modal is closed
       }
     });
+  };
+
+  // Add a function to handle nationality change
+  const handleNationalityChange = (value: "nigerian" | "foreign") => {
+    setNationality(value);
+    
+    // If nationality is Nigerian, set country to Nigeria in personal details
+    if (value === "nigerian") {
+      setPostgraduateData(prev => ({
+        ...prev,
+        personalDetails: {
+          ...prev.personalDetails,
+          nationality: "nigeria",
+          country: "Nigeria"
+        }
+      }));
+    }
   };
 
   return (
@@ -376,80 +454,190 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
             {activeTab === "postgraduate" ? (
               <TabsContent value="postgraduate">
                 <div className="space-y-8">
-                  {/* Payment Container */}
-                  {activeTab === "postgraduate" && !isPaymentMade && (
-                    <Card className="border-2 border-[#FF5500]">
-                      <CardHeader>
-                        <CardTitle className="text-xl sm:text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
-                        <CardDescription className="text-sm sm:text-base">
-                          A non-refundable application fee is required to proceed with your postgraduate application.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4 sm:space-y-6">
-                        <div className="space-y-4">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div className="mb-4 sm:mb-0">
-                              <h4 className="text-base sm:text-lg font-semibold">Application Fee</h4>
-                              <p className="text-sm text-gray-600">Required for all postgraduate applications</p>
-                            </div>
-                            <div className="text-left sm:text-right">
-                              <p className="text-xl sm:text-2xl font-bold text-[#FF6B00]">
-                                {nationality === "nigerian" ? "₦10,000" : "$50"}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {nationality === "nigerian" ? "Nigerian Applicants" : "International Applicants"}
+                  {/* Payment Container - Commented out as requested */}
+                  {/* <Card className="border-2 border-[#FF5500]">
+                    <CardHeader>
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">
+                        A non-refundable application fee is required to proceed with your postgraduate application.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 sm:space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="mb-4 sm:mb-0">
+                            <h4 className="text-base sm:text-lg font-semibold">Application Fee</h4>
+                            <p className="text-sm text-gray-600">Required for all postgraduate applications</p>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-xl sm:text-2xl font-bold text-[#FF6B00]">
+                              {nationality === "nigerian" ? "₦10,000" : "$50"}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {nationality === "nigerian" ? "Nigerian Applicants" : "International Applicants"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-yellow-50 rounded-lg">
+                          <div className="flex items-start">
+                            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-semibold text-yellow-800">Important Notice</h4>
+                              <p className="text-sm text-yellow-700">
+                                This fee is non-refundable. Please ensure you have selected the correct nationality before proceeding with payment.
                               </p>
                             </div>
                           </div>
-                          <div className="p-4 bg-yellow-50 rounded-lg">
-                            <div className="flex items-start">
-                              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2 flex-shrink-0" />
-                              <div>
-                                <h4 className="font-semibold text-yellow-800">Important Notice</h4>
-                                <p className="text-sm text-yellow-700">
-                                  This fee is non-refundable. Please ensure you have selected the correct nationality before proceeding with payment.
-                                </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                          <Label className="text-base">Select your nationality:</Label>
+                          <div className="flex space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <RadioGroup
+                                value={nationality}
+                                onValueChange={handleNationalityChange}
+                                className="flex space-x-4"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="nigerian" id="nigerian" />
+                                  <Label htmlFor="nigerian" className="text-base">Nigerian</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="foreign" id="foreign" />
+                                  <Label htmlFor="foreign" className="text-base">International</Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={handleFlutterwavePayment}
+                          size="lg"
+                          className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white px-8 py-2 text-base sm:text-lg"
+                        >
+                          Pay Application Fee
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card> */}
+
+                  {/* New Payment Information Card */}
+                  <Card className="border-2 border-[#FF5500]">
+                    <CardHeader>
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">
+                        Please make your payment to the bank account below and upload your payment receipt.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 sm:space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="mb-4 sm:mb-0">
+                            <h4 className="text-base sm:text-lg font-semibold">Application Fee</h4>
+                            <p className="text-sm text-gray-600">Required for all postgraduate applications</p>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-xl sm:text-2xl font-bold text-[#FF6B00]">
+                              {nationality === "nigerian" ? "₦10,000" : "$50"}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {nationality === "nigerian" ? "Nigerian Applicants" : "International Applicants"}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <div className="flex items-start">
+                            <CreditCard className="h-5 w-5 text-blue-600 mt-1 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-semibold text-blue-800">Bank Account Details</h4>
+                              <div className="mt-2 space-y-1 text-sm text-blue-700">
+                                <p><span className="font-medium">Bank Name:</span> Access Bank</p>
+                                <p><span className="font-medium">Account Name:</span> African University of Science and Technology</p>
+                                <p><span className="font-medium">Account Number:</span> 0123456789</p>
+                                <p><span className="font-medium">Swift Code:</span> ABNGNGLAXXX</p>
                               </div>
                             </div>
                           </div>
                         </div>
-
-                        <div className="space-y-4">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <Label className="text-base">Select your nationality:</Label>
-                            <div className="flex space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <RadioGroup
-                                  value={nationality}
-                                  onValueChange={(value: "nigerian" | "foreign") => setNationality(value)}
-                                  className="flex space-x-4"
-                                >
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="nigerian" id="nigerian" />
-                                    <Label htmlFor="nigerian" className="text-base">Nigerian</Label>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="foreign" id="foreign" />
-                                    <Label htmlFor="foreign" className="text-base">International</Label>
-                                  </div>
-                                </RadioGroup>
-                              </div>
+                        
+                        <div className="p-4 bg-yellow-50 rounded-lg">
+                          <div className="flex items-start">
+                            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-semibold text-yellow-800">Important Notice</h4>
+                              <p className="text-sm text-yellow-700">
+                                This fee is non-refundable. Please ensure you have selected the correct nationality before proceeding with payment.
+                              </p>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="flex justify-center">
-                          <Button
-                            onClick={handleFlutterwavePayment}
-                            size="lg"
-                            className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white px-8 py-2 text-base sm:text-lg"
-                          >
-                            Pay Application Fee
-                          </Button>
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                          <Label className="text-base">Select your nationality:</Label>
+                          <div className="flex space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <RadioGroup
+                                value={nationality}
+                                onValueChange={handleNationalityChange}
+                                className="flex space-x-4"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="nigerian" id="nigerian" />
+                                  <Label htmlFor="nigerian" className="text-base">Nigerian</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="foreign" id="foreign" />
+                                  <Label htmlFor="foreign" className="text-base">International</Label>
+                                </div>
+                              </RadioGroup>
+                            </div>
+                          </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="payment-receipt" className="text-base">Upload Payment Receipt</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="payment-receipt"
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload("postgraduate", "fee", file);
+                                }
+                              }}
+                            />
+                            {documents.postgraduate.find(doc => doc.id === "fee")?.file && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleClearFile("postgraduate", "fee")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">Supported formats: PDF, JPG, PNG. Max 5MB.</p>
+                          {documents.postgraduate.find(doc => doc.id === "fee")?.file && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                              {documents.postgraduate.find(doc => doc.id === "fee")?.file?.name}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   {/* Program Selection */}
                   <Card className="shadow-sm border border-gray-200">
@@ -537,6 +725,12 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                               accept="image/*,.pdf"
                               className="hidden"
                               disabled={!isPaymentMade}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload("postgraduate", "passport", file);
+                                }
+                              }}
                             />
                             <Label
                               htmlFor="passport"
@@ -544,8 +738,23 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             >
                               Upload Photo
                             </Label>
+                            {documents.postgraduate.find(doc => doc.id === "passport")?.file && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleClearFile("postgraduate", "passport")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                           <p className="text-sm text-gray-500">Supported formats: PDF or image. Max 100 MB.</p>
+                          {documents.postgraduate.find(doc => doc.id === "passport")?.file && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                              {documents.postgraduate.find(doc => doc.id === "passport")?.file?.name}
+                            </p>
+                          )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
@@ -601,7 +810,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <Select
                               value={postgraduateData.personalDetails.nationality}
                               onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-                              disabled={!isPaymentMade}
+                              disabled={!isFieldEnabled("postgraduate", "nationality") || nationality === "nigerian"}
                             >
                               <SelectTrigger id="nationality" className="w-full">
                                 <SelectValue placeholder="Select your nationality" />
@@ -662,7 +871,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                               <Input
                                 id="stateOfOrigin"
                                 placeholder="Enter your state of origin"
-                                disabled={!isPaymentMade}
+                                disabled={!isFieldEnabled("postgraduate", "stateOfOrigin")}
                               />
                             </div>
                           )}
@@ -706,7 +915,9 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <Input
                               id="country"
                               placeholder="Enter your country"
-                              disabled={!isPaymentMade}
+                              value={nationality === "nigerian" ? "Nigeria" : postgraduateData.personalDetails.country}
+                              onChange={(e) => handlePersonalDetailsChange("country", e.target.value)}
+                              disabled={!isFieldEnabled("postgraduate", "country") || nationality === "nigerian"}
                             />
                           </div>
                           <div className="space-y-2">
@@ -825,7 +1036,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                                     });
                                   }}
                                   value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[0] || ''}
-                                  disabled={!isPaymentMade}
+                                disabled={!isPaymentMade}
                                 >
                                   <SelectTrigger className="w-[140px]">
                                     <SelectValue placeholder="Month" />
@@ -886,7 +1097,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                                     });
                                   }}
                                   value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[0] || ''}
-                                  disabled={!isPaymentMade}
+                                disabled={!isPaymentMade}
                                 >
                                   <SelectTrigger className="w-[140px]">
                                     <SelectValue placeholder="Month" />
@@ -940,6 +1151,12 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                                 multiple
                                 className="hidden"
                                 disabled={!isPaymentMade}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleFileUpload("postgraduate", "transcript", file);
+                                  }
+                                }}
                               />
                               <Label
                                 htmlFor="transcript1"
@@ -947,7 +1164,23 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                               >
                                 Upload Files
                               </Label>
+                              {documents.postgraduate.find(doc => doc.id === "transcript")?.file && (
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => handleClearFile("postgraduate", "transcript")}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
+                            <p className="text-sm text-gray-500">Supported formats: PDF or image. Max 5MB.</p>
+                            {documents.postgraduate.find(doc => doc.id === "transcript")?.file && (
+                              <p className="text-sm text-green-600 flex items-center">
+                                <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                                {documents.postgraduate.find(doc => doc.id === "transcript")?.file?.name}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -1035,22 +1268,86 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
 
                         {/* Other Qualifications */}
                         <div className="space-y-2">
-                          <Label htmlFor="otherQualifications">Other Academic Qualifications</Label>
+                          <Label htmlFor="other">Other Academic Qualifications</Label>
                           <div className="flex items-center space-x-4">
                             <Input
-                              id="otherQualifications"
+                              id="other"
                               type="file"
                               accept=".pdf,.doc,.docx,image/*"
                               className="hidden"
                               disabled={!isPaymentMade}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload("postgraduate", "other", file);
+                                }
+                              }}
                             />
                             <Label
-                              htmlFor="otherQualifications"
+                              htmlFor="other"
                               className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
                             >
                               Upload File
                             </Label>
+                            {documents.postgraduate.find(doc => doc.id === "other")?.file && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleClearFile("postgraduate", "other")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
+                          <p className="text-sm text-gray-500">Supported formats: PDF, DOC, DOCX, or image. Max 5MB.</p>
+                          {documents.postgraduate.find(doc => doc.id === "other")?.file && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                              {documents.postgraduate.find(doc => doc.id === "other")?.file?.name}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Degree Certificate */}
+                        <div className="space-y-2">
+                          <Label htmlFor="degree">Degree Certificate</Label>
+                          <div className="flex items-center space-x-4">
+                            <Input
+                              id="degree"
+                              type="file"
+                              accept=".pdf,image/*"
+                              className="hidden"
+                              disabled={!isPaymentMade}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload("postgraduate", "degree", file);
+                                }
+                              }}
+                            />
+                            <Label
+                              htmlFor="degree"
+                              className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
+                            >
+                              Upload Certificate
+                            </Label>
+                            {documents.postgraduate.find(doc => doc.id === "degree")?.file && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleClearFile("postgraduate", "degree")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">Supported formats: PDF or image. Max 5MB.</p>
+                          {documents.postgraduate.find(doc => doc.id === "degree")?.file && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                              {documents.postgraduate.find(doc => doc.id === "degree")?.file?.name}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -1070,31 +1367,43 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="statement">Statement of Purpose</Label>
-                          <Textarea
-                            id="statement"
-                            placeholder="Write your statement of purpose here..."
-                            className="min-h-[200px]"
-                            disabled={!isPaymentMade}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="statementFile">Upload Statement of Purpose</Label>
                           <div className="flex items-center space-x-4">
                             <Input
-                              id="statementFile"
+                              id="statement"
                               type="file"
                               accept=".pdf,.doc,.docx"
-                              multiple
                               className="hidden"
                               disabled={!isPaymentMade}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  handleFileUpload("postgraduate", "statement", file);
+                                }
+                              }}
                             />
                             <Label
-                              htmlFor="statementFile"
+                              htmlFor="statement"
                               className="cursor-pointer bg-gray-50 hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-md border border-gray-300"
                             >
-                              Upload Files
+                              Upload Statement
                             </Label>
+                            {documents.postgraduate.find(doc => doc.id === "statement")?.file && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleClearFile("postgraduate", "statement")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
+                          <p className="text-sm text-gray-500">Supported formats: PDF, DOC, DOCX. Max 5MB.</p>
+                          {documents.postgraduate.find(doc => doc.id === "statement")?.file && (
+                            <p className="text-sm text-green-600 flex items-center">
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                              {documents.postgraduate.find(doc => doc.id === "statement")?.file?.name}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -1109,7 +1418,13 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                       <div className="space-y-6">
                         <div className="bg-yellow-50 p-4 rounded-lg">
                           <p className="text-sm text-yellow-800">
-                            It is your responsibility to ensure that you provide TWO references to support your application. Your referees must be able to comment on your academic suitability for the program.
+                            It is your responsibility to provide two referees to support your application.
+Your referees must be able to comment on your academic suitability for the program.
+A secure reference link will be sent directly to each referee for them to complete.
+Please ensure that the referee's email address is an official institutional or company email (e.g., .edu, .org, or company domain). Personal email addresses like Gmail or Yahoo will not be accepted.
+<br/>
+<br/><b>
+🔗 Only referees with valid professional email addresses will receive the reference request form.</b>
                           </p>
                         </div>
 
@@ -1235,6 +1550,188 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         </CardContent>
                       </Card>
                     )}
+                    
+                    {/* Add Contact Information Card for both undergraduate and JUPEB */}
+                    <Card className="shadow-sm border border-gray-200">
+                      <CardHeader className="bg-gray-50 border-b">
+                        <CardTitle className="text-xl text-gray-800">Personal Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-surname`}>Surname *</Label>
+                              <Input
+                                id={`${type}-surname`}
+                                placeholder="Enter your surname"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-firstName`}>First Name *</Label>
+                              <Input
+                                id={`${type}-firstName`}
+                                placeholder="Enter your first name"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-otherNames`}>Other Names</Label>
+                              <Input
+                                id={`${type}-otherNames`}
+                                placeholder="Enter your other names"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-dateOfBirth`}>Date of Birth *</Label>
+                              <Input
+                                id={`${type}-dateOfBirth`}
+                                type="date"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-gender`}>Gender *</Label>
+                              <Select>
+                                <SelectTrigger id={`${type}-gender`} className="w-full">
+                                  <SelectValue placeholder="Select gender" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="male">Male</SelectItem>
+                                  <SelectItem value="female">Female</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-nationality`}>Nationality *</Label>
+                              <Select>
+                                <SelectTrigger id={`${type}-nationality`} className="w-full">
+                                  <SelectValue placeholder="Select nationality" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="nigeria">Nigeria</SelectItem>
+                                  <SelectItem value="ghana">Ghana</SelectItem>
+                                  <SelectItem value="kenya">Kenya</SelectItem>
+                                  <SelectItem value="south_africa">South Africa</SelectItem>
+                                  <SelectItem value="tanzania">Tanzania</SelectItem>
+                                  <SelectItem value="uganda">Uganda</SelectItem>
+                                  <SelectItem value="zimbabwe">Zimbabwe</SelectItem>
+                                  <SelectItem value="zambia">Zambia</SelectItem>
+                                  <SelectItem value="malawi">Malawi</SelectItem>
+                                  <SelectItem value="mozambique">Mozambique</SelectItem>
+                                  <SelectItem value="angola">Angola</SelectItem>
+                                  <SelectItem value="botswana">Botswana</SelectItem>
+                                  <SelectItem value="namibia">Namibia</SelectItem>
+                                  <SelectItem value="lesotho">Lesotho</SelectItem>
+                                  <SelectItem value="eswatini">Eswatini</SelectItem>
+                                  <SelectItem value="cameroon">Cameroon</SelectItem>
+                                  <SelectItem value="gabon">Gabon</SelectItem>
+                                  <SelectItem value="congo">Congo</SelectItem>
+                                  <SelectItem value="drc">DR Congo</SelectItem>
+                                  <SelectItem value="central_african_republic">Central African Republic</SelectItem>
+                                  <SelectItem value="chad">Chad</SelectItem>
+                                  <SelectItem value="sudan">Sudan</SelectItem>
+                                  <SelectItem value="south_sudan">South Sudan</SelectItem>
+                                  <SelectItem value="ethiopia">Ethiopia</SelectItem>
+                                  <SelectItem value="eritrea">Eritrea</SelectItem>
+                                  <SelectItem value="djibouti">Djibouti</SelectItem>
+                                  <SelectItem value="somalia">Somalia</SelectItem>
+                                  <SelectItem value="burundi">Burundi</SelectItem>
+                                  <SelectItem value="rwanda">Rwanda</SelectItem>
+                                  <SelectItem value="senegal">Senegal</SelectItem>
+                                  <SelectItem value="gambia">Gambia</SelectItem>
+                                  <SelectItem value="guinea">Guinea</SelectItem>
+                                  <SelectItem value="guinea_bissau">Guinea-Bissau</SelectItem>
+                                  <SelectItem value="sierra_leone">Sierra Leone</SelectItem>
+                                  <SelectItem value="liberia">Liberia</SelectItem>
+                                  <SelectItem value="cote_divoire">Côte d'Ivoire</SelectItem>
+                                  <SelectItem value="mali">Mali</SelectItem>
+                                  <SelectItem value="burkina_faso">Burkina Faso</SelectItem>
+                                  <SelectItem value="niger">Niger</SelectItem>
+                                  <SelectItem value="benin">Benin</SelectItem>
+                                  <SelectItem value="togo">Togo</SelectItem>
+                                  <SelectItem value="mauritania">Mauritania</SelectItem>
+                                  <SelectItem value="cape_verde">Cape Verde</SelectItem>
+                                  <SelectItem value="sao_tome">São Tomé and Príncipe</SelectItem>
+                                  <SelectItem value="equatorial_guinea">Equatorial Guinea</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Contact Information Card */}
+                    <Card className="shadow-sm border border-gray-200">
+                      <CardHeader className="bg-gray-50 border-b">
+                        <CardTitle className="text-xl text-gray-800">Contact Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-phone`}>Phone Number *</Label>
+                              <Input
+                                id={`${type}-phone`}
+                                type="tel"
+                                pattern="[0-9+()-]*"
+                                placeholder="Enter your phone number"
+                                className="w-full"
+                                required
+                              />
+                              <p className="text-xs text-gray-500">Format: +234 123 456 7890</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-email`}>Email Address *</Label>
+                              <Input
+                                id={`${type}-email`}
+                                type="email"
+                                placeholder="Enter your email address"
+                                className="w-full"
+                                required
+                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                              />
+                              <p className="text-xs text-gray-500">Format: example@domain.com</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-address`}>Address *</Label>
+                              <Input
+                                id={`${type}-address`}
+                                placeholder="Enter your address"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-city`}>City *</Label>
+                              <Input
+                                id={`${type}-city`}
+                                placeholder="Enter your city"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-state`}>State *</Label>
+                              <Input
+                                id={`${type}-state`}
+                                placeholder="Enter your state"
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${type}-country`}>Country *</Label>
+                              <Input
+                                id={`${type}-country`}
+                                placeholder="Enter your country"
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                     
                     {fields.map((field) => (
                       <Card key={field.id} className="shadow-sm">

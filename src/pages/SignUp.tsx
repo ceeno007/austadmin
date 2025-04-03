@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const SignUp = () => {
   const [fullName, setFullName] = useState("");
@@ -16,6 +17,7 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [programType, setProgramType] = useState("");
   const navigate = useNavigate();
 
   // Password strength validation
@@ -26,6 +28,11 @@ const SignUp = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!programType) {
+      toast.error("Please select a program type!");
+      return;
+    }
     
     if (!passwordsMatch) {
       toast.error("Passwords don't match!");
@@ -42,10 +49,11 @@ const SignUp = () => {
     // Simulate signup process
     setTimeout(() => {
       setIsLoading(false);
-      // Store user's name
+      // Store user's name and program type
       localStorage.setItem("userName", fullName);
+      localStorage.setItem("programType", programType);
       toast.success("Account created successfully!");
-      navigate("/documents");
+      navigate("/document-upload");
     }, 1500);
   };
 
@@ -87,12 +95,26 @@ const SignUp = () => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  placeholder="your.email@example.com"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
                   required
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="programType">Program Type</Label>
+                <Select value={programType} onValueChange={setProgramType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your program type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="undergraduate">Undergraduate</SelectItem>
+                    <SelectItem value="postgraduate">Postgraduate</SelectItem>
+                    <SelectItem value="jupeb">JUPEB</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
