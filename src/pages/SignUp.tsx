@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { apiService } from "@/services/api";
 
 const SignUp = () => {
   const [fullName, setFullName] = useState("");
@@ -46,15 +47,27 @@ const SignUp = () => {
     
     setIsLoading(true);
     
-    // Simulate signup process
-    setTimeout(() => {
-      setIsLoading(false);
-      // Store user's name and program type
-      localStorage.setItem("userName", fullName);
-      localStorage.setItem("programType", programType);
-      toast.success("Account created successfully!");
-      navigate("/document-upload");
-    }, 1500);
+    // Use the API service for signup
+    apiService.signup({
+      email,
+      full_name: fullName,
+      program: programType,
+      password
+    })
+      .then((data) => {
+        // Store user's name and program type
+        localStorage.setItem("userName", fullName);
+        localStorage.setItem("programType", programType);
+        toast.success("Account created successfully! Please log in to continue.");
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error("Error during signup:", error);
+        toast.error(error.message || "Failed to create account. Please try again.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (

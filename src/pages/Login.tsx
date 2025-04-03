@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
+import { apiService } from "@/services/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,16 +18,55 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+    
     setIsLoading(true);
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      // Store user's name (in a real app, this would come from the backend)
-      localStorage.setItem("userName", email.split("@")[0]);
-      toast.success("Login successful!");
-      navigate("/documents");
-    }, 1500);
+    // Use the API service for login
+    apiService.login({
+      username: email,
+      password
+    })
+      .then((data) => {
+        console.log("Login response:", data); // Log the full response
+        
+        if (!data.access_token) {
+          throw new Error("No access token received");
+        }
+        
+        // Store the access token
+        localStorage.setItem("accessToken", data.access_token);
+        console.log("Access token stored in localStorage");
+        
+        // Show success message
+        toast.success("Login successful!");
+        
+        // Navigate to the correct route
+        console.log("Attempting to navigate to /document-upload");
+        // First try the /documents route
+        navigate("/documents", { replace: true });
+        
+        // If that doesn't work, try the alternative route after a short delay
+        setTimeout(() => {
+          const currentPath = window.location.pathname;
+          console.log("Current path after navigation:", currentPath);
+          if (currentPath === "/login") {
+            console.log("First navigation failed, trying alternative route");
+            navigate("/document-upload", { replace: true });
+          }
+        }, 100);
+      })
+      .catch((error) => {
+        console.error("Login error details:", error);
+        toast.error(error.message || "Invalid email or password");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -45,9 +85,9 @@ const Login = () => {
                 className="h-16 w-auto object-contain"
               />
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+            <CardTitle className="text-2xl font-bold">Log in to your account</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account
+              Enter your credentials to access your application
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -56,20 +96,16 @@ const Login = () => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  placeholder="your.email@example.com"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
                   required
                 />
               </div>
+              
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -91,9 +127,15 @@ const Login = () => {
                     )}
                   </button>
                 </div>
+                <div className="flex justify-end">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
+              
               <Button type="submit" className="w-full bg-primary" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </form>
             

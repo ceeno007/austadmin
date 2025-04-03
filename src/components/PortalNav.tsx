@@ -3,14 +3,22 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const PortalNav = () => {
+interface PortalNavProps {
+  userName?: string;
+}
+
+const PortalNav = ({ userName = "User" }: PortalNavProps) => {
   const navigate = useNavigate();
-  const user = {
-    name: "John Doe", // This should come from your auth context
-  };
 
   const handleLogout = () => {
-    // Add your logout logic here
+    // Clear all user data from localStorage
+    localStorage.removeItem("userName");
+    localStorage.removeItem("programType");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("accessToken");
+    
+    // Redirect to home page
     navigate("/");
   };
 
@@ -20,7 +28,7 @@ const PortalNav = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <span className="text-lg font-semibold text-gray-900">
-              {user.name}
+              Welcome, {userName}
             </span>
           </div>
           

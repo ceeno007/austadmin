@@ -41,6 +41,7 @@ const App: React.FC = () => {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/application" element={<ApplicationForm />} />
               <Route path="/documents" element={<DocumentUpload />} />
+              <Route path="/document-upload" element={<DocumentUpload />} />
               <Route path="/about" element={<About />} />
               <Route path="/programs" element={<Programs />} />
               <Route path="/campus" element={<CampusLife />} />

@@ -1,136 +1,158 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { Toaster } from "@/components/ui/toaster";
-import PortalNav from "@/components/PortalNav";
-import Footer from "@/components/Footer";
-import { ArrowLeft } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Label } from "@/components/ui/label";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import austLogo from "@/assets/images/austlogo.webp";
+import { apiService } from "@/services/api";
 
 const ResetPassword = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    // Extract token from URL query parameters
+    const params = new URLSearchParams(location.search);
+    const resetToken = params.get("token");
     
-    if (password !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive",
-        className: "bg-red-50 text-red-800",
-      });
+    if (!resetToken) {
+      toast.error("Invalid or missing reset token");
+      navigate("/forgot-password");
       return;
     }
+    
+    setToken(resetToken);
+  }, [location, navigate]);
 
-    setIsLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real application, you would make an API call here
-      // const token = searchParams.get('token');
-      // await api.post('/auth/reset-password', { token, password });
-      
-      toast({
-        title: "Password Reset",
-        description: "Your password has been successfully reset.",
-        className: "bg-green-50 text-green-800",
-      });
-      
-      // Redirect to login page after successful reset
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reset password. Please try again.",
-        variant: "destructive",
-        className: "bg-red-50 text-red-800",
-      });
-    } finally {
-      setIsLoading(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!password || !confirmPassword) {
+      toast.error("Please enter both password fields");
+      return;
     }
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Use the API service for password reset
+    apiService.resetPassword({ 
+      token,
+      password
+    })
+      .then(() => {
+        toast.success("Password reset successful");
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.error("Error during password reset:", error);
+        toast.error(error.message || "Failed to reset password");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <PortalNav />
-      <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-md mx-auto">
-            <Link
-              to="/login"
-              className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Login
-            </Link>
-
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900">
-                  Reset Password
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Please enter your new password below.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="password">New Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Enter new password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={8}
-                      className="w-full"
-                    />
-                    <p className="text-sm text-gray-500">
-                      Password must be at least 8 characters long
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm new password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      className="w-full"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90"
-                    disabled={isLoading}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md">
+        <Link to="/login" className="flex items-center mb-8 text-sm text-gray-600 hover:text-primary">
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back to login
+        </Link>
+        
+        <Card className="border-none shadow-lg">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-2">
+              <img 
+                src={austLogo} 
+                alt="AUST Logo" 
+                className="h-16 w-auto object-contain"
+              />
+            </div>
+            <CardTitle className="text-2xl font-bold">Reset your password</CardTitle>
+            <CardDescription>
+              Enter your new password below
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your new password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    {isLoading ? "Resetting..." : "Reset Password"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
-      <Footer />
-      <Toaster />
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your new password"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              <Button type="submit" className="w-full bg-primary" disabled={isLoading}>
+                {isLoading ? "Resetting..." : "Reset Password"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

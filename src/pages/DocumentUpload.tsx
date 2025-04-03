@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Upload, X, CheckCircle2, AlertCircle, Info, AlertTriangle, CreditCard } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Info, AlertTriangle, CreditCard, Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import PortalNav from "@/components/PortalNav";
@@ -87,7 +87,14 @@ declare global {
 
 const DocumentUpload = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("undergraduate");
+  const [activeTab, setActiveTab] = useState(() => {
+    // Get program type from localStorage, default to "undergraduate" if not found
+    return localStorage.getItem("programType") || "undergraduate";
+  });
+  const [userName, setUserName] = useState(() => {
+    // Get user name from localStorage
+    return localStorage.getItem("userName") || "User";
+  });
   const [notes, setNotes] = useState("");
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [modalContent, setModalContent] = useState({
@@ -168,6 +175,29 @@ const DocumentUpload = () => {
   ];
 
   const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
+
+  // Add useEffect to check if user is logged in
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to access this page.",
+        variant: "destructive",
+        className: "bg-red-50 text-red-800",
+      });
+      // Redirect to login page
+      window.location.href = "/login";
+    }
+  }, [toast]);
+
+  // Add useEffect to set active tab based on program type
+  useEffect(() => {
+    const programType = localStorage.getItem("programType");
+    if (programType) {
+      setActiveTab(programType);
+    }
+  }, []);
 
   // Add useEffect to show undergraduate popup on mount
   useEffect(() => {
@@ -441,7 +471,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
 
   return (
     <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
-      <PortalNav />
+      <PortalNav userName={userName} />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
@@ -558,10 +588,78 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <div>
                               <h4 className="font-semibold text-blue-800">Bank Account Details</h4>
                               <div className="mt-2 space-y-1 text-sm text-blue-700">
-                                <p><span className="font-medium">Bank Name:</span> Access Bank</p>
-                                <p><span className="font-medium">Account Name:</span> African University of Science and Technology</p>
-                                <p><span className="font-medium">Account Number:</span> 0123456789</p>
-                                <p><span className="font-medium">Swift Code:</span> ABNGNGLAXXX</p>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Bank Name:</span> UBA</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("UBA");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Bank name copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Account Name:</span> African University of Science and Technology</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("African University of Science and Technology");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Account name copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Account Number:</span> 0123456789</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("0123456789");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Account number copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Swift Code:</span> UNAFNGLAXXX</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("UNAFNGLAXXX");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Swift code copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
