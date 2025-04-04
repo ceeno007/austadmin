@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,14 +18,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-
-  // Prevent accessing login page if already authenticated
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      navigate("/documents");
-    }
-  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,8 +45,31 @@ const Login = () => {
       // Show success message
       toast.success("Login successful!");
       
-      // Navigate to the intended destination or documents page
-      const destination = location.state?.from?.pathname || "/documents";
+      // Get the program type from the response data or localStorage
+      const programType = data.program_type || localStorage.getItem("programType");
+      
+      // Determine the destination based on program type
+      let destination = location.state?.from?.pathname;
+      
+      if (!destination) {
+        // Store program type in localStorage before navigation
+        if (programType) {
+          localStorage.setItem("programType", programType.toLowerCase());
+        }
+        
+        // Construct the destination URL with query parameters
+        switch (programType?.toLowerCase()) {
+          case "undergraduate":
+          case "postgraduate":
+          case "jupeb":
+            destination = `/document-upload?type=${programType.toLowerCase()}`;
+            break;
+          default:
+            destination = "/document-upload?type=undergraduate";
+        }
+      }
+      
+      // Use navigate with replace to prevent back navigation to login
       navigate(destination, { replace: true });
       
     } catch (error) {

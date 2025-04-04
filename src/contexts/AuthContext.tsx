@@ -27,14 +27,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, []);
 
-  // Prevent back button after logout
-  useEffect(() => {
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-      window.history.pushState(null, '', window.location.href);
-    };
-  }, []);
-
   const checkAuth = () => {
     const token = localStorage.getItem('accessToken');
     const isValid = !!token;
@@ -60,8 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Update authentication state
     setIsAuthenticated(false);
     
-    // Clear navigation history and redirect to login
-    window.history.replaceState(null, '', '/login');
+    // Redirect to login
     navigate('/login', { replace: true });
   };
 

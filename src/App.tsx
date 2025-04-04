@@ -57,11 +57,6 @@ const App: React.FC = () => {
                     <ApplicationForm />
                   </ProtectedRoute>
                 } />
-                <Route path="/documents" element={
-                  <ProtectedRoute>
-                    <DocumentUpload />
-                  </ProtectedRoute>
-                } />
                 <Route path="/document-upload" element={
                   <ProtectedRoute>
                     <DocumentUpload />
