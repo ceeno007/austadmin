@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,37 @@ interface DateField {
   day: string;
   month: string;
   year: string;
+}
+
+interface ApplicationData {
+  academic_session?: string;
+  selected_program?: string;
+  program_type?: string;
+  surname?: string;
+  first_name?: string;
+  other_names?: string;
+  gender?: string;
+  date_of_birth?: string;
+  street_address?: string;
+  city?: string;
+  country?: string;
+  state_of_origin?: string;
+  nationality?: string;
+  phone_number?: string;
+  email?: string;
+  has_disability?: boolean;
+  disability_description?: string;
+  jamb_reg_number?: string;
+  jamb_score?: string;
+  jamb_year?: string;
+  exam_number?: string;
+  exam_year?: string;
+  // File paths
+  passport_photo_path?: string;
+  payment_receipt_path?: string;
+  waec_result_path?: string;
+  jamb_result_path?: string;
+  other_qualifications_path?: string;
 }
 
 interface UndergraduateFormData {
@@ -164,7 +195,86 @@ const countries = [
   "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
+// Helper function to create a placeholder file from a file path
+const createPlaceholderFile = (filePath: string | undefined): File | null => {
+  if (!filePath) return null;
+  
+  // Extract the original filename from the path
+  const fileNameMatch = filePath.match(/[^\\\/]+$/);
+  const fileName = fileNameMatch ? fileNameMatch[0] : "uploaded-file.png";
+  
+  // Create an empty file with the extracted name
+  // Using a 1x1 px transparent GIF as minimal content
+  const base64Data = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+  
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+  
+  // Determine mime type from filename
+  let mimeType = 'application/octet-stream';
+  if (fileName.endsWith('.png')) mimeType = 'image/png';
+  else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mimeType = 'image/jpeg';
+  else if (fileName.endsWith('.pdf')) mimeType = 'application/pdf';
+  else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) mimeType = 'application/msword';
+  
+  // Create the file object
+  const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
+  
+  // Add the original path as a custom property
+  Object.defineProperty(placeholderFile, 'originalPath', {
+    value: filePath,
+    writable: false
+  });
+  
+  return placeholderFile;
+};
+
 const UndergraduateForm = () => {
+  // Get application data from localStorage if available
+  const [applicationData, setApplicationData] = useState<ApplicationData>({});
+
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        setApplicationData(parsedData);
+        
+        // Check if this is the correct form type
+        // Backend sends 'program' instead of 'program_type'
+        const apiProgramType = parsedData.program_type || parsedData.program;
+        if (apiProgramType) {
+          const programType = apiProgramType.toLowerCase();
+          // Get stored program type from localStorage for comparison
+          const savedProgramType = localStorage.getItem("programType");
+          
+          // Only redirect if both values exist and are different, 
+          // ensuring we check against localStorage which may have been updated by user choice
+          if (programType !== 'undergraduate' && 
+              savedProgramType && 
+              savedProgramType !== 'undergraduate') {
+            console.log(`Redirecting from undergraduate to ${programType} form based on application data`);
+            window.location.href = `/document-upload?type=${programType}`;
+          } else {
+            // If program type matches, update localStorage to be consistent
+            localStorage.setItem("programType", "undergraduate");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing application data:", error);
+    }
+  }, []);
+
   const [undergraduateData, setUndergraduateData] = useState<UndergraduateFormData>({
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
@@ -214,6 +324,90 @@ const UndergraduateForm = () => {
     "July", "August", "September", "October", "November", "December"
   ];
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+
+  // Fill form data from application data when it's available
+  useEffect(() => {
+    if (Object.keys(applicationData).length > 0) {
+      console.log("Populating undergraduate form with application data:", applicationData);
+      
+      // Extract data from the application
+      const {
+        academic_session,
+        selected_program,
+        nationality,
+        gender,
+        date_of_birth,
+        street_address,
+        city,
+        country,
+        state_of_origin,
+        phone_number,
+        email,
+        has_disability,
+        disability_description,
+        // File paths
+        passport_photo_path,
+        payment_receipt_path,
+        waec_result_path,
+        jamb_result_path,
+        // JAMB specific
+        jamb_reg_number,
+        jamb_score,
+        jamb_year
+      } = applicationData;
+      
+      // Create placeholder files
+      const passportPhoto = createPlaceholderFile(passport_photo_path);
+      const paymentReceipt = createPlaceholderFile(payment_receipt_path);
+      const waecResults = createPlaceholderFile(waec_result_path);
+      const jambResults = createPlaceholderFile(jamb_result_path);
+      
+      setUndergraduateData(prev => ({
+        ...prev,
+        passportPhoto: passportPhoto,
+        paymentReceipt: paymentReceipt,
+        academicSession: academic_session || prev.academicSession,
+        program: selected_program || prev.program,
+        personalDetails: {
+          ...prev.personalDetails,
+          surname: applicationData.surname || prev.personalDetails.surname,
+          firstName: applicationData.first_name || prev.personalDetails.firstName,
+          otherNames: applicationData.other_names || prev.personalDetails.otherNames,
+          gender: gender || prev.personalDetails.gender,
+          dateOfBirth: date_of_birth ? {
+            day: new Date(date_of_birth).getDate().toString().padStart(2, '0'),
+            month: (new Date(date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
+            year: new Date(date_of_birth).getFullYear().toString()
+          } : prev.personalDetails.dateOfBirth,
+          streetAddress: street_address || prev.personalDetails.streetAddress,
+          city: city || prev.personalDetails.city,
+          country: country || prev.personalDetails.country,
+          stateOfOrigin: state_of_origin || prev.personalDetails.stateOfOrigin,
+          nationality: nationality || prev.personalDetails.nationality,
+          phoneNumber: phone_number || prev.personalDetails.phoneNumber,
+          email: email || prev.personalDetails.email,
+          hasDisabilities: has_disability ? "yes" : "no",
+          disabilityDescription: disability_description || prev.personalDetails.disabilityDescription
+        },
+        academicQualifications: {
+          ...prev.academicQualifications,
+          waecResults: {
+            ...prev.academicQualifications.waecResults,
+            examNumber: applicationData.exam_number || prev.academicQualifications.waecResults.examNumber,
+            examYear: applicationData.exam_year || prev.academicQualifications.waecResults.examYear,
+            documents: waecResults || prev.academicQualifications.waecResults.documents
+          },
+          jambResults: {
+            ...prev.academicQualifications.jambResults,
+            regNumber: jamb_reg_number || prev.academicQualifications.jambResults.regNumber,
+            examYear: jamb_year || prev.academicQualifications.jambResults.examYear,
+            score: jamb_score || prev.academicQualifications.jambResults.score,
+            documents: jambResults || prev.academicQualifications.jambResults.documents
+          }
+        }
+      }));
+    }
+  }, [applicationData]);
 
   const handleCopy = async (text: string, field: string) => {
     try {

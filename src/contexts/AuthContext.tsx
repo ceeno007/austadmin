@@ -37,6 +37,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (token: string, userData: any) => {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('applicationData', JSON.stringify(userData));
+    
+    // Store user information
+    if (userData.name) {
+      localStorage.setItem('userName', userData.name);
+    }
+    
+    if (userData.email) {
+      localStorage.setItem('userEmail', userData.email);
+    }
+    
+    if (userData.id) {
+      localStorage.setItem('userId', userData.id.toString());
+    }
+    
+    // First check for program type in applications array (this is where it's located in the response)
+    let programType;
+    if (userData.applications && userData.applications.length > 0) {
+      programType = userData.applications[0].program_type;
+      console.log("Found program_type in applications:", programType);
+    } else {
+      // Fallback to other locations if not found in applications
+      programType = userData.program_type || userData.user?.program || userData.program;
+    }
+    
+    if (programType) {
+      localStorage.setItem('programType', programType.toLowerCase());
+      console.log(`Program type set to: ${programType.toLowerCase()} from API response`);
+    }
+    
     setIsAuthenticated(true);
   };
 

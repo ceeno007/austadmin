@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -78,6 +79,42 @@ interface FormData {
   };
   declaration: string;
   nationality: string;
+}
+
+interface ApplicationData {
+  academic_session?: string;
+  selected_program?: string;
+  program_type?: string;
+  surname?: string;
+  first_name?: string;
+  other_names?: string;
+  gender?: string;
+  date_of_birth?: string;
+  street_address?: string;
+  city?: string;
+  country?: string;
+  state_of_origin?: string;
+  nationality?: string;
+  phone_number?: string;
+  email?: string;
+  has_disability?: boolean;
+  disability_description?: string;
+  awarding_institution?: string;
+  qualification_type?: string;
+  subject?: string;
+  grade?: string;
+  start_date?: string;
+  end_date?: string;
+  first_referee_name?: string;
+  first_referee_email?: string;
+  second_referee_name?: string;
+  second_referee_email?: string;
+  passport_photo_path?: string;
+  transcript_path?: string;
+  certificate_path?: string;
+  statement_of_purpose_path?: string;
+  payment_receipt_path?: string;
+  other_qualifications_path?: string;
 }
 
 const programs = {
@@ -197,7 +234,108 @@ const FileUploadField = ({
   );
 };
 
-const PostgraduateForm: React.FC = () => {
+// Helper function to create a placeholder file from a file path
+const createPlaceholderFile = (filePath: string | undefined): File | null => {
+  if (!filePath) return null;
+  
+  // Extract the original filename from the path
+  const fileNameMatch = filePath.match(/[^\\\/]+$/);
+  const fileName = fileNameMatch ? fileNameMatch[0] : "uploaded-file.png";
+  
+  // Create an empty file with the extracted name
+  // Using a 1x1 px transparent GIF as minimal content
+  const base64Data = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
+  
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+  
+  // Determine mime type from filename
+  let mimeType = 'application/octet-stream';
+  if (fileName.endsWith('.png')) mimeType = 'image/png';
+  else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) mimeType = 'image/jpeg';
+  else if (fileName.endsWith('.pdf')) mimeType = 'application/pdf';
+  else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) mimeType = 'application/msword';
+  
+  // Create the file object
+  const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
+  
+  // Add the original path as a custom property
+  Object.defineProperty(placeholderFile, 'originalPath', {
+    value: filePath,
+    writable: false
+  });
+  
+  return placeholderFile;
+};
+
+const PostgraduateForm = () => {
+  // Get application data from localStorage if available
+  const [applicationData, setApplicationData] = useState<ApplicationData>({});
+
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        
+        // Check if there are applications in the response
+        const application = parsedData.applications && parsedData.applications.length > 0 
+          ? parsedData.applications[0] 
+          : null;
+        
+        if (application) {
+          // Use the application data as our source
+          setApplicationData(application);
+          
+          // Check for program_type in the application
+          const programType = application.program_type?.toLowerCase();
+          
+          // Get stored program type from localStorage for comparison
+          const savedProgramType = localStorage.getItem("programType");
+          
+          console.log("Application program_type:", programType);
+          console.log("Saved programType:", savedProgramType);
+          
+          // Only redirect if program type exists and is different from 'postgraduate'
+          if (programType && 
+              programType !== 'postgraduate' && 
+              programType !== 'msc' && 
+              programType !== 'phd' && 
+              savedProgramType && 
+              savedProgramType !== 'postgraduate') {
+            console.log(`Redirecting from postgraduate to ${programType} form based on application data`);
+            window.location.href = `/document-upload?type=${programType}`;
+          } else {
+            // If program type matches, update localStorage to be consistent
+            localStorage.setItem("programType", "postgraduate");
+          }
+        } else {
+          // No applications found, check if user object has program
+          const userProgram = parsedData.user?.program?.toLowerCase();
+          
+          if (userProgram && 
+              userProgram !== 'postgraduate' && 
+              userProgram !== 'msc' && 
+              userProgram !== 'phd') {
+            console.log(`Redirecting from postgraduate to ${userProgram} form based on user program`);
+            window.location.href = `/document-upload?type=${userProgram}`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing application data:", error);
+    }
+  }, []);
+
   const [postgraduateData, setPostgraduateData] = useState<FormData>({
     applicantType: "Nigerian",
     passportPhoto: null,
@@ -241,6 +379,120 @@ const PostgraduateForm: React.FC = () => {
     declaration: "",
     nationality: "Nigerian",
   });
+
+  // Fill form data from application data when it's available
+  useEffect(() => {
+    if (Object.keys(applicationData).length > 0) {
+      console.log("Populating form with application data:", applicationData);
+      
+      // Extract data from the application
+      const {
+        academic_session,
+        selected_program,
+        nationality,
+        gender,
+        date_of_birth,
+        street_address,
+        city,
+        country,
+        state_of_origin,
+        phone_number,
+        has_disability,
+        disability_description,
+        awarding_institution,
+        qualification_type,
+        subject,
+        grade,
+        cgpa,
+        start_date,
+        end_date,
+        first_referee_name,
+        first_referee_email,
+        second_referee_name,
+        second_referee_email,
+        passport_photo_path,
+        transcript_path,
+        certificate_path,
+        statement_of_purpose_path,
+        payment_receipt_path,
+        other_qualifications_path
+      } = applicationData;
+      
+      // Create placeholder files
+      const passportPhoto = createPlaceholderFile(passport_photo_path);
+      const transcript = createPlaceholderFile(transcript_path);
+      const certificate = createPlaceholderFile(certificate_path);
+      const statementOfPurpose = createPlaceholderFile(statement_of_purpose_path);
+      const paymentReceipt = createPlaceholderFile(payment_receipt_path);
+      const otherQualifications = createPlaceholderFile(other_qualifications_path);
+      
+      // Calculate which document items to include in qualification1.documents
+      const qualificationDocs: File[] = [];
+      if (transcript) qualificationDocs.push(transcript);
+      if (certificate) qualificationDocs.push(certificate);
+      
+      setPostgraduateData(prev => ({
+        ...prev,
+        passportPhoto: passportPhoto,
+        academicSession: academic_session || prev.academicSession,
+        program: selected_program || prev.program,
+        applicationFee: paymentReceipt,
+        personalDetails: {
+          ...prev.personalDetails,
+          gender: gender || prev.personalDetails.gender,
+          dateOfBirth: date_of_birth ? {
+            day: new Date(date_of_birth).getDate().toString().padStart(2, '0'),
+            month: (new Date(date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
+            year: new Date(date_of_birth).getFullYear().toString()
+          } : prev.personalDetails.dateOfBirth,
+          streetAddress: street_address || prev.personalDetails.streetAddress,
+          city: city || prev.personalDetails.city,
+          country: country || prev.personalDetails.country,
+          stateOfOrigin: state_of_origin || prev.personalDetails.stateOfOrigin,
+          nationality: nationality || prev.personalDetails.nationality,
+          phoneNumber: phone_number || prev.personalDetails.phoneNumber,
+          hasDisabilities: has_disability ? "Yes" : "No",
+          disabilityDescription: disability_description || prev.personalDetails.disabilityDescription
+        },
+        academicQualifications: {
+          ...prev.academicQualifications,
+          qualification1: {
+            ...prev.academicQualifications.qualification1,
+            institution: awarding_institution || prev.academicQualifications.qualification1.institution,
+            type: qualification_type || prev.academicQualifications.qualification1.type,
+            subject: subject || prev.academicQualifications.qualification1.subject,
+            grade: grade || prev.academicQualifications.qualification1.grade,
+            cgpa: cgpa || prev.academicQualifications.qualification1.cgpa,
+            // Convert start and end dates from API to form format
+            startDate: start_date ? {
+              day: new Date(start_date).getDate().toString().padStart(2, '0'),
+              month: (new Date(start_date).getMonth() + 1).toString().padStart(2, '0'),
+              year: new Date(start_date).getFullYear().toString()
+            } : prev.academicQualifications.qualification1.startDate,
+            endDate: end_date ? {
+              day: new Date(end_date).getDate().toString().padStart(2, '0'),
+              month: (new Date(end_date).getMonth() + 1).toString().padStart(2, '0'),
+              year: new Date(end_date).getFullYear().toString()
+            } : prev.academicQualifications.qualification1.endDate,
+            documents: qualificationDocs.length > 0 ? qualificationDocs : prev.academicQualifications.qualification1.documents
+          },
+          otherQualifications: otherQualifications || prev.academicQualifications.otherQualifications
+        },
+        statementOfPurpose: statementOfPurpose ? [statementOfPurpose] : prev.statementOfPurpose,
+        references: {
+          referee1: {
+            name: first_referee_name || prev.references.referee1.name,
+            email: first_referee_email || prev.references.referee1.email
+          },
+          referee2: {
+            name: second_referee_name || prev.references.referee2.name,
+            email: second_referee_email || prev.references.referee2.email
+          }
+        }
+      }));
+    }
+  }, [applicationData]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});

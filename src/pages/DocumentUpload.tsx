@@ -25,11 +25,18 @@ const DocumentUpload = () => {
   const typeFromUrl = searchParams.get("type");
 
   const [activeTab, setActiveTab] = useState(() => {
+    // Use URL parameter first, then localStorage, then default to "undergraduate"
     return typeFromUrl || localStorage.getItem("programType") || "undergraduate";
   });
   
   const [programType, setProgramType] = useState(() => {
-    return typeFromUrl || localStorage.getItem("programType") || "undergraduate";
+    // Use URL parameter first, then localStorage, then default to "undergraduate"
+    const type = typeFromUrl || localStorage.getItem("programType") || "undergraduate";
+    
+    // Always update localStorage with the current program type to ensure consistency
+    localStorage.setItem("programType", type);
+    
+    return type;
   });
 
   const [userName, setUserName] = useState(() => {
@@ -45,6 +52,21 @@ const DocumentUpload = () => {
       setActiveTab(typeFromUrl);
       setProgramType(typeFromUrl);
       localStorage.setItem("programType", typeFromUrl);
+      console.log(`Program type set to ${typeFromUrl} from URL parameter`);
+    } else {
+      // If URL has no type, get from localStorage to maintain persistence  
+      const savedType = localStorage.getItem("programType");
+      if (savedType) {
+        setActiveTab(savedType);
+        setProgramType(savedType);
+        // Update URL to match the saved program type without full page reload
+        window.history.replaceState(
+          null, 
+          '', 
+          `${window.location.pathname}?type=${savedType}`
+        );
+        console.log(`Program type set to ${savedType} from localStorage`);
+      }
     }
   }, [typeFromUrl]);
 
@@ -126,7 +148,7 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
           </div>
 
           <div className="space-y-6">
-            {programType === "postgraduate" ? (
+            {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
               <PostgraduateForm />
             ) : programType === "jupeb" ? (
               <JupebForm />

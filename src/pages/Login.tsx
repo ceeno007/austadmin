@@ -45,28 +45,32 @@ const Login = () => {
       // Show success message
       toast.success("Login successful!");
       
-      // Get the program type from the response data or localStorage
-      const programType = data.program_type || localStorage.getItem("programType");
+      // Get the program type from the response data (check applications array first)
+      let programType = null;
+      if (data.applications && data.applications.length > 0) {
+        programType = data.applications[0].program_type?.toLowerCase();
+        console.log("Found program_type in applications:", programType);
+      }
+
+      // If not found in applications, fallback to other locations
+      if (!programType) {
+        programType = data.program_type?.toLowerCase() || 
+                     data.user?.program?.toLowerCase() || 
+                     data.program?.toLowerCase();
+        console.log("Using fallback program type:", programType);
+      }
       
       // Determine the destination based on program type
       let destination = location.state?.from?.pathname;
       
       if (!destination) {
-        // Store program type in localStorage before navigation
-        if (programType) {
-          localStorage.setItem("programType", programType.toLowerCase());
-        }
+        // Default to using the program type from response, falling back to undergraduate if not available
+        const formType = programType || "undergraduate";
         
         // Construct the destination URL with query parameters
-        switch (programType?.toLowerCase()) {
-          case "undergraduate":
-          case "postgraduate":
-          case "jupeb":
-            destination = `/document-upload?type=${programType.toLowerCase()}`;
-            break;
-          default:
-            destination = "/document-upload?type=undergraduate";
-        }
+        destination = `/document-upload?type=${formType}`;
+        
+        console.log(`Redirecting to ${destination} based on program type: ${programType}`);
       }
       
       // Use navigate with replace to prevent back navigation to login
