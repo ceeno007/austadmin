@@ -15,7 +15,7 @@ const ViewPDF = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex items-center justify-center p-4">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-500 mb-4">Error: No PDF Source</h1>
             <p className="text-gray-600 mb-6">The PDF source was not provided.</p>
@@ -32,14 +32,15 @@ const ViewPDF = () => {
   }
 
   // Construct the full PDF URL
-  const fullPdfUrl = pdfSrc.startsWith('/') ? pdfSrc : `/${pdfSrc}`;
+  const fullPdfUrl = pdfSrc.startsWith("/") ? pdfSrc : `/${pdfSrc}`;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow bg-gray-100 p-4">
         <div className="container mx-auto">
-          <div className="mb-6 flex items-center justify-between">
+          {/* Header section becomes more responsive on small screens */}
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-bold">{title}</h1>
             <Button asChild variant="outline">
               <Link to="/programs" className="flex items-center">
@@ -47,11 +48,13 @@ const ViewPDF = () => {
               </Link>
             </Button>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-4">
+
+          <div className="bg-white rounded-lg p-4">
+            {/* Object wrapper for the PDF; reduced height on mobile */}
             <object
               data={fullPdfUrl}
               type="application/pdf"
-              className="w-full h-[80vh] border-0 rounded-lg"
+              className="w-full h-[60vh] sm:h-[80vh] border-0 rounded-lg"
             >
               <div className="text-center p-4">
                 <p className="mb-4">It appears you don't have a PDF plugin for this browser.</p>

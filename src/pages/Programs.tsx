@@ -11,13 +11,14 @@ const Programs = () => {
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("undergraduate");
 
+  // Updated images for each program to better match the course
   const tabs = {
     undergraduate: [
       {
         title: "B.Sc. Software Engineering",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80",
         description: "Focus on software development methodologies, tools, and systems design.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -30,7 +31,7 @@ const Programs = () => {
         title: "B.Sc. Computer Science",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
         description: "Develop skills in algorithms, software engineering, and computer systems.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -43,7 +44,7 @@ const Programs = () => {
         title: "B.Eng. Petroleum and Energy Resources Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1581090700227-1e8aa2cb1e9c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         description: "Explore oil and gas engineering principles and practices.",
         requirements: [
           "Five SSC credits including Physics, Chemistry, Mathematics, and English",
@@ -56,7 +57,7 @@ const Programs = () => {
         title: "B.Sc. Accounting",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1581092919534-6c2e1b3dcd75?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1556740772-1a741367b93e?auto=format&fit=crop&w=800&q=80",
         description: "Gain expertise in financial reporting, auditing, and corporate accounting principles.",
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
@@ -69,7 +70,7 @@ const Programs = () => {
         title: "B.Sc. Business Administration",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1556664839-2b11c80e72c5?auto=format&fit=crop&w=800&q=80",
         description: "Understand organizational behavior, management, and entrepreneurship strategies.",
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
@@ -82,7 +83,7 @@ const Programs = () => {
         title: "B.Eng. Civil Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=800&q=80",
         description: "Design and construct infrastructure like roads, bridges, and water systems.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -95,7 +96,7 @@ const Programs = () => {
         title: "B.Eng. Materials & Metallurgical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1517586979037-5dff5562d13c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1585829361037-fca1d1320355?auto=format&fit=crop&w=800&q=80",
         description: "Learn the development and application of metallic and composite materials.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -108,7 +109,7 @@ const Programs = () => {
         title: "B.Eng. Mechanical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1599940824395-432a20de0f3c?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1616412341025-02e2f6b64d24?auto=format&fit=crop&w=800&q=80",
         description: "Apply physics and materials science for the design and analysis of mechanical systems.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -137,14 +138,14 @@ const Programs = () => {
         title: "M.Sc. Aerospace Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Aerospace Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
@@ -160,27 +161,37 @@ const Programs = () => {
           "Academic Transcripts",
           "Reference Letters"
         ],
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Computer Science [Class of 2025].pdf"
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Computer Science [Class of 2025].pdf",
+        type: "Masters"
       },
       {
         title: "Ph.D. Computer Science",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
         image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        description: "Doctoral research in advanced computer science topics.",
+        requirements: [
+          "First Class or Second Class Upper",
+          "Relevant Master's Degree",
+          "Research Proposal",
+          "Academic Transcripts",
+          "Reference Letters"
+        ],
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf",
+        type: "Ph.D."
       },
       {
         title: "M.Sc. Geoinformatics & GIS",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Geoinformatics & GIS",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
@@ -203,7 +214,8 @@ const Programs = () => {
           "Academic Transcripts",
           "Reference Letters"
         ],
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Management of Information Technology [Class of 2025].pdf"
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Management of Information Technology [Class of 2025].pdf",
+        type: "Masters"
       },
       {
         title: "M.Sc. Materials Science & Engineering",
@@ -238,7 +250,14 @@ const Programs = () => {
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
         image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=800&q=80",
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        description: "Postgraduate diploma in petroleum engineering fundamentals.",
+        requirements: [
+          "Bachelor's Degree in relevant field",
+          "Academic Transcripts",
+          "Reference Letters"
+        ],
+        pdf: "/pdfs/2025 Postgraduate Fees.pdf",
+        type: "PGD"
       },
       {
         title: "M.Sc. Petroleum Engineering",
@@ -300,14 +319,14 @@ const Programs = () => {
         title: "M.Sc. Space Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Space Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
@@ -328,14 +347,14 @@ const Programs = () => {
         title: "M.Sc. Theoretical & Applied Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "Ph.D. Theoretical & Applied Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: "https://images.unsplash.com/photo-1581093458794-2efc18f661d8?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       }
     ],
@@ -356,83 +375,204 @@ const Programs = () => {
     ]
   };
 
-  const getLabel = (title) => {
+  const getLabel = (title: string) => {
     if (title.toLowerCase().includes("ph.d.")) return "Ph.D.";
     if (title.toLowerCase().includes("m.sc") || title.toLowerCase().includes("taught")) return "Masters";
     if (title.toLowerCase().includes("pgd")) return "PGD";
     return null;
   };
 
-  const getImage = (program) =>
+  const getImage = (program: any) =>
     program.image ||
-    "https://images.unsplash.com/photo-1521790366320-5f62b5b3f210?auto=format&fit=crop&w=800&q=80";
-  const getDescription = (program) =>
+    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80";
+
+  const getDescription = (program: any) =>
     program.description ||
-    "Explore our advanced curriculum designed to equip students with academic and practical skills.";
-  const getRequirements = (program) =>
+    "A comprehensive program designed to provide students with the knowledge and skills needed for success in their chosen field.";
+
+  const getRequirements = (program: any) =>
     program.requirements || [
-      "Bachelor's degree or equivalent",
-      "Program-specific prerequisites",
-      "English proficiency",
+      "First Class or Second Class Upper",
+      "Relevant Bachelor's Degree",
+      "Research Proposal",
+      "Academic Transcripts",
+      "Reference Letters"
     ];
 
   const handleProgramClick = (title: string) => {
-    setSelectedProgram(selectedProgram === title ? null : title);
+    setSelectedProgram(title);
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+
       <main className="flex-grow">
+        {/* Hero Section */}
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Explore Our <span className="text-[#FF5500]">Programs</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              AUST provides dynamic, forward-thinking programs through Undergraduate, Postgraduate, and JUPEB categories.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Discover our wide range of undergraduate, postgraduate, and JUPEB programs designed to prepare you for success in your chosen field.
             </p>
           </div>
         </section>
 
-        <section className="py-16 bg-white">
+        {/* Programs Section */}
+        <section className="py-16">
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex justify-center mb-8">
-                <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-muted">
-                  <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
-                  <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
-                  <TabsTrigger value="jupeb">JUPEB</TabsTrigger>
-                </TabsList>
-              </div>
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="undergraduate">Undergraduate Programs</TabsTrigger>
+                <TabsTrigger value="postgraduate">Postgraduate Programs</TabsTrigger>
+                <TabsTrigger value="jupeb">JUPEB Programs</TabsTrigger>
+              </TabsList>
 
-              <TabsContent value={activeTab}>
+              <TabsContent value="undergraduate">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tabs[activeTab].map((program, idx) => (
+                  {tabs.undergraduate.map((program) => (
                     <div
-                      key={idx}
-                      className="bg-white border rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition relative"
-                      onClick={() => handleProgramClick(program.title)}
+                      key={program.title}
+                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                     >
-                      <img
-                        src={getImage(program)}
-                        alt={program.title}
-                        className="w-full h-40 object-cover"
-                      />
-                      {activeTab === "postgraduate" && (
-                        <div className="absolute top-2 left-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
-                          {getLabel(program.title)}
-                        </div>
-                      )}
-                      <div className="p-5">
+                      <div className="relative h-48">
+                        <img
+                          src={getImage(program)}
+                          alt={program.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-6">
                         <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
-                        <p className="text-sm text-gray-600 mb-1">{getDescription(program)}</p>
-                        <p className="text-xs text-gray-500">
-                          Duration: {program.duration}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Fees: {program.schoolFees}
-                        </p>
+                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Duration:</span> {program.duration}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">School Fees:</span> {program.schoolFees}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <Button
+                            variant="outline"
+                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
+                            onClick={() => handleProgramClick(program.title)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="text-[#FF5500]"
+                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            View PDF
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="postgraduate">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tabs.postgraduate.map((program) => (
+                    <div
+                      key={program.title}
+                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                    >
+                      <div className="relative h-48">
+                        <img
+                          src={getImage(program)}
+                          alt={program.title}
+                          className="w-full h-full object-cover"
+                        />
+                        {program.type && (
+                          <div className="absolute top-2 right-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
+                            {program.type}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Duration:</span> {program.duration}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">School Fees:</span> {program.schoolFees}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <Button
+                            variant="outline"
+                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
+                            onClick={() => handleProgramClick(program.title)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="text-[#FF5500]"
+                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            View PDF
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="jupeb">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tabs.jupeb.map((program) => (
+                    <div
+                      key={program.title}
+                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                    >
+                      <div className="relative h-48">
+                        <img
+                          src={getImage(program)}
+                          alt={program.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Duration:</span> {program.duration}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">School Fees:</span> {program.schoolFees}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <Button
+                            variant="outline"
+                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
+                            onClick={() => handleProgramClick(program.title)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="text-[#FF5500]"
+                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            View PDF
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -442,6 +582,7 @@ const Programs = () => {
           </div>
         </section>
 
+        {/* Modal for Selected Program */}
         {selectedProgram && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
             <div className="bg-white w-full max-w-xl p-6 rounded-xl relative animate-fade-in shadow-xl max-h-screen overflow-y-auto">
@@ -451,61 +592,69 @@ const Programs = () => {
               >
                 <X className="h-5 w-5" />
               </button>
-              <img
-                src={tabs[activeTab].find((p) => p.title === selectedProgram)?.image}
-                alt={selectedProgram}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h2 className="text-2xl font-bold mb-2">{selectedProgram}</h2>
-              <p className="text-gray-600 mb-2">
-                {tabs[activeTab].find((p) => p.title === selectedProgram)?.description}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Duration: {tabs[activeTab].find((p) => p.title === selectedProgram)?.duration}
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                School Fees:{" "}
-                {tabs[activeTab].find((p) => p.title === selectedProgram)?.schoolFees}
-              </p>
-              <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
-              <ul className="space-y-1 mb-6">
-                {tabs[activeTab]
-                  .find((p) => p.title === selectedProgram)
-                  ?.requirements?.map((req, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
-                      <span>{req}</span>
-                    </li>
-                  ))}
-              </ul>
-              <div className="grid gap-4">
-                <Button
-                  asChild
-                  className="bg-[#FF5500] hover:bg-[#e64d00] w-full"
-                >
-                  <Link to="/signup" className="flex items-center justify-center">
-                    Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                {tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf && (
-                  <Button
-                    onClick={() =>
-                      navigate(
-                        `/view-pdf?src=${encodeURIComponent(
-                          tabs[activeTab].find((p) => p.title === selectedProgram)?.pdf || ''
-                        )}&title=${encodeURIComponent(selectedProgram || 'Program Handbook')}`
-                      )
-                    }
-                    className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"
-                  >
-                    <FileText className="w-4 h-4 mr-2" /> View Full Program Handbook
-                  </Button>
-                )}
-              </div>
+              {(() => {
+                const program = tabs[activeTab].find((p: any) => p.title === selectedProgram);
+                if (!program) return null;
+
+                return (
+                  <>
+                    <img
+                      src={getImage(program)}
+                      alt={program.title}
+                      className="w-full h-48 object-cover rounded-lg mb-4"
+                    />
+                    <h2 className="text-2xl font-bold mb-2">{program.title}</h2>
+                    <p className="text-gray-600 mb-2">
+                      {getDescription(program)}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-1">
+                      Duration: {program.duration}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4">
+                      School Fees: {program.schoolFees}
+                    </p>
+                    <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
+                    <ul className="space-y-1 mb-6">
+                      {getRequirements(program).map((req: string, idx: number) => (
+                        <li key={idx} className="flex items-start">
+                          <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="grid gap-4">
+                      <Button
+                        asChild
+                        className="bg-[#FF5500] hover:bg-[#e64d00] w-full"
+                      >
+                        <Link to="/signup" className="flex items-center justify-center">
+                          Apply Now <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+
+                      {/* View PDF Button (if PDF exists) */}
+                      {program.pdf && (
+                        <Button
+                          onClick={() =>
+                            navigate(
+                              `/view-pdf?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`
+                            )
+                          }
+                          className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"
+                        >
+                          <FileText className="w-4 h-4 mr-2" /> View Full Program Handbook
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
       </main>
+
       <Footer />
     </div>
   );

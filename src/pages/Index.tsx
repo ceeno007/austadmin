@@ -14,6 +14,8 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         <HeroSection />
+
+        {/* Programs Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -23,49 +25,50 @@ const Index = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    <h3 className="text-xl font-bold mb-3">Undergraduate Programs</h3>
-    <p className="text-gray-600 mb-4">
-      Bachelor's degrees in Computer Science, Engineering, and more.
-    </p>
-    <Button
-      asChild
-      variant="outline"
-      className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-    >
-      <Link to="/programs">Learn More</Link>
-    </Button>
-  </div>
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    <h3 className="text-xl font-bold mb-3">Postgraduate Programs</h3>
-    <p className="text-gray-600 mb-4">
-      Master's and Ph.D. programs for advanced research and specialization.
-    </p>
-    <Button
-      asChild
-      variant="outline"
-      className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-    >
-      <Link to="/programs">Learn More</Link>
-    </Button>
-  </div>
-  <div className="bg-white p-6 rounded-xl shadow-md">
-    <h3 className="text-xl font-bold mb-3">JUPEB Program</h3>
-    <p className="text-gray-600 mb-4">
-      One-year pre-university program for direct entry admission.
-    </p>
-    <Button
-      asChild
-      variant="outline"
-      className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-    >
-      <Link to="/programs">Learn More</Link>
-    </Button>
-  </div>
-</div>
-
+              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                <h3 className="text-xl font-bold mb-3">Undergraduate Programs</h3>
+                <p className="text-gray-600 mb-4">
+                  Bachelor's degrees in Computer Science, Engineering, and more.
+                </p>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
+                >
+                  <Link to="/programs">Learn More</Link>
+                </Button>
+              </div>
+              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                <h3 className="text-xl font-bold mb-3">Postgraduate Programs</h3>
+                <p className="text-gray-600 mb-4">
+                  Master's and Ph.D. programs for advanced research and specialization.
+                </p>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
+                >
+                  <Link to="/programs">Learn More</Link>
+                </Button>
+              </div>
+              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
+                <h3 className="text-xl font-bold mb-3">JUPEB Program</h3>
+                <p className="text-gray-600 mb-4">
+                  One-year pre-university program for direct entry admission.
+                </p>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
+                >
+                  <Link to="/programs">Learn More</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
+
+        {/* Why Choose AUST Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -78,7 +81,7 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
                 <img
                   src={academicImage}
                   alt="Academics"
@@ -92,7 +95,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
                 <img
                   src={communityImage}
                   alt="Community"
@@ -106,7 +109,7 @@ const Index = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+              <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
                 <img
                   src={careerSupportImage}
                   alt="Career Support"
@@ -122,9 +125,8 @@ const Index = () => {
             </div>
           </div>
         </section>
-
-        
       </main>
+
       <Footer />
     </div>
   );

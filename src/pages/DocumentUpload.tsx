@@ -103,8 +103,46 @@ const DocumentUpload = () => {
     title: "",
     content: "",
   });
+
+  // Function to get current academic session
+  const getCurrentAcademicSession = () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    
+    // If we're in the second half of the year (August or later), show next year
+    if (currentMonth >= 8) {
+      return `${currentYear}/${currentYear + 1}`;
+    }
+    // Otherwise show current year
+    return `${currentYear - 1}/${currentYear}`;
+  };
+
+  // List of all countries in the world
+  const countries = [
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
+    "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
+    "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon",
+    "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba",
+    "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador",
+    "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia",
+    "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary",
+    "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
+    "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia",
+    "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands",
+    "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar",
+    "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman",
+    "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania",
+    "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+    "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia",
+    "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland",
+    "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
+    "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+    "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+  ].sort((a, b) => a.localeCompare(b));
+
   const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>({
-    academicSession: "2024/2025",
+    academicSession: getCurrentAcademicSession(),
     programType: "",
     program: "",
     personalDetails: {
@@ -459,14 +497,13 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
   const handleNationalityChange = (value: "nigerian" | "foreign") => {
     setNationality(value);
     
-    // If nationality is Nigerian, set country to Nigeria in personal details
+    // If nationality is Nigerian, set nationality to nigeria in personal details
     if (value === "nigerian") {
       setPostgraduateData(prev => ({
         ...prev,
         personalDetails: {
           ...prev.personalDetails,
-          nationality: "nigeria",
-          country: "Nigeria"
+          nationality: "nigeria"
         }
       }));
     }
@@ -836,7 +873,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Label htmlFor="academicSession">Academic Session</Label>
                           <Input
                             id="academicSession"
-                            value="2024/2025 Academic Session"
+                            value={`${getCurrentAcademicSession()} Academic Session`}
                             disabled
                             className="bg-gray-50"
                           />
@@ -991,53 +1028,12 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <SelectTrigger id="nationality" className="w-full">
                               <SelectValue placeholder="Select your nationality" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                              <SelectItem value="nigeria" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Nigeria</SelectItem>
-                              <SelectItem value="ghana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ghana</SelectItem>
-                              <SelectItem value="kenya" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Kenya</SelectItem>
-                              <SelectItem value="south_africa" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Africa</SelectItem>
-                              <SelectItem value="tanzania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Tanzania</SelectItem>
-                              <SelectItem value="uganda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Uganda</SelectItem>
-                              <SelectItem value="zimbabwe" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zimbabwe</SelectItem>
-                              <SelectItem value="zambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zambia</SelectItem>
-                              <SelectItem value="malawi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Malawi</SelectItem>
-                              <SelectItem value="mozambique" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mozambique</SelectItem>
-                              <SelectItem value="angola" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Angola</SelectItem>
-                              <SelectItem value="botswana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Botswana</SelectItem>
-                              <SelectItem value="namibia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Namibia</SelectItem>
-                              <SelectItem value="lesotho" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Lesotho</SelectItem>
-                              <SelectItem value="eswatini" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eswatini</SelectItem>
-                              <SelectItem value="cameroon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cameroon</SelectItem>
-                              <SelectItem value="gabon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gabon</SelectItem>
-                              <SelectItem value="congo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Congo</SelectItem>
-                              <SelectItem value="drc" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">DR Congo</SelectItem>
-                              <SelectItem value="central_african_republic" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Central African Republic</SelectItem>
-                              <SelectItem value="chad" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Chad</SelectItem>
-                              <SelectItem value="sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sudan</SelectItem>
-                              <SelectItem value="south_sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Sudan</SelectItem>
-                              <SelectItem value="ethiopia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ethiopia</SelectItem>
-                              <SelectItem value="eritrea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eritrea</SelectItem>
-                              <SelectItem value="djibouti" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Djibouti</SelectItem>
-                              <SelectItem value="somalia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Somalia</SelectItem>
-                              <SelectItem value="burundi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burundi</SelectItem>
-                              <SelectItem value="rwanda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Rwanda</SelectItem>
-                              <SelectItem value="senegal" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Senegal</SelectItem>
-                              <SelectItem value="gambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gambia</SelectItem>
-                              <SelectItem value="guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea</SelectItem>
-                              <SelectItem value="guinea_bissau" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea-Bissau</SelectItem>
-                              <SelectItem value="sierra_leone" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sierra Leone</SelectItem>
-                              <SelectItem value="liberia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Liberia</SelectItem>
-                              <SelectItem value="cote_divoire" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Côte d'Ivoire</SelectItem>
-                              <SelectItem value="mali" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mali</SelectItem>
-                              <SelectItem value="burkina_faso" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burkina Faso</SelectItem>
-                              <SelectItem value="niger" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Niger</SelectItem>
-                              <SelectItem value="benin" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Benin</SelectItem>
-                              <SelectItem value="togo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Togo</SelectItem>
-                              <SelectItem value="mauritania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mauritania</SelectItem>
-                              <SelectItem value="cape_verde" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cape Verde</SelectItem>
-                              <SelectItem value="sao_tome" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">São Tomé and Príncipe</SelectItem>
-                              <SelectItem value="equatorial_guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Equatorial Guinea</SelectItem>
-                              <SelectItem value="other" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Other</SelectItem>
+                            <SelectContent>
+                              {countries.map((country) => (
+                                <SelectItem key={country} value={country.toLowerCase().replace(/\s+/g, '_')}>
+                                  {country}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1089,60 +1085,18 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         <div className="space-y-2">
                           <Label htmlFor="country">Country *</Label>
                           <Select
-                            value={postgraduateData.personalDetails.country}
                             onValueChange={(value) => handlePersonalDetailsChange("country", value)}
-                            disabled={!isPaymentMade || nationality === "nigerian"}
+                            disabled={!isPaymentMade}
                           >
                             <SelectTrigger id="country" className="w-full">
                               <SelectValue placeholder="Select your country" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Nigeria">Nigeria</SelectItem>
-                              <SelectItem value="Ghana">Ghana</SelectItem>
-                              <SelectItem value="Kenya">Kenya</SelectItem>
-                              <SelectItem value="South Africa">South Africa</SelectItem>
-                              <SelectItem value="Tanzania">Tanzania</SelectItem>
-                              <SelectItem value="Uganda">Uganda</SelectItem>
-                              <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
-                              <SelectItem value="Zambia">Zambia</SelectItem>
-                              <SelectItem value="Malawi">Malawi</SelectItem>
-                              <SelectItem value="Mozambique">Mozambique</SelectItem>
-                              <SelectItem value="Angola">Angola</SelectItem>
-                              <SelectItem value="Botswana">Botswana</SelectItem>
-                              <SelectItem value="Namibia">Namibia</SelectItem>
-                              <SelectItem value="Lesotho">Lesotho</SelectItem>
-                              <SelectItem value="Eswatini">Eswatini</SelectItem>
-                              <SelectItem value="Cameroon">Cameroon</SelectItem>
-                              <SelectItem value="Gabon">Gabon</SelectItem>
-                              <SelectItem value="Congo">Congo</SelectItem>
-                              <SelectItem value="DR Congo">DR Congo</SelectItem>
-                              <SelectItem value="Central African Republic">Central African Republic</SelectItem>
-                              <SelectItem value="Chad">Chad</SelectItem>
-                              <SelectItem value="Sudan">Sudan</SelectItem>
-                              <SelectItem value="South Sudan">South Sudan</SelectItem>
-                              <SelectItem value="Ethiopia">Ethiopia</SelectItem>
-                              <SelectItem value="Eritrea">Eritrea</SelectItem>
-                              <SelectItem value="Djibouti">Djibouti</SelectItem>
-                              <SelectItem value="Somalia">Somalia</SelectItem>
-                              <SelectItem value="Burundi">Burundi</SelectItem>
-                              <SelectItem value="Rwanda">Rwanda</SelectItem>
-                              <SelectItem value="Senegal">Senegal</SelectItem>
-                              <SelectItem value="Gambia">Gambia</SelectItem>
-                              <SelectItem value="Guinea">Guinea</SelectItem>
-                              <SelectItem value="Guinea-Bissau">Guinea-Bissau</SelectItem>
-                              <SelectItem value="Sierra Leone">Sierra Leone</SelectItem>
-                              <SelectItem value="Liberia">Liberia</SelectItem>
-                              <SelectItem value="Côte d'Ivoire">Côte d'Ivoire</SelectItem>
-                              <SelectItem value="Mali">Mali</SelectItem>
-                              <SelectItem value="Burkina Faso">Burkina Faso</SelectItem>
-                              <SelectItem value="Niger">Niger</SelectItem>
-                              <SelectItem value="Benin">Benin</SelectItem>
-                              <SelectItem value="Togo">Togo</SelectItem>
-                              <SelectItem value="Mauritania">Mauritania</SelectItem>
-                              <SelectItem value="Cape Verde">Cape Verde</SelectItem>
-                              <SelectItem value="São Tomé and Príncipe">São Tomé and Príncipe</SelectItem>
-                              <SelectItem value="Equatorial Guinea">Equatorial Guinea</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
+                              {countries.map((country) => (
+                                <SelectItem key={country} value={country}>
+                                  {country}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -1959,52 +1913,11 @@ Please ensure that the referee's email address is an official institutional or c
                               <SelectValue placeholder="Select your nationality" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
-                              <SelectItem value="nigeria" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Nigeria</SelectItem>
-                              <SelectItem value="ghana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ghana</SelectItem>
-                              <SelectItem value="kenya" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Kenya</SelectItem>
-                              <SelectItem value="south_africa" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Africa</SelectItem>
-                              <SelectItem value="tanzania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Tanzania</SelectItem>
-                              <SelectItem value="uganda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Uganda</SelectItem>
-                              <SelectItem value="zimbabwe" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zimbabwe</SelectItem>
-                              <SelectItem value="zambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Zambia</SelectItem>
-                              <SelectItem value="malawi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Malawi</SelectItem>
-                              <SelectItem value="mozambique" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mozambique</SelectItem>
-                              <SelectItem value="angola" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Angola</SelectItem>
-                              <SelectItem value="botswana" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Botswana</SelectItem>
-                              <SelectItem value="namibia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Namibia</SelectItem>
-                              <SelectItem value="lesotho" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Lesotho</SelectItem>
-                              <SelectItem value="eswatini" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eswatini</SelectItem>
-                              <SelectItem value="cameroon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cameroon</SelectItem>
-                              <SelectItem value="gabon" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gabon</SelectItem>
-                              <SelectItem value="congo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Congo</SelectItem>
-                              <SelectItem value="drc" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">DR Congo</SelectItem>
-                              <SelectItem value="central_african_republic" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Central African Republic</SelectItem>
-                              <SelectItem value="chad" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Chad</SelectItem>
-                              <SelectItem value="sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sudan</SelectItem>
-                              <SelectItem value="south_sudan" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">South Sudan</SelectItem>
-                              <SelectItem value="ethiopia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Ethiopia</SelectItem>
-                              <SelectItem value="eritrea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Eritrea</SelectItem>
-                              <SelectItem value="djibouti" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Djibouti</SelectItem>
-                              <SelectItem value="somalia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Somalia</SelectItem>
-                              <SelectItem value="burundi" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burundi</SelectItem>
-                              <SelectItem value="rwanda" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Rwanda</SelectItem>
-                              <SelectItem value="senegal" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Senegal</SelectItem>
-                              <SelectItem value="gambia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Gambia</SelectItem>
-                              <SelectItem value="guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea</SelectItem>
-                              <SelectItem value="guinea_bissau" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Guinea-Bissau</SelectItem>
-                              <SelectItem value="sierra_leone" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Sierra Leone</SelectItem>
-                              <SelectItem value="liberia" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Liberia</SelectItem>
-                              <SelectItem value="cote_divoire" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Côte d'Ivoire</SelectItem>
-                              <SelectItem value="mali" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mali</SelectItem>
-                              <SelectItem value="burkina_faso" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Burkina Faso</SelectItem>
-                              <SelectItem value="niger" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Niger</SelectItem>
-                              <SelectItem value="benin" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Benin</SelectItem>
-                              <SelectItem value="togo" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Togo</SelectItem>
-                              <SelectItem value="mauritania" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Mauritania</SelectItem>
-                              <SelectItem value="cape_verde" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Cape Verde</SelectItem>
-                              <SelectItem value="sao_tome" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">São Tomé and Príncipe</SelectItem>
-                              <SelectItem value="equatorial_guinea" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Equatorial Guinea</SelectItem>
-                              <SelectItem value="other" className="text-gray-900 hover:bg-gray-100 hover:text-gray-900">Other</SelectItem>
+                              {countries.map((country) => (
+                                <SelectItem key={country} value={country.toLowerCase().replace(/\s+/g, '_')}>
+                                  {country}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -2046,52 +1959,11 @@ Please ensure that the referee's email address is an official institutional or c
                               <SelectValue placeholder="Select your country" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Nigeria">Nigeria</SelectItem>
-                              <SelectItem value="Ghana">Ghana</SelectItem>
-                              <SelectItem value="Kenya">Kenya</SelectItem>
-                              <SelectItem value="South Africa">South Africa</SelectItem>
-                              <SelectItem value="Tanzania">Tanzania</SelectItem>
-                              <SelectItem value="Uganda">Uganda</SelectItem>
-                              <SelectItem value="Zimbabwe">Zimbabwe</SelectItem>
-                              <SelectItem value="Zambia">Zambia</SelectItem>
-                              <SelectItem value="Malawi">Malawi</SelectItem>
-                              <SelectItem value="Mozambique">Mozambique</SelectItem>
-                              <SelectItem value="Angola">Angola</SelectItem>
-                              <SelectItem value="Botswana">Botswana</SelectItem>
-                              <SelectItem value="Namibia">Namibia</SelectItem>
-                              <SelectItem value="Lesotho">Lesotho</SelectItem>
-                              <SelectItem value="Eswatini">Eswatini</SelectItem>
-                              <SelectItem value="Cameroon">Cameroon</SelectItem>
-                              <SelectItem value="Gabon">Gabon</SelectItem>
-                              <SelectItem value="Congo">Congo</SelectItem>
-                              <SelectItem value="DR Congo">DR Congo</SelectItem>
-                              <SelectItem value="Central African Republic">Central African Republic</SelectItem>
-                              <SelectItem value="Chad">Chad</SelectItem>
-                              <SelectItem value="Sudan">Sudan</SelectItem>
-                              <SelectItem value="South Sudan">South Sudan</SelectItem>
-                              <SelectItem value="Ethiopia">Ethiopia</SelectItem>
-                              <SelectItem value="Eritrea">Eritrea</SelectItem>
-                              <SelectItem value="Djibouti">Djibouti</SelectItem>
-                              <SelectItem value="Somalia">Somalia</SelectItem>
-                              <SelectItem value="Burundi">Burundi</SelectItem>
-                              <SelectItem value="Rwanda">Rwanda</SelectItem>
-                              <SelectItem value="Senegal">Senegal</SelectItem>
-                              <SelectItem value="Gambia">Gambia</SelectItem>
-                              <SelectItem value="Guinea">Guinea</SelectItem>
-                              <SelectItem value="Guinea-Bissau">Guinea-Bissau</SelectItem>
-                              <SelectItem value="Sierra Leone">Sierra Leone</SelectItem>
-                              <SelectItem value="Liberia">Liberia</SelectItem>
-                              <SelectItem value="Côte d'Ivoire">Côte d'Ivoire</SelectItem>
-                              <SelectItem value="Mali">Mali</SelectItem>
-                              <SelectItem value="Burkina Faso">Burkina Faso</SelectItem>
-                              <SelectItem value="Niger">Niger</SelectItem>
-                              <SelectItem value="Benin">Benin</SelectItem>
-                              <SelectItem value="Togo">Togo</SelectItem>
-                              <SelectItem value="Mauritania">Mauritania</SelectItem>
-                              <SelectItem value="Cape Verde">Cape Verde</SelectItem>
-                              <SelectItem value="São Tomé and Príncipe">São Tomé and Príncipe</SelectItem>
-                              <SelectItem value="Equatorial Guinea">Equatorial Guinea</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
+                              {countries.map((country) => (
+                                <SelectItem key={country} value={country}>
+                                  {country}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
