@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { apiService } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,8 +16,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Prevent accessing login page if already authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      navigate("/documents");
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
@@ -26,38 +37,32 @@ const Login = () => {
     
     setIsLoading(true);
     
-    // Use the API service for login
-    apiService.login({
-      username: email,
-      password
-    })
-      .then((data) => {
-        console.log("Login response:", data);
-        
-        if (!data.access_token) {
-          throw new Error("No access token received");
-        }
-        
-        // Store user information
-        localStorage.setItem("accessToken", data.access_token);
-        localStorage.setItem("userName", data.user.full_name);
-        localStorage.setItem("programType", data.user.program);
-        console.log("User data stored in localStorage");
-        
-        // Show success message
-        toast.success("Login successful!");
-        
-        // Navigate to the correct route
-        console.log("Attempting to navigate to /documents");
-        navigate("/documents", { replace: true });
-      })
-      .catch((error) => {
-        console.error("Login error details:", error);
-        toast.error(error.message || "Invalid email or password");
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      const data = await apiService.login({
+        username: email,
+        password
       });
+      
+      if (!data.access_token) {
+        throw new Error("No access token received");
+      }
+      
+      // Use the auth context to handle login
+      login(data.access_token, data);
+      
+      // Show success message
+      toast.success("Login successful!");
+      
+      // Navigate to the intended destination or documents page
+      const destination = location.state?.from?.pathname || "/documents";
+      navigate(destination, { replace: true });
+      
+    } catch (error) {
+      console.error("Login error details:", error);
+      toast.error(error instanceof Error ? error.message : "Invalid email or password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -81,6 +86,7 @@ const Login = () => {
               Enter your credentials to access your application
             </CardDescription>
           </CardHeader>
+          
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">

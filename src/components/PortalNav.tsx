@@ -1,26 +1,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PortalNavProps {
   userName?: string;
 }
 
 const PortalNav = ({ userName = "User" }: PortalNavProps) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    // Clear all user data from localStorage
-    localStorage.removeItem("userName");
-    localStorage.removeItem("programType");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("accessToken");
-    
-    // Redirect to home page
-    navigate("/");
-  };
+  const { logout } = useAuth();
 
   return (
     <nav className="bg-[hsl(var(--accent)/0.1)] border-b border-gray-200">
@@ -36,7 +24,7 @@ const PortalNav = ({ userName = "User" }: PortalNavProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleLogout}
+              onClick={logout}
               className="text-gray-600 hover:text-gray-900"
             >
               <LogOut className="h-4 w-4 mr-2" />

@@ -463,14 +463,12 @@ const Programs = () => {
                           >
                             View Details
                           </Button>
-                          <Button
-                            variant="ghost"
-                            className="text-[#FF5500]"
-                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
-                          >
-                            <FileText className="w-4 h-4 mr-2" />
-                            View PDF
-                          </Button>
+                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                            <Button variant="ghost" className="text-[#FF5500]">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Download PDF
+                            </Button>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -516,14 +514,12 @@ const Programs = () => {
                           >
                             View Details
                           </Button>
-                          <Button
-                            variant="ghost"
-                            className="text-[#FF5500]"
-                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
-                          >
-                            <FileText className="w-4 h-4 mr-2" />
-                            View PDF
-                          </Button>
+                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                            <Button variant="ghost" className="text-[#FF5500]">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Download PDF
+                            </Button>
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -555,6 +551,15 @@ const Programs = () => {
                           <p className="text-sm text-gray-500">
                             <span className="font-medium">School Fees:</span> {program.schoolFees}
                           </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Application Fee:</span> ₦20,000
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Acceptance Fee:</span> ₦50,000
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            <span className="font-medium">Total Fees:</span> ₦1,413,000
+                          </p>
                         </div>
                         <div className="flex justify-between items-center">
                           <Button
@@ -564,14 +569,12 @@ const Programs = () => {
                           >
                             View Details
                           </Button>
-                          <Button
-                            variant="ghost"
-                            className="text-[#FF5500]"
-                            onClick={() => navigate(`/pdfview?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`)}
-                          >
-                            <FileText className="w-4 h-4 mr-2" />
-                            View PDF
-                          </Button>
+                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                            <Button variant="ghost" className="text-[#FF5500]">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Download PDF
+                            </Button>
+                          </a>
                         </div>
                       </div>
                     </div>

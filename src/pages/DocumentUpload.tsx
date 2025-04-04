@@ -75,7 +75,7 @@ interface PostgraduateFormData {
     referee1: { name: string; email: string };
     referee2: { name: string; email: string };
   };
-  declaration: boolean;
+  declaration: string;
 }
 
 // Add Flutterwave types
@@ -103,6 +103,20 @@ const DocumentUpload = () => {
     title: "",
     content: "",
   });
+
+  // Get user ID from URL or localStorage
+  const [userId, setUserId] = useState(() => {
+    const pathParts = window.location.pathname.split('/');
+    const idFromUrl = pathParts[pathParts.length - 1];
+    return idFromUrl === 'documents' ? '' : idFromUrl;
+  });
+
+  // Update URL when userId changes
+  useEffect(() => {
+    if (userId && window.location.pathname !== `/documents/${userId}`) {
+      window.history.pushState({}, '', `/documents/${userId}`);
+    }
+  }, [userId]);
 
   // Function to get current academic session
   const getCurrentAcademicSession = () => {
@@ -141,72 +155,375 @@ const DocumentUpload = () => {
     "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
   ].sort((a, b) => a.localeCompare(b));
 
-  const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>({
-    academicSession: getCurrentAcademicSession(),
-    programType: "",
-    program: "",
-    personalDetails: {
-      surname: "",
-      firstName: "",
-      otherNames: "",
-      gender: "",
-      dateOfBirth: "",
-      streetAddress: "",
-      city: "",
-      country: "",
-      stateOfOrigin: "",
-      nationality: "",
-      phoneNumber: "",
-      email: "",
-      hasDisabilities: "",
-      disabilityDescription: "",
-    },
-    academicQualifications: {
-      qualification1: {
-        type: "",
-        grade: "",
-        cgpa: "",
-        subject: "",
-        institution: "",
-        startDate: "",
-        endDate: "",
-        documents: null,
+  const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>(() => {
+    const storedData = localStorage.getItem("applicationData");
+    if (storedData) {
+      const data = JSON.parse(storedData);
+      const application = data.applications?.[0];
+      if (application) {
+        // Split full name into parts
+        const nameParts = application.full_name?.split(" ") || [];
+        const surname = nameParts[0] || "";
+        const firstName = nameParts[1] || "";
+        const otherNames = nameParts.slice(2).join(" ") || "";
+
+        return {
+          academicSession: application.academic_session || getCurrentAcademicSession(),
+          programType: application.program_type || "",
+          program: application.selected_program || "",
+          personalDetails: {
+            surname,
+            firstName,
+            otherNames,
+            gender: application.gender || "",
+            dateOfBirth: application.date_of_birth?.split("T")[0] || "",
+            streetAddress: application.street_address || "",
+            city: application.city || "",
+            country: application.country || "",
+            stateOfOrigin: application.state_of_origin || "",
+            nationality: application.nationality || "",
+            phoneNumber: application.phone_number || "",
+            email: data.user?.email || "",
+            hasDisabilities: application.has_disability ? "yes" : "no",
+            disabilityDescription: application.disability_description || "",
+          },
+          academicQualifications: {
+            qualification1: {
+              type: application.qualification_type || "",
+              grade: application.grade || "",
+              cgpa: application.cgpa || "",
+              subject: application.subject || "",
+              institution: application.awarding_institution || "",
+              startDate: application.start_date?.split("T")[0] || "",
+              endDate: application.end_date?.split("T")[0] || "",
+              documents: null,
+            },
+          },
+          statementOfPurpose: null,
+          applicationFee: null,
+          references: {
+            referee1: { 
+              name: application.first_referee_name || "", 
+              email: application.first_referee_email || "" 
+            },
+            referee2: { 
+              name: application.second_referee_name || "", 
+              email: application.second_referee_email || "" 
+            },
+          },
+          declaration: "",
+        };
+      }
+    }
+    return {
+      academicSession: getCurrentAcademicSession(),
+      programType: "",
+      program: "",
+      personalDetails: {
+        surname: "",
+        firstName: "",
+        otherNames: "",
+        gender: "",
+        dateOfBirth: "",
+        streetAddress: "",
+        city: "",
+        country: "",
+        stateOfOrigin: "",
+        nationality: "",
+        phoneNumber: "",
+        email: "",
+        hasDisabilities: "",
+        disabilityDescription: "",
       },
-    },
-    statementOfPurpose: null,
-    applicationFee: null,
-    references: {
-      referee1: { name: "", email: "" },
-      referee2: { name: "", email: "" },
-    },
-    declaration: false,
+      academicQualifications: {
+        qualification1: {
+          type: "",
+          grade: "",
+          cgpa: "",
+          subject: "",
+          institution: "",
+          startDate: "",
+          endDate: "",
+          documents: null,
+        },
+      },
+      statementOfPurpose: null,
+      applicationFee: null,
+      references: {
+        referee1: { name: "", email: "" },
+        referee2: { name: "", email: "" },
+      },
+      declaration: "",
+    };
   });
+
+  // Add useEffect to update form data when user signs in
+  useEffect(() => {
+    const storedData = localStorage.getItem("applicationData");
+    console.log("Stored Application Data:", storedData);
+    
+    if (!storedData) {
+      console.log("No stored data found, initializing with empty values");
+      setPostgraduateData({
+        academicSession: getCurrentAcademicSession(),
+        programType: "",
+        program: "",
+        personalDetails: {
+          surname: "",
+          firstName: "",
+          otherNames: "",
+          gender: "",
+          dateOfBirth: "",
+          streetAddress: "",
+          city: "",
+          country: "",
+          stateOfOrigin: "",
+          nationality: "",
+          phoneNumber: "",
+          email: "",
+          hasDisabilities: "no",
+          disabilityDescription: "",
+        },
+        academicQualifications: {
+          qualification1: {
+            type: "",
+            grade: "",
+            cgpa: "",
+            subject: "",
+            institution: "",
+            startDate: "",
+            endDate: "",
+            documents: null,
+          },
+        },
+        statementOfPurpose: null,
+        applicationFee: null,
+        references: {
+          referee1: { name: "", email: "" },
+          referee2: { name: "", email: "" },
+        },
+        declaration: "",
+      });
+      return;
+    }
+
+    try {
+      const data = JSON.parse(storedData);
+      console.log("Parsed Application Data:", data);
+      
+      // Get user data from the response
+      const userData = data.user;
+      console.log("User Data:", userData);
+      
+      // Get application data
+      const application = data.applications?.[0];
+      console.log("First Application:", application);
+      
+      if (!application) {
+        console.log("No application found in data");
+        setPostgraduateData({
+          academicSession: getCurrentAcademicSession(),
+          programType: "",
+          program: "",
+          personalDetails: {
+            surname: "",
+            firstName: "",
+            otherNames: "",
+            gender: "",
+            dateOfBirth: "",
+            streetAddress: "",
+            city: "",
+            country: "",
+            stateOfOrigin: "",
+            nationality: "",
+            phoneNumber: "",
+            email: userData?.email || "",
+            hasDisabilities: "no",
+            disabilityDescription: "",
+          },
+          academicQualifications: {
+            qualification1: {
+              type: "",
+              grade: "",
+              cgpa: "",
+              subject: "",
+              institution: "",
+              startDate: "",
+              endDate: "",
+              documents: null,
+            },
+          },
+          statementOfPurpose: null,
+          applicationFee: null,
+          references: {
+            referee1: { name: "", email: "" },
+            referee2: { name: "", email: "" },
+          },
+          declaration: "",
+        });
+        return;
+      }
+
+      // Create updated postgraduate data
+      const updatedData = {
+        academicSession: application.academic_session || getCurrentAcademicSession(),
+        programType: application.program_type || "",
+        program: application.selected_program || "",
+        personalDetails: {
+          surname: application.surname || "",
+          firstName: application.first_name || "",
+          otherNames: application.other_names || "",
+          gender: application.gender || "",
+          dateOfBirth: application.date_of_birth?.split("T")[0] || "",
+          streetAddress: application.street_address || "",
+          city: application.city || "",
+          country: application.country || "",
+          stateOfOrigin: application.state_of_origin || "",
+          nationality: application.nationality || "",
+          phoneNumber: application.phone_number || "",
+          email: userData?.email || "",
+          hasDisabilities: application.has_disability ? "yes" : "no",
+          disabilityDescription: application.disability_description || "",
+        },
+        academicQualifications: {
+          qualification1: {
+            type: application.qualification_type || "",
+            grade: application.grade || "",
+            cgpa: application.cgpa || "",
+            subject: application.subject || "",
+            institution: application.awarding_institution || "",
+            startDate: application.start_date?.split("T")[0] || "",
+            endDate: application.end_date?.split("T")[0] || "",
+            documents: null,
+          },
+        },
+        statementOfPurpose: null,
+        applicationFee: null,
+        references: {
+          referee1: { 
+            name: application.first_referee_name || "", 
+            email: application.first_referee_email || "" 
+          },
+          referee2: { 
+            name: application.second_referee_name || "", 
+            email: application.second_referee_email || "" 
+          },
+        },
+        declaration: "",
+      };
+
+      console.log("Updated Postgraduate Data:", updatedData);
+      setPostgraduateData(updatedData);
+      
+      // Update userId if available
+      if (userData?.uuid) {
+        setUserId(userData.uuid);
+        localStorage.setItem("userId", userData.uuid);
+      }
+    } catch (error) {
+      console.error("Error parsing application data:", error);
+      // Initialize with empty values if there's an error
+      setPostgraduateData({
+        academicSession: getCurrentAcademicSession(),
+        programType: "",
+        program: "",
+        personalDetails: {
+          surname: "",
+          firstName: "",
+          otherNames: "",
+          gender: "",
+          dateOfBirth: "",
+          streetAddress: "",
+          city: "",
+          country: "",
+          stateOfOrigin: "",
+          nationality: "",
+          phoneNumber: "",
+          email: "",
+          hasDisabilities: "no",
+          disabilityDescription: "",
+        },
+        academicQualifications: {
+          qualification1: {
+            type: "",
+            grade: "",
+            cgpa: "",
+            subject: "",
+            institution: "",
+            startDate: "",
+            endDate: "",
+            documents: null,
+          },
+        },
+        statementOfPurpose: null,
+        applicationFee: null,
+        references: {
+          referee1: { name: "", email: "" },
+          referee2: { name: "", email: "" },
+        },
+        declaration: "",
+      });
+    }
+  }, [localStorage.getItem("applicationData")]);
+
   const [isPaymentMade, setIsPaymentMade] = useState(false);
   const [nationality, setNationality] = useState<"nigerian" | "foreign">("nigerian");
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, boolean>>({});
 
-  const [documents, setDocuments] = useState<Record<string, DocumentField[]>>({
-    undergraduate: [
-      { id: "ssce", label: "SSCE Result", required: true, file: null },
-      { id: "passport", label: "Passport Photo", required: true, file: null },
-      { id: "birth", label: "Birth Certificate", required: true, file: null },
-      { id: "statement", label: "Statement of Result", required: true, file: null },
-      { id: "jamb", label: "JAMB Result", required: true, file: null },
-    ],
-    postgraduate: [
-      { id: "passport", label: "Recent Passport Photograph", required: true, file: null },
-      { id: "degree", label: "Degree Certificate", required: true, file: null },
-      { id: "transcript", label: "Academic Transcript", required: true, file: null },
-      { id: "statement", label: "Statement of Purpose", required: true, file: null },
-      { id: "fee", label: "Application Fee Payment Evidence", required: true, file: null },
-      { id: "other", label: "Other Academic Qualifications", required: false, file: null },
-    ],
-    jupeb: [
-      { id: "ssce", label: "SSCE Result", required: true, file: null },
-      { id: "passport", label: "Passport Photo", required: true, file: null },
-      { id: "birth", label: "Birth Certificate", required: true, file: null },
-      { id: "medical", label: "Medical Certificate", required: true, file: null },
-    ],
+  const [documents, setDocuments] = useState<Record<string, DocumentField[]>>(() => {
+    const storedData = localStorage.getItem("applicationData");
+    if (storedData) {
+      const data = JSON.parse(storedData);
+      const application = data.applications?.[0];
+      if (application) {
+        return {
+          undergraduate: [
+            { id: "ssce", label: "SSCE Result", required: true, file: null },
+            { id: "passport", label: "Passport Photo", required: true, file: null },
+            { id: "birth", label: "Birth Certificate", required: true, file: null },
+            { id: "statement", label: "Statement of Result", required: true, file: null },
+            { id: "jamb", label: "JAMB Result", required: true, file: null },
+          ],
+          postgraduate: [
+            { id: "passport", label: "Recent Passport Photograph", required: true, file: null },
+            { id: "degree", label: "Degree Certificate", required: true, file: null },
+            { id: "transcript", label: "Academic Transcript", required: true, file: null },
+            { id: "statement", label: "Statement of Purpose", required: true, file: null },
+            { id: "fee", label: "Application Fee Payment Evidence", required: true, file: null },
+            { id: "other", label: "Other Academic Qualifications", required: false, file: null },
+          ],
+          jupeb: [
+            { id: "ssce", label: "SSCE Result", required: true, file: null },
+            { id: "passport", label: "Passport Photo", required: true, file: null },
+            { id: "birth", label: "Birth Certificate", required: true, file: null },
+            { id: "medical", label: "Medical Certificate", required: true, file: null }
+          ],
+        };
+      }
+    }
+    return {
+      undergraduate: [
+        { id: "ssce", label: "SSCE Result", required: true, file: null },
+        { id: "passport", label: "Passport Photo", required: true, file: null },
+        { id: "birth", label: "Birth Certificate", required: true, file: null },
+        { id: "statement", label: "Statement of Result", required: true, file: null },
+        { id: "jamb", label: "JAMB Result", required: true, file: null },
+      ],
+      postgraduate: [
+        { id: "passport", label: "Recent Passport Photograph", required: true, file: null },
+        { id: "degree", label: "Degree Certificate", required: true, file: null },
+        { id: "transcript", label: "Academic Transcript", required: true, file: null },
+        { id: "statement", label: "Statement of Purpose", required: true, file: null },
+        { id: "fee", label: "Application Fee Payment Evidence", required: true, file: null },
+        { id: "other", label: "Other Academic Qualifications", required: false, file: null },
+      ],
+      jupeb: [
+        { id: "ssce", label: "SSCE Result", required: true, file: null },
+        { id: "passport", label: "Passport Photo", required: true, file: null },
+        { id: "birth", label: "Birth Certificate", required: true, file: null },
+        { id: "medical", label: "Medical Certificate", required: true, file: null }
+      ],
+    };
   });
 
   const months = [
@@ -273,6 +590,69 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     };
   }, []);
 
+  // Add useEffect to update form data when application data changes
+  useEffect(() => {
+    const storedData = localStorage.getItem("applicationData");
+    if (storedData) {
+      const data = JSON.parse(storedData);
+      const application = data.applications?.[0];
+      if (application) {
+        // Split full name into parts
+        const nameParts = application.full_name?.split(" ") || [];
+        const surname = nameParts[0] || "";
+        const firstName = nameParts[1] || "";
+        const otherNames = nameParts.slice(2).join(" ") || "";
+
+        setPostgraduateData(prev => ({
+          ...prev,
+          academicSession: application.academic_session || getCurrentAcademicSession(),
+          programType: application.program_type || "",
+          program: application.selected_program || "",
+          personalDetails: {
+            ...prev.personalDetails,
+            surname,
+            firstName,
+            otherNames,
+            gender: application.gender || "",
+            dateOfBirth: application.date_of_birth?.split("T")[0] || "",
+            streetAddress: application.street_address || "",
+            city: application.city || "",
+            country: application.country || "",
+            stateOfOrigin: application.state_of_origin || "",
+            nationality: application.nationality || "",
+            phoneNumber: application.phone_number || "",
+            email: data.user?.email || "",
+            hasDisabilities: application.has_disability ? "yes" : "no",
+            disabilityDescription: application.disability_description || "",
+          },
+          academicQualifications: {
+            ...prev.academicQualifications,
+            qualification1: {
+              ...prev.academicQualifications.qualification1,
+              type: application.qualification_type || "",
+              grade: application.grade || "",
+              cgpa: application.cgpa || "",
+              subject: application.subject || "",
+              institution: application.awarding_institution || "",
+              startDate: application.start_date?.split("T")[0] || "",
+              endDate: application.end_date?.split("T")[0] || "",
+            },
+          },
+          references: {
+            referee1: { 
+              name: application.first_referee_name || "", 
+              email: application.first_referee_email || "" 
+            },
+            referee2: { 
+              name: application.second_referee_name || "", 
+              email: application.second_referee_email || "" 
+            },
+          },
+        }));
+      }
+    }
+  }, []);
+
   const handleFileUpload = (programType: string, fieldId: string, file: File) => {
     setDocuments((prev) => ({
       ...prev,
@@ -288,7 +668,7 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     }));
     
     // If payment receipt is uploaded, enable all fields
-    if (programType === "postgraduate" && fieldId === "fee") {
+    if ((programType === "postgraduate" || programType === "jupeb") && fieldId === "fee") {
       setIsPaymentMade(true);
     }
     
@@ -315,7 +695,7 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     }));
     
     // If payment receipt is removed, disable all fields
-    if (programType === "postgraduate" && fieldId === "fee") {
+    if ((programType === "postgraduate" || programType === "jupeb") && fieldId === "fee") {
       setIsPaymentMade(false);
     }
     
@@ -327,15 +707,12 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     });
   };
 
-  const isFieldEnabled = (programType: string, fieldId: string) => {
-    // For postgraduate section, enable fields if payment receipt is uploaded
-    if (programType === "postgraduate") {
-      if (fieldId === "fee") return true; // Payment receipt is always enabled
-      // Enable all fields if payment receipt is uploaded
-      return uploadedFiles[`${programType}_fee`] === true;
+  const isFieldEnabled = (fieldId: string) => {
+    if (programType === "jupeb") {
+      const paymentReceipt = documents.jupeb.find(doc => doc.id === "payment");
+      return paymentReceipt?.file !== null;
     }
-    // For other sections, enable fields if any required file is uploaded
-    return Object.values(uploadedFiles).some(value => value === true);
+    return true;
   };
 
   const handlePostgraduateChange = (field: string, value: any) => {
@@ -370,40 +747,171 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (activeTab === "postgraduate") {
-      // Validate postgraduate form
+      // Validate declaration
       if (!postgraduateData.declaration) {
         toast({
           title: "Declaration Required",
-          description: "Please accept the declaration to proceed.",
+          description: "Please enter your full name in the declaration section.",
           variant: "destructive",
           className: "bg-red-50 text-red-800",
         });
         return;
       }
+
+      // Validate required fields
+      const requiredFields = [
+        { field: postgraduateData.personalDetails.surname, message: "Surname is required" },
+        { field: postgraduateData.personalDetails.firstName, message: "First name is required" },
+        { field: postgraduateData.personalDetails.gender, message: "Gender is required" },
+        { field: postgraduateData.personalDetails.dateOfBirth, message: "Date of birth is required" },
+        { field: postgraduateData.personalDetails.nationality, message: "Nationality is required" },
+        { field: postgraduateData.personalDetails.phoneNumber, message: "Phone number is required" },
+        { field: postgraduateData.personalDetails.streetAddress, message: "Street address is required" },
+        { field: postgraduateData.personalDetails.city, message: "City is required" },
+        { field: postgraduateData.personalDetails.country, message: "Country is required" },
+        { field: postgraduateData.programType, message: "Program type is required" },
+        { field: postgraduateData.program, message: "Program is required" },
+        { field: postgraduateData.academicQualifications.qualification1.type, message: "Qualification type is required" },
+        { field: postgraduateData.academicQualifications.qualification1.grade, message: "Grade is required" },
+        { field: postgraduateData.academicQualifications.qualification1.cgpa, message: "CGPA is required" },
+        { field: postgraduateData.academicQualifications.qualification1.subject, message: "Subject is required" },
+        { field: postgraduateData.academicQualifications.qualification1.institution, message: "Institution is required" },
+        { field: postgraduateData.academicQualifications.qualification1.startDate, message: "Start date is required" },
+        { field: postgraduateData.academicQualifications.qualification1.endDate, message: "End date is required" },
+        { field: postgraduateData.references.referee1.name, message: "First referee name is required" },
+        { field: postgraduateData.references.referee1.email, message: "First referee email is required" },
+        { field: postgraduateData.references.referee2.name, message: "Second referee name is required" },
+        { field: postgraduateData.references.referee2.email, message: "Second referee email is required" },
+      ];
+
+      for (const { field, message } of requiredFields) {
+        if (!field) {
+          toast({
+            title: "Required Field Missing",
+            description: message,
+            variant: "destructive",
+            className: "bg-red-50 text-red-800",
+          });
+          return;
+        }
+      }
+
+      // Validate required files
+      const requiredFiles = [
+        { id: "passport", label: "Passport Photo" },
+        { id: "transcript", label: "Academic Transcript" },
+        { id: "degree", label: "Degree Certificate" },
+        { id: "statement", label: "Statement of Purpose" },
+        { id: "fee", label: "Application Fee Payment Evidence" },
+      ];
+
+      for (const { id, label } of requiredFiles) {
+        const file = documents.postgraduate.find(doc => doc.id === id)?.file;
+        if (!file) {
+          toast({
+            title: "Required Document Missing",
+            description: `${label} is required`,
+            variant: "destructive",
+            className: "bg-red-50 text-red-800",
+          });
+          return;
+        }
+      }
+
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+          toast({
+            title: "Authentication Required",
+            description: "Please log in to continue.",
+            variant: "destructive",
+            className: "bg-red-50 text-red-800",
+          });
+          return;
+        }
+
+        // Create FormData for file uploads
+        const formData = new FormData();
+
+        // Add files to FormData
+        const passportPhoto = documents.postgraduate.find(doc => doc.id === "passport")?.file;
+        const transcript = documents.postgraduate.find(doc => doc.id === "transcript")?.file;
+        const certificate = documents.postgraduate.find(doc => doc.id === "degree")?.file;
+        const statementOfPurpose = documents.postgraduate.find(doc => doc.id === "statement")?.file;
+        const paymentReceipt = documents.postgraduate.find(doc => doc.id === "fee")?.file;
+        const otherQualifications = documents.postgraduate.find(doc => doc.id === "other")?.file;
+
+        if (passportPhoto) formData.append('passport_photo', passportPhoto);
+        if (transcript) formData.append('transcript', transcript);
+        if (certificate) formData.append('certificate', certificate);
+        if (statementOfPurpose) formData.append('statement_of_purpose', statementOfPurpose);
+        if (paymentReceipt) formData.append('payment_receipt', paymentReceipt);
+        if (otherQualifications) formData.append('other_qualifications', otherQualifications);
+
+        // Add query parameters
+        const queryParams = new URLSearchParams({
+          nationality: postgraduateData.personalDetails.nationality,
+          gender: postgraduateData.personalDetails.gender,
+          date_of_birth: postgraduateData.personalDetails.dateOfBirth,
+          phone_number: postgraduateData.personalDetails.phoneNumber,
+          street_address: postgraduateData.personalDetails.streetAddress,
+          city: postgraduateData.personalDetails.city,
+          country: postgraduateData.personalDetails.country,
+          academic_session: postgraduateData.academicSession,
+          program_type: postgraduateData.programType,
+          selected_program: postgraduateData.program,
+          qualification_type: postgraduateData.academicQualifications.qualification1.type,
+          grade: postgraduateData.academicQualifications.qualification1.grade,
+          cgpa: postgraduateData.academicQualifications.qualification1.cgpa,
+          subject: postgraduateData.academicQualifications.qualification1.subject,
+          awarding_institution: postgraduateData.academicQualifications.qualification1.institution,
+          start_date: postgraduateData.academicQualifications.qualification1.startDate,
+          end_date: postgraduateData.academicQualifications.qualification1.endDate,
+          first_referee_name: postgraduateData.references.referee1.name,
+          first_referee_email: postgraduateData.references.referee1.email,
+          second_referee_name: postgraduateData.references.referee2.name,
+          second_referee_email: postgraduateData.references.referee2.email,
+          state_of_origin: postgraduateData.personalDetails.stateOfOrigin,
+          has_disability: postgraduateData.personalDetails.hasDisabilities === "yes" ? "true" : "false",
+          disability_description: postgraduateData.personalDetails.disabilityDescription || "",
+          declaration: postgraduateData.declaration,
+        });
+
+        // Make API call
+        const response = await fetch(`https://admissions-qmt4.onrender.com/application/upload?${queryParams.toString()}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit application');
+        }
+
+        const data = await response.json();
+        
+        toast({
+          title: "Application Submitted",
+          description: "Your application has been submitted successfully!",
+          className: "bg-green-50 text-green-800",
+        });
+
+      } catch (error) {
+        console.error('Error submitting application:', error);
+        toast({
+          title: "Submission Failed",
+          description: "There was an error submitting your application. Please try again.",
+          variant: "destructive",
+          className: "bg-red-50 text-red-800",
+        });
+      }
     }
-
-    // Check if all required fields are filled
-    const requiredFields = documents[activeTab].filter((doc) => doc.required);
-    const missingFields = requiredFields.filter((doc) => !doc.file);
-
-    if (missingFields.length > 0) {
-      toast({
-        title: "Missing Documents",
-        description: `Please upload all required documents: ${missingFields.map((doc) => doc.label).join(", ")}`,
-        variant: "destructive",
-        className: "bg-red-50 text-red-800",
-      });
-      return;
-    }
-
-    // Simulate submission
-    toast({
-      title: "Application Submitted",
-      description: "Your application has been submitted successfully!",
-      className: "bg-green-50 text-green-800",
-    });
   };
 
   const handleTabChange = (value: string) => {
@@ -587,6 +1095,46 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
       ...prev,
       programType: value,
       program: "", // Reset program when program type changes
+    }));
+  };
+
+  // Add authentication check
+  useEffect(() => {
+    const checkAuth = () => {
+      const accessToken = localStorage.getItem("accessToken");
+      
+      if (!accessToken) {
+        console.log("No access token found");
+        // Clear any existing data
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("applicationData");
+        localStorage.removeItem("userId");
+        // Redirect to login page
+        window.location.href = "/login";
+        return;
+      }
+    };
+
+    // Check auth immediately
+    checkAuth();
+
+    // Set up interval to check auth every 5 minutes
+    const interval = setInterval(checkAuth, 5 * 60 * 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAcademicQualificationChange = (qualification: 'qualification1' | 'qualification2', field: string, value: string) => {
+    setPostgraduateData(prev => ({
+      ...prev,
+      academicQualifications: {
+        ...prev.academicQualifications,
+        [qualification]: {
+          ...prev.academicQualifications[qualification],
+          [field]: value
+        }
+      }
     }));
   };
 
@@ -975,6 +1523,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="surname"
                             placeholder="Enter your surname"
+                            value={postgraduateData.personalDetails.surname}
+                            onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -983,6 +1533,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="firstName"
                             placeholder="Enter your first name"
+                            value={postgraduateData.personalDetails.firstName}
+                            onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -991,12 +1543,16 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="otherNames"
                             placeholder="Enter your other names"
+                            value={postgraduateData.personalDetails.otherNames}
+                            onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Gender *</Label>
                           <RadioGroup
+                            value={postgraduateData.personalDetails.gender}
+                            onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
                             disabled={!isPaymentMade}
                             className="flex space-x-4"
                           >
@@ -1015,6 +1571,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="dateOfBirth"
                             type="date"
+                            value={postgraduateData.personalDetails.dateOfBirth}
+                            onChange={(e) => handlePersonalDetailsChange("dateOfBirth", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -1023,7 +1581,7 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Select
                             value={postgraduateData.personalDetails.nationality}
                             onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-                            disabled={!isFieldEnabled("postgraduate", "nationality") || nationality === "nigerian"}
+                            disabled={!isFieldEnabled("nationality") || nationality === "nigerian"}
                           >
                             <SelectTrigger id="nationality" className="w-full">
                               <SelectValue placeholder="Select your nationality" />
@@ -1043,7 +1601,9 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <Input
                               id="stateOfOrigin"
                               placeholder="Enter your state of origin"
-                              disabled={!isFieldEnabled("postgraduate", "stateOfOrigin")}
+                              value={postgraduateData.personalDetails.stateOfOrigin}
+                              onChange={(e) => handlePersonalDetailsChange("stateOfOrigin", e.target.value)}
+                              disabled={!isFieldEnabled("stateOfOrigin")}
                             />
                           </div>
                         )}
@@ -1054,6 +1614,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             type="tel"
                             pattern="[0-9]*"
                             placeholder="Enter your phone number"
+                            value={postgraduateData.personalDetails.phoneNumber}
+                            onChange={(e) => handlePersonalDetailsChange("phoneNumber", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -1063,6 +1625,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             id="email"
                             type="email"
                             placeholder="Enter your email address"
+                            value={postgraduateData.personalDetails.email}
+                            onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -1071,6 +1635,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="address"
                             placeholder="Enter your street address"
+                            value={postgraduateData.personalDetails.streetAddress}
+                            onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
@@ -1079,12 +1645,15 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           <Input
                             id="city"
                             placeholder="Enter your city"
+                            value={postgraduateData.personalDetails.city}
+                            onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
                             disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="country">Country *</Label>
                           <Select
+                            value={postgraduateData.personalDetails.country}
                             onValueChange={(value) => handlePersonalDetailsChange("country", value)}
                             disabled={!isPaymentMade}
                           >
@@ -1103,6 +1672,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         <div className="space-y-2">
                           <Label>Do you have any disabilities/special needs? *</Label>
                           <RadioGroup
+                            value={postgraduateData.personalDetails.hasDisabilities}
+                            onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
                             disabled={!isPaymentMade}
                             className="flex space-x-4"
                           >
@@ -1116,14 +1687,18 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             </div>
                           </RadioGroup>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="disabilityDescription">If yes, provide a brief description:</Label>
-                          <Textarea
-                            id="disabilityDescription"
-                            placeholder="Describe your disability or special needs"
-                            disabled={!isPaymentMade}
-                          />
-                        </div>
+                        {postgraduateData.personalDetails.hasDisabilities === "yes" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="disabilityDescription">Disability Description</Label>
+                            <Textarea
+                              id="disabilityDescription"
+                              placeholder="Please describe your disability/special needs"
+                              value={postgraduateData.personalDetails.disabilityDescription}
+                              onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -1148,7 +1723,11 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="qualification1">Qualification Type *</Label>
-                            <Select disabled={!isPaymentMade}>
+                            <Select 
+                              value={postgraduateData.academicQualifications.qualification1.type}
+                              onValueChange={(value) => handleAcademicQualificationChange('qualification1', 'type', value)}
+                              disabled={!isPaymentMade}
+                            >
                               <SelectTrigger id="qualification1" className="w-full">
                                 <SelectValue placeholder="Select qualification" />
                               </SelectTrigger>
@@ -1160,7 +1739,11 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="grade1">Grade *</Label>
-                            <Select disabled={!isPaymentMade}>
+                            <Select 
+                              value={postgraduateData.academicQualifications.qualification1.grade}
+                              onValueChange={(value) => handleAcademicQualificationChange('qualification1', 'grade', value)}
+                              disabled={!isPaymentMade}
+                            >
                               <SelectTrigger id="grade1" className="w-full">
                                 <SelectValue placeholder="Select grade" />
                               </SelectTrigger>
@@ -1179,6 +1762,8 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                               type="number"
                               step="0.01"
                               placeholder="Enter CGPA"
+                              value={postgraduateData.academicQualifications.qualification1.cgpa}
+                              onChange={(e) => handleAcademicQualificationChange('qualification1', 'cgpa', e.target.value)}
                               disabled={!isPaymentMade}
                             />
                           </div>
@@ -1187,138 +1772,40 @@ Note that you will need to pay a non-refundable application form fee of N10,000 
                             <Input
                               id="subject1"
                               placeholder="Enter subject"
+                              value={postgraduateData.academicQualifications.qualification1.subject}
+                              onChange={(e) => handleAcademicQualificationChange('qualification1', 'subject', e.target.value)}
                               disabled={!isPaymentMade}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="institution1">Awarding Institution/University *</Label>
+                            <Label htmlFor="institution1">Institution *</Label>
                             <Input
                               id="institution1"
-                              placeholder="Enter institution name"
+                              placeholder="Enter institution"
+                              value={postgraduateData.academicQualifications.qualification1.institution}
+                              onChange={(e) => handleAcademicQualificationChange('qualification1', 'institution', e.target.value)}
                               disabled={!isPaymentMade}
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="startDate1">Start Date (Month/Year) *</Label>
-                            <div className="flex gap-2">
-                              <Select
-                                onValueChange={(value) => {
-                                  const [month, year] = postgraduateData.academicQualifications.qualification1.startDate.split('/');
-                                  setPostgraduateData({
-                                    ...postgraduateData,
-                                    academicQualifications: {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        startDate: `${value}/${year || ''}`
-                                      }
-                                    }
-                                  });
-                                }}
-                                value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[0] || ''}
+                            <Label htmlFor="startDate1">Start Date *</Label>
+                            <Input
+                              id="startDate1"
+                              type="date"
+                              value={postgraduateData.academicQualifications.qualification1.startDate}
+                              onChange={(e) => handleAcademicQualificationChange('qualification1', 'startDate', e.target.value)}
                               disabled={!isPaymentMade}
-                              >
-                                <SelectTrigger className="w-[140px]">
-                                  <SelectValue placeholder="Month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {months.map((month) => (
-                                    <SelectItem key={month} value={month}>
-                                      {month}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                onValueChange={(value) => {
-                                  const [month] = postgraduateData.academicQualifications.qualification1.startDate.split('/');
-                                  setPostgraduateData({
-                                    ...postgraduateData,
-                                    academicQualifications: {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        startDate: `${month || ''}/${value}`
-                                      }
-                                    }
-                                  });
-                                }}
-                                value={postgraduateData.academicQualifications.qualification1.startDate.split('/')[1] || ''}
-                                disabled={!isPaymentMade}
-                              >
-                                <SelectTrigger className="w-[100px]">
-                                  <SelectValue placeholder="Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {years.map((year) => (
-                                    <SelectItem key={year} value={year}>
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                            />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="endDate1">End Date (Month/Year) *</Label>
-                            <div className="flex gap-2">
-                              <Select
-                                onValueChange={(value) => {
-                                  const [month, year] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
-                                  setPostgraduateData({
-                                    ...postgraduateData,
-                                    academicQualifications: {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        endDate: `${value}/${year || ''}`
-                                      }
-                                    }
-                                  });
-                                }}
-                                value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[0] || ''}
+                            <Label htmlFor="endDate1">End Date *</Label>
+                            <Input
+                              id="endDate1"
+                              type="date"
+                              value={postgraduateData.academicQualifications.qualification1.endDate}
+                              onChange={(e) => handleAcademicQualificationChange('qualification1', 'endDate', e.target.value)}
                               disabled={!isPaymentMade}
-                              >
-                                <SelectTrigger className="w-[140px]">
-                                  <SelectValue placeholder="Month" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {months.map((month) => (
-                                    <SelectItem key={month} value={month}>
-                                      {month}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Select
-                                onValueChange={(value) => {
-                                  const [month] = postgraduateData.academicQualifications.qualification1.endDate.split('/');
-                                  setPostgraduateData({
-                                    ...postgraduateData,
-                                    academicQualifications: {
-                                      ...postgraduateData.academicQualifications,
-                                      qualification1: {
-                                        ...postgraduateData.academicQualifications.qualification1,
-                                        endDate: `${month || ''}/${value}`
-                                      }
-                                    }
-                                  });
-                                }}
-                                value={postgraduateData.academicQualifications.qualification1.endDate.split('/')[1] || ''}
-                                disabled={!isPaymentMade}
-                              >
-                                <SelectTrigger className="w-[100px]">
-                                  <SelectValue placeholder="Year" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {years.map((year) => (
-                                    <SelectItem key={year} value={year}>
-                                      {year}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                            />
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -1723,6 +2210,19 @@ Please ensure that the referee's email address is an official institutional or c
                             <Input
                               id="referee1Name"
                               placeholder="Enter referee's full name"
+                              value={postgraduateData.references.referee1.name}
+                              onChange={(e) => {
+                                setPostgraduateData(prev => ({
+                                  ...prev,
+                                  references: {
+                                    ...prev.references,
+                                    referee1: {
+                                      ...prev.references.referee1,
+                                      name: e.target.value
+                                    }
+                                  }
+                                }));
+                              }}
                               disabled={!isPaymentMade}
                             />
                           </div>
@@ -1732,6 +2232,19 @@ Please ensure that the referee's email address is an official institutional or c
                               id="referee1Email"
                               type="email"
                               placeholder="Enter referee's email address"
+                              value={postgraduateData.references.referee1.email}
+                              onChange={(e) => {
+                                setPostgraduateData(prev => ({
+                                  ...prev,
+                                  references: {
+                                    ...prev.references,
+                                    referee1: {
+                                      ...prev.references.referee1,
+                                      email: e.target.value
+                                    }
+                                  }
+                                }));
+                              }}
                               disabled={!isPaymentMade}
                             />
                           </div>
@@ -1747,6 +2260,19 @@ Please ensure that the referee's email address is an official institutional or c
                             <Input
                               id="referee2Name"
                               placeholder="Enter referee's full name"
+                              value={postgraduateData.references.referee2.name}
+                              onChange={(e) => {
+                                setPostgraduateData(prev => ({
+                                  ...prev,
+                                  references: {
+                                    ...prev.references,
+                                    referee2: {
+                                      ...prev.references.referee2,
+                                      name: e.target.value
+                                    }
+                                  }
+                                }));
+                              }}
                               disabled={!isPaymentMade}
                             />
                           </div>
@@ -1756,6 +2282,19 @@ Please ensure that the referee's email address is an official institutional or c
                               id="referee2Email"
                               type="email"
                               placeholder="Enter referee's email address"
+                              value={postgraduateData.references.referee2.email}
+                              onChange={(e) => {
+                                setPostgraduateData(prev => ({
+                                  ...prev,
+                                  references: {
+                                    ...prev.references,
+                                    referee2: {
+                                      ...prev.references.referee2,
+                                      email: e.target.value
+                                    }
+                                  }
+                                }));
+                              }}
                               disabled={!isPaymentMade}
                             />
                           </div>
@@ -1774,19 +2313,16 @@ Please ensure that the referee's email address is an official institutional or c
                     <div className="space-y-6">
                       <div className="bg-yellow-50 p-4 rounded-lg">
                         <p className="text-sm text-yellow-800">
-                          By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+                          I declare that the information provided in this application is true and complete to the best of my knowledge. I understand that any false or misleading information may result in the rejection of my application or termination of my admission.
                         </p>
-                        <ul className="list-disc list-inside text-sm text-yellow-800 mt-2">
-                          <li>cancel my application.</li>
-                          <li>if admitted, be dismissed from the University.</li>
-                          <li>if degree already awarded, rescind degree awarded.</li>
-                        </ul>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="declaration">Full Name (in lieu of signature) *</Label>
                         <Input
                           id="declaration"
-                          placeholder="Type your full name"
+                          placeholder="Enter your full name"
+                          value={postgraduateData.declaration}
+                          onChange={(e) => handlePostgraduateChange("declaration", e.target.value)}
                           disabled={!isPaymentMade}
                         />
                       </div>
@@ -1796,16 +2332,16 @@ Please ensure that the referee's email address is an official institutional or c
 
                 {/* Submit Button */}
                 <div className="flex justify-end space-x-4">
-                  <Button
+                  {/* <Button
                     variant="outline"
-                    className="border-[#FF6B00] text-[#FF6B00] hover:bg-[#FF6B00]/10"
-                    disabled={!isPaymentMade}
+                    onClick={handleSaveDraft}
+                    className="border-gray-300"
                   >
-                    Save as Draft
-                  </Button>
+                    Save Draft
+                  </Button> */}
                   <Button
-                    className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
-                    disabled={!isPaymentMade}
+                    onClick={handleSubmit}
+                    className="bg-[#FF5500] hover:bg-[#e64d00]"
                   >
                     Submit Application
                   </Button>
@@ -1855,6 +2391,159 @@ Please ensure that the referee's email address is an official institutional or c
                   </Card>
                 )}
 
+                {programType === "jupeb" && (
+                  <Card className="border-2 border-[#FF5500]">
+                    <CardHeader>
+                      <CardTitle className="text-xl sm:text-2xl font-bold text-[#FF6B00]">Application Fee Payment</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">
+                        Please make your payment to the bank account below and upload your payment receipt.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 sm:space-y-6">
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="mb-4 sm:mb-0">
+                            <h4 className="text-base sm:text-lg font-semibold">Application Fee</h4>
+                            <p className="text-sm text-gray-600">Required for all JUPEB applications</p>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <p className="text-xl sm:text-2xl font-bold text-[#FF6B00]">₦10,000</p>
+                            <p className="text-sm text-gray-600">Nigerian Applicants</p>
+                          </div>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <div className="flex items-start">
+                            <CreditCard className="h-5 w-5 text-blue-600 mt-1 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-semibold text-blue-800">Bank Account Details</h4>
+                              <div className="mt-2 space-y-1 text-sm text-blue-700">
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Bank Name:</span> UBA</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("UBA");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Bank name copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Account Name:</span> African University of Science and Technology</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("African University of Science and Technology");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Account name copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Account Number:</span> 0123456789</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("0123456789");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Account number copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <p><span className="font-medium">Swift Code:</span> UNAFNGLAXXX</p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 text-blue-600 hover:text-blue-800"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText("UNAFNGLAXXX");
+                                      toast({
+                                        title: "Copied!",
+                                        description: "Swift code copied to clipboard",
+                                        className: "bg-green-50 text-green-800",
+                                      });
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="p-4 bg-yellow-50 rounded-lg">
+                          <div className="flex items-start">
+                            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-1 mr-2 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-semibold text-yellow-800">Important Notice</h4>
+                              <p className="text-sm text-yellow-700">
+                                This fee is non-refundable.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="payment-receipt" className="text-base">Upload Payment Receipt</Label>
+                        <div className="flex items-center space-x-4">
+                          <Input
+                            id="payment-receipt"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleFileUpload("jupeb", "payment", file);
+                              }
+                            }}
+                          />
+                          {documents.jupeb.find(doc => doc.id === "payment")?.file && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleClearFile("jupeb", "payment")}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500">Supported formats: PDF, JPG, PNG. Max 5MB.</p>
+                        {documents.jupeb.find(doc => doc.id === "payment")?.file && (
+                          <p className="text-sm text-green-600 flex items-center">
+                            <CheckCircle2 className="h-4 w-4 mr-1" /> 
+                            {documents.jupeb.find(doc => doc.id === "payment")?.file?.name}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Personal Information Card for Undergraduate and JUPEB */}
                 <Card className="shadow-sm border border-gray-200">
                   <CardHeader className="bg-gray-50 border-b">
@@ -1868,6 +2557,9 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="surname"
                             placeholder="Enter your surname"
+                            value={postgraduateData.personalDetails.surname}
+                            onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1875,6 +2567,9 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="firstName"
                             placeholder="Enter your first name"
+                            value={postgraduateData.personalDetails.firstName}
+                            onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1882,11 +2577,17 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="otherNames"
                             placeholder="Enter your other names"
+                            value={postgraduateData.personalDetails.otherNames}
+                            onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label>Gender *</Label>
                           <RadioGroup
+                            value={postgraduateData.personalDetails.gender}
+                            onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+                            disabled={!isPaymentMade}
                             className="flex space-x-4"
                           >
                             <div className="flex items-center space-x-2">
@@ -1904,15 +2605,22 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="dateOfBirth"
                             type="date"
+                            value={postgraduateData.personalDetails.dateOfBirth}
+                            onChange={(e) => handlePersonalDetailsChange("dateOfBirth", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="nationality">Nationality *</Label>
-                          <Select>
+                          <Select
+                            value={postgraduateData.personalDetails.nationality}
+                            onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
+                            disabled={!isFieldEnabled("nationality") || nationality === "nigerian"}
+                          >
                             <SelectTrigger id="nationality" className="w-full">
                               <SelectValue placeholder="Select your nationality" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent>
                               {countries.map((country) => (
                                 <SelectItem key={country} value={country.toLowerCase().replace(/\s+/g, '_')}>
                                   {country}
@@ -1921,6 +2629,18 @@ Please ensure that the referee's email address is an official institutional or c
                             </SelectContent>
                           </Select>
                         </div>
+                        {nationality === "nigerian" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="stateOfOrigin">State of Origin</Label>
+                            <Input
+                              id="stateOfOrigin"
+                              placeholder="Enter your state of origin"
+                              value={postgraduateData.personalDetails.stateOfOrigin}
+                              onChange={(e) => handlePersonalDetailsChange("stateOfOrigin", e.target.value)}
+                              disabled={!isFieldEnabled("stateOfOrigin")}
+                            />
+                          </div>
+                        )}
                         <div className="space-y-2">
                           <Label htmlFor="phone">Telephone / Mobile Number *</Label>
                           <Input
@@ -1928,6 +2648,9 @@ Please ensure that the referee's email address is an official institutional or c
                             type="tel"
                             pattern="[0-9]*"
                             placeholder="Enter your phone number"
+                            value={postgraduateData.personalDetails.phoneNumber}
+                            onChange={(e) => handlePersonalDetailsChange("phoneNumber", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1936,6 +2659,9 @@ Please ensure that the referee's email address is an official institutional or c
                             id="email"
                             type="email"
                             placeholder="Enter your email address"
+                            value={postgraduateData.personalDetails.email}
+                            onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1943,6 +2669,9 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="address"
                             placeholder="Enter your street address"
+                            value={postgraduateData.personalDetails.streetAddress}
+                            onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1950,11 +2679,18 @@ Please ensure that the referee's email address is an official institutional or c
                           <Input
                             id="city"
                             placeholder="Enter your city"
+                            value={postgraduateData.personalDetails.city}
+                            onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+                            disabled={!isPaymentMade}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="country">Country *</Label>
-                          <Select>
+                          <Select
+                            value={postgraduateData.personalDetails.country}
+                            onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+                            disabled={!isPaymentMade}
+                          >
                             <SelectTrigger id="country" className="w-full">
                               <SelectValue placeholder="Select your country" />
                             </SelectTrigger>
@@ -1970,6 +2706,9 @@ Please ensure that the referee's email address is an official institutional or c
                         <div className="space-y-2">
                           <Label>Do you have any disabilities/special needs? *</Label>
                           <RadioGroup
+                            value={postgraduateData.personalDetails.hasDisabilities}
+                            onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+                            disabled={!isPaymentMade}
                             className="flex space-x-4"
                           >
                             <div className="flex items-center space-x-2">
@@ -1982,13 +2721,18 @@ Please ensure that the referee's email address is an official institutional or c
                             </div>
                           </RadioGroup>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="disabilityDescription">If yes, provide a brief description:</Label>
-                          <Textarea
-                            id="disabilityDescription"
-                            placeholder="Describe your disability or special needs"
-                          />
-                        </div>
+                        {postgraduateData.personalDetails.hasDisabilities === "yes" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="disabilityDescription">Disability Description</Label>
+                            <Textarea
+                              id="disabilityDescription"
+                              placeholder="Please describe your disability/special needs"
+                              value={postgraduateData.personalDetails.disabilityDescription}
+                              onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+                              disabled={!isPaymentMade}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -2020,13 +2764,14 @@ Please ensure that the referee's email address is an official institutional or c
                               size="icon"
                               onClick={() => handleClearFile(programType, field.id)}
                               className="text-red-500 hover:text-red-700"
+                              disabled={!isFieldEnabled(field.id)}
                             >
                               <X className="h-4 w-4" />
                             </Button>
                           </>
                         ) : (
                           <div className="flex-1">
-                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 ${!isFieldEnabled(field.id) ? 'opacity-50 cursor-not-allowed' : ''}`}>
                               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="h-8 w-8 mb-2 text-gray-500" />
                                 <p className="mb-2 text-sm text-gray-500">
@@ -2037,6 +2782,7 @@ Please ensure that the referee's email address is an official institutional or c
                               <input
                                 type="file"
                                 className="hidden"
+                                disabled={!isFieldEnabled(field.id)}
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file && file.size <= 5 * 1024 * 1024) {
@@ -2074,13 +2820,13 @@ Please ensure that the referee's email address is an official institutional or c
                 </Card>
 
                 <div className="flex justify-end space-x-4">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     onClick={handleSaveDraft}
                     className="border-gray-300"
                   >
                     Save Draft
-                  </Button>
+                  </Button> */}
                   <Button
                     onClick={handleSubmit}
                     className="bg-[#FF5500] hover:bg-[#e64d00]"
