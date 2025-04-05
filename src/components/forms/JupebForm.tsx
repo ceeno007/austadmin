@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, CheckCircle2, AlertCircle, Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface DocumentField {
   id: string;
@@ -185,6 +187,13 @@ const countries = [
   "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
+const nigeriaStates = [
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
+    "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+    "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo",
+    "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT"
+  ];
+
 // Helper function to create a placeholder file from a file path
 const createPlaceholderFile = (filePath: string | undefined): File | null => {
   if (!filePath) return null;
@@ -334,9 +343,9 @@ const JupebForm = () => {
         payment_receipt_path,
         waec_result_path,
         // JAMB specific
-        jamb_reg_number,
-        jamb_score,
-        jamb_year
+        // jamb_reg_number,
+        // jamb_score,
+        // jamb_year
       } = applicationData;
       
       // Create placeholder files
@@ -563,224 +572,246 @@ const JupebForm = () => {
       </div>
 
       {/* Personal Details Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Personal Details</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="surname">Surname *</Label>
-              <Input
-                id="surname"
-                value={jupebData.personalDetails.surname}
-                onChange={(e) => handlePersonalDetailsChange('surname', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input
-                id="firstName"
-                value={jupebData.personalDetails.firstName}
-                onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="otherNames">Other Names</Label>
-              <Input
-                id="otherNames"
-                value={jupebData.personalDetails.otherNames}
-                onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender *</Label>
-              <Select
-                value={jupebData.personalDetails.gender}
-                onValueChange={(value) => handlePersonalDetailsChange('gender', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Date of Birth */}
-            <div className="space-y-2">
-              <Label>Date of Birth *</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Select
-                  value={jupebData.personalDetails.dateOfBirth.day}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'day', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {days.map((day) => (
-                      <SelectItem key={day} value={day}>
-                        {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={jupebData.personalDetails.dateOfBirth.month}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'month', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((month, index) => (
-                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                        {month}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={jupebData.personalDetails.dateOfBirth.year}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'year', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nationality">Nationality *</Label>
-              <Select
-                value={jupebData.personalDetails.nationality}
-                onValueChange={(value) => handlePersonalDetailsChange('nationality', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select nationality" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stateOfOrigin">State of Origin *</Label>
-              <Input
-                id="stateOfOrigin"
-                value={jupebData.personalDetails.stateOfOrigin}
-                onChange={(e) => handlePersonalDetailsChange('stateOfOrigin', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={jupebData.personalDetails.email}
-                onChange={(e) => handlePersonalDetailsChange('email', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number *</Label>
-              <Input
-                id="phoneNumber"
-                value={jupebData.personalDetails.phoneNumber}
-                onChange={(e) => handlePersonalDetailsChange('phoneNumber', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="streetAddress">Street Address *</Label>
-            <Textarea
-              id="streetAddress"
-              value={jupebData.personalDetails.streetAddress}
-              onChange={(e) => handlePersonalDetailsChange('streetAddress', e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                value={jupebData.personalDetails.city}
-                onChange={(e) => handlePersonalDetailsChange('city', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country *</Label>
-              <Select
-                value={jupebData.personalDetails.country}
-                onValueChange={(value) => handlePersonalDetailsChange('country', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Do you have any disabilities? *</Label>
-            <Select
-              value={jupebData.personalDetails.hasDisabilities}
-              onValueChange={(value) => handlePersonalDetailsChange('hasDisabilities', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select option" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="yes">Yes</SelectItem>
-                <SelectItem value="no">No</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {jupebData.personalDetails.hasDisabilities === "yes" && (
-            <div className="space-y-2">
-              <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
-              <Textarea
-                id="disabilityDescription"
-                value={jupebData.personalDetails.disabilityDescription}
-                onChange={(e) => handlePersonalDetailsChange('disabilityDescription', e.target.value)}
-                required
-              />
-            </div>
-          )}
-        </div>
+<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+  <h3 className="text-lg font-semibold">Personal Details</h3>
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Surname *</Label>
+        <Input
+          placeholder="Enter your surname"
+          value={jupebData.personalDetails.surname}
+          onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+          required
+        />
       </div>
+      <div className="space-y-2">
+        <Label>First Name *</Label>
+        <Input
+          placeholder="Enter your first name"
+          value={jupebData.personalDetails.firstName}
+          onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Other Names</Label>
+      <Input
+        placeholder="Enter other names (if any)"
+        value={jupebData.personalDetails.otherNames}
+        onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Gender *</Label>
+      <Select
+        value={jupebData.personalDetails.gender}
+        onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select gender" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="male">Male</SelectItem>
+          <SelectItem value="female">Female</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {/* Date of Birth */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-2">
+        <Label>Day of Birth</Label>
+        <Select
+          value={jupebData.personalDetails.dateOfBirth.day}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select day" />
+          </SelectTrigger>
+          <SelectContent>
+            {days.map((day) => (
+              <SelectItem key={day} value={day}>
+                {day}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Month of Birth</Label>
+        <Select
+          value={jupebData.personalDetails.dateOfBirth.month}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month, index) => (
+              <SelectItem key={month} value={(index + 1).toString().padStart(2, "0")}>
+                {month}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Year of Birth</Label>
+        <Select
+          value={jupebData.personalDetails.dateOfBirth.year}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Nationality *</Label>
+      <Select
+        value={jupebData.personalDetails.nationality}
+        onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select nationality" />
+        </SelectTrigger>
+        <SelectContent>
+          {countries.map((country) => (
+            <SelectItem key={country} value={country}>
+              {country}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    {jupebData.personalDetails.nationality === "Nigerian" && (
+      <div className="space-y-2">
+        <Label>State of Origin *</Label>
+        <Select
+          value={jupebData.personalDetails.stateOfOrigin}
+          onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select state of origin" />
+          </SelectTrigger>
+          <SelectContent>
+            {nigeriaStates.map((state) => (
+              <SelectItem key={state} value={state}>
+                {state}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Phone Number *</Label>
+        <PhoneInput
+          international
+          defaultCountry="NG"
+          value={jupebData.personalDetails.phoneNumber}
+          onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
+          className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+          placeholder="Enter phone number"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Email *</Label>
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={jupebData.personalDetails.email}
+          onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label htmlFor="streetAddress">Street Address *</Label>
+      <Textarea
+        id="streetAddress"
+        value={jupebData.personalDetails.streetAddress}
+        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="city">City *</Label>
+        <Input
+          id="city"
+          value={jupebData.personalDetails.city}
+          onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="country">Country *</Label>
+        <Select
+          value={jupebData.personalDetails.country}
+          onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Do you have any disabilities? *</Label>
+      <Select
+        value={jupebData.personalDetails.hasDisabilities}
+        onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="yes">Yes</SelectItem>
+          <SelectItem value="no">No</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {jupebData.personalDetails.hasDisabilities === "yes" && (
+      <div className="space-y-2">
+        <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
+        <Textarea
+          id="disabilityDescription"
+          value={jupebData.personalDetails.disabilityDescription}
+          onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+          required
+        />
+      </div>
+    )}
+  </div>
+</div>
 
       {/* Academic Qualifications Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">

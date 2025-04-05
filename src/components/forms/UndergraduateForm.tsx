@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, CheckCircle2, AlertCircle, Check } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface DocumentField {
   id: string;
@@ -22,7 +24,12 @@ interface DateField {
   month: string;
   year: string;
 }
-
+const nigeriaStates = [
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
+    "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina",
+    "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo",
+    "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT"
+  ];
 interface ApplicationData {
   academic_session?: string;
   selected_program?: string;
@@ -550,227 +557,119 @@ const UndergraduateForm = () => {
         </div>
       </div>
 
-      {/* Personal Details Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Personal Details</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="surname">Surname *</Label>
-              <Input
-                id="surname"
-                value={undergraduateData.personalDetails.surname}
-                onChange={(e) => handlePersonalDetailsChange('surname', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name *</Label>
-              <Input
-                id="firstName"
-                value={undergraduateData.personalDetails.firstName}
-                onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="otherNames">Other Names</Label>
-              <Input
-                id="otherNames"
-                value={undergraduateData.personalDetails.otherNames}
-                onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender *</Label>
-              <Select
-                value={undergraduateData.personalDetails.gender}
-                onValueChange={(value) => handlePersonalDetailsChange('gender', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Date of Birth */}
-            <div className="space-y-2">
-              <Label>Date of Birth *</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Select
-                  value={undergraduateData.personalDetails.dateOfBirth.day}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'day', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {days.map((day) => (
-                      <SelectItem key={day} value={day}>
-                        {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={undergraduateData.personalDetails.dateOfBirth.month}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'month', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((month, index) => (
-                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                        {month}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={undergraduateData.personalDetails.dateOfBirth.year}
-                  onValueChange={(value) => handleDateChange('dateOfBirth', 'year', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nationality">Nationality *</Label>
-              <Select
-                value={undergraduateData.personalDetails.nationality}
-                onValueChange={(value) => handlePersonalDetailsChange('nationality', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select nationality" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stateOfOrigin">State of Origin *</Label>
-              <Input
-                id="stateOfOrigin"
-                value={undergraduateData.personalDetails.stateOfOrigin}
-                onChange={(e) => handlePersonalDetailsChange('stateOfOrigin', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={undergraduateData.personalDetails.email}
-                onChange={(e) => handlePersonalDetailsChange('email', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number *</Label>
-              <Input
-                id="phoneNumber"
-                value={undergraduateData.personalDetails.phoneNumber}
-                onChange={(e) => handlePersonalDetailsChange('phoneNumber', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="streetAddress">Street Address *</Label>
-            <Textarea
-              id="streetAddress"
-              value={undergraduateData.personalDetails.streetAddress}
-              onChange={(e) => handlePersonalDetailsChange('streetAddress', e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                value={undergraduateData.personalDetails.city}
-                onChange={(e) => handlePersonalDetailsChange('city', e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country *</Label>
-              <Select
-                value={undergraduateData.personalDetails.country}
-                onValueChange={(value) => handlePersonalDetailsChange('country', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Do you have any disabilities? *</Label>
-            <RadioGroup
-              value={undergraduateData.personalDetails.hasDisabilities}
-              onValueChange={(value) => handlePersonalDetailsChange('hasDisabilities', value)}
-              className="flex space-x-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="disabilities-yes" />
-                <Label htmlFor="disabilities-yes">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="disabilities-no" />
-                <Label htmlFor="disabilities-no">No</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {undergraduateData.personalDetails.hasDisabilities === "yes" && (
-            <div className="space-y-2">
-              <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
-              <Textarea
-                id="disabilityDescription"
-                value={undergraduateData.personalDetails.disabilityDescription}
-                onChange={(e) => handlePersonalDetailsChange('disabilityDescription', e.target.value)}
-                required
-              />
-            </div>
-          )}
+{/* Personal Details Section */}
+<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+  <h3 className="text-lg font-semibold">Personal Details</h3>
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="surname">Surname *</Label>
+        <Input id="surname" value={undergraduateData.personalDetails.surname} onChange={(e) => handlePersonalDetailsChange('surname', e.target.value)} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="firstName">First Name *</Label>
+        <Input id="firstName" value={undergraduateData.personalDetails.firstName} onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="otherNames">Other Names</Label>
+        <Input id="otherNames" value={undergraduateData.personalDetails.otherNames} onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender *</Label>
+        <Select value={undergraduateData.personalDetails.gender} onValueChange={(value) => handlePersonalDetailsChange('gender', value)}>
+          <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Date of Birth *</Label>
+        <div className="grid grid-cols-3 gap-2">
+          <Select value={undergraduateData.personalDetails.dateOfBirth.day} onValueChange={(value) => handleDateChange('dateOfBirth', 'day', value)}>
+            <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+            <SelectContent>{days.map((day) => (<SelectItem key={day} value={day}>{day}</SelectItem>))}</SelectContent>
+          </Select>
+          <Select value={undergraduateData.personalDetails.dateOfBirth.month} onValueChange={(value) => handleDateChange('dateOfBirth', 'month', value)}>
+            <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+            <SelectContent>{months.map((month, index) => (<SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>{month}</SelectItem>))}</SelectContent>
+          </Select>
+          <Select value={undergraduateData.personalDetails.dateOfBirth.year} onValueChange={(value) => handleDateChange('dateOfBirth', 'year', value)}>
+            <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+            <SelectContent>{years.map((year) => (<SelectItem key={year} value={year.toString()}>{year}</SelectItem>))}</SelectContent>
+          </Select>
         </div>
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="nationality">Nationality *</Label>
+        <Select value={undergraduateData.personalDetails.nationality} onValueChange={(value) => handlePersonalDetailsChange('nationality', value)}>
+          <SelectTrigger><SelectValue placeholder="Select nationality" /></SelectTrigger>
+          <SelectContent>{countries.map((country) => (<SelectItem key={country} value={country}>{country}</SelectItem>))}</SelectContent>
+        </Select>
+      </div>
+      {undergraduateData.personalDetails.nationality === 'Nigeria' && (
+        <div className="space-y-2">
+          <Label htmlFor="stateOfOrigin">State of Origin *</Label>
+          <Select value={undergraduateData.personalDetails.stateOfOrigin} onValueChange={(value) => handlePersonalDetailsChange('stateOfOrigin', value)}>
+            <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+            <SelectContent>{nigeriaStates.map((state) => (<SelectItem key={state} value={state}>{state}</SelectItem>))}</SelectContent>
+          </Select>
+        </div>
+      )}
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Phone Number *</Label>
+        <PhoneInput
+          international
+          defaultCountry="NG"
+          value={undergraduateData.personalDetails.phoneNumber}
+          onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
+          className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+          placeholder="Enter phone number"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Email *</Label>
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={undergraduateData.personalDetails.email}
+          onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Do you have any disabilities? *</Label>
+      <Select
+        value={undergraduateData.personalDetails.hasDisabilities}
+        onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+      >
+        <SelectTrigger><SelectValue placeholder="Select option" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Yes">Yes</SelectItem>
+          <SelectItem value="No">No</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {undergraduateData.personalDetails.hasDisabilities === "Yes" && (
+      <div className="space-y-2">
+        <Label>Please specify your disabilities *</Label>
+        <Textarea
+          placeholder="Describe your disabilities"
+          value={undergraduateData.personalDetails.disabilityDescription}
+          onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+          required
+        />
+      </div>
+    )}
+  </div>
+</div>
 
       {/* Academic Qualifications Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">

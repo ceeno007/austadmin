@@ -12,6 +12,8 @@ import {
 import { Upload, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface DateField {
   day: string;
@@ -56,6 +58,7 @@ interface FormData {
     qualification2?: {
       type: string;
       otherType?: string;
+      grade: string;
       cgpa: string;
       subject: string;
       institution: string;
@@ -277,6 +280,37 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   return placeholderFile;
 };
 
+const countries = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
+  "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
+  "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde",
+  "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros",
+  "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
+  "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini",
+  "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
+  "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia",
+  "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
+  "Korea, North", "Korea, South", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
+  "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta",
+  "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro",
+  "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger",
+  "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
+  "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis",
+  "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia",
+  "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia",
+  "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan",
+  "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
+  "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay",
+  "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
+const nigerianStates = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta",
+  "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",
+  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto",
+  "Taraba", "Yobe", "Zamfara"
+];
+
 const PostgraduateForm = () => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -340,7 +374,7 @@ const PostgraduateForm = () => {
     applicantType: "Nigerian",
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
-    programType: "MSc",
+    programType: "Postgraduate Diploma/Taught Masters",
     program: "",
     personalDetails: {
       surname: "",
@@ -355,7 +389,7 @@ const PostgraduateForm = () => {
       nationality: "Nigerian",
       phoneNumber: "",
       email: "",
-      hasDisabilities: "No",
+      hasDisabilities: "no",
       disabilityDescription: "",
     },
     academicQualifications: {
@@ -368,14 +402,31 @@ const PostgraduateForm = () => {
         startDate: { day: "", month: "", year: "" },
         endDate: { day: "", month: "", year: "" },
         documents: [],
-      }
+      },
+      qualification2: {
+        type: "",
+        grade: "",
+        cgpa: "",
+        subject: "",
+        institution: "",
+        startDate: { day: "", month: "", year: "" },
+        endDate: { day: "", month: "", year: "" },
+        documents: [],
+      },
+      otherQualifications: null,
     },
     statementOfPurpose: [],
-    references: {
-      referee1: { name: "", email: "" },
-      referee2: { name: "", email: "" },
-    },
     applicationFee: null,
+    references: {
+      referee1: {
+        name: "",
+        email: "",
+      },
+      referee2: {
+        name: "",
+        email: "",
+      },
+    },
     declaration: "",
     nationality: "Nigerian",
   });
@@ -476,6 +527,24 @@ const PostgraduateForm = () => {
             } : prev.academicQualifications.qualification1.endDate,
             documents: qualificationDocs.length > 0 ? qualificationDocs : prev.academicQualifications.qualification1.documents
           },
+          qualification2: prev.programType === "PhD" ? {
+            type: qualification_type || prev.academicQualifications.qualification2?.type,
+            grade: grade || prev.academicQualifications.qualification2?.grade,
+            cgpa: cgpa || prev.academicQualifications.qualification2?.cgpa,
+            subject: subject || prev.academicQualifications.qualification2?.subject,
+            institution: awarding_institution || prev.academicQualifications.qualification2?.institution,
+            startDate: start_date ? {
+              day: new Date(start_date).getDate().toString().padStart(2, '0'),
+              month: (new Date(start_date).getMonth() + 1).toString().padStart(2, '0'),
+              year: new Date(start_date).getFullYear().toString()
+            } : prev.academicQualifications.qualification2?.startDate,
+            endDate: end_date ? {
+              day: new Date(end_date).getDate().toString().padStart(2, '0'),
+              month: (new Date(end_date).getMonth() + 1).toString().padStart(2, '0'),
+              year: new Date(end_date).getFullYear().toString()
+            } : prev.academicQualifications.qualification2?.endDate,
+            documents: qualificationDocs.length > 0 ? qualificationDocs : prev.academicQualifications.qualification2?.documents
+          } : undefined,
           otherQualifications: otherQualifications || prev.academicQualifications.otherQualifications
         },
         statementOfPurpose: statementOfPurpose ? [statementOfPurpose] : prev.statementOfPurpose,
@@ -505,31 +574,6 @@ const PostgraduateForm = () => {
     "July", "August", "September", "October", "November", "December"
   ];
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
-
-  // Add countries array
-  const countries = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-    "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan",
-    "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde",
-    "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros",
-    "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica",
-    "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini",
-    "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
-    "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia",
-    "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati",
-    "Korea, North", "Korea, South", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
-    "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta",
-    "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro",
-    "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger",
-    "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
-    "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis",
-    "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia",
-    "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia",
-    "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan",
-    "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
-    "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay",
-    "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-  ];
 
   const handlePersonalDetailsChange = (field: string, value: string) => {
     setPostgraduateData(prev => ({
@@ -587,34 +631,75 @@ const PostgraduateForm = () => {
     }
   };
 
+  const handleAcademicQualificationChange = (
+    qualificationField: "qualification1" | "qualification2" | "otherQualifications",
+    subField: "type" | "grade" | "cgpa" | "subject" | "institution" | "otherType" | "documents",
+    value: string | File[] | null
+  ) => {
+    setPostgraduateData(prev => ({
+      ...prev,
+      academicQualifications: {
+        ...prev.academicQualifications,
+        [qualificationField]: {
+          ...prev.academicQualifications[qualificationField],
+          [subField]: value
+        }
+      }
+    }));
+  };
+
   const isFormValid = () => {
-    // Check required fields
-    if (!postgraduateData.passportPhoto) return false;
-    if (!postgraduateData.applicationFee) return false;
-    if (!postgraduateData.program) return false;
+    const { personalDetails, academicQualifications, programType, applicantType } = postgraduateData;
     
-    // Check personal details
-    const pd = postgraduateData.personalDetails;
-    if (!pd.surname || !pd.firstName || !pd.gender || !pd.dateOfBirth.day || 
-        !pd.dateOfBirth.month || !pd.dateOfBirth.year || !pd.streetAddress || 
-        !pd.city || !pd.country || !pd.stateOfOrigin || !pd.nationality || 
-        !pd.phoneNumber || !pd.email) return false;
+    // Basic personal details validation
+    if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
+        !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
+        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.country ||
+        !personalDetails.nationality || !personalDetails.phoneNumber ||
+        !personalDetails.email) {
+      return false;
+    }
 
-    // Check academic qualifications
-    const aq = postgraduateData.academicQualifications.qualification1;
-    if (!aq.type || !aq.grade || !aq.cgpa || !aq.subject || !aq.institution || 
-        !aq.documents.length) return false;
+    // Validate state of origin only for Nigerian applicants
+    if (applicantType === "Nigerian" && !personalDetails.stateOfOrigin) {
+      return false;
+    }
 
-    // Check statement of purpose
-    if (!postgraduateData.statementOfPurpose.length) return false;
+    // Validate first academic qualification
+    const qual1 = academicQualifications.qualification1;
+    if (!qual1.type || !qual1.grade || !qual1.cgpa || !qual1.subject || !qual1.institution ||
+        !qual1.startDate.day || !qual1.startDate.month || !qual1.startDate.year ||
+        !qual1.endDate.day || !qual1.endDate.month || !qual1.endDate.year ||
+        qual1.documents.length === 0) {
+      return false;
+    }
 
-    // Check references
-    const refs = postgraduateData.references;
-    if (!refs.referee1.name || !refs.referee1.email || !refs.referee2.name || 
-        !refs.referee2.email) return false;
+    // Validate second academic qualification for PhD students
+    if (programType === "PhD") {
+      const qual2 = academicQualifications.qualification2;
+      if (!qual2 || !qual2.type || !qual2.grade || !qual2.cgpa || !qual2.subject || !qual2.institution ||
+          !qual2.startDate.day || !qual2.startDate.month || !qual2.startDate.year ||
+          !qual2.endDate.day || !qual2.endDate.month || !qual2.endDate.year ||
+          qual2.documents.length === 0) {
+        return false;
+      }
+    }
 
-    // Check declaration
-    if (!postgraduateData.declaration) return false;
+    // Validate statement of purpose
+    if (postgraduateData.statementOfPurpose.length === 0) {
+      return false;
+    }
+
+    // Validate references
+    const { referee1, referee2 } = postgraduateData.references;
+    if (!referee1.name || !referee1.email || !referee2.name || !referee2.email) {
+      return false;
+    }
+
+    // Validate declaration
+    if (!postgraduateData.declaration) {
+      return false;
+    }
 
     return true;
   };
@@ -925,379 +1010,497 @@ const PostgraduateForm = () => {
         </div>
       </div>
 
-      {/* Personal Details Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Personal Details</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Surname *</Label>
-              <Input
-                placeholder="Enter your surname"
-                value={postgraduateData.personalDetails.surname}
-                onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>First Name *</Label>
-              <Input
-                placeholder="Enter your first name"
-                value={postgraduateData.personalDetails.firstName}
-                onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Other Names</Label>
-            <Input
-              placeholder="Enter other names (if any)"
-              value={postgraduateData.personalDetails.otherNames}
-              onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Gender *</Label>
-            <Select
-              value={postgraduateData.personalDetails.gender}
-              onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Date of Birth */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Day of Birth</Label>
-              <Select
-                value={postgraduateData.personalDetails.dateOfBirth.day}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {days.map((day) => (
-                    <SelectItem key={day} value={day}>
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Month of Birth</Label>
-              <Select
-                value={postgraduateData.personalDetails.dateOfBirth.month}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month) => (
-                    <SelectItem key={month} value={month}>
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Year of Birth</Label>
-              <Select
-                value={postgraduateData.personalDetails.dateOfBirth.year}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Street Address *</Label>
-            <Input
-              placeholder="Enter your street address"
-              value={postgraduateData.personalDetails.streetAddress}
-              onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>City *</Label>
-              <Input
-                placeholder="Enter your city"
-                value={postgraduateData.personalDetails.city}
-                onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Country *</Label>
-              <Select
-                value={postgraduateData.personalDetails.country}
-                onValueChange={(value) => handlePersonalDetailsChange("country", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>State of Origin *</Label>
-              <Input
-                placeholder="Enter your state of origin"
-                value={postgraduateData.personalDetails.stateOfOrigin}
-                onChange={(e) => handlePersonalDetailsChange("stateOfOrigin", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Nationality *</Label>
-              {postgraduateData.applicantType === "Nigerian" ? (
-                <Input
-                  value="Nigerian"
-                  disabled
-                  className="bg-gray-100"
-                />
-              ) : (
-                <Select
-                  value={postgraduateData.personalDetails.nationality}
-                  onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select nationality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((country) => (
-                      <SelectItem key={country} value={country}>
-                        {country}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Phone Number *</Label>
-              <Input
-                type="tel"
-                placeholder="Enter your phone number"
-                value={postgraduateData.personalDetails.phoneNumber}
-                onChange={(e) => handlePersonalDetailsChange("phoneNumber", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Email *</Label>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={postgraduateData.personalDetails.email}
-                onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Do you have any disabilities?</Label>
-            <Select
-              value={postgraduateData.personalDetails.hasDisabilities}
-              onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select option" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="No">No</SelectItem>
-                <SelectItem value="Yes">Yes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {postgraduateData.personalDetails.hasDisabilities === "Yes" && (
-            <div className="space-y-2">
-              <Label>Please describe your disability</Label>
-              <Input
-                placeholder="Describe your disability"
-                value={postgraduateData.personalDetails.disabilityDescription}
-                onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
-              />
-            </div>
-          )}
-        </div>
+     {/* Personal Details Section */}
+<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+  <h3 className="text-lg font-semibold">Personal Details</h3>
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Surname *</Label>
+        <Input
+          placeholder="Enter your surname"
+          value={postgraduateData.personalDetails.surname}
+          onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+          required
+        />
       </div>
+      <div className="space-y-2">
+        <Label>First Name *</Label>
+        <Input
+          placeholder="Enter your first name"
+          value={postgraduateData.personalDetails.firstName}
+          onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Other Names</Label>
+      <Input
+        placeholder="Enter other names (if any)"
+        value={postgraduateData.personalDetails.otherNames}
+        onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Gender *</Label>
+      <Select
+        value={postgraduateData.personalDetails.gender}
+        onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select gender" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Male">Male</SelectItem>
+          <SelectItem value="Female">Female</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {/* Date of Birth */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-2">
+        <Label>Day of Birth</Label>
+        <Select
+          value={postgraduateData.personalDetails.dateOfBirth.day}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select day" />
+          </SelectTrigger>
+          <SelectContent>
+            {days.map((day) => (
+              <SelectItem key={day} value={day}>
+                {day}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Month of Birth</Label>
+        <Select
+          value={postgraduateData.personalDetails.dateOfBirth.month}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month) => (
+              <SelectItem key={month} value={month}>
+                {month}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Year of Birth</Label>
+        <Select
+          value={postgraduateData.personalDetails.dateOfBirth.year}
+          onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Street Address *</Label>
+      <Input
+        placeholder="Enter your street address"
+        value={postgraduateData.personalDetails.streetAddress}
+        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>City *</Label>
+        <Input
+          placeholder="Enter your city"
+          value={postgraduateData.personalDetails.city}
+          onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Country *</Label>
+        <Select
+          value={postgraduateData.personalDetails.country}
+          onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Nationality *</Label>
+      {postgraduateData.applicantType === "Nigerian" ? (
+        <Input value="Nigerian" disabled className="bg-gray-100" />
+      ) : (
+        <Select
+          value={postgraduateData.personalDetails.nationality}
+          onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select nationality" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+
+    {postgraduateData.applicantType === "Nigerian" && (
+      <div className="space-y-2">
+        <Label>State of Origin *</Label>
+        <Select
+          value={postgraduateData.personalDetails.stateOfOrigin}
+          onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select state of origin" />
+          </SelectTrigger>
+          <SelectContent>
+            {nigerianStates.map((state) => (
+              <SelectItem key={state} value={state}>
+                {state}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Phone Number *</Label>
+        <PhoneInput
+          international
+          defaultCountry="NG"
+          value={postgraduateData.personalDetails.phoneNumber}
+          onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
+          className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+          placeholder="Enter phone number"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Email *</Label>
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={postgraduateData.personalDetails.email}
+          onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+          required
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Do you have any disabilities?</Label>
+      <Select
+        value={postgraduateData.personalDetails.hasDisabilities}
+        onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select option" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="No">No</SelectItem>
+          <SelectItem value="Yes">Yes</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {postgraduateData.personalDetails.hasDisabilities === "Yes" && (
+      <div className="space-y-2">
+        <Label>Please describe your disability</Label>
+        <Input
+          placeholder="Describe your disability"
+          value={postgraduateData.personalDetails.disabilityDescription}
+          onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+        />
+      </div>
+    )}
+  </div>
+</div>
+
 
       {/* Academic Qualifications Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Academic Qualifications</h3>
+        
+        {/* First Academic Qualification */}
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              Please provide accurate information about your academic qualifications. All fields marked with * are required.
-            </p>
-          </div>
+          <h4 className="font-medium">First Academic Qualification *</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Qualification Type *</Label>
+              <Select
+                value={postgraduateData.academicQualifications.qualification1.type}
+                onValueChange={(value) => handleAcademicQualificationChange("qualification1", "type", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select qualification type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                  <SelectItem value="masters">Master's Degree</SelectItem>
+                  <SelectItem value="phd">PhD</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* First Degree */}
-          <div className="space-y-4">
-            <h4 className="font-medium">First Degree *</h4>
-            <div className="grid grid-cols-2 gap-4">
+            {postgraduateData.academicQualifications.qualification1.type === "other" && (
               <div className="space-y-2">
-                <Label>Type *</Label>
+                <Label>Specify Other Qualification *</Label>
+                <Input
+                  placeholder="Enter other qualification"
+                  value={postgraduateData.academicQualifications.qualification1.otherType}
+                  onChange={(e) => handleAcademicQualificationChange("qualification1", "otherType", e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Grade *</Label>
+              <Input
+                placeholder="Enter grade"
+                value={postgraduateData.academicQualifications.qualification1.grade}
+                onChange={(e) => handleAcademicQualificationChange("qualification1", "grade", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>CGPA *</Label>
+              <Input
+                placeholder="Enter CGPA"
+                value={postgraduateData.academicQualifications.qualification1.cgpa}
+                onChange={(e) => handleAcademicQualificationChange("qualification1", "cgpa", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subject *</Label>
+              <Input
+                placeholder="Enter subject"
+                value={postgraduateData.academicQualifications.qualification1.subject}
+                onChange={(e) => handleAcademicQualificationChange("qualification1", "subject", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Institution *</Label>
+              <Input
+                placeholder="Enter institution name"
+                value={postgraduateData.academicQualifications.qualification1.institution}
+                onChange={(e) => handleAcademicQualificationChange("qualification1", "institution", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Start Date *</Label>
+              <div className="grid grid-cols-3 gap-2">
                 <Select
-                  value={postgraduateData.academicQualifications.qualification1.type}
-                  onValueChange={(value) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          type: value
-                        }
-                      }
-                    }));
-                  }}
+                  value={postgraduateData.academicQualifications.qualification1.startDate.day}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "day", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select degree type" />
+                    <SelectValue placeholder="Day" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="BSc">BSc</SelectItem>
-                    <SelectItem value="BA">BA</SelectItem>
-                    <SelectItem value="BEng">BEng</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    {days.map((day) => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={postgraduateData.academicQualifications.qualification1.startDate.month}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "month", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month, index) => (
+                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={postgraduateData.academicQualifications.qualification1.startDate.year}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "year", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>End Date *</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Select
+                  value={postgraduateData.academicQualifications.qualification1.endDate.day}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "day", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {days.map((day) => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={postgraduateData.academicQualifications.qualification1.endDate.month}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "month", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month, index) => (
+                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={postgraduateData.academicQualifications.qualification1.endDate.year}
+                  onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "year", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <FileUploadField
+            id="qualification1Documents"
+            label="Upload Qualification Documents *"
+            accept=".pdf,.doc,.docx"
+            value={postgraduateData.academicQualifications.qualification1.documents}
+            onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
+            onRemove={() => handleAcademicQualificationChange("qualification1", "documents", [])}
+            multiple
+          />
+        </div>
+
+        {/* Second Academic Qualification (Only for PhD) */}
+        {postgraduateData.programType === "PhD" && (
+          <div className="space-y-4">
+            <h4 className="font-medium">Second Academic Qualification *</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Qualification Type *</Label>
+                <Select
+                  value={postgraduateData.academicQualifications.qualification2?.type}
+                  onValueChange={(value) => handleAcademicQualificationChange("qualification2", "type", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select qualification type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                    <SelectItem value="masters">Master's Degree</SelectItem>
+                    <SelectItem value="phd">PhD</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {postgraduateData.academicQualifications.qualification1.type === "Other" && (
+              {postgraduateData.academicQualifications.qualification2?.type === "other" && (
                 <div className="space-y-2">
-                  <Label>Specify Other Type *</Label>
+                  <Label>Specify Other Qualification *</Label>
                   <Input
-                    placeholder="Enter degree type"
-                    value={postgraduateData.academicQualifications.qualification1.otherType}
-                    onChange={(e) => {
-                      setPostgraduateData(prev => ({
-                        ...prev,
-                        academicQualifications: {
-                          ...prev.academicQualifications,
-                          qualification1: {
-                            ...prev.academicQualifications.qualification1,
-                            otherType: e.target.value
-                          }
-                        }
-                      }));
-                    }}
+                    placeholder="Enter other qualification"
+                    value={postgraduateData.academicQualifications.qualification2.otherType}
+                    onChange={(e) => handleAcademicQualificationChange("qualification2", "otherType", e.target.value)}
                   />
                 </div>
               )}
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Grade *</Label>
-                <Select
-                  value={postgraduateData.academicQualifications.qualification1.grade}
-                  onValueChange={(value) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          grade: value
-                        }
-                      }
-                    }));
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="First Class">First Class</SelectItem>
-                    <SelectItem value="Second Class Upper">Second Class Upper</SelectItem>
-                    <SelectItem value="Second Class Lower">Second Class Lower</SelectItem>
-                    <SelectItem value="Third Class">Third Class</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="Enter grade"
+                  value={postgraduateData.academicQualifications.qualification2?.grade}
+                  onChange={(e) => handleAcademicQualificationChange("qualification2", "grade", e.target.value)}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>CGPA *</Label>
                 <Input
                   placeholder="Enter CGPA"
-                  value={postgraduateData.academicQualifications.qualification1.cgpa}
-                  onChange={(e) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          cgpa: e.target.value
-                        }
-                      }
-                    }));
-                  }}
+                  value={postgraduateData.academicQualifications.qualification2?.cgpa}
+                  onChange={(e) => handleAcademicQualificationChange("qualification2", "cgpa", e.target.value)}
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Subject/Course *</Label>
+                <Label>Subject *</Label>
                 <Input
-                  placeholder="Enter your course of study"
-                  value={postgraduateData.academicQualifications.qualification1.subject}
-                  onChange={(e) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          subject: e.target.value
-                        }
-                      }
-                    }));
-                  }}
+                  placeholder="Enter subject"
+                  value={postgraduateData.academicQualifications.qualification2?.subject}
+                  onChange={(e) => handleAcademicQualificationChange("qualification2", "subject", e.target.value)}
                 />
               </div>
 
@@ -1305,31 +1508,17 @@ const PostgraduateForm = () => {
                 <Label>Institution *</Label>
                 <Input
                   placeholder="Enter institution name"
-                  value={postgraduateData.academicQualifications.qualification1.institution}
-                  onChange={(e) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          institution: e.target.value
-                        }
-                      }
-                    }));
-                  }}
+                  value={postgraduateData.academicQualifications.qualification2?.institution}
+                  onChange={(e) => handleAcademicQualificationChange("qualification2", "institution", e.target.value)}
                 />
               </div>
-            </div>
 
-            {/* Qualification 1 Dates */}
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Start Date</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <Label>Start Date *</Label>
+                <div className="grid grid-cols-3 gap-2">
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.startDate.day}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "day", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.startDate.day}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "day", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Day" />
@@ -1343,23 +1532,23 @@ const PostgraduateForm = () => {
                     </SelectContent>
                   </Select>
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.startDate.month}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "month", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.startDate.month}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "month", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Month" />
                     </SelectTrigger>
                     <SelectContent>
-                      {months.map((month) => (
-                        <SelectItem key={month} value={month}>
+                      {months.map((month, index) => (
+                        <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
                           {month}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.startDate.year}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "year", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.startDate.year}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "year", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Year" />
@@ -1374,12 +1563,13 @@ const PostgraduateForm = () => {
                   </Select>
                 </div>
               </div>
+
               <div className="space-y-2">
-                <Label>End Date</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <Label>End Date *</Label>
+                <div className="grid grid-cols-3 gap-2">
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.endDate.day}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "day", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.endDate.day}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "day", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Day" />
@@ -1393,23 +1583,23 @@ const PostgraduateForm = () => {
                     </SelectContent>
                   </Select>
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.endDate.month}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "month", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.endDate.month}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "month", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Month" />
                     </SelectTrigger>
                     <SelectContent>
-                      {months.map((month) => (
-                        <SelectItem key={month} value={month}>
+                      {months.map((month, index) => (
+                        <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
                           {month}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select
-                    value={postgraduateData.academicQualifications.qualification1.endDate.year}
-                    onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "year", value)}
+                    value={postgraduateData.academicQualifications.qualification2?.endDate.year}
+                    onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "year", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Year" />
@@ -1426,38 +1616,29 @@ const PostgraduateForm = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Upload Documents *</Label>
-              <FileUploadField
-                id="qualification1Documents"
-                label="Upload Documents (Certificate, Transcripts)"
-                accept=".pdf"
-                value={postgraduateData.academicQualifications.qualification1.documents}
-                onChange={(files) => setPostgraduateData(prev => ({
-                  ...prev,
-                  academicQualifications: {
-                    ...prev.academicQualifications,
-                    qualification1: {
-                      ...prev.academicQualifications.qualification1,
-                      documents: files || []
-                    }
-                  }
-                }))}
-                onRemove={() => setPostgraduateData(prev => ({
-                  ...prev,
-                  academicQualifications: {
-                    ...prev.academicQualifications,
-                    qualification1: {
-                      ...prev.academicQualifications.qualification1,
-                      documents: []
-                    }
-                  }
-                }))}
-                multiple={true}
-                maxSize="10MB"
-              />
-            </div>
+            <FileUploadField
+              id="qualification2Documents"
+              label="Upload Qualification Documents *"
+              accept=".pdf,.doc,.docx"
+              value={postgraduateData.academicQualifications.qualification2?.documents}
+              onChange={(files) => handleAcademicQualificationChange("qualification2", "documents", files)}
+              onRemove={() => handleAcademicQualificationChange("qualification2", "documents", [])}
+              multiple
+            />
           </div>
+        )}
+
+        {/* Other Qualifications */}
+        <div className="space-y-4">
+          <h4 className="font-medium">Other Qualifications (Optional)</h4>
+          <FileUploadField
+            id="otherQualifications"
+            label="Upload Other Qualifications"
+            accept=".pdf,.doc,.docx"
+            value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
+            onChange={(files) => handleAcademicQualificationChange("otherQualifications", null, files)}
+            onRemove={() => handleAcademicQualificationChange("otherQualifications", null, null)}
+          />
         </div>
       </div>
 
@@ -1495,136 +1676,109 @@ const PostgraduateForm = () => {
         </div>
       </div>
 
-      {/* Other Academic Qualifications */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Other Academic Qualifications</h3>
-        <div className="space-y-4">
-          <FileUploadField
-            id="otherQualifications"
-            label="Additional Qualifications"
-            accept=".pdf"
-            value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
-            onChange={(files) => setPostgraduateData(prev => ({
+     {/* References Section */}
+<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+  <h3 className="text-lg font-semibold">Academic References</h3>
+  <div className="space-y-4">
+    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+      <p className="text-sm text-yellow-800">
+        It is your responsibility to ensure that you provide TWO references to support your application. Your
+        referees must be able to comment on your academic suitability for the program. A secure link will be sent to the email address of each referee — they must fill it or you cannot proceed with your application.
+        <br />
+        ⚠️ <strong>Only institutional or corporate email addresses will receive the reference link.</strong>
+        <br />
+        <strong>✅ Accepted:</strong> example@university.edu, example@company.com
+        <br />
+        <strong>❌ Not accepted:</strong> example@gmail.com, example@yahoo.com, example@outlook.com
+      </p>
+    </div>
+
+    {/* Referee 1 */}
+    <div className="space-y-4">
+      <h4 className="font-medium">Referee 1</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Full Name</Label>
+          <Input
+            placeholder="Enter referee's full name"
+            value={postgraduateData.references.referee1.name}
+            onChange={(e) => setPostgraduateData(prev => ({
               ...prev,
-              academicQualifications: {
-                ...prev.academicQualifications,
-                otherQualifications: files ? files[0] : undefined
+              references: {
+                ...prev.references,
+                referee1: {
+                  ...prev.references.referee1,
+                  name: e.target.value
+                }
               }
             }))}
-            onRemove={() => setPostgraduateData(prev => ({
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Email Address</Label>
+          <Input
+            type="email"
+            placeholder="Enter referee's email"
+            value={postgraduateData.references.referee1.email}
+            onChange={(e) => setPostgraduateData(prev => ({
               ...prev,
-              academicQualifications: {
-                ...prev.academicQualifications,
-                otherQualifications: undefined
+              references: {
+                ...prev.references,
+                referee1: {
+                  ...prev.references.referee1,
+                  email: e.target.value
+                }
               }
             }))}
-            maxSize="10MB"
           />
         </div>
       </div>
+    </div>
 
-      {/* References Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Academic References</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-           <p className="text-sm text-yellow-800">
-  It is your responsibility to ensure that you provide TWO references to support your application. Your
-  referees must be able to comment on your academic suitability for the program. A secure link will be sent to the email address of each referee — they must fill it or you cannot proceed with your application.
-  <br />
-  ⚠️ <strong>Only institutional or corporate email addresses will receive the reference link.</strong> 
-  <br />
-  <strong>✅ Accepted:</strong> example@university.edu, example@company.com 
-  <br />
-  <strong>❌ Not accepted:</strong> example@gmail.com, example@yahoo.com, example@outlook.com
-</p>
-
-          </div>
-          {/* Referee 1 */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Referee 1</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input
-                  placeholder="Enter referee's full name"
-                  value={postgraduateData.references.referee1.name}
-                  onChange={(e) => setPostgraduateData(prev => ({
-                    ...prev,
-                    references: {
-                      ...prev.references,
-                      referee1: {
-                        ...prev.references.referee1,
-                        name: e.target.value
-                      }
-                    }
-                  }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Email Address</Label>
-                <Input
-                  type="email"
-                  placeholder="Enter referee's email"
-                  value={postgraduateData.references.referee1.email}
-                  onChange={(e) => setPostgraduateData(prev => ({
-                    ...prev,
-                    references: {
-                      ...prev.references,
-                      referee1: {
-                        ...prev.references.referee1,
-                        email: e.target.value
-                      }
-                    }
-                  }))}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Referee 2 */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Referee 2</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input
-                  placeholder="Enter referee's full name"
-                  value={postgraduateData.references.referee2.name}
-                  onChange={(e) => setPostgraduateData(prev => ({
-                    ...prev,
-                    references: {
-                      ...prev.references,
-                      referee2: {
-                        ...prev.references.referee2,
-                        name: e.target.value
-                      }
-                    }
-                  }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Email Address</Label>
-                <Input
-                  type="email"
-                  placeholder="Enter referee's email"
-                  value={postgraduateData.references.referee2.email}
-                  onChange={(e) => setPostgraduateData(prev => ({
-                    ...prev,
-                    references: {
-                      ...prev.references,
-                      referee2: {
-                        ...prev.references.referee2,
-                        email: e.target.value
-                      }
-                    }
-                  }))}
-                />
-              </div>
-            </div>
-          </div>
+    {/* Referee 2 */}
+    <div className="space-y-4">
+      <h4 className="font-medium">Referee 2</h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Full Name</Label>
+          <Input
+            placeholder="Enter referee's full name"
+            value={postgraduateData.references.referee2.name}
+            onChange={(e) => setPostgraduateData(prev => ({
+              ...prev,
+              references: {
+                ...prev.references,
+                referee2: {
+                  ...prev.references.referee2,
+                  name: e.target.value
+                }
+              }
+            }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Email Address</Label>
+          <Input
+            type="email"
+            placeholder="Enter referee's email"
+            value={postgraduateData.references.referee2.email}
+            onChange={(e) => setPostgraduateData(prev => ({
+              ...prev,
+              references: {
+                ...prev.references,
+                referee2: {
+                  ...prev.references.referee2,
+                  email: e.target.value
+                }
+              }
+            }))}
+          />
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
 
       {/* Declaration */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">

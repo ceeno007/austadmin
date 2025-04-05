@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (programType) {
       localStorage.setItem('programType', programType.toLowerCase());
-      console.log(`Program type set to: ${programType.toLowerCase()} from API response`);
+    //   console.log(`Program type set to: ${programType.toLowerCase()} from API response`);
     }
     
     setIsAuthenticated(true);
