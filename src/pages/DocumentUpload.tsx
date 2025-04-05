@@ -146,8 +146,8 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
             </h1>
             <p className="text-gray-600 mt-2">Please upload your required documents below</p>
           </div>
-
-          <div className="space-y-6">
+          
+                      <div className="space-y-6">
             {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
               <PostgraduateForm />
             ) : programType === "jupeb" ? (
