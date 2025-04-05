@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Home, CheckCircle2, ArrowRight, X } from "lucide-react";
+import { Home, CheckCircle2, ArrowRight, X, Image } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
@@ -200,16 +200,17 @@ const Hostels = () => {
                         className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
                         onClick={() => setSelectedHostel(hostel)}
                       >
-                        View Details
+                        <Image className="h-4 w-4 mr-2" />
+                        View Images
                       </Button>
-                      {/* <Button
+                      <Button
                         asChild
                         className="bg-[#FF5500] hover:bg-[#e64d00]"
                       >
                         <Link to="/signup" className="flex items-center">
                           Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
-                      </Button> */}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -220,8 +221,8 @@ const Hostels = () => {
 
         {/* Modal for Selected Hostel */}
         {selectedHostel && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl relative max-h-[90vh]">
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl relative my-8">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-50"
                 onClick={() => setSelectedHostel(null)}
@@ -247,7 +248,7 @@ const Hostels = () => {
                       <img
                         src={img}
                         alt={`Slide ${i + 1}`}
-                        className="rounded-lg w-full h-[400px] object-cover mx-auto"
+                        className="rounded-lg w-full h-[300px] md:h-[400px] object-cover mx-auto"
                       />
                     </SwiperSlide>
                   ))}
