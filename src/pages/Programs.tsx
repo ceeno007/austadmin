@@ -6,6 +6,19 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, X, FileText } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+
+
+import softwareEngineeringImg from "@/assets/images/software-engineering.jpg";
+import computerScienceImg from "@/assets/images/computer-science.jpg";
+import petroleumEngineeringImg from "@/assets/images/petroleum-engineering.jpg";
+import accountingImg from "@/assets/images/accounting.jpg";
+import businessAdminImg from "@/assets/images/business-admin.jpg";
+import civilEngineeringImg from "@/assets/images/civil-engineering.jpg";
+import materialsEngineeringImg from "@/assets/images/materials-metallurgical.jpg";
+import mechanicalEngineeringImg from "@/assets/images/mechanical.jpg";
+import defaultProgramImg from "@/assets/images/default.jpg";
+
+
 const Programs = () => {
   const navigate = useNavigate();
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
@@ -18,7 +31,7 @@ const Programs = () => {
         title: "B.Sc. Software Engineering",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&w=800&q=80",
+        image:softwareEngineeringImg,
         description: "Focus on software development methodologies, tools, and systems design.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -31,7 +44,7 @@ const Programs = () => {
         title: "B.Sc. Computer Science",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+        image: computerScienceImg,
         description: "Develop skills in algorithms, software engineering, and computer systems.",
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
@@ -44,7 +57,7 @@ const Programs = () => {
         title: "B.Eng. Petroleum and Energy Resources Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1557879429-2d8c5c933a9c?auto=format&fit=crop&w=800&q=80",
+        image: petroleumEngineeringImg,
         description: "Explore oil and gas engineering principles and practices.",
         requirements: [
           "Five SSC credits including Physics, Chemistry, Mathematics, and English",
@@ -57,7 +70,7 @@ const Programs = () => {
         title: "B.Sc. Accounting",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1556740772-1a741367b93e?auto=format&fit=crop&w=800&q=80",
+        image: accountingImg ,
         description: "Gain expertise in financial reporting, auditing, and corporate accounting principles.",
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
@@ -70,7 +83,7 @@ const Programs = () => {
         title: "B.Sc. Business Administration",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1556664839-2b11c80e72c5?auto=format&fit=crop&w=800&q=80",
+        image: businessAdminImg,
         description: "Understand organizational behavior, management, and entrepreneurship strategies.",
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
@@ -83,7 +96,7 @@ const Programs = () => {
         title: "B.Eng. Civil Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=800&q=80",
+        image: civilEngineeringImg,
         description: "Design and construct infrastructure like roads, bridges, and water systems.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -96,7 +109,7 @@ const Programs = () => {
         title: "B.Eng. Materials & Metallurgical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1585829361037-fca1d1320355?auto=format&fit=crop&w=800&q=80",
+        image: materialsEngineeringImg,
         description: "Learn the development and application of metallic and composite materials.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -109,7 +122,7 @@ const Programs = () => {
         title: "B.Eng. Mechanical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: "https://images.unsplash.com/photo-1616412341025-02e2f6b64d24?auto=format&fit=crop&w=800&q=80",
+        image: mechanicalEngineeringImg,
         description: "Apply physics and materials science for the design and analysis of mechanical systems.",
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
@@ -381,6 +394,11 @@ const Programs = () => {
     if (title.toLowerCase().includes("pgd")) return "PGD";
     return null;
   };
+  const categorizedPostgrad = {
+    Masters: tabs.postgraduate.filter((p) => getLabel(p.title) === "Masters"),
+    "Ph.D.": tabs.postgraduate.filter((p) => getLabel(p.title) === "Ph.D."),
+    Others: tabs.postgraduate.filter((p) => getLabel(p.title) === "PGD" || getLabel(p.title) === null)
+  };
 
   const getImage = (program: any) =>
     program.image ||
@@ -425,9 +443,9 @@ const Programs = () => {
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="undergraduate">Undergraduate Programs</TabsTrigger>
-                <TabsTrigger value="postgraduate">Postgraduate Programs</TabsTrigger>
-                <TabsTrigger value="jupeb">JUPEB Programs</TabsTrigger>
+                <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
+                <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
+                <TabsTrigger value="jupeb">JUPEB</TabsTrigger>
               </TabsList>
 
               <TabsContent value="undergraduate">
@@ -477,54 +495,51 @@ const Programs = () => {
               </TabsContent>
 
               <TabsContent value="postgraduate">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tabs.postgraduate.map((program) => (
-                    <div
-                      key={program.title}
-                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      <div className="relative h-48">
-                        <img
-                          src={getImage(program)}
-                          alt={program.title}
-                          className="w-full h-full object-cover"
-                        />
-                        {program.type && (
-                          <div className="absolute top-2 right-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
-                            {program.type}
+                {Object.entries(categorizedPostgrad).map(([category, programs]) => (
+                  <div key={category} className="mb-12">
+                    <h2 className="text-2xl font-bold text-[#FF5500] mb-4">{category} Programs</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {programs.map((program) => (
+                        <div key={program.title} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                          <div className="relative h-48">
+                            <img src={getImage(program)} alt={program.title} className="w-full h-full object-cover" />
+                            {program.type && (
+                              <div className="absolute top-2 right-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
+                                {program.type}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
-                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
-                        <div className="space-y-2 mb-4">
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Duration:</span> {program.duration}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">School Fees:</span> {program.schoolFees}
-                          </p>
+                          <div className="p-6">
+                            <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                            <p className="text-gray-600 mb-4">{getDescription(program)}</p>
+                            <div className="space-y-2 mb-4">
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">Duration:</span> {program.duration}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">School Fees:</span> {program.schoolFees}
+                              </p>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <Button
+                                variant="outline"
+                                className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
+                                onClick={() => handleProgramClick(program.title)}
+                              >
+                                View Details
+                              </Button>
+                              <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                                <Button variant="ghost" className="text-[#FF5500]">
+                                  <FileText className="w-4 h-4 mr-2" /> Download PDF
+                                </Button>
+                              </a>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <Button
-                            variant="outline"
-                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                            onClick={() => handleProgramClick(program.title)}
-                          >
-                            View Details
-                          </Button>
-                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
-                            <Button variant="ghost" className="text-[#FF5500]">
-                              <FileText className="w-4 h-4 mr-2" />
-                              Download PDF
-                            </Button>
-                          </a>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </TabsContent>
 
               <TabsContent value="jupeb">
