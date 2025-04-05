@@ -1,8 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-// Since Lucide doesn't have an official "X (Twitter)" logo,
-// we will continue to use the X icon as a placeholder.
-import { Facebook, X, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import XLogo from "@/components/icons/XLogo"; // Update path as needed
 import austLogo from "@/assets/images/austlogo.webp";
 
 const Footer = () => {
@@ -39,14 +38,14 @@ const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
 
-              {/* X (formerly Twitter) */}
+              {/* X (formerly Twitter) - our custom icon */}
               <a
                 href="https://twitter.com/AUSTAbuja"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition-colors"
               >
-                <X className="h-5 w-5" />
+                <XLogo className="h-5 w-5" />
               </a>
 
               {/* Instagram */}
