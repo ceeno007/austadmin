@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,6 +10,11 @@ const ViewPDF = () => {
   const queryParams = new URLSearchParams(location.search);
   const pdfSrc = queryParams.get("src");
   const title = queryParams.get("title") || "Program Handbook";
+
+  // Log the PDF source for debugging
+  useEffect(() => {
+    console.log("PDF Source:", pdfSrc);
+  }, [pdfSrc]);
 
   if (!pdfSrc) {
     return (
@@ -33,6 +38,7 @@ const ViewPDF = () => {
 
   // Construct the full PDF URL
   const fullPdfUrl = pdfSrc.startsWith("/") ? pdfSrc : `/${pdfSrc}`;
+  console.log("Full PDF URL:", fullPdfUrl);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,14 +62,20 @@ const ViewPDF = () => {
               type="application/pdf"
               className="w-full h-[60vh] sm:h-[80vh] border-0 rounded-lg"
             >
-              <div className="text-center p-4">
-                <p className="mb-4">It appears you don't have a PDF plugin for this browser.</p>
-                <Button asChild>
-                  <a href={fullPdfUrl} className="flex items-center">
-                    Download PDF
-                  </a>
-                </Button>
-              </div>
+              <iframe 
+                src={fullPdfUrl} 
+                className="w-full h-[60vh] sm:h-[80vh] border-0 rounded-lg"
+                title={title}
+              >
+                <div className="text-center p-4">
+                  <p className="mb-4">It appears you don't have a PDF plugin for this browser.</p>
+                  <Button asChild>
+                    <a href={fullPdfUrl} download className="flex items-center">
+                      Download PDF
+                    </a>
+                  </Button>
+                </div>
+              </iframe>
             </object>
           </div>
         </div>

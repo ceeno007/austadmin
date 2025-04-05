@@ -53,7 +53,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Physics, and one other Science subject",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Software Engineering [Undergraduate].pdf"
       },
       {
         title: "B.Sc. Computer Science",
@@ -66,7 +66,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Physics, and one other Science subject",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Computer Science [Undergraduate].pdf"
       },
       {
         title: "B.Eng. Petroleum and Energy Resources Engineering",
@@ -79,7 +79,7 @@ const Programs = () => {
           "UTME Subjects: Chemistry, Mathematics, Physics",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Petroleum and Energy Resources Engineering [Undergraduate].pdf"
       },
       {
         title: "B.Sc. Accounting",
@@ -92,7 +92,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
       {
         title: "B.Sc. Business Administration",
@@ -105,7 +105,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
       {
         title: "B.Eng. Civil Engineering",
@@ -118,7 +118,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Physics, Chemistry",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Civil Engineering [Undergraduate].pdf"
       },
       {
         title: "B.Eng. Materials & Metallurgical Engineering",
@@ -131,7 +131,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Physics, Chemistry",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Materials and Metallurgical Engineering [Undergraduate].pdf"
       },
       {
         title: "B.Eng. Mechanical Engineering",
@@ -144,7 +144,7 @@ const Programs = () => {
           "UTME Subjects: Mathematics, Physics, Chemistry",
           "JAMB score of 200+"
         ],
-        pdf: "/pdfs/UTME and DE Requirement for Undergraduate Admission.pdf"
+        pdf: "/pdfs/Departmental Handbook - Mechanical Engineering [Undergraduate].pdf"
       }
     ],
     postgraduate: [
@@ -328,7 +328,7 @@ const Programs = () => {
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
         image: mathImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Pure and Applied Mathematics [Class of 2025].pdf"
       },
       {
         title: "Ph.D. Pure & Applied Mathematics",
@@ -370,7 +370,7 @@ const Programs = () => {
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
         image: physicsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        pdf: "/pdfs/Curriculum Handbook - M.Sc. Theoretical and Applied Physics [Class of 2025].pdf"
       },
       {
         title: "Ph.D. Theoretical & Applied Physics",
@@ -663,11 +663,12 @@ const Programs = () => {
                       {/* View PDF Button (if PDF exists) */}
                       {program.pdf && (
                         <Button
-                          onClick={() =>
+                          onClick={() => {
+                            console.log("Navigating to PDF:", program.pdf);
                             navigate(
                               `/view-pdf?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`
-                            )
-                          }
+                            );
+                          }}
                           className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"
                         >
                           <FileText className="w-4 h-4 mr-2" /> View Full Program Handbook

@@ -62,11 +62,7 @@ const App: React.FC = () => {
                     <DocumentUpload />
                   </ProtectedRoute>
                 } />
-                <Route path="/view-pdf" element={
-                  <ProtectedRoute>
-                    <ViewPDF />
-                  </ProtectedRoute>
-                } />
+                <Route path="/view-pdf" element={<ViewPDF />} />
 
                 {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
