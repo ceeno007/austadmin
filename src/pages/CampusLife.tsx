@@ -1,6 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
   Coffee, 
@@ -10,7 +12,8 @@ import {
   Users, 
   Dumbbell, 
   Gamepad2,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import campusLife from "@/assets/images/campusLife.jpg";
@@ -132,9 +135,14 @@ const CampusLife = () => {
                     </div>
                     <h3 className="text-xl font-bold">Student Housing</h3>
                   </div>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 mb-4">
                     Comfortable and secure accommodation options to make you feel at home while you focus on your studies.
                   </p>
+                  <Button asChild variant="outline" className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]">
+                    <Link to="/hostels" className="flex items-center">
+                      See All Hostels <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
               

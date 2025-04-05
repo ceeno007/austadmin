@@ -71,6 +71,15 @@ const Navbar = () => {
               Campus Life
             </Link>
             <Link 
+              to="/hostels" 
+              className={cn(
+                "font-medium transition-colors",
+                isActive("/hostels") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+              )}
+            >
+              Hostels
+            </Link>
+            <Link 
               to="/contact" 
               className={cn(
                 "font-medium transition-colors",
@@ -144,6 +153,15 @@ const Navbar = () => {
             )}
           >
             Campus Life
+          </Link>
+          <Link 
+            to="/hostels" 
+            className={cn(
+              "block font-medium transition-colors",
+              isActive("/hostels") ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+            )}
+          >
+            Hostels
           </Link>
           <Link 
             to="/contact" 

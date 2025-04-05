@@ -22,6 +22,7 @@ import Terms from "./pages/Terms";
 import Sitemap from "./pages/Sitemap";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Hostels from "./pages/Hostels";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App: React.FC = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/programs" element={<Programs />} />
                 <Route path="/campus" element={<CampusLife />} />
+                <Route path="/hostels" element={<Hostels />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
