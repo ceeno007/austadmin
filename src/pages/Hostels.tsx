@@ -203,14 +203,14 @@ const Hostels = () => {
                         <Image className="h-4 w-4 mr-2" />
                         View Images
                       </Button>
-                      <Button
+                      {/* <Button
                         asChild
                         className="bg-[#FF5500] hover:bg-[#e64d00]"
                       >
                         <Link to="/signup" className="flex items-center">
                           Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
-                      </Button>
+                      </Button> */}
                     </div>
                   </CardContent>
                 </Card>
