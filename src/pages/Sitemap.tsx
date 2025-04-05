@@ -62,16 +62,7 @@ const Sitemap = () => {
                       Forgot Password
                     </Link>
                   </li>
-                  <li>
-                    <Link to="/application" className="text-blue-600 hover:text-blue-800">
-                      Application Form
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/document-upload" className="text-blue-600 hover:text-blue-800">
-                      Document Upload
-                    </Link>
-                  </li>
+                 
                 </ul>
               </section>
 
