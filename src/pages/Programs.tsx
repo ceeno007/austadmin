@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, X, FileText } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 
 
@@ -36,8 +36,18 @@ import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
 
 const Programs = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("undergraduate");
+
+  // Check for tab parameter in URL
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tabParam = queryParams.get("tab");
+    if (tabParam && ["undergraduate", "postgraduate", "jupeb"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
 
   // Updated images for each program to better match the course
   const tabs = {

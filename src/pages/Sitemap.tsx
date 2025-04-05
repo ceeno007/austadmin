@@ -32,6 +32,11 @@ const Sitemap = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/campus" className="text-blue-600 hover:text-blue-800">
+                      Campus Life
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/contact" className="text-blue-600 hover:text-blue-800">
                       Contact
                     </Link>
@@ -53,6 +58,16 @@ const Sitemap = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/forgot-password" className="text-blue-600 hover:text-blue-800">
+                      Forgot Password
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/application" className="text-blue-600 hover:text-blue-800">
+                      Application Form
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/document-upload" className="text-blue-600 hover:text-blue-800">
                       Document Upload
                     </Link>
@@ -64,13 +79,18 @@ const Sitemap = () => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Programs</h2>
                 <ul className="space-y-2">
                   <li>
-                    <Link to="/programs#undergraduate" className="text-blue-600 hover:text-blue-800">
+                    <Link to="/programs?tab=undergraduate" className="text-blue-600 hover:text-blue-800">
                       Undergraduate Programs
                     </Link>
                   </li>
                   <li>
-                    <Link to="/programs#postgraduate" className="text-blue-600 hover:text-blue-800">
+                    <Link to="/programs?tab=postgraduate" className="text-blue-600 hover:text-blue-800">
                       Postgraduate Programs
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/programs?tab=jupeb" className="text-blue-600 hover:text-blue-800">
+                      JUPEB Program
                     </Link>
                   </li>
                 </ul>
@@ -87,22 +107,6 @@ const Sitemap = () => {
                   <li>
                     <Link to="/terms" className="text-blue-600 hover:text-blue-800">
                       Terms of Use
-                    </Link>
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">Resources</h2>
-                <ul className="space-y-2">
-                  <li>
-                    <Link to="/faq" className="text-blue-600 hover:text-blue-800">
-                      FAQ
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/news" className="text-blue-600 hover:text-blue-800">
-                      News & Updates
                     </Link>
                   </li>
                 </ul>
