@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +95,32 @@
   
   ::-webkit-scrollbar-thumb {
     @apply bg-primary/50 rounded-full hover:bg-primary/70;
+  }
+
+  /* Dropdown and Select styles */
+  .select-trigger {
+    @apply bg-white border border-gray-300 text-gray-900;
+  }
+
+  .select-content {
+    @apply bg-white border border-gray-200 shadow-md;
+  }
+
+  .select-item {
+    @apply text-gray-900 hover:bg-orange-100 focus:bg-orange-100;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-orange-500 text-white hover:bg-orange-600;
+  }
+
+  .btn-secondary {
+    @apply bg-orange-100 text-orange-900 hover:bg-orange-200;
+  }
+
+  .btn-outline {
+    @apply border border-orange-500 text-orange-700 hover:bg-orange-50;
   }
 }
 
