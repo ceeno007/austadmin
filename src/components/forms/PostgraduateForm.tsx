@@ -1252,7 +1252,7 @@ const PostgraduateForm = () => {
     </div>
 
     <div className="space-y-2">
-      <Label>Do you have any disabilities?</Label>
+      <Label>Do you have any disabilities? <span className="text-red-500 text-xs italic">Required</span></Label>
       <div className="max-w-md">
         <Select
           value={postgraduateData.personalDetails.hasDisabilities}
@@ -1271,7 +1271,7 @@ const PostgraduateForm = () => {
 
     {postgraduateData.personalDetails.hasDisabilities === "Yes" && (
       <div className="space-y-2">
-        <Label>Please describe your disability</Label>
+        <Label>Please describe your disability <span className="text-red-500 text-xs italic">Required</span></Label>
         <Input
           placeholder="Describe your disability"
           value={postgraduateData.personalDetails.disabilityDescription}
@@ -1745,7 +1745,7 @@ const PostgraduateForm = () => {
       <h4 className="font-medium">Referee 1</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Full Name</Label>
+          <Label>Full Name <span className="text-red-500 text-xs italic">Required</span></Label>
           <Input
             placeholder="Enter referee's full name"
             value={postgraduateData.references.referee1.name}
@@ -1762,7 +1762,7 @@ const PostgraduateForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label>Email Address</Label>
+          <Label>Email Address <span className="text-red-500 text-xs italic">Required</span></Label>
           <Input
             type="email"
             placeholder="Enter referee's email"
@@ -1787,7 +1787,7 @@ const PostgraduateForm = () => {
       <h4 className="font-medium">Referee 2</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Full Name</Label>
+          <Label>Full Name <span className="text-red-500 text-xs italic">Required</span></Label>
           <Input
             placeholder="Enter referee's full name"
             value={postgraduateData.references.referee2.name}
@@ -1804,7 +1804,7 @@ const PostgraduateForm = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label>Email Address</Label>
+          <Label>Email Address <span className="text-red-500 text-xs italic">Required</span></Label>
           <Input
             type="email"
             placeholder="Enter referee's email"
