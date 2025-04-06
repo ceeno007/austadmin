@@ -899,30 +899,35 @@ const PostgraduateForm = () => {
       </p>
     </div>
 
-    {/* Applicant Type Selection */}
-    <div className="space-y-2">
-      <Label>Are you a Nigerian or International Applicant? *</Label>
-      <Select
-        value={postgraduateData.applicantType}
-        onValueChange={(value: "Nigerian" | "International") =>
-          setPostgraduateData((prev) => ({
-            ...prev,
-            applicantType: value,
-            personalDetails: {
-              ...prev.personalDetails,
-              nationality: value === "Nigerian" ? "Nigerian" : prev.personalDetails.nationality
-            }
-          }))
-        }
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select applicant type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Nigerian">Nigerian</SelectItem>
-          <SelectItem value="International">International</SelectItem>
-        </SelectContent>
-      </Select>
+    {/* Applicant Type Section */}
+    <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+      <h3 className="text-lg font-semibold">Applicant Type</h3>
+      <div className="max-w-md">
+        <div className="space-y-2">
+          <Label>Are you a Nigerian or International Applicant? *</Label>
+          <Select
+            value={postgraduateData.applicantType}
+            onValueChange={(value) => {
+              setPostgraduateData(prev => ({
+                ...prev,
+                applicantType: value as "Nigerian" | "International",
+                personalDetails: {
+                  ...prev.personalDetails,
+                  nationality: value === "Nigerian" ? "Nigerian" : prev.personalDetails.nationality,
+                }
+              }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select applicant type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Nigerian">Nigerian</SelectItem>
+              <SelectItem value="International">International</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </div>
 
     {/* Upload Payment Evidence */}
@@ -1064,77 +1069,74 @@ const PostgraduateForm = () => {
       />
     </div>
 
-    <div className="space-y-2">
-      <Label>Gender *</Label>
-      <Select
-        value={postgraduateData.personalDetails.gender}
-        onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select gender" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Male">Male</SelectItem>
-          <SelectItem value="Female">Female</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    {/* Gender and Date of Birth side by side */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Gender *</Label>
+        <Select
+          value={postgraduateData.personalDetails.gender}
+          onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select gender" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Male">Male</SelectItem>
+            <SelectItem value="Female">Female</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-    {/* Date of Birth */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Date of Birth */}
       <div className="space-y-2">
-        <Label>Day of Birth</Label>
-        <Select
-          value={postgraduateData.personalDetails.dateOfBirth.day}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select day" />
-          </SelectTrigger>
-          <SelectContent>
-            {days.map((day) => (
-              <SelectItem key={day} value={day}>
-                {day}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Month of Birth</Label>
-        <Select
-          value={postgraduateData.personalDetails.dateOfBirth.month}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((month) => (
-              <SelectItem key={month} value={month}>
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Year of Birth</Label>
-        <Select
-          value={postgraduateData.personalDetails.dateOfBirth.year}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>Date of Birth *</Label>
+        <div className="grid grid-cols-3 gap-2">
+          <Select
+            value={postgraduateData.personalDetails.dateOfBirth.day}
+            onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Day" />
+            </SelectTrigger>
+            <SelectContent>
+              {days.map((day) => (
+                <SelectItem key={day} value={day}>
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={postgraduateData.personalDetails.dateOfBirth.month}
+            onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Month" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month) => (
+                <SelectItem key={month} value={month}>
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={postgraduateData.personalDetails.dateOfBirth.year}
+            onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
 
@@ -1178,49 +1180,52 @@ const PostgraduateForm = () => {
       </div>
     </div>
 
-    <div className="space-y-2">
-      <Label>Nationality *</Label>
-      {postgraduateData.applicantType === "Nigerian" ? (
-        <Input value="Nigerian" disabled className="bg-gray-100" />
-      ) : (
-        <Select
-          value={postgraduateData.personalDetails.nationality}
-          onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select nationality" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    {/* Nationality and State of Origin side by side */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Nationality *</Label>
+        {postgraduateData.applicantType === "Nigerian" ? (
+          <Input value="Nigerian" disabled className="bg-gray-100" />
+        ) : (
+          <Select
+            value={postgraduateData.personalDetails.nationality}
+            onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select nationality" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {postgraduateData.applicantType === "Nigerian" && (
+        <div className="space-y-2">
+          <Label>State of Origin *</Label>
+          <Select
+            value={postgraduateData.personalDetails.stateOfOrigin}
+            onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select state of origin" />
+            </SelectTrigger>
+            <SelectContent>
+              {nigerianStates.map((state) => (
+                <SelectItem key={state} value={state}>
+                  {state}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       )}
     </div>
-
-    {postgraduateData.applicantType === "Nigerian" && (
-      <div className="space-y-2">
-        <Label>State of Origin *</Label>
-        <Select
-          value={postgraduateData.personalDetails.stateOfOrigin}
-          onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select state of origin" />
-          </SelectTrigger>
-          <SelectContent>
-            {nigerianStates.map((state) => (
-              <SelectItem key={state} value={state}>
-                {state}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    )}
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -1248,18 +1253,20 @@ const PostgraduateForm = () => {
 
     <div className="space-y-2">
       <Label>Do you have any disabilities?</Label>
-      <Select
-        value={postgraduateData.personalDetails.hasDisabilities}
-        onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select option" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="No">No</SelectItem>
-          <SelectItem value="Yes">Yes</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="max-w-md">
+        <Select
+          value={postgraduateData.personalDetails.hasDisabilities}
+          onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select option" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="No">No</SelectItem>
+            <SelectItem value="Yes">Yes</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </div>
 
     {postgraduateData.personalDetails.hasDisabilities === "Yes" && (
@@ -1325,9 +1332,19 @@ const PostgraduateForm = () => {
             <div className="space-y-2">
               <Label>CGPA *</Label>
               <Input
+                type="number"
+                step="0.01"
+                min="0"
+                max="5"
                 placeholder="Enter CGPA"
                 value={postgraduateData.academicQualifications.qualification1.cgpa}
-                onChange={(e) => handleAcademicQualificationChange("qualification1", "cgpa", e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow numbers and decimal point
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    handleAcademicQualificationChange("qualification1", "cgpa", value);
+                  }
+                }}
               />
             </div>
 
@@ -1509,9 +1526,19 @@ const PostgraduateForm = () => {
               <div className="space-y-2">
                 <Label>CGPA *</Label>
                 <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="5"
                   placeholder="Enter CGPA"
                   value={postgraduateData.academicQualifications.qualification2?.cgpa}
-                  onChange={(e) => handleAcademicQualificationChange("qualification2", "cgpa", e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow numbers and decimal point
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      handleAcademicQualificationChange("qualification2", "cgpa", value);
+                    }
+                  }}
                 />
               </div>
 
