@@ -221,46 +221,47 @@ const Hostels = () => {
 
         {/* Modal for Selected Hostel */}
         {selectedHostel && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl relative my-8">
-              <button
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-50"
-                onClick={() => setSelectedHostel(null)}
-              >
-                <X className="w-6 h-6" />
-              </button>
-
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-4 text-center">
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md md:max-w-2xl lg:max-w-4xl rounded-xl overflow-hidden shadow-2xl relative max-h-[85vh] flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h2 className="text-xl font-bold">
                   {selectedHostel.name} – {selectedHostel.type}
                 </h2>
+                <button
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => setSelectedHostel(null)}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
+              <div className="overflow-y-auto flex-1 p-4">
                 <Swiper
                   modules={[Pagination, Navigation]}
-                  spaceBetween={20}
+                  spaceBetween={10}
                   slidesPerView={1}
                   pagination={{ clickable: true }}
                   navigation
-                  className="mb-6"
+                  className="mb-4"
                 >
                   {selectedHostel.images.map((img: string, i: number) => (
                     <SwiperSlide key={i}>
                       <img
                         src={img}
                         alt={`Slide ${i + 1}`}
-                        className="rounded-lg w-full h-[300px] md:h-[400px] object-cover mx-auto"
+                        className="rounded-lg w-full h-[200px] md:h-[300px] object-cover mx-auto"
                       />
                     </SwiperSlide>
                   ))}
                 </Swiper>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Description</h3>
-                    <p className="text-gray-600 mb-4">{selectedHostel.description}</p>
+                    <h3 className="text-lg font-semibold mb-2">Description</h3>
+                    <p className="text-gray-600 mb-4 text-sm">{selectedHostel.description}</p>
                     
-                    <h3 className="text-xl font-semibold mb-2">Pricing</h3>
-                    <div className="space-y-2 mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Pricing</h3>
+                    <div className="space-y-1 mb-4 text-sm">
                       <p className="flex justify-between">
                         <span>Per Semester:</span>
                         <span className="font-medium">{selectedHostel.feePerSemester}</span>
@@ -273,11 +274,11 @@ const Hostels = () => {
                   </div>
                   
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Features</h3>
-                    <ul className="space-y-2">
+                    <h3 className="text-lg font-semibold mb-2">Features</h3>
+                    <ul className="space-y-1 text-sm">
                       {selectedHostel.features.map((feature: string, idx: number) => (
                         <li key={idx} className="flex items-start">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{feature}</span>
                         </li>
                       ))}
