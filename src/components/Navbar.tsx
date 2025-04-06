@@ -89,6 +89,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-4">
+            {/* Language Toggle - Commented out
             <Button
               variant="ghost"
               size="icon"
@@ -98,6 +99,7 @@ const Navbar = () => {
               <Globe className="h-5 w-5" />
               <span className="ml-2 text-sm font-medium">{language.toUpperCase()}</span>
             </Button>
+            */}
             <button 
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900"
               onClick={toggleMenu}
