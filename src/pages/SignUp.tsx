@@ -31,17 +31,32 @@ const SignUp = () => {
     e.preventDefault();
     
     if (!programType) {
-      toast.error("Please select a program type!");
+      toast.error("Please select a program type!", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
     if (!passwordsMatch) {
-      toast.error("Passwords don't match!");
+      toast.error("Passwords don't match!", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
     if (!(hasMinLength && hasUpperCase && hasNumber)) {
-      toast.error("Password doesn't meet requirements!");
+      toast.error("Password doesn't meet requirements!", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
@@ -58,12 +73,22 @@ const SignUp = () => {
         // Store user's name and program type
         localStorage.setItem("userName", fullName);
         localStorage.setItem("programType", programType);
-        toast.success("Account created successfully! Please log in to continue.");
+        toast.success("Account created successfully! Please log in to continue.", {
+          style: {
+            background: '#10B981', // Green background
+            color: 'white',
+          }
+        });
         navigate("/login");
       })
       .catch((error) => {
         console.error("Error during signup:", error);
-        toast.error(error.message || "Failed to create account. Please try again.");
+        toast.error(error.message || "Failed to create account. Please try again.", {
+          style: {
+            background: '#EF4444', // Red background
+            color: 'white',
+          }
+        });
       })
       .finally(() => {
         setIsLoading(false);

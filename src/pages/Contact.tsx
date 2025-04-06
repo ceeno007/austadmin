@@ -1,21 +1,69 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiService } from "@/services/api";
 
 const Contact = () => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message Sent",
-      description: "Thank you for contacting us. We'll get back to you soon!",
-    });
+    setIsSubmitting(true);
+    
+    try {
+      // Use the API service to submit the contact form
+      await apiService.submitContactForm(formData);
+      
+      // Reset form after successful submission
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+      
+      toast({
+        title: "Message Sent",
+        description: "Thank you for contacting us. We'll get back to you soon!",
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send your message. Please try again later.",
+        variant: "destructive",
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,27 +90,65 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-1">Full Name</label>
-                    <Input id="name" placeholder="Your full name" required />
+                    <Input 
+                      id="name" 
+                      placeholder="Your full name" 
+                      required 
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
                   </div>
                   
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
-                    <Input id="email" type="email" placeholder="Your email address" required />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Your email address" 
+                      required 
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
                   </div>
                   
                   <div>
                     <label htmlFor="subject" className="block text-sm font-medium mb-1">Subject</label>
-                    <Input id="subject" placeholder="Message subject" required />
+                    <Input 
+                      id="subject" 
+                      placeholder="Message subject" 
+                      required 
+                      value={formData.subject}
+                      onChange={handleChange}
+                    />
                   </div>
                   
                   <div>
                     <label htmlFor="message" className="block text-sm font-medium mb-1">Message</label>
-                    <Textarea id="message" placeholder="Your message" className="min-h-32" required />
+                    <Textarea 
+                      id="message" 
+                      placeholder="Your message" 
+                      className="min-h-32" 
+                      required 
+                      value={formData.message}
+                      onChange={handleChange}
+                    />
                   </div>
                   
                   <div>
-                    <Button type="submit" className="w-full bg-[#FF5500] hover:bg-[#e64d00]">
-                      <Send className="mr-2 h-4 w-4" /> Send Message
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-[#FF5500] hover:bg-[#e64d00]"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" /> Send Message
+                        </>
+                      )}
                     </Button>
                   </div>
                 </form>

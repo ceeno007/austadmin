@@ -435,7 +435,11 @@ const UndergraduateForm = () => {
     }));
     
     toast.success("File uploaded successfully", {
-      description: `${file.name} has been uploaded.`
+      description: `${file.name} has been uploaded.`,
+      style: {
+        background: '#10B981', // Green background
+        color: 'white',
+      }
     });
   };
 
@@ -446,7 +450,11 @@ const UndergraduateForm = () => {
     }));
     
     toast.info("File removed", {
-      description: "The file has been removed."
+      description: "The file has been removed.",
+      style: {
+        background: '#3B82F6', // Blue background
+        color: 'white',
+      }
     });
   };
 
@@ -483,12 +491,20 @@ const UndergraduateForm = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       toast.success("Application saved as draft", {
-        description: "Your application has been saved successfully. You can continue editing later."
+        description: "Your application has been saved successfully. You can continue editing later.",
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
       });
     } catch (error) {
       console.error('Error saving draft:', error);
       toast.error("Failed to save draft", {
-        description: "There was an error saving your application. Please try again."
+        description: "There was an error saving your application. Please try again.",
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
     } finally {
       setIsSaving(false);
@@ -499,7 +515,11 @@ const UndergraduateForm = () => {
     e.preventDefault();
     if (!isFormValid()) {
       toast.error("Incomplete Application", {
-        description: "Please fill in all required fields before submitting."
+        description: "Please fill in all required fields before submitting.",
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
       return;
     }
@@ -512,12 +532,20 @@ const UndergraduateForm = () => {
         action: {
           label: "View Status →",
           onClick: () => console.log("Navigate to status page")
+        },
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
         }
       });
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error("Submission failed", {
-        description: "There was an error submitting your application. Please try again."
+        description: "There was an error submitting your application. Please try again.",
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
     } finally {
       setIsSubmitting(false);

@@ -23,7 +23,12 @@ const Login = () => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please enter both email and password");
+      toast.error("Please enter both email and password", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
@@ -43,7 +48,12 @@ const Login = () => {
       login(data.access_token, data);
       
       // Show success message
-      toast.success("Login successful!");
+      toast.success("Login successful!", {
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
+      });
       
       // Get the program type from the response data (check applications array first)
       let programType = null;

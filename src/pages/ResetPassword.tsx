@@ -37,17 +37,32 @@ const ResetPassword = () => {
     e.preventDefault();
     
     if (!password || !confirmPassword) {
-      toast.error("Please enter both password fields");
+      toast.error("Please enter both password fields", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters long");
+      toast.error("Password must be at least 8 characters long", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
       return;
     }
     
@@ -59,12 +74,22 @@ const ResetPassword = () => {
       password
     })
       .then(() => {
-        toast.success("Password reset successful");
+        toast.success("Password reset successful", {
+          style: {
+            background: '#10B981', // Green background
+            color: 'white',
+          }
+        });
         navigate("/login");
       })
       .catch((error) => {
         console.error("Error during password reset:", error);
-        toast.error(error.message || "Failed to reset password");
+        toast.error(error.message || "Failed to reset password", {
+          style: {
+            background: '#EF4444', // Red background
+            color: 'white',
+          }
+        });
       })
       .finally(() => {
         setIsLoading(false);

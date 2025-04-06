@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/token`,
   DOCUMENT_UPLOAD: `${API_BASE_URL}/document-upload`,
   FORGOT_PASSWORD: `${API_BASE_URL}/forgot-password`,
+  CONTACT: `${API_BASE_URL}/contact`,
   // Add more endpoints as needed
 };
 
@@ -126,6 +127,36 @@ export const apiService = {
       return await response.json();
     } catch (error) {
       console.error("Password reset request error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Submit a contact form
+   * @param contactData - Contact form data
+   * @returns Promise with the API response
+   */
+  submitContactForm: async (contactData: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.CONTACT, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify(contactData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to send message");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Contact form submission error:", error);
       throw error;
     }
   },

@@ -722,12 +722,20 @@ const PostgraduateForm = () => {
         </div>
       ), {
         duration: 5000,
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
       });
     } catch (error) {
       console.error('Error saving draft:', error);
       toast.error('Failed to save draft', {
         description: 'There was an error saving your application. Please try again.',
         duration: 5000,
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
     } finally {
       setIsSaving(false);
@@ -740,6 +748,10 @@ const PostgraduateForm = () => {
       toast.error('Incomplete Application', {
         description: 'Please fill in all required fields before submitting.',
         duration: 5000,
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
       return;
     }
@@ -767,12 +779,20 @@ const PostgraduateForm = () => {
         </div>
       ), {
         duration: 8000,
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
       });
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Submission failed', {
         description: 'There was an error submitting your application. Please try again.',
         duration: 5000,
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
       });
     } finally {
       setIsSubmitting(false);
