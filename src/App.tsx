@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -32,43 +33,45 @@ const App: React.FC = () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/programs" element={<Programs />} />
-                <Route path="/campus" element={<CampusLife />} />
-                <Route path="/hostels" element={<Hostels />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/sitemap" element={<Sitemap />} />
+          <LanguageProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthProvider>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/programs" element={<Programs />} />
+                  <Route path="/campus" element={<CampusLife />} />
+                  <Route path="/hostels" element={<Hostels />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/sitemap" element={<Sitemap />} />
 
-                {/* Protected Routes */}
-                <Route path="/application" element={
-                  <ProtectedRoute>
-                    <ApplicationForm />
-                  </ProtectedRoute>
-                } />
-                <Route path="/document-upload" element={
-                  <ProtectedRoute>
-                    <DocumentUpload />
-                  </ProtectedRoute>
-                } />
-                <Route path="/view-pdf" element={<ViewPDF />} />
+                  {/* Protected Routes */}
+                  <Route path="/application" element={
+                    <ProtectedRoute>
+                      <ApplicationForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/document-upload" element={
+                    <ProtectedRoute>
+                      <DocumentUpload />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/view-pdf" element={<ViewPDF />} />
 
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
+                  {/* Catch-all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </AuthProvider>
+            </BrowserRouter>
+          </LanguageProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </React.StrictMode>

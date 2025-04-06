@@ -35,7 +35,7 @@ const Index = () => {
                   variant="outline"
                   className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
                 >
-                  <Link to="/programs?tab=undergraduate">Learn More</Link>
+                  <Link to="/programs">Learn More</Link>
                 </Button>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
@@ -48,7 +48,7 @@ const Index = () => {
                   variant="outline"
                   className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
                 >
-                  <Link to="/programs?tab=postgraduate">Learn More</Link>
+                  <Link to="/programs">Learn More</Link>
                 </Button>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
@@ -61,7 +61,7 @@ const Index = () => {
                   variant="outline"
                   className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
                 >
-                  <Link to="/programs?tab=jupeb">Learn More</Link>
+                  <Link to="/programs">Learn More</Link>
                 </Button>
               </div>
             </div>
