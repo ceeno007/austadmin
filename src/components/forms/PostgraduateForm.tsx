@@ -802,7 +802,7 @@ const PostgraduateForm = () => {
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-  <h3 className="text-lg font-semibold">Application Fee Payment <span className="text-red-500">Required</span></h3>
+  <h3 className="text-lg font-semibold">Application Fee Payment</h3>
   <div className="space-y-4">
 
     {/* Payment Info */}
@@ -904,7 +904,7 @@ const PostgraduateForm = () => {
       <h3 className="text-lg font-semibold">Applicant Type</h3>
       <div className="max-w-md">
         <div className="space-y-2">
-          <Label>Are you a Nigerian or International Applicant? *</Label>
+          <Label>Are you a Nigerian or International Applicant? <span className="text-red-500 text-xs italic">Required</span></Label>
           <Select
             value={postgraduateData.applicantType}
             onValueChange={(value) => {
@@ -932,19 +932,23 @@ const PostgraduateForm = () => {
 
     {/* Upload Payment Evidence */}
     <FileUploadField
-      id="applicationFee"
-      label="Payment Evidence"
-      accept=".pdf,.jpg,.jpeg,.png"
-      value={postgraduateData.applicationFee ? [postgraduateData.applicationFee] : null}
+      id="paymentEvidence"
+      label={
+        <>
+          Payment Evidence <span className="text-red-500 text-xs italic">Required</span>
+        </>
+      }
+      accept=".jpg,.jpeg,.png,.pdf"
+      value={postgraduateData.paymentEvidence ? [postgraduateData.paymentEvidence] : null}
       onChange={(files) => setPostgraduateData(prev => ({
         ...prev,
-        applicationFee: files ? files[0] : null
+        paymentEvidence: files ? files[0] : null
       }))}
       onRemove={() => setPostgraduateData(prev => ({
         ...prev,
-        applicationFee: null
+        paymentEvidence: null
       }))}
-      maxSize="10MB"
+      maxSize="5MB"
     />
   </div>
 </div>
@@ -956,7 +960,11 @@ const PostgraduateForm = () => {
         <div className="space-y-4">
           <FileUploadField
             id="passportPhoto"
-            label="Passport Photograph <span className='text-red-500 text-xs italic'>Required</span>"
+            label={
+              <>
+                Passport Photograph <span className="text-red-500 text-xs italic">Required</span>
+              </>
+            }
             accept=".jpg,.jpeg,.png"
             value={postgraduateData.passportPhoto ? [postgraduateData.passportPhoto] : null}
             onChange={(files) => setPostgraduateData(prev => ({
@@ -1289,7 +1297,7 @@ const PostgraduateForm = () => {
         
         {/* First Academic Qualification */}
         <div className="space-y-4">
-          <h4 className="font-medium">First Academic Qualification <span className="text-red-500">Required</span></h4>
+          <h4 className="font-medium"><b>First Academic Qualification</b></h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Qualification Type <span className="text-red-500">Required</span></Label>
@@ -1471,7 +1479,11 @@ const PostgraduateForm = () => {
 
           <FileUploadField
             id="qualification1Documents"
-            label="Upload Qualification Documents <span className='text-red-500 text-xs italic'>Required</span>"
+            label={
+              <>
+                Upload Qualification Documents <span className="text-red-500 text-xs italic">Required</span>
+              </>
+            }
             accept=".pdf,.doc,.docx"
             value={postgraduateData.academicQualifications.qualification1.documents}
             onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
@@ -1483,7 +1495,7 @@ const PostgraduateForm = () => {
         {/* Second Academic Qualification (Only for PhD) */}
         {postgraduateData.programType === "PhD" && (
           <div className="space-y-4">
-            <h4 className="font-medium">Second Academic Qualification <span className="text-red-500">Required</span></h4>
+            <h4 className="font-medium"><b>Second Academic Qualification</b></h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Qualification Type <span className="text-red-500">Required</span></Label>
@@ -1665,7 +1677,11 @@ const PostgraduateForm = () => {
 
             <FileUploadField
               id="qualification2Documents"
-              label="Upload Qualification Documents <span className='text-red-500 text-xs italic'>Required</span>"
+              label={
+                <>
+                  Upload Qualification Documents <span className="text-red-500 text-xs italic">Required</span>
+                </>
+              }
               accept=".pdf,.doc,.docx"
               value={postgraduateData.academicQualifications.qualification2?.documents}
               onChange={(files) => handleAcademicQualificationChange("qualification2", "documents", files)}
@@ -1691,7 +1707,9 @@ const PostgraduateForm = () => {
 
       {/* Statement of Purpose */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Statement of Purpose/Personal Statement</h3>
+        <h3 className="text-lg font-semibold">
+          Statement of Purpose 
+        </h3>
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
@@ -1706,19 +1724,22 @@ const PostgraduateForm = () => {
           </div>
           <FileUploadField
             id="statementOfPurpose"
-            label="Statement of Purpose"
+            label={
+              <>
+                Statement of Purpose {postgraduateData.programType === "PhD" && <span className="text-red-500 text-xs italic">Required</span>}
+              </>
+            }
             accept=".pdf,.doc,.docx"
-            value={postgraduateData.statementOfPurpose}
+            value={postgraduateData.statementOfPurpose ? [postgraduateData.statementOfPurpose] : null}
             onChange={(files) => setPostgraduateData(prev => ({
               ...prev,
-              statementOfPurpose: files || []
+              statementOfPurpose: files ? files[0] : null
             }))}
             onRemove={() => setPostgraduateData(prev => ({
               ...prev,
-              statementOfPurpose: []
+              statementOfPurpose: null
             }))}
-            multiple={false}
-            maxSize="10MB"
+            maxSize="5MB"
           />
         </div>
       </div>
