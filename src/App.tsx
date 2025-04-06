@@ -21,7 +21,6 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Sitemap from "./pages/Sitemap";
 import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import Hostels from "./pages/Hostels";
 
 // Create a new QueryClient instance
@@ -43,7 +42,6 @@ const App: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/programs" element={<Programs />} />
                 <Route path="/campus" element={<CampusLife />} />

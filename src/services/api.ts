@@ -8,6 +8,11 @@ export const API_ENDPOINTS = {
   DOCUMENT_UPLOAD: `${API_BASE_URL}/document-upload`,
   FORGOT_PASSWORD: `${API_BASE_URL}/forgot-password`,
   CONTACT: `${API_BASE_URL}/contact`,
+  SEND_VERIFICATION: `${API_BASE_URL}/send-verification`,
+  VERIFY_EMAIL: `${API_BASE_URL}/verify-email`,
+  SEND_PASSWORD_RESET_OTP: `${API_BASE_URL}/send-password-reset-otp`,
+  VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/verify-password-reset-otp`,
+  RESET_PASSWORD: `${API_BASE_URL}/reset-password`,
   // Add more endpoints as needed
 };
 
@@ -157,6 +162,131 @@ export const apiService = {
       return await response.json();
     } catch (error) {
       console.error("Contact form submission error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send email verification code
+   * @param email - User's email address
+   * @returns Promise with the API response
+   */
+  sendVerificationCode: async (email: string) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.SEND_VERIFICATION, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to send verification code");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Verification code sending error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verify email with OTP code
+   * @param data - Object containing email and verification code
+   * @returns Promise with the API response
+   */
+  verifyEmail: async (data: { email: string; code: string }) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.VERIFY_EMAIL, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to verify email");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Email verification error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send password reset OTP
+   * @param email - User's email address
+   * @returns Promise with the API response
+   */
+  sendPasswordResetOtp: async (email: string) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.SEND_PASSWORD_RESET_OTP, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to send password reset OTP");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Password reset OTP sending error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verify password reset OTP
+   * @param data - Object containing email and OTP code
+   * @returns Promise with the API response
+   */
+  verifyPasswordResetOtp: async (data: { email: string; code: string }) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.VERIFY_PASSWORD_RESET_OTP, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to verify password reset OTP");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Password reset OTP verification error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Reset password with verified OTP
+   * @param data - Object containing email, OTP code, and new password
+   * @returns Promise with the API response
+   */
+  resetPassword: async (data: { email: string; code: string; password: string }) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.RESET_PASSWORD, {
+        method: "POST",
+        headers: defaultHeaders,
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to reset password");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Password reset error:", error);
       throw error;
     }
   },

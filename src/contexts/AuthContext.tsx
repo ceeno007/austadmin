@@ -39,16 +39,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('applicationData', JSON.stringify(userData));
     
     // Store user information
-    if (userData.name) {
+    if (userData.user && userData.user.full_name) {
+      localStorage.setItem('userName', userData.user.full_name);
+    } else if (userData.name) {
       localStorage.setItem('userName', userData.name);
+    } else if (userData.full_name) {
+      localStorage.setItem('userName', userData.full_name);
+    } else if (userData.user && userData.user.name) {
+      localStorage.setItem('userName', userData.user.name);
     }
     
     if (userData.email) {
       localStorage.setItem('userEmail', userData.email);
+    } else if (userData.user && userData.user.email) {
+      localStorage.setItem('userEmail', userData.user.email);
     }
     
     if (userData.id) {
       localStorage.setItem('userId', userData.id.toString());
+    } else if (userData.user && userData.user.uuid) {
+      localStorage.setItem('userId', userData.user.uuid);
     }
     
     // First check for program type in applications array (this is where it's located in the response)

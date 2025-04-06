@@ -17,12 +17,14 @@ import {
 import UndergraduateForm from "@/components/forms/UndergraduateForm";
 import PostgraduateForm from "@/components/forms/PostgraduateForm";
 import JupebForm from "@/components/forms/JupebForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DocumentUpload = () => {
   const { toast } = useToast();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const typeFromUrl = searchParams.get("type");
+  const { checkAuth } = useAuth();
 
   const [activeTab, setActiveTab] = useState(() => {
     // Use URL parameter first, then localStorage, then default to "undergraduate"
@@ -40,7 +42,41 @@ const DocumentUpload = () => {
   });
 
   const [userName, setUserName] = useState(() => {
-    return localStorage.getItem("userName") || "User";
+    // Get the user's name from localStorage or applicationData
+    const storedName = localStorage.getItem("userName");
+    if (storedName) return storedName;
+    
+    // If not in userName, try to get from applicationData
+    const applicationData = localStorage.getItem("applicationData");
+    if (applicationData) {
+      try {
+        const data = JSON.parse(applicationData);
+        
+        // Check for full_name in the user object first (based on the API response structure)
+        if (data.user && data.user.full_name) {
+          localStorage.setItem("userName", data.user.full_name);
+          return data.user.full_name;
+        }
+        
+        // Fallback to other possible locations
+        if (data.name) {
+          localStorage.setItem("userName", data.name);
+          return data.name;
+        }
+        if (data.full_name) {
+          localStorage.setItem("userName", data.full_name);
+          return data.full_name;
+        }
+        if (data.user?.name) {
+          localStorage.setItem("userName", data.user.name);
+          return data.user.name;
+        }
+      } catch (e) {
+        console.error("Error parsing application data:", e);
+      }
+    }
+    
+    return "User";
   });
 
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -84,7 +120,7 @@ const DocumentUpload = () => {
 
   // Add authentication check
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuthStatus = () => {
       const accessToken = localStorage.getItem("accessToken");
       
       if (!accessToken) {
@@ -100,10 +136,10 @@ const DocumentUpload = () => {
     };
 
     // Check auth immediately
-    checkAuth();
+    checkAuthStatus();
 
     // Set up interval to check auth every 5 minutes
-    const interval = setInterval(checkAuth, 5 * 60 * 1000);
+    const interval = setInterval(checkAuthStatus, 5 * 60 * 1000);
 
     // Cleanup interval on unmount
     return () => clearInterval(interval);

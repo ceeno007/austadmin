@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiService } from "@/services/api";
@@ -19,6 +19,11 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [programType, setProgramType] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [showOtpField, setShowOtpField] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const navigate = useNavigate();
 
   // Password strength validation
@@ -26,6 +31,81 @@ const SignUp = () => {
   const hasUpperCase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
   const passwordsMatch = password === confirmPassword && password !== "";
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // Show OTP field when email is entered
+  useEffect(() => {
+    if (isEmailValid && !isEmailVerified) {
+      setShowOtpField(true);
+    }
+  }, [email, isEmailValid, isEmailVerified]);
+
+  const handleSendVerification = async () => {
+    if (!isEmailValid) {
+      toast.error("Please enter a valid email address", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      await apiService.sendVerificationCode(email);
+      toast.success("Verification code sent to your email", {
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
+      });
+    } catch (error) {
+      console.error("Error sending verification code:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to send verification code", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!verificationCode) {
+      toast.error("Please enter the verification code", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    try {
+      await apiService.verifyEmail({ email, code: verificationCode });
+      setIsEmailVerified(true);
+      toast.success("Email verified successfully", {
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+        }
+      });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to verify email", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +132,16 @@ const SignUp = () => {
     
     if (!(hasMinLength && hasUpperCase && hasNumber)) {
       toast.error("Password doesn't meet requirements!", {
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+        }
+      });
+      return;
+    }
+
+    if (!isEmailVerified) {
+      toast.error("Please verify your email address first!", {
         style: {
           background: '#EF4444', // Red background
           color: 'white',
@@ -131,15 +221,81 @@ const SignUp = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                />
+                <div className="flex gap-2">
+                  <div className="relative flex-grow">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                      className={isEmailVerified ? "border-green-500" : ""}
+                      disabled={isEmailVerified}
+                    />
+                    {isEmailVerified && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
+                        <CheckCircle className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleSendVerification}
+                    disabled={!isEmailValid || isVerifying || isEmailVerified}
+                    className="whitespace-nowrap"
+                  >
+                    {isVerifying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : isEmailVerified ? (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                        Verified
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4 mr-2" />
+                        Verify
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
+              
+              {showOtpField && !isEmailVerified && (
+                <div className="space-y-2">
+                  <Label htmlFor="verificationCode">Verification Code</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="verificationCode"
+                      placeholder="Enter verification code"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      required
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleVerifyOtp}
+                      disabled={!verificationCode || isVerifyingOtp}
+                      className="whitespace-nowrap"
+                    >
+                      {isVerifyingOtp ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        "Verify Code"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="programType">Program Type</Label>
@@ -243,13 +399,13 @@ const SignUp = () => {
                 )}
               </div>
               
-              <Button type="submit" className="w-full bg-primary" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-primary" disabled={isLoading || !isEmailVerified}>
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>
             
             <div className="mt-4 text-center text-sm">
-              <span className="text-gray-500">Already have an account?</span>{" "}
+              Already have an account?{" "}
               <Link to="/login" className="text-primary hover:underline">
                 Log in
               </Link>
