@@ -952,11 +952,11 @@ const PostgraduateForm = () => {
 
       {/* Passport Photo Upload */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Passport Photograph <span className="text-red-500">Required</span></h3>
+        <h3 className="text-lg font-semibold">Passport Photograph</h3>
         <div className="space-y-4">
           <FileUploadField
             id="passportPhoto"
-            label="Passport Photograph <span className='text-red-500 font-medium'>Required</span>"
+            label="Passport Photograph <span className='text-red-500 text-xs italic'>Required</span>"
             accept=".jpg,.jpeg,.png"
             value={postgraduateData.passportPhoto ? [postgraduateData.passportPhoto] : null}
             onChange={(files) => setPostgraduateData(prev => ({
@@ -977,7 +977,7 @@ const PostgraduateForm = () => {
         <h3 className="text-lg font-semibold">Program Selection</h3>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Academic Session <span className="text-red-500 font-medium">Required</span></Label>
+            <Label>Academic Session <span className="text-red-500 text-xs italic">Required</span></Label>
             <Select
               value={postgraduateData.academicSession}
               onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, academicSession: value }))}
@@ -992,7 +992,7 @@ const PostgraduateForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Program Type <span className="text-red-500 font-medium">Required</span></Label>
+            <Label>Program Type <span className="text-red-500 text-xs italic">Required</span></Label>
             <Select
               value={postgraduateData.programType}
               onValueChange={(value: "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD") => {
@@ -1015,7 +1015,7 @@ const PostgraduateForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Program <span className="text-red-500 font-medium">Required</span></Label>
+            <Label>Program <span className="text-red-500 text-xs italic">Required</span></Label>
             <Select
               value={postgraduateData.program}
               onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, program: value }))}
@@ -1041,7 +1041,7 @@ const PostgraduateForm = () => {
   <div className="space-y-4">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label>Surname <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Surname <span className="text-red-500 text-xs italic">Required</span></Label>
         <Input
           placeholder="Enter your surname"
           value={postgraduateData.personalDetails.surname}
@@ -1050,7 +1050,7 @@ const PostgraduateForm = () => {
         />
       </div>
       <div className="space-y-2">
-        <Label>First Name <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>First Name <span className="text-red-500 text-xs italic">Required</span></Label>
         <Input
           placeholder="Enter your first name"
           value={postgraduateData.personalDetails.firstName}
@@ -1072,7 +1072,7 @@ const PostgraduateForm = () => {
     {/* Gender and Date of Birth side by side */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label>Gender <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Gender <span className="text-red-500 text-xs italic">Required</span></Label>
         <Select
           value={postgraduateData.personalDetails.gender}
           onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
@@ -1089,7 +1089,7 @@ const PostgraduateForm = () => {
 
       {/* Date of Birth */}
       <div className="space-y-2">
-        <Label>Date of Birth <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
         <div className="grid grid-cols-3 gap-2">
           <Select
             value={postgraduateData.personalDetails.dateOfBirth.day}
@@ -1141,7 +1141,7 @@ const PostgraduateForm = () => {
     </div>
 
     <div className="space-y-2">
-      <Label>Street Address <span className="text-red-500 font-medium">Required</span></Label>
+      <Label>Street Address <span className="text-red-500 text-xs italic">Required</span></Label>
       <Input
         placeholder="Enter your street address"
         value={postgraduateData.personalDetails.streetAddress}
@@ -1152,7 +1152,7 @@ const PostgraduateForm = () => {
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label>City <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>City <span className="text-red-500 text-xs italic">Required</span></Label>
         <Input
           placeholder="Enter your city"
           value={postgraduateData.personalDetails.city}
@@ -1161,7 +1161,7 @@ const PostgraduateForm = () => {
         />
       </div>
       <div className="space-y-2">
-        <Label>Country <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Country <span className="text-red-500 text-xs italic">Required</span></Label>
         <Select
           value={postgraduateData.personalDetails.country}
           onValueChange={(value) => handlePersonalDetailsChange("country", value)}
@@ -1183,7 +1183,7 @@ const PostgraduateForm = () => {
     {/* Nationality and State of Origin side by side */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label>Nationality <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Nationality <span className="text-red-500 text-xs italic">Required</span></Label>
         {postgraduateData.applicantType === "Nigerian" ? (
           <Input value="Nigerian" disabled className="bg-gray-100" />
         ) : (
@@ -1207,7 +1207,7 @@ const PostgraduateForm = () => {
 
       {postgraduateData.applicantType === "Nigerian" && (
         <div className="space-y-2">
-          <Label>State of Origin <span className="text-red-500 font-medium">Required</span></Label>
+          <Label>State of Origin <span className="text-red-500 text-xs italic">Required</span></Label>
           <Select
             value={postgraduateData.personalDetails.stateOfOrigin}
             onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
@@ -1229,7 +1229,7 @@ const PostgraduateForm = () => {
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label>Phone Number <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Phone Number <span className="text-red-500 text-xs italic">Required</span></Label>
         <PhoneInput
           international
           defaultCountry="NG"
@@ -1240,7 +1240,7 @@ const PostgraduateForm = () => {
         />
       </div>
       <div className="space-y-2">
-        <Label>Email <span className="text-red-500 font-medium">Required</span></Label>
+        <Label>Email <span className="text-red-500 text-xs italic">Required</span></Label>
         <Input
           type="email"
           placeholder="Enter your email"
@@ -1471,7 +1471,7 @@ const PostgraduateForm = () => {
 
           <FileUploadField
             id="qualification1Documents"
-            label="Upload Qualification Documents <span className='text-red-500'>Required</span>"
+            label="Upload Qualification Documents <span className='text-red-500 text-xs italic'>Required</span>"
             accept=".pdf,.doc,.docx"
             value={postgraduateData.academicQualifications.qualification1.documents}
             onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
@@ -1665,7 +1665,7 @@ const PostgraduateForm = () => {
 
             <FileUploadField
               id="qualification2Documents"
-              label="Upload Qualification Documents <span className='text-red-500'>Required</span>"
+              label="Upload Qualification Documents <span className='text-red-500 text-xs italic'>Required</span>"
               accept=".pdf,.doc,.docx"
               value={postgraduateData.academicQualifications.qualification2?.documents}
               onChange={(files) => handleAcademicQualificationChange("qualification2", "documents", files)}
@@ -1829,7 +1829,7 @@ const PostgraduateForm = () => {
 
       {/* Declaration */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Declaration <span className="text-red-500">Required</span></h3>
+        <h3 className="text-lg font-semibold">Declaration</h3>
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
@@ -1840,7 +1840,7 @@ const PostgraduateForm = () => {
             </p>
           </div>
           <div className="space-y-2">
-            <Label>Full Name (in lieu of signature) <span className="text-red-500">Required</span></Label>
+            <Label>Full Name (in lieu of signature) <span className="text-red-500 text-xs italic">Required</span></Label>
             <Input
               placeholder="Type your full name"
               value={postgraduateData.declaration}
