@@ -83,7 +83,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1000"
+                    src="https://www.aust.edu.ng/sites/default/files/2023-10/computer-lab-education-technology.jpg"
                     alt="Computer Labs"
                     className="w-full h-full object-cover"
                   />
