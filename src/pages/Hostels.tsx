@@ -10,6 +10,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Pagination, Navigation } from 'swiper/modules';
+import ImageViewer from "@/components/ImageViewer";
 
 import nnamdi1 from "@/assets/images/hostel/nnamdi1.jpg";
 import nnamdi2 from "@/assets/images/hostel/nnamdi2.jpg";
@@ -32,6 +33,7 @@ import julius5 from "@/assets/images/hostel/Julius Nyerere5.jpg";
 
 const Hostels = () => {
   const [selectedHostel, setSelectedHostel] = useState<any | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Hostel data
   const hostels = [
@@ -252,66 +254,63 @@ const Hostels = () => {
           </div>
         </section>
 
-        {/* Modal for Selected Hostel */}
+        {/* Hostel Modal */}
         {selectedHostel && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-md md:max-w-2xl lg:max-w-4xl rounded-xl overflow-hidden shadow-2xl relative max-h-[85vh] flex flex-col">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h2 className="text-xl font-bold">
-                  {selectedHostel.name} – {selectedHostel.type}
-                </h2>
-                <button
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => setSelectedHostel(null)}
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+          <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold">{selectedHostel.name}</h2>
+                  <button 
+                    onClick={() => setSelectedHostel(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+                
+                <div className="mb-6">
+                  <Swiper
+                    modules={[Pagination, Navigation]}
+                    spaceBetween={20}
+                    navigation
+                    pagination={{ clickable: true }}
+                    className="rounded-lg overflow-hidden"
+                  >
+                    {selectedHostel.images.map((image: string, index: number) => (
+                      <SwiperSlide key={index}>
+                        <div 
+                          className="cursor-pointer"
+                          onClick={() => setSelectedImage(image)}
+                        >
+                          <img
+                            src={image}
+                            alt={`${selectedHostel.name} - Image ${index + 1}`}
+                            className="w-full h-96 object-cover rounded-lg"
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
 
-              <div className="overflow-y-auto flex-1 p-4">
-                <Swiper
-                  modules={[Pagination, Navigation]}
-                  spaceBetween={10}
-                  slidesPerView={1}
-                  pagination={{ clickable: true }}
-                  navigation
-                  className="mb-4"
-                >
-                  {selectedHostel.images.map((img: string, i: number) => (
-                    <SwiperSlide key={i}>
-                      <img
-                        src={img}
-                        alt={`Slide ${i + 1}`}
-                        className="rounded-lg w-full h-[200px] md:h-[300px] object-cover mx-auto"
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Description</h3>
-                    <p className="text-gray-600 mb-4 text-sm">{selectedHostel.description}</p>
-                    
-                    <h3 className="text-lg font-semibold mb-2">Pricing</h3>
-                    <div className="space-y-1 mb-4 text-sm">
-                      <p className="flex justify-between">
-                        <span>Per Semester:</span>
-                        <span className="font-medium">{selectedHostel.feePerSemester}</span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span>Total (1 year):</span>
-                        <span className="font-medium text-[#FF5500]">{selectedHostel.totalFee}</span>
-                      </p>
+                    <h3 className="text-xl font-semibold mb-4">Details</h3>
+                    <div className="space-y-2">
+                      <p><span className="font-medium">Type:</span> {selectedHostel.type}</p>
+                      <p><span className="font-medium">Duration:</span> {selectedHostel.duration}</p>
+                      <p><span className="font-medium">Fee per Semester:</span> {selectedHostel.feePerSemester}</p>
+                      <p><span className="font-medium">Total Fee:</span> {selectedHostel.totalFee}</p>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Features</h3>
-                    <ul className="space-y-1 text-sm">
-                      {selectedHostel.features.map((feature: string, idx: number) => (
-                        <li key={idx} className="flex items-start">
-                          <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <h3 className="text-xl font-semibold mb-4">Features</h3>
+                    <ul className="space-y-2">
+                      {selectedHostel.features.map((feature: string, index: number) => (
+                        <li key={index} className="flex items-start">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -321,6 +320,14 @@ const Hostels = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Image Viewer */}
+        {selectedImage && (
+          <ImageViewer 
+            imageUrl={selectedImage} 
+            onClose={() => setSelectedImage(null)} 
+          />
         )}
       </main>
       
