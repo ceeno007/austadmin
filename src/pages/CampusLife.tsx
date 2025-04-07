@@ -210,7 +210,7 @@ const CampusLife = () => {
                   Join one of our many student-led organizations to develop leadership skills and build lifelong connections.
                 </p>
                 <ul className="list-disc pl-5 space-y-2 text-gray-600">
-                  <li>Student Government Association</li>
+                 
                   <li>Academic Clubs (Engineering Society, Computing Club)</li>
                   <li>Cultural Associations</li>
                   <li>Community Service Groups</li>
