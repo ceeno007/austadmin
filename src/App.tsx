@@ -3,11 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { 
-  HashRouter as Router,  // <-- Use HashRouter
-  Routes, 
-  Route 
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -31,6 +27,7 @@ import Hostels from "./pages/Hostels";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
+// Make sure App is defined as a proper React component function
 const App: React.FC = () => {
   return (
     <React.StrictMode>
@@ -39,12 +36,7 @@ const App: React.FC = () => {
           <LanguageProvider>
             <Toaster />
             <Sonner />
-            {/*
-              Use HashRouter instead of BrowserRouter
-              So direct URLs like chino.com/#/programs 
-              won't lead to a 404 on servers that don't have rewrite rules
-            */}
-            <Router>
+            <BrowserRouter>
               <AuthProvider>
                 <Routes>
                   {/* Public Routes */}
@@ -62,29 +54,23 @@ const App: React.FC = () => {
                   <Route path="/sitemap" element={<Sitemap />} />
 
                   {/* Protected Routes */}
-                  <Route
-                    path="/application"
-                    element={
-                      <ProtectedRoute>
-                        <ApplicationForm />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/document-upload"
-                    element={
-                      <ProtectedRoute>
-                        <DocumentUpload />
-                      </ProtectedRoute>
-                    }
-                  />
+                  <Route path="/application" element={
+                    <ProtectedRoute>
+                      <ApplicationForm />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/document-upload" element={
+                    <ProtectedRoute>
+                      <DocumentUpload />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/view-pdf" element={<ViewPDF />} />
 
                   {/* Catch-all route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AuthProvider>
-            </Router>
+            </BrowserRouter>
           </LanguageProvider>
         </TooltipProvider>
       </QueryClientProvider>
@@ -92,4 +78,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default App; 
