@@ -11,6 +11,25 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Pagination, Navigation } from 'swiper/modules';
 
+import nnamdi1 from "@/assets/images/hostel/nnamdi1.jpg";
+import nnamdi2 from "@/assets/images/hostel/nnamdi2.jpg";
+import kwame1 from "@/assets/images/hostel/Kwame Nkrumah1.jpg";
+import kwame2 from "@/assets/images/hostel/Kwame Nkrumah2.jpg";
+import kwame3 from "@/assets/images/hostel/Kwame Nkrumah3.jpg";
+import kwame4 from "@/assets/images/hostel/Kwame Nkrumah4.jpg";
+import kwame5 from "@/assets/images/hostel/Kwame Nkrumah5.jpg";
+import kwame6 from "@/assets/images/hostel/Kwame Nkrumah6.jpg";
+import kwame7 from "@/assets/images/hostel/Kwame Nkrumah7.jpg";
+
+import julius1 from "@/assets/images/hostel/Julius Nyerere1.jpg";
+import julius2 from "@/assets/images/hostel/Julius Nyerere2.jpg";
+import julius3 from "@/assets/images/hostel/Julius Nyerere3.jpg";
+import julius4 from "@/assets/images/hostel/Julius Nyerere4.jpg";
+import julius5 from "@/assets/images/hostel/Julius Nyerere5.jpg";
+
+
+
+
 const Hostels = () => {
   const [selectedHostel, setSelectedHostel] = useState<any | null>(null);
 
@@ -23,9 +42,9 @@ const Hostels = () => {
       feePerSemester: "N280,000",
       totalFee: "N560,000",
       images: [
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000",
-        "https://images.unsplash.com/photo-1590080875621-cdd43e49ef88?q=80&w=1000"
+        nnamdi1,
+        nnamdi2,
+       
       ],
       description: "Comfortable shared accommodation in a vibrant community setting.",
       features: [
@@ -43,9 +62,13 @@ const Hostels = () => {
       feePerSemester: "N280,000",
       totalFee: "N560,000",
       images: [
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000",
-        "https://images.unsplash.com/photo-1590080875621-cdd43e49ef88?q=80&w=1000"
+        kwame1,
+        kwame2,
+        kwame3,
+        kwame4,
+        kwame5,
+        kwame6,
+        kwame7,
       ],
       description: "Affordable shared accommodation with modern amenities.",
       features: [
@@ -63,9 +86,13 @@ const Hostels = () => {
       feePerSemester: "N350,000",
       totalFee: "N700,000",
       images: [
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000",
-        "https://images.unsplash.com/photo-1590080875621-cdd43e49ef88?q=80&w=1000"
+        kwame1,
+        kwame2,
+        kwame3,
+        kwame4,
+        kwame5,
+        kwame6,
+        kwame7,
       ],
       description: "Private room with enhanced privacy and comfort.",
       features: [
@@ -83,9 +110,13 @@ const Hostels = () => {
       feePerSemester: "N455,000",
       totalFee: "N910,000",
       images: [
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000",
-        "https://images.unsplash.com/photo-1590080875621-cdd43e49ef88?q=80&w=1000",
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000"
+        julius5,
+        julius1,
+        julius2,
+        julius3,
+        julius4,
+        
+       ,
       ],
       description: "Premium single room with modern amenities and privacy.",
       features: [
@@ -104,9 +135,11 @@ const Hostels = () => {
       feePerSemester: "N238,000",
       totalFee: "N476,000",
       images: [
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000",
-        "https://images.unsplash.com/photo-1590080875621-cdd43e49ef88?q=80&w=1000"
+        julius5,
+        julius1,
+        julius2,
+        julius3,
+        julius4,
       ],
       description: "Economical shared accommodation in a premium hall.",
       features: [
@@ -138,7 +171,7 @@ const Hostels = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img 
-                    src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=1000"
+                    src={kwame1}
                     alt="AUST Student Housing"
                     className="w-full h-80 object-cover"
                   />

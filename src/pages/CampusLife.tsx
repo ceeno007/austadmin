@@ -19,6 +19,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import campusLife from "@/assets/images/campusLife.jpg";
 import research from "@/assets/images/research.jpg";
 import housing from "@/assets/images/housing.jpg";
+import cafeteria from "@/assets/images/Cafeteria.jpg";
+// import gym from "@/assets/images/gym.jpg";
+import library from "@/assets/images/library.jpg";
 
 const CampusLife = () => {
   return (
@@ -59,7 +62,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1558021211-6d1403321394?q=80&w=1000"
+                     src={library}
                     alt="AUST Library"
                     className="w-full h-full object-cover"
                   />
@@ -149,7 +152,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?q=80&w=1000"
+                    src={cafeteria}
                     alt="Cafeteria"
                     className="w-full h-full object-cover"
                   />
@@ -170,7 +173,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1000"
+                    // src={library}
                     alt="Sports Facilities"
                     className="w-full h-full object-cover"
                   />
