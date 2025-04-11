@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { apiService } from "../../services/api";
 
 interface DateField {
   day: string;
@@ -340,9 +341,6 @@ const PostgraduateForm = () => {
           // Get stored program type from localStorage for comparison
           const savedProgramType = localStorage.getItem("programType");
           
-          console.log("Application program_type:", programType);
-          console.log("Saved programType:", savedProgramType);
-          
           // Only redirect if program type exists and is different from 'postgraduate'
           if (programType && 
               programType !== 'postgraduate' && 
@@ -350,7 +348,6 @@ const PostgraduateForm = () => {
               programType !== 'phd' && 
               savedProgramType && 
               savedProgramType !== 'postgraduate') {
-            console.log(`Redirecting from postgraduate to ${programType} form based on application data`);
             window.location.href = `/document-upload?type=${programType}`;
           } else {
             // If program type matches, update localStorage to be consistent
@@ -364,13 +361,12 @@ const PostgraduateForm = () => {
               userProgram !== 'postgraduate' && 
               userProgram !== 'msc' && 
               userProgram !== 'phd') {
-            console.log(`Redirecting from postgraduate to ${userProgram} form based on user program`);
             window.location.href = `/document-upload?type=${userProgram}`;
           }
         }
       }
     } catch (error) {
-      console.error("Error parsing application data:", error);
+      // Error handling without console.log
     }
   }, []);
 
@@ -447,6 +443,10 @@ const PostgraduateForm = () => {
       const {
         academic_session,
         selected_program,
+        program_type,
+        surname,
+        first_name,
+        other_names,
         nationality,
         gender,
         date_of_birth,
@@ -455,6 +455,7 @@ const PostgraduateForm = () => {
         country,
         state_of_origin,
         phone_number,
+        email,
         has_disability,
         disability_description,
         awarding_institution,
@@ -489,26 +490,65 @@ const PostgraduateForm = () => {
       if (transcript) qualificationDocs.push(transcript);
       if (certificate) qualificationDocs.push(certificate);
       
+      // Parse date of birth if available
+      let parsedDateOfBirth = { day: "", month: "", year: "" };
+      if (date_of_birth) {
+        const date = new Date(date_of_birth);
+        parsedDateOfBirth = {
+          day: date.getDate().toString().padStart(2, '0'),
+          month: (date.getMonth() + 1).toString().padStart(2, '0'),
+          year: date.getFullYear().toString()
+        };
+      }
+      
+      // Parse start and end dates if available
+      let parsedStartDate = { day: "", month: "", year: "" };
+      let parsedEndDate = { day: "", month: "", year: "" };
+      
+      if (start_date) {
+        const startDate = new Date(start_date);
+        parsedStartDate = {
+          day: startDate.getDate().toString().padStart(2, '0'),
+          month: (startDate.getMonth() + 1).toString().padStart(2, '0'),
+          year: startDate.getFullYear().toString()
+        };
+      }
+      
+      if (end_date) {
+        const endDate = new Date(end_date);
+        parsedEndDate = {
+          day: endDate.getDate().toString().padStart(2, '0'),
+          month: (endDate.getMonth() + 1).toString().padStart(2, '0'),
+          year: endDate.getFullYear().toString()
+        };
+      }
+      
       setPostgraduateData(prev => ({
         ...prev,
-        passportPhoto: passportPhoto,
+        passportPhoto: passportPhoto || prev.passportPhoto,
         academicSession: academic_session || prev.academicSession,
+        programType: (program_type as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD") || prev.programType,
         program: selected_program || prev.program,
-        applicationFee: paymentReceipt,
+        applicationFee: paymentReceipt || prev.applicationFee,
+        paymentEvidence: paymentReceipt || prev.paymentEvidence,
         personalDetails: {
           ...prev.personalDetails,
+          surname: surname || prev.personalDetails.surname,
+          firstName: first_name || prev.personalDetails.firstName,
+          otherNames: other_names || prev.personalDetails.otherNames,
           gender: gender || prev.personalDetails.gender,
-          dateOfBirth: date_of_birth ? {
-            day: new Date(date_of_birth).getDate().toString().padStart(2, '0'),
-            month: (new Date(date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
-            year: new Date(date_of_birth).getFullYear().toString()
-          } : prev.personalDetails.dateOfBirth,
+          dateOfBirth: {
+            day: parsedDateOfBirth.day || prev.personalDetails.dateOfBirth.day,
+            month: parsedDateOfBirth.month || prev.personalDetails.dateOfBirth.month,
+            year: parsedDateOfBirth.year || prev.personalDetails.dateOfBirth.year
+          },
           streetAddress: street_address || prev.personalDetails.streetAddress,
           city: city || prev.personalDetails.city,
           country: country || prev.personalDetails.country,
           stateOfOrigin: state_of_origin || prev.personalDetails.stateOfOrigin,
           nationality: nationality || prev.personalDetails.nationality,
           phoneNumber: phone_number || prev.personalDetails.phoneNumber,
+          email: email || prev.personalDetails.email,
           hasDisabilities: has_disability ? "Yes" : "No",
           disabilityDescription: disability_description || prev.personalDetails.disabilityDescription
         },
@@ -516,53 +556,34 @@ const PostgraduateForm = () => {
           ...prev.academicQualifications,
           qualification1: {
             ...prev.academicQualifications.qualification1,
-            institution: awarding_institution || prev.academicQualifications.qualification1.institution,
             type: qualification_type || prev.academicQualifications.qualification1.type,
-            subject: subject || prev.academicQualifications.qualification1.subject,
             grade: grade || prev.academicQualifications.qualification1.grade,
             cgpa: cgpa || prev.academicQualifications.qualification1.cgpa,
-            // Convert start and end dates from API to form format
-            startDate: start_date ? {
-              day: new Date(start_date).getDate().toString().padStart(2, '0'),
-              month: (new Date(start_date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(start_date).getFullYear().toString()
-            } : prev.academicQualifications.qualification1.startDate,
-            endDate: end_date ? {
-              day: new Date(end_date).getDate().toString().padStart(2, '0'),
-              month: (new Date(end_date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(end_date).getFullYear().toString()
-            } : prev.academicQualifications.qualification1.endDate,
+            subject: subject || prev.academicQualifications.qualification1.subject,
+            institution: awarding_institution || prev.academicQualifications.qualification1.institution,
+            startDate: {
+              day: parsedStartDate.day || prev.academicQualifications.qualification1.startDate.day,
+              month: parsedStartDate.month || prev.academicQualifications.qualification1.startDate.month,
+              year: parsedStartDate.year || prev.academicQualifications.qualification1.startDate.year
+            },
+            endDate: {
+              day: parsedEndDate.day || prev.academicQualifications.qualification1.endDate.day,
+              month: parsedEndDate.month || prev.academicQualifications.qualification1.endDate.month,
+              year: parsedEndDate.year || prev.academicQualifications.qualification1.endDate.year
+            },
             documents: qualificationDocs.length > 0 ? qualificationDocs : prev.academicQualifications.qualification1.documents
           },
-          qualification2: prev.programType === "PhD" ? {
-            type: qualification_type || prev.academicQualifications.qualification2?.type,
-            grade: grade || prev.academicQualifications.qualification2?.grade,
-            cgpa: cgpa || prev.academicQualifications.qualification2?.cgpa,
-            subject: subject || prev.academicQualifications.qualification2?.subject,
-            institution: awarding_institution || prev.academicQualifications.qualification2?.institution,
-            startDate: start_date ? {
-              day: new Date(start_date).getDate().toString().padStart(2, '0'),
-              month: (new Date(start_date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(start_date).getFullYear().toString()
-            } : prev.academicQualifications.qualification2?.startDate,
-            endDate: end_date ? {
-              day: new Date(end_date).getDate().toString().padStart(2, '0'),
-              month: (new Date(end_date).getMonth() + 1).toString().padStart(2, '0'),
-              year: new Date(end_date).getFullYear().toString()
-            } : prev.academicQualifications.qualification2?.endDate,
-            documents: qualificationDocs.length > 0 ? qualificationDocs : prev.academicQualifications.qualification2?.documents
-          } : undefined,
           otherQualifications: otherQualifications || prev.academicQualifications.otherQualifications
         },
         statementOfPurpose: statementOfPurpose ? [statementOfPurpose] : prev.statementOfPurpose,
         references: {
           referee1: {
             name: first_referee_name || prev.references.referee1.name,
-            email: first_referee_email || prev.references.referee1.email,
+            email: first_referee_email || prev.references.referee1.email
           },
           referee2: {
             name: second_referee_name || prev.references.referee2.name,
-            email: second_referee_email || prev.references.referee2.email,
+            email: second_referee_email || prev.references.referee2.email
           }
         }
       }));
@@ -665,35 +686,17 @@ const PostgraduateForm = () => {
         !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
         !personalDetails.streetAddress || !personalDetails.city || !personalDetails.country ||
         !personalDetails.phoneNumber || !personalDetails.email) {
-      console.log('Personal details validation failed:', {
-        surname: !!personalDetails.surname,
-        firstName: !!personalDetails.firstName,
-        gender: !!personalDetails.gender,
-        dateOfBirth: !!personalDetails.dateOfBirth,
-        streetAddress: !!personalDetails.streetAddress,
-        city: !!personalDetails.city,
-        country: !!personalDetails.country,
-        phoneNumber: !!personalDetails.phoneNumber,
-        email: !!personalDetails.email
-      });
       return false;
     }
 
     // Validate nationality based on applicant type
     if ((applicantType === "Nigerian" && personalDetails.nationality !== "Nigerian") ||
         (applicantType === "International" && !personalDetails.nationality)) {
-      console.log('Nationality validation failed:', {
-        applicantType,
-        nationality: personalDetails.nationality
-      });
       return false;
     }
 
     // Validate state of origin only for Nigerian applicants
     if (applicantType === "Nigerian" && !personalDetails.stateOfOrigin) {
-      console.log('State of origin validation failed:', {
-        stateOfOrigin: personalDetails.stateOfOrigin
-      });
       return false;
     }
 
@@ -703,16 +706,6 @@ const PostgraduateForm = () => {
         !qual1.startDate.day || !qual1.startDate.month || !qual1.startDate.year ||
         !qual1.endDate.day || !qual1.endDate.month || !qual1.endDate.year ||
         qual1.documents.length === 0) {
-      console.log('First qualification validation failed:', {
-        type: !!qual1.type,
-        grade: !!qual1.grade,
-        cgpa: !!qual1.cgpa,
-        subject: !!qual1.subject,
-        institution: !!qual1.institution,
-        startDate: !!qual1.startDate,
-        endDate: !!qual1.endDate,
-        documents: qual1.documents.length > 0
-      });
       return false;
     }
 
@@ -723,58 +716,28 @@ const PostgraduateForm = () => {
           !qual2.startDate.day || !qual2.startDate.month || !qual2.startDate.year ||
           !qual2.endDate.day || !qual2.endDate.month || !qual2.endDate.year ||
           qual2.documents.length === 0) {
-        console.log('Second qualification validation failed:', {
-          type: !!qual2?.type,
-          grade: !!qual2?.grade,
-          cgpa: !!qual2?.cgpa,
-          subject: !!qual2?.subject,
-          institution: !!qual2?.institution,
-          startDate: !!qual2?.startDate,
-          endDate: !!qual2?.endDate,
-          documents: qual2?.documents.length > 0
-        });
         return false;
       }
     }
 
     // Validate statement of purpose
     if (postgraduateData.statementOfPurpose.length === 0) {
-      console.log('Statement of purpose validation failed:', {
-        statementOfPurpose: postgraduateData.statementOfPurpose
-      });
       return false;
     }
 
     // Validate references
     const { referee1, referee2 } = postgraduateData.references;
     if (!referee1.name || !referee1.email || !referee2.name || !referee2.email) {
-      console.log('References validation failed:', {
-        referee1: {
-          name: !!referee1.name,
-          email: !!referee1.email
-        },
-        referee2: {
-          name: !!referee2.name,
-          email: !!referee2.email
-        }
-      });
       return false;
     }
 
     // Validate declaration
     if (!postgraduateData.declaration) {
-      console.log('Declaration validation failed:', {
-        declaration: postgraduateData.declaration
-      });
       return false;
     }
 
     // Validate required files
     if (!postgraduateData.passportPhoto || !postgraduateData.paymentEvidence) {
-      console.log('Required files validation failed:', {
-        passportPhoto: !!postgraduateData.passportPhoto,
-        paymentEvidence: !!postgraduateData.paymentEvidence
-      });
       return false;
     }
 
@@ -821,122 +784,68 @@ const PostgraduateForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!isFormValid()) {
-      toast.error('Form Validation Failed', {
-        description: 'Please fill in all required fields correctly before submitting.',
-        duration: 5000,
-      });
+      toast.error("Please fill in all required fields");
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
-      // Create FormData object
       const formData = new FormData();
-
-      // Get user ID from localStorage
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        toast.error('Authentication Error', {
-          description: 'User ID not found. Please log in again.',
-          duration: 5000,
-        });
-        return;
-      }
-      formData.append('user_id', userId);
-
-      // Personal Details
-      formData.append('first_name', postgraduateData.personalDetails.firstName);
-      formData.append('last_name', postgraduateData.personalDetails.surname);
-      formData.append('other_names', postgraduateData.personalDetails.otherNames);
-      formData.append('gender', postgraduateData.personalDetails.gender);
-      formData.append('date_of_birth', `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
-      formData.append('street_address', postgraduateData.personalDetails.streetAddress);
-      formData.append('city', postgraduateData.personalDetails.city);
-      formData.append('country', postgraduateData.personalDetails.country);
-      formData.append('state_of_origin', postgraduateData.personalDetails.stateOfOrigin);
-      formData.append('nationality', postgraduateData.personalDetails.nationality);
-      formData.append('phone_number', postgraduateData.personalDetails.phoneNumber);
-      formData.append('has_disability', postgraduateData.personalDetails.hasDisabilities === "Yes" ? "true" : "false");
-      formData.append('disability_description', postgraduateData.personalDetails.disabilityDescription);
-
-      // Program Details
-      formData.append('program_type', postgraduateData.programType);
-      formData.append('selected_program', postgraduateData.program);
-      formData.append('academic_session', postgraduateData.academicSession);
-
-      // Academic Qualifications
-      formData.append('qualification_type', postgraduateData.academicQualifications.qualification1.type);
-      formData.append('grade', postgraduateData.academicQualifications.qualification1.grade);
-      formData.append('cgpa', postgraduateData.academicQualifications.qualification1.cgpa);
-      formData.append('subject', postgraduateData.academicQualifications.qualification1.subject);
-      formData.append('awarding_institution', postgraduateData.academicQualifications.qualification1.institution);
-      formData.append('start_date', `${postgraduateData.academicQualifications.qualification1.startDate.year}-${postgraduateData.academicQualifications.qualification1.startDate.month}-${postgraduateData.academicQualifications.qualification1.startDate.day}`);
-      formData.append('end_date', `${postgraduateData.academicQualifications.qualification1.endDate.year}-${postgraduateData.academicQualifications.qualification1.endDate.month}-${postgraduateData.academicQualifications.qualification1.endDate.day}`);
-
-      // References
-      formData.append('first_referee_name', postgraduateData.references.referee1.name);
-      formData.append('first_referee_email', postgraduateData.references.referee1.email);
-      formData.append('second_referee_name', postgraduateData.references.referee2.name);
-      formData.append('second_referee_email', postgraduateData.references.referee2.email);
-
-      // Files
-      if (postgraduateData.passportPhoto) {
-        formData.append('passport_photo', postgraduateData.passportPhoto);
-      }
+      
+      // Append personal details
+      formData.append("surname", postgraduateData.personalDetails.surname);
+      formData.append("first_name", postgraduateData.personalDetails.firstName);
+      formData.append("gender", postgraduateData.personalDetails.gender);
+      formData.append("date_of_birth", `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", postgraduateData.personalDetails.streetAddress);
+      formData.append("city", postgraduateData.personalDetails.city);
+      formData.append("country", postgraduateData.personalDetails.country);
+      formData.append("nationality", postgraduateData.personalDetails.nationality);
+      formData.append("phone_number", postgraduateData.personalDetails.phoneNumber);
+      formData.append("email", postgraduateData.personalDetails.email);
+      
+      // Append program details
+      formData.append("program_type", postgraduateData.programType);
+      formData.append("applicant_type", postgraduateData.applicantType);
+      
+      // Append academic qualifications
+      formData.append("degree", postgraduateData.academicQualifications.qualification1.type);
+      formData.append("institution", postgraduateData.academicQualifications.qualification1.institution);
+      formData.append("year", postgraduateData.academicQualifications.qualification1.endDate.year);
+      formData.append("class_of_degree", postgraduateData.academicQualifications.qualification1.grade);
+      
+      // Append references
+      formData.append("referee1_name", postgraduateData.references.referee1.name);
+      formData.append("referee1_email", postgraduateData.references.referee1.email);
+      formData.append("referee2_name", postgraduateData.references.referee2.name);
+      formData.append("referee2_email", postgraduateData.references.referee2.email);
+      
+      // Append statement of purpose
       if (postgraduateData.statementOfPurpose.length > 0) {
-        formData.append('statement_of_purpose', postgraduateData.statementOfPurpose[0]);
+        formData.append("statement_of_purpose", postgraduateData.statementOfPurpose[0]);
+      }
+      
+      // Append declaration
+      formData.append("declaration", postgraduateData.declaration.toString());
+      
+      // Append files if they exist
+      if (postgraduateData.passportPhoto) {
+        formData.append("passport_photo", postgraduateData.passportPhoto);
       }
       if (postgraduateData.paymentEvidence) {
-        formData.append('payment_receipt', postgraduateData.paymentEvidence);
+        formData.append("payment_evidence", postgraduateData.paymentEvidence);
       }
-      if (postgraduateData.academicQualifications.qualification1.documents.length > 0) {
-        formData.append('credentials_1', postgraduateData.academicQualifications.qualification1.documents[0]);
-      }
-      if (postgraduateData.academicQualifications.qualification2?.documents.length > 0) {
-        formData.append('credentials_2', postgraduateData.academicQualifications.qualification2.documents[0]);
-      }
-      if (postgraduateData.academicQualifications.otherQualifications) {
-        formData.append('other_qualifications', postgraduateData.academicQualifications.otherQualifications);
-      }
-
-      // Send the request to the backend
-      const response = await fetch('https://admissions-qmt4.onrender.com/application/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
       
-      toast.success('Application Submitted Successfully', {
-        description: 'Your application has been submitted. You will receive a confirmation email shortly.',
-        duration: 5000,
-        action: {
-          label: "View Status",
-          onClick: () => window.location.href = '/application-status'
-        },
-      });
+      const response = await apiService.submitApplication(formData);
+      toast.success("Application submitted successfully!");
       
       // Clear form data from localStorage after successful submission
-      localStorage.removeItem('applicationData');
+      localStorage.removeItem("postgraduateApplicationData");
       
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Submission Failed', {
-        description: error instanceof Error 
-          ? `Error: ${error.message}. Please try again or contact support if the problem persists.`
-          : 'There was an error submitting your application. Please try again.',
-        duration: 8000,
-        action: {
-          label: "Try Again",
-          onClick: () => window.location.reload()
-        },
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to submit application");
     } finally {
       setIsSubmitting(false);
     }

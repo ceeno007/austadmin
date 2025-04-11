@@ -316,4 +316,28 @@ uploadPostgraduateApplication: async (formData: FormData) => {
   }
 },
 
+/**
+ * Submit a postgraduate application
+ * @param formData - Application form data
+ * @returns Promise with the API response
+ */
+submitApplication: async (formData: FormData) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Application submission failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Application submission error:", error);
+    throw error;
+  }
+},
+
 };
