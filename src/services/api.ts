@@ -14,7 +14,7 @@ export const API_ENDPOINTS = {
   VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/verify-password-reset-otp`,
   RESET_PASSWORD: `${API_BASE_URL}/reset-password`,
   APPLICATION_UPLOAD: `${API_BASE_URL}/application/upload`,
-
+  APPLICATION_DRAFT: `${API_BASE_URL}/application/draft`,
 };
 
 // Default Headers for JSON requests
@@ -336,6 +336,30 @@ submitApplication: async (formData: FormData) => {
     return await response.json();
   } catch (error) {
     console.error("Application submission error:", error);
+    throw error;
+  }
+},
+
+/**
+ * Submit a draft application
+ * @param formData - Application form data with is_draft flag
+ * @returns Promise with the API response
+ */
+submitDraftApplication: async (formData: FormData) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.APPLICATION_DRAFT, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Draft application submission failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Draft application submission error:", error);
     throw error;
   }
 },

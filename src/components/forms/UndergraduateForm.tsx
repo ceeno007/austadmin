@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { apiService } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 interface DocumentField {
   id: string;
@@ -246,6 +248,7 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
 };
 
 const UndergraduateForm = () => {
+  const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
 
@@ -489,11 +492,60 @@ const UndergraduateForm = () => {
   const handleSaveAsDraft = async () => {
     setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const formData = new FormData();
+      
+      // Add personal details
+      formData.append("surname", undergraduateData.personalDetails.surname);
+      formData.append("first_name", undergraduateData.personalDetails.firstName);
+      formData.append("other_names", undergraduateData.personalDetails.otherNames);
+      formData.append("gender", undergraduateData.personalDetails.gender);
+      formData.append("date_of_birth", `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", undergraduateData.personalDetails.streetAddress);
+      formData.append("city", undergraduateData.personalDetails.city);
+      formData.append("country", undergraduateData.personalDetails.country);
+      formData.append("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
+      formData.append("nationality", undergraduateData.personalDetails.nationality);
+      formData.append("phone_number", undergraduateData.personalDetails.phoneNumber);
+      formData.append("email", undergraduateData.personalDetails.email);
+      formData.append("has_disability", undergraduateData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
+      formData.append("disability_description", undergraduateData.personalDetails.disabilityDescription);
+
+      // Add academic qualifications
+      formData.append("exam_number", undergraduateData.academicQualifications.waecResults.examNumber);
+      formData.append("exam_year", undergraduateData.academicQualifications.waecResults.examYear);
+      formData.append("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
+      formData.append("jamb_score", undergraduateData.academicQualifications.jambResults.score);
+      formData.append("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
+
+      // Add files if they exist
+      if (undergraduateData.passportPhoto) {
+        formData.append("passport_photo", undergraduateData.passportPhoto);
+      }
+      if (undergraduateData.academicQualifications.waecResults.documents) {
+        formData.append("waec_result", undergraduateData.academicQualifications.waecResults.documents);
+      }
+      if (undergraduateData.academicQualifications.jambResults.documents) {
+        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
+      }
+
+      // Add program type and academic session
+      formData.append("program_type", "undergraduate");
+      formData.append("academic_session", undergraduateData.academicSession);
+      formData.append("is_draft", "true");
+
+      // Submit the form data
+      const response = await apiService.submitApplication(formData);
+      
+      // Save to localStorage
+      localStorage.setItem('applicationData', JSON.stringify({
+        ...response,
+        program_type: "undergraduate"
+      }));
+
       toast.success("Application saved as draft", {
         description: "Your application has been saved successfully. You can continue editing later.",
         style: {
-          background: '#10B981', // Green background
+          background: '#10B981',
           color: 'white',
         }
       });
@@ -502,7 +554,7 @@ const UndergraduateForm = () => {
       toast.error("Failed to save draft", {
         description: "There was an error saving your application. Please try again.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -517,7 +569,7 @@ const UndergraduateForm = () => {
       toast.error("Incomplete Application", {
         description: "Please fill in all required fields before submitting.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -526,24 +578,72 @@ const UndergraduateForm = () => {
     
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const formData = new FormData();
+      
+      // Add personal details
+      formData.append("surname", undergraduateData.personalDetails.surname);
+      formData.append("first_name", undergraduateData.personalDetails.firstName);
+      formData.append("other_names", undergraduateData.personalDetails.otherNames);
+      formData.append("gender", undergraduateData.personalDetails.gender);
+      formData.append("date_of_birth", `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", undergraduateData.personalDetails.streetAddress);
+      formData.append("city", undergraduateData.personalDetails.city);
+      formData.append("country", undergraduateData.personalDetails.country);
+      formData.append("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
+      formData.append("nationality", undergraduateData.personalDetails.nationality);
+      formData.append("phone_number", undergraduateData.personalDetails.phoneNumber);
+      formData.append("email", undergraduateData.personalDetails.email);
+      formData.append("has_disability", undergraduateData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
+      formData.append("disability_description", undergraduateData.personalDetails.disabilityDescription);
+
+      // Add academic qualifications
+      formData.append("exam_number", undergraduateData.academicQualifications.waecResults.examNumber);
+      formData.append("exam_year", undergraduateData.academicQualifications.waecResults.examYear);
+      formData.append("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
+      formData.append("jamb_score", undergraduateData.academicQualifications.jambResults.score);
+      formData.append("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
+
+      // Add files if they exist
+      if (undergraduateData.passportPhoto) {
+        formData.append("passport_photo", undergraduateData.passportPhoto);
+      }
+      if (undergraduateData.academicQualifications.waecResults.documents) {
+        formData.append("waec_result", undergraduateData.academicQualifications.waecResults.documents);
+      }
+      if (undergraduateData.academicQualifications.jambResults.documents) {
+        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
+      }
+
+      // Add program type and academic session
+      formData.append("program_type", "undergraduate");
+      formData.append("academic_session", undergraduateData.academicSession);
+      formData.append("is_draft", "false");
+
+      // Submit the form data
+      const response = await apiService.submitApplication(formData);
+      
+      // Save to localStorage
+      localStorage.setItem('applicationData', JSON.stringify({
+        ...response,
+        program_type: "undergraduate"
+      }));
+
       toast.success("Application submitted successfully", {
         description: "Your application has been submitted. You will receive a confirmation email shortly.",
-        action: {
-          label: "View Status →",
-          onClick: () => console.log("Navigate to status page")
-        },
         style: {
-          background: '#10B981', // Green background
+          background: '#10B981',
           color: 'white',
         }
       });
+
+      // Redirect to congratulatory page
+      navigate("/application-success");
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error("Submission failed", {
         description: "There was an error submitting your application. Please try again.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });

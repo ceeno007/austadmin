@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { apiService } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 interface DocumentField {
   id: string;
@@ -238,6 +240,7 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
 };
 
 const JupebForm = () => {
+  const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
 
@@ -464,27 +467,42 @@ const JupebForm = () => {
   };
 
   const handleSaveAsDraft = async () => {
-    setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Application saved as draft", {
-        description: "Your application has been saved successfully. You can continue editing later.",
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
+      const formData = new FormData();
+      
+      // Add all form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          formData.append(key, value);
         }
       });
+
+      // Add files if they exist
+      if (jupebData.passportPhoto) {
+        formData.append("passport_photo", jupebData.passportPhoto);
+      }
+      if (jupebData.academicQualifications.waecResults.documents) {
+        formData.append("waec_result", jupebData.academicQualifications.waecResults.documents);
+      }
+
+      // Add is_draft flag
+      formData.append("is_draft", "true");
+      formData.append("program_type", "jupeb");
+
+      // Submit the draft application
+      await apiService.submitDraftApplication(formData);
+
+      // Save to localStorage
+      const applicationData = {
+        ...formData,
+        is_draft: true,
+        program_type: "jupeb",
+      };
+      localStorage.setItem("jupebApplicationData", JSON.stringify(applicationData));
+
+      toast.success("Application saved as draft successfully");
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error("Failed to save draft", {
-        description: "There was an error saving your application. Please try again.",
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
-    } finally {
-      setIsSaving(false);
+      toast.error("Failed to save draft application");
     }
   };
 
@@ -494,7 +512,7 @@ const JupebForm = () => {
       toast.error("Incomplete Application", {
         description: "Please fill in all required fields before submitting.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -503,24 +521,66 @@ const JupebForm = () => {
     
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const formData = new FormData();
+      
+      // Add personal details
+      formData.append("surname", jupebData.personalDetails.surname);
+      formData.append("first_name", jupebData.personalDetails.firstName);
+      formData.append("other_names", jupebData.personalDetails.otherNames);
+      formData.append("gender", jupebData.personalDetails.gender);
+      formData.append("date_of_birth", `${jupebData.personalDetails.dateOfBirth.year}-${jupebData.personalDetails.dateOfBirth.month}-${jupebData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", jupebData.personalDetails.streetAddress);
+      formData.append("city", jupebData.personalDetails.city);
+      formData.append("country", jupebData.personalDetails.country);
+      formData.append("state_of_origin", jupebData.personalDetails.stateOfOrigin);
+      formData.append("nationality", jupebData.personalDetails.nationality);
+      formData.append("phone_number", jupebData.personalDetails.phoneNumber);
+      formData.append("email", jupebData.personalDetails.email);
+      formData.append("has_disability", jupebData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
+      formData.append("disability_description", jupebData.personalDetails.disabilityDescription);
+
+      // Add academic qualifications
+      formData.append("exam_number", jupebData.academicQualifications.waecResults.examNumber);
+      formData.append("exam_year", jupebData.academicQualifications.waecResults.examYear);
+
+      // Add files if they exist
+      if (jupebData.passportPhoto) {
+        formData.append("passport_photo", jupebData.passportPhoto);
+      }
+      if (jupebData.academicQualifications.waecResults.documents) {
+        formData.append("waec_result", jupebData.academicQualifications.waecResults.documents);
+      }
+
+      // Add program type and academic session
+      formData.append("program_type", "jupeb");
+      formData.append("academic_session", jupebData.academicSession);
+      formData.append("is_draft", "false");
+
+      // Submit the form data
+      const response = await apiService.submitApplication(formData);
+      
+      // Save to localStorage
+      localStorage.setItem('applicationData', JSON.stringify({
+        ...response,
+        program_type: "jupeb"
+      }));
+
       toast.success("Application submitted successfully", {
         description: "Your application has been submitted. You will receive a confirmation email shortly.",
-        action: {
-          label: "View Status →",
-          onClick: () => console.log("Navigate to status page")
-        },
         style: {
-          background: '#10B981', // Green background
+          background: '#10B981',
           color: 'white',
         }
       });
+
+      // Redirect to congratulatory page
+      navigate("/application-success");
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error("Submission failed", {
         description: "There was an error submitting your application. Please try again.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -536,310 +596,351 @@ const JupebForm = () => {
         <h3 className="text-lg font-semibold">Application Fee Payment</h3>
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              Application Fee: ₦10,000
+            <p className="text-sm text-yellow-800 space-y-2">
+              <strong>Application Fee (Non-refundable):</strong>
+              <br />
+              <span className="block mt-2">
+                <strong>Nigerian Applicants:</strong> ₦20,000
+              </span>
+              <span className="block mt-2">
+                <strong>International Applicants:</strong> $50
+              </span>
+
+              <div className="mt-4 p-3 bg-white rounded border border-gray-200">
+                {jupebData.personalDetails.nationality === "Nigerian" ? (
+                  <>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Account Name:</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("African University of Science and Technology (AUST)", "nairaAccName")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["nairaAccName"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p className="mb-2">African University of Science and Technology (AUST)</p>
+
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Account Number (NGN):</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("1016087221", "nairaAccNum")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["nairaAccNum"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p className="mb-2">1016087221</p>
+
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Bank:</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("UBA Plc", "nairaBank")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["nairaBank"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p>UBA Plc</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Account Name:</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("African University of Science and Technology (AUST USD)", "usdAccName")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["usdAccName"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p className="mb-2">African University of Science and Technology (AUST USD)</p>
+
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Account Number (USD):</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("3050500123", "usdAccNum")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["usdAccNum"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p className="mb-2">3050500123</p>
+
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold">Bank:</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy("Zenith Bank", "usdBank")}
+                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
+                      >
+                        {copyStatus["usdBank"] ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p>Zenith Bank</p>
+                  </>
+                )}
+              </div>
             </p>
           </div>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Bank Account Details</Label>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                  <span className="text-sm">Account Name:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">AUST JUPEB</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy("AUST JUPEB", "accountName")}
-                    >
-                      {copyStatus["accountName"] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                  <span className="text-sm">Account Number:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">1234567890</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy("1234567890", "accountNumber")}
-                    >
-                      {copyStatus["accountNumber"] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                  <span className="text-sm">Bank Name:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">First Bank</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCopy("First Bank", "bankName")}
-                    >
-                      {copyStatus["bankName"] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <FileUploadField
-              id="paymentEvidence"
-              label="Upload Payment Evidence"
-              accept=".pdf,.jpg,.jpeg,.png"
-              value={jupebData.passportPhoto ? [jupebData.passportPhoto] : null}
-              onChange={(files) => handleFileUpload("paymentEvidence", files![0])}
-              onRemove={() => handleClearFile("paymentEvidence")}
-            />
-          </div>
+          <FileUploadField
+            id="paymentEvidence"
+            label="Payment Evidence (Required)"
+            accept=".jpg,.jpeg,.png,.pdf"
+            value={jupebData.passportPhoto ? [jupebData.passportPhoto] : null}
+            onChange={(files) => handleFileUpload("paymentEvidence", files![0])}
+            onRemove={() => handleClearFile("paymentEvidence")}
+            maxSize="5MB"
+          />
         </div>
       </div>
 
       {/* Personal Details Section */}
-<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-  <h3 className="text-lg font-semibold">Personal Details</h3>
-  <div className="space-y-4">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label>Surname *</Label>
-        <Input
-          placeholder="Enter your surname"
-          value={jupebData.personalDetails.surname}
-          onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label>First Name *</Label>
-        <Input
-          placeholder="Enter your first name"
-          value={jupebData.personalDetails.firstName}
-          onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
-          required
-        />
-      </div>
-    </div>
+      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <h3 className="text-lg font-semibold">Personal Details</h3>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Surname *</Label>
+              <Input
+                placeholder="Enter your surname"
+                value={jupebData.personalDetails.surname}
+                onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>First Name *</Label>
+              <Input
+                placeholder="Enter your first name"
+                value={jupebData.personalDetails.firstName}
+                onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-    <div className="space-y-2">
-      <Label>Other Names</Label>
-      <Input
-        placeholder="Enter other names (if any)"
-        value={jupebData.personalDetails.otherNames}
-        onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
-      />
-    </div>
+          <div className="space-y-2">
+            <Label>Other Names</Label>
+            <Input
+              placeholder="Enter other names (if any)"
+              value={jupebData.personalDetails.otherNames}
+              onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+            />
+          </div>
 
-    <div className="space-y-2">
-      <Label>Gender *</Label>
-      <Select
-        value={jupebData.personalDetails.gender}
-        onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select gender" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="male">Male</SelectItem>
-          <SelectItem value="female">Female</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+          <div className="space-y-2">
+            <Label>Gender *</Label>
+            <Select
+              value={jupebData.personalDetails.gender}
+              onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-    {/* Date of Birth */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="space-y-2">
-        <Label>Day of Birth</Label>
-        <Select
-          value={jupebData.personalDetails.dateOfBirth.day}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select day" />
-          </SelectTrigger>
-          <SelectContent>
-            {days.map((day) => (
-              <SelectItem key={day} value={day}>
-                {day}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Month of Birth</Label>
-        <Select
-          value={jupebData.personalDetails.dateOfBirth.month}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select month" />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((month, index) => (
-              <SelectItem key={month} value={(index + 1).toString().padStart(2, "0")}>
-                {month}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Year of Birth</Label>
-        <Select
-          value={jupebData.personalDetails.dateOfBirth.year}
-          onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+          {/* Date of Birth */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Day of Birth</Label>
+              <Select
+                value={jupebData.personalDetails.dateOfBirth.day}
+                onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {days.map((day) => (
+                    <SelectItem key={day} value={day}>
+                      {day}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Month of Birth</Label>
+              <Select
+                value={jupebData.personalDetails.dateOfBirth.month}
+                onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month, index) => (
+                    <SelectItem key={month} value={(index + 1).toString().padStart(2, "0")}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Year of Birth</Label>
+              <Select
+                value={jupebData.personalDetails.dateOfBirth.year}
+                onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-    <div className="space-y-2">
-      <Label>Nationality *</Label>
-      <Select
-        value={jupebData.personalDetails.nationality}
-        onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select nationality" />
-        </SelectTrigger>
-        <SelectContent>
-          {countries.map((country) => (
-            <SelectItem key={country} value={country}>
-              {country}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+          <div className="space-y-2">
+            <Label>Nationality *</Label>
+            <Select
+              value={jupebData.personalDetails.nationality}
+              onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select nationality" />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-    {jupebData.personalDetails.nationality === "Nigerian" && (
-      <div className="space-y-2">
-        <Label>State of Origin *</Label>
-        <Select
-          value={jupebData.personalDetails.stateOfOrigin}
-          onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select state of origin" />
-          </SelectTrigger>
-          <SelectContent>
-            {nigeriaStates.map((state) => (
-              <SelectItem key={state} value={state}>
-                {state}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    )}
+          {jupebData.personalDetails.nationality === "Nigerian" && (
+            <div className="space-y-2">
+              <Label>State of Origin *</Label>
+              <Select
+                value={jupebData.personalDetails.stateOfOrigin}
+                onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select state of origin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {nigeriaStates.map((state) => (
+                    <SelectItem key={state} value={state}>
+                      {state}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label>Phone Number *</Label>
-        <PhoneInput
-          international
-          defaultCountry="NG"
-          value={jupebData.personalDetails.phoneNumber}
-          onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-          className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
-          placeholder="Enter phone number"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label>Email *</Label>
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={jupebData.personalDetails.email}
-          onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-          required
-        />
-      </div>
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Phone Number *</Label>
+              <PhoneInput
+                international
+                defaultCountry="NG"
+                value={jupebData.personalDetails.phoneNumber}
+                onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
+                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={jupebData.personalDetails.email}
+                onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-    <div className="space-y-2">
-      <Label htmlFor="streetAddress">Street Address *</Label>
-      <Textarea
-        id="streetAddress"
-        value={jupebData.personalDetails.streetAddress}
-        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
-        required
-      />
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="streetAddress">Street Address *</Label>
+            <Textarea
+              id="streetAddress"
+              value={jupebData.personalDetails.streetAddress}
+              onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+              required
+            />
+          </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label htmlFor="city">City *</Label>
-        <Input
-          id="city"
-          value={jupebData.personalDetails.city}
-          onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="country">Country *</Label>
-        <Select
-          value={jupebData.personalDetails.country}
-          onValueChange={(value) => handlePersonalDetailsChange("country", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select country" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                value={jupebData.personalDetails.city}
+                onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="country">Country *</Label>
+              <Select
+                value={jupebData.personalDetails.country}
+                onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-    <div className="space-y-2">
-      <Label>Do you have any disabilities? *</Label>
-      <Select
-        value={jupebData.personalDetails.hasDisabilities}
-        onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select option" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="yes">Yes</SelectItem>
-          <SelectItem value="no">No</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+          <div className="space-y-2">
+            <Label>Do you have any disabilities? *</Label>
+            <Select
+              value={jupebData.personalDetails.hasDisabilities}
+              onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-    {jupebData.personalDetails.hasDisabilities === "yes" && (
-      <div className="space-y-2">
-        <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
-        <Textarea
-          id="disabilityDescription"
-          value={jupebData.personalDetails.disabilityDescription}
-          onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
-          required
-        />
+          {jupebData.personalDetails.hasDisabilities === "yes" && (
+            <div className="space-y-2">
+              <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
+              <Textarea
+                id="disabilityDescription"
+                value={jupebData.personalDetails.disabilityDescription}
+                onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+                required
+              />
+            </div>
+          )}
+        </div>
       </div>
-    )}
-  </div>
-</div>
 
       {/* Academic Qualifications Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -933,10 +1034,10 @@ const JupebForm = () => {
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
-              By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-              <br />- cancel my application.
-              <br />- if admitted, be dismissed from the University.
-              <br />- if degree already awarded, rescind degree awarded.
+              By writing my name below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+              <br />- cancel my application
+              <br />- if admitted, be dismissed from the University
+              <br />- if degree already awarded, rescind degree awarded
             </p>
           </div>
           <div className="space-y-2">

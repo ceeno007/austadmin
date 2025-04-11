@@ -747,35 +747,114 @@ const PostgraduateForm = () => {
   const handleSaveAsDraft = async () => {
     setIsSaving(true);
     try {
-      // Add your save logic here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      // Save to localStorage or your backend
-      toast.custom((t) => (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-          <Check className="h-5 w-5 text-green-600 mt-0.5" />
-          <div>
-            <h3 className="font-medium text-green-900">Application saved as draft</h3>
-            <p className="text-green-700 text-sm mt-1">
-              Your application has been saved successfully. You can continue editing later.
-            </p>
-          </div>
-        </div>
-      ), {
+      const formData = new FormData();
+      
+      // Append personal details if they exist
+      if (postgraduateData.personalDetails.surname) {
+        formData.append("surname", postgraduateData.personalDetails.surname);
+      }
+      if (postgraduateData.personalDetails.firstName) {
+        formData.append("first_name", postgraduateData.personalDetails.firstName);
+      }
+      if (postgraduateData.personalDetails.gender) {
+        formData.append("gender", postgraduateData.personalDetails.gender);
+      }
+      if (postgraduateData.personalDetails.dateOfBirth.day && 
+          postgraduateData.personalDetails.dateOfBirth.month && 
+          postgraduateData.personalDetails.dateOfBirth.year) {
+        formData.append("date_of_birth", 
+          `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
+      }
+      if (postgraduateData.personalDetails.streetAddress) {
+        formData.append("street_address", postgraduateData.personalDetails.streetAddress);
+      }
+      if (postgraduateData.personalDetails.city) {
+        formData.append("city", postgraduateData.personalDetails.city);
+      }
+      if (postgraduateData.personalDetails.country) {
+        formData.append("country", postgraduateData.personalDetails.country);
+      }
+      if (postgraduateData.personalDetails.nationality) {
+        formData.append("nationality", postgraduateData.personalDetails.nationality);
+      }
+      if (postgraduateData.personalDetails.phoneNumber) {
+        formData.append("phone_number", postgraduateData.personalDetails.phoneNumber);
+      }
+      if (postgraduateData.personalDetails.email) {
+        formData.append("email", postgraduateData.personalDetails.email);
+      }
+      
+      // Append program details if they exist
+      if (postgraduateData.programType) {
+        formData.append("program_type", postgraduateData.programType);
+      }
+      if (postgraduateData.applicantType) {
+        formData.append("applicant_type", postgraduateData.applicantType);
+      }
+      
+      // Append academic qualifications if they exist
+      if (postgraduateData.academicQualifications.qualification1.type) {
+        formData.append("degree", postgraduateData.academicQualifications.qualification1.type);
+      }
+      if (postgraduateData.academicQualifications.qualification1.institution) {
+        formData.append("institution", postgraduateData.academicQualifications.qualification1.institution);
+      }
+      if (postgraduateData.academicQualifications.qualification1.endDate.year) {
+        formData.append("year", postgraduateData.academicQualifications.qualification1.endDate.year);
+      }
+      if (postgraduateData.academicQualifications.qualification1.grade) {
+        formData.append("class_of_degree", postgraduateData.academicQualifications.qualification1.grade);
+      }
+      
+      // Append references if they exist
+      if (postgraduateData.references.referee1.name) {
+        formData.append("referee1_name", postgraduateData.references.referee1.name);
+      }
+      if (postgraduateData.references.referee1.email) {
+        formData.append("referee1_email", postgraduateData.references.referee1.email);
+      }
+      if (postgraduateData.references.referee2.name) {
+        formData.append("referee2_name", postgraduateData.references.referee2.name);
+      }
+      if (postgraduateData.references.referee2.email) {
+        formData.append("referee2_email", postgraduateData.references.referee2.email);
+      }
+      
+      // Append statement of purpose if it exists
+      if (postgraduateData.statementOfPurpose.length > 0) {
+        formData.append("statement_of_purpose", postgraduateData.statementOfPurpose[0]);
+      }
+      
+      // Append declaration if it exists
+      if (postgraduateData.declaration) {
+        formData.append("declaration", postgraduateData.declaration.toString());
+      }
+      
+      // Append files if they exist
+      if (postgraduateData.passportPhoto) {
+        formData.append("passport_photo", postgraduateData.passportPhoto);
+      }
+      if (postgraduateData.paymentEvidence) {
+        formData.append("payment_evidence", postgraduateData.paymentEvidence);
+      }
+
+      // Add draft flag
+      formData.append("is_draft", "true");
+      
+      // Use the new submitDraftApplication function instead of submitApplication
+      const response = await apiService.submitDraftApplication(formData);
+      
+      // Save to localStorage for later retrieval
+      localStorage.setItem("postgraduateApplicationData", JSON.stringify(postgraduateData));
+      
+      toast.success("Application saved as draft", {
+        description: "Your application has been saved successfully. You can continue editing later.",
         duration: 5000,
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
       });
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error('Failed to save draft', {
-        description: 'There was an error saving your application. Please try again.',
+      toast.error("Failed to save draft", {
+        description: "There was an error saving your application. Please try again.",
         duration: 5000,
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
       });
     } finally {
       setIsSaving(false);
