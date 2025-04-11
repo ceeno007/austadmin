@@ -602,9 +602,7 @@ const JupebForm = () => {
               <span className="block mt-2">
                 <strong>Nigerian Applicants:</strong> ₦20,000
               </span>
-              <span className="block mt-2">
-                <strong>International Applicants:</strong> $50
-              </span>
+             
 
               <div className="mt-4 p-3 bg-white rounded border border-gray-200">
                 {jupebData.personalDetails.nationality === "Nigerian" ? (
@@ -751,7 +749,7 @@ const JupebForm = () => {
           </div>
 
           {/* Date of Birth */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             <div className="space-y-2">
               <Label>Day of Birth</Label>
               <Select

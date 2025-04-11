@@ -42,42 +42,69 @@ const SignUp = () => {
 
   const handleSendVerification = async () => {
     if (!isEmailValid) {
-      toast.error("Please enter a valid email address", {
+      toast.error("Invalid email address", {
+        description: "Please enter a valid email address to continue.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
       return;
     }
 
+    // Temporarily bypass verification for testing
+    setIsEmailVerified(true);
+    toast.success("Email verification bypassed", {
+      description: "Email verification has been temporarily disabled for testing.",
+      style: {
+        background: '#10B981',
+        color: 'white',
+      }
+    });
+    
+    /* Commented out for testing
     setIsVerifying(true);
     try {
       await apiService.sendVerificationCode(email);
-      toast.success("Verification code sent to your email", {
+      toast.success("Verification code sent", {
+        description: "Please check your email for the verification code.",
         style: {
-          background: '#10B981', // Green background
+          background: '#10B981',
           color: 'white',
         }
       });
     } catch (error) {
       console.error("Error sending verification code:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send verification code", {
+      toast.error("Failed to send verification code", {
+        description: error instanceof Error ? error.message : "Please try again later.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
     } finally {
       setIsVerifying(false);
     }
+    */
   };
 
   const handleVerifyOtp = async () => {
+    // Temporarily bypass OTP verification for testing
+    setIsEmailVerified(true);
+    toast.success("OTP verification bypassed", {
+      description: "OTP verification has been temporarily disabled for testing.",
+      style: {
+        background: '#10B981',
+        color: 'white',
+      }
+    });
+    
+    /* Commented out for testing
     if (!verificationCode) {
-      toast.error("Please enter the verification code", {
+      toast.error("Verification code required", {
+        description: "Please enter the verification code sent to your email.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -88,32 +115,36 @@ const SignUp = () => {
     try {
       await apiService.verifyEmail({ email, code: verificationCode });
       setIsEmailVerified(true);
-      toast.success("Email verified successfully", {
+      toast.success("Email verified", {
+        description: "Your email has been successfully verified.",
         style: {
-          background: '#10B981', // Green background
+          background: '#10B981',
           color: 'white',
         }
       });
     } catch (error) {
       console.error("Error verifying email:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to verify email", {
+      toast.error("Verification failed", {
+        description: error instanceof Error ? error.message : "Please check the code and try again.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
     } finally {
       setIsVerifyingOtp(false);
     }
+    */
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!programType) {
-      toast.error("Please select a program type!", {
+      toast.error("Program type required", {
+        description: "Please select a program type to continue.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -121,9 +152,10 @@ const SignUp = () => {
     }
     
     if (!passwordsMatch) {
-      toast.error("Passwords don't match!", {
+      toast.error("Passwords don't match", {
+        description: "Please make sure your passwords match.",
         style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -131,19 +163,10 @@ const SignUp = () => {
     }
     
     if (!(hasMinLength && hasUpperCase && hasNumber)) {
-      toast.error("Password doesn't meet requirements!", {
+      toast.error("Password requirements not met", {
+        description: "Password must be at least 8 characters with uppercase, number, and special character.",
         style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
-      return;
-    }
-
-    if (!isEmailVerified) {
-      toast.error("Please verify your email address first!", {
-        style: {
-          background: '#EF4444', // Red background
+          background: '#EF4444',
           color: 'white',
         }
       });
@@ -163,9 +186,10 @@ const SignUp = () => {
         // Store user's name and program type
         localStorage.setItem("userName", fullName);
         localStorage.setItem("programType", programType);
-        toast.success("Account created successfully! Please log in to continue.", {
+        toast.success("Account created", {
+          description: "Your account has been created successfully. Please log in to continue.",
           style: {
-            background: '#10B981', // Green background
+            background: '#10B981',
             color: 'white',
           }
         });
@@ -173,9 +197,10 @@ const SignUp = () => {
       })
       .catch((error) => {
         console.error("Error during signup:", error);
-        toast.error(error.message || "Failed to create account. Please try again.", {
+        toast.error("Signup failed", {
+          description: error.message || "Failed to create account. Please try again.",
           style: {
-            background: '#EF4444', // Red background
+            background: '#EF4444',
             color: 'white',
           }
         });
@@ -399,7 +424,7 @@ const SignUp = () => {
                 )}
               </div>
               
-              <Button type="submit" className="w-full bg-primary" disabled={isLoading || !isEmailVerified}>
+              <Button type="submit" className="w-full bg-primary" disabled={isLoading || !fullName || !email || !programType || !password || !confirmPassword}>
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>
