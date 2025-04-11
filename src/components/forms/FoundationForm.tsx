@@ -45,7 +45,7 @@ interface ApplicationData {
   email?: string;
   has_disability?: boolean;
   disability_description?: string;
-  // JUPEB specific fields
+  // Foundation and Remedial Studies specific fields
   exam_number?: string;
   exam_year?: string;
   // File paths
@@ -54,7 +54,7 @@ interface ApplicationData {
   waec_result_path?: string;
 }
 
-interface JupebFormData {
+interface FoundationRemedialFormData {
   passportPhoto: File | null;
   academicSession: string;
   program: string;
@@ -73,9 +73,33 @@ interface JupebFormData {
     email: string;
     hasDisabilities: string;
     disabilityDescription: string;
+    bloodGroup: string;
+  };
+  parentGuardian: {
+    name: string;
+    occupation: string;
+    homeAddress: string;
+    officeAddress: string;
+    mobileNumber: string;
+    email: string;
+  };
+  programChoice: {
+    program: string;
+    subjectCombination: string;
+    firstChoice: {
+      university: string;
+      department: string;
+      faculty: string;
+    };
+    secondChoice: {
+      university: string;
+      department: string;
+      faculty: string;
+    };
   };
   academicQualifications: {
-    waecResults: {
+    examResults: {
+      examType: string;
       examNumber: string;
       examYear: string;
       subjects: Array<{
@@ -239,7 +263,7 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   return placeholderFile;
 };
 
-const JupebForm = () => {
+const FoundationForm = () => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -261,14 +285,14 @@ const JupebForm = () => {
           
           // Only redirect if both values exist and are different, 
           // ensuring we check against localStorage which may have been updated by user choice
-          if (programType !== 'jupeb' && 
+          if (programType !== 'foundation_remedial' && 
               savedProgramType && 
-              savedProgramType !== 'jupeb') {
-            console.log(`Redirecting from JUPEB to ${programType} form based on application data`);
+              savedProgramType !== 'foundation_remedial') {
+            console.log(`Redirecting from Foundation and Remedial Studies to ${programType} form based on application data`);
             window.location.href = `/document-upload?type=${programType}`;
           } else {
             // If program type matches, update localStorage to be consistent
-            localStorage.setItem("programType", "jupeb");
+            localStorage.setItem("programType", "foundation_remedial");
           }
         }
       }
@@ -277,7 +301,7 @@ const JupebForm = () => {
     }
   }, []);
 
-  const [jupebData, setJupebData] = useState<JupebFormData>({
+  const [foundationRemedialData, setFoundationRemedialData] = useState<FoundationRemedialFormData>({
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
     program: "",
@@ -296,14 +320,38 @@ const JupebForm = () => {
       email: "",
       hasDisabilities: "no",
       disabilityDescription: "",
+      bloodGroup: "",
+    },
+    parentGuardian: {
+      name: "",
+      occupation: "",
+      homeAddress: "",
+      officeAddress: "",
+      mobileNumber: "",
+      email: "",
+    },
+    programChoice: {
+      program: "",
+      subjectCombination: "",
+      firstChoice: {
+        university: "",
+        department: "",
+        faculty: "",
+      },
+      secondChoice: {
+        university: "",
+        department: "",
+        faculty: "",
+      },
     },
     academicQualifications: {
-      waecResults: {
+      examResults: {
+        examType: "",
         examNumber: "",
         examYear: "",
         subjects: [],
         documents: null
-      }
+      },
     },
     declaration: ""
   });
@@ -324,7 +372,7 @@ const JupebForm = () => {
   // Fill form data from application data when it's available
   useEffect(() => {
     if (Object.keys(applicationData).length > 0) {
-      console.log("Populating JUPEB form with application data:", applicationData);
+      console.log("Populating Foundation and Remedial Studies form with application data:", applicationData);
       
       // Extract data from the application
       const {
@@ -356,7 +404,7 @@ const JupebForm = () => {
       const paymentReceipt = createPlaceholderFile(payment_receipt_path);
       const waecResults = createPlaceholderFile(waec_result_path);
       
-      setJupebData(prev => ({
+      setFoundationRemedialData(prev => ({
         ...prev,
         passportPhoto: passportPhoto,
         paymentReceipt: paymentReceipt,
@@ -385,11 +433,11 @@ const JupebForm = () => {
         },
         academicQualifications: {
           ...prev.academicQualifications,
-          waecResults: {
-            ...prev.academicQualifications.waecResults,
-            examNumber: applicationData.exam_number || prev.academicQualifications.waecResults.examNumber,
-            examYear: applicationData.exam_year || prev.academicQualifications.waecResults.examYear,
-            documents: waecResults ? waecResults : prev.academicQualifications.waecResults.documents
+          examResults: {
+            ...prev.academicQualifications.examResults,
+            examNumber: applicationData.exam_number || prev.academicQualifications.examResults.examNumber,
+            examYear: applicationData.exam_year || prev.academicQualifications.examResults.examYear,
+            documents: waecResults ? waecResults : prev.academicQualifications.examResults.documents
           }
         }
       }));
@@ -409,7 +457,7 @@ const JupebForm = () => {
   };
 
   const handleFileUpload = (fieldId: string, file: File) => {
-    setJupebData((prev) => ({
+    setFoundationRemedialData((prev) => ({
       ...prev,
       passportPhoto: file
     }));
@@ -424,7 +472,7 @@ const JupebForm = () => {
   };
 
   const handleClearFile = (fieldId: string) => {
-    setJupebData((prev) => ({
+    setFoundationRemedialData((prev) => ({
       ...prev,
       passportPhoto: null
     }));
@@ -439,7 +487,7 @@ const JupebForm = () => {
   };
 
   const handlePersonalDetailsChange = (field: string, value: string) => {
-    setJupebData((prev) => ({
+    setFoundationRemedialData((prev) => ({
       ...prev,
       personalDetails: {
         ...prev.personalDetails,
@@ -449,7 +497,7 @@ const JupebForm = () => {
   };
 
   const handleDateChange = (field: string, type: "day" | "month" | "year", value: string) => {
-    setJupebData(prev => ({
+    setFoundationRemedialData(prev => ({
       ...prev,
       personalDetails: {
         ...prev.personalDetails,
@@ -478,16 +526,16 @@ const JupebForm = () => {
       });
 
       // Add files if they exist
-      if (jupebData.passportPhoto) {
-        formData.append("passport_photo", jupebData.passportPhoto);
+      if (foundationRemedialData.passportPhoto) {
+        formData.append("passport_photo", foundationRemedialData.passportPhoto);
       }
-      if (jupebData.academicQualifications.waecResults.documents) {
-        formData.append("waec_result", jupebData.academicQualifications.waecResults.documents);
+      if (foundationRemedialData.academicQualifications.examResults.documents) {
+        formData.append("waec_result", foundationRemedialData.academicQualifications.examResults.documents);
       }
 
       // Add is_draft flag
       formData.append("is_draft", "true");
-      formData.append("program_type", "jupeb");
+      formData.append("program_type", "foundation_remedial");
 
       // Submit the draft application
       await apiService.submitDraftApplication(formData);
@@ -496,9 +544,9 @@ const JupebForm = () => {
       const applicationData = {
         ...formData,
         is_draft: true,
-        program_type: "jupeb",
+        program_type: "foundation_remedial",
       };
-      localStorage.setItem("jupebApplicationData", JSON.stringify(applicationData));
+      localStorage.setItem("foundationRemedialApplicationData", JSON.stringify(applicationData));
 
       toast.success("Application saved as draft successfully");
     } catch (error) {
@@ -524,36 +572,36 @@ const JupebForm = () => {
       const formData = new FormData();
       
       // Add personal details
-      formData.append("surname", jupebData.personalDetails.surname);
-      formData.append("first_name", jupebData.personalDetails.firstName);
-      formData.append("other_names", jupebData.personalDetails.otherNames);
-      formData.append("gender", jupebData.personalDetails.gender);
-      formData.append("date_of_birth", `${jupebData.personalDetails.dateOfBirth.year}-${jupebData.personalDetails.dateOfBirth.month}-${jupebData.personalDetails.dateOfBirth.day}`);
-      formData.append("street_address", jupebData.personalDetails.streetAddress);
-      formData.append("city", jupebData.personalDetails.city);
-      formData.append("country", jupebData.personalDetails.country);
-      formData.append("state_of_origin", jupebData.personalDetails.stateOfOrigin);
-      formData.append("nationality", jupebData.personalDetails.nationality);
-      formData.append("phone_number", jupebData.personalDetails.phoneNumber);
-      formData.append("email", jupebData.personalDetails.email);
-      formData.append("has_disability", jupebData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
-      formData.append("disability_description", jupebData.personalDetails.disabilityDescription);
+      formData.append("surname", foundationRemedialData.personalDetails.surname);
+      formData.append("first_name", foundationRemedialData.personalDetails.firstName);
+      formData.append("other_names", foundationRemedialData.personalDetails.otherNames);
+      formData.append("gender", foundationRemedialData.personalDetails.gender);
+      formData.append("date_of_birth", `${foundationRemedialData.personalDetails.dateOfBirth.year}-${foundationRemedialData.personalDetails.dateOfBirth.month}-${foundationRemedialData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", foundationRemedialData.personalDetails.streetAddress);
+      formData.append("city", foundationRemedialData.personalDetails.city);
+      formData.append("country", foundationRemedialData.personalDetails.country);
+      formData.append("state_of_origin", foundationRemedialData.personalDetails.stateOfOrigin);
+      formData.append("nationality", foundationRemedialData.personalDetails.nationality);
+      formData.append("phone_number", foundationRemedialData.personalDetails.phoneNumber);
+      formData.append("email", foundationRemedialData.personalDetails.email);
+      formData.append("has_disability", foundationRemedialData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
+      formData.append("disability_description", foundationRemedialData.personalDetails.disabilityDescription);
 
       // Add academic qualifications
-      formData.append("exam_number", jupebData.academicQualifications.waecResults.examNumber);
-      formData.append("exam_year", jupebData.academicQualifications.waecResults.examYear);
+      formData.append("exam_number", foundationRemedialData.academicQualifications.examResults.examNumber);
+      formData.append("exam_year", foundationRemedialData.academicQualifications.examResults.examYear);
 
       // Add files if they exist
-      if (jupebData.passportPhoto) {
-        formData.append("passport_photo", jupebData.passportPhoto);
+      if (foundationRemedialData.passportPhoto) {
+        formData.append("passport_photo", foundationRemedialData.passportPhoto);
       }
-      if (jupebData.academicQualifications.waecResults.documents) {
-        formData.append("waec_result", jupebData.academicQualifications.waecResults.documents);
+      if (foundationRemedialData.academicQualifications.examResults.documents) {
+        formData.append("waec_result", foundationRemedialData.academicQualifications.examResults.documents);
       }
 
       // Add program type and academic session
-      formData.append("program_type", "jupeb");
-      formData.append("academic_session", jupebData.academicSession);
+      formData.append("program_type", "foundation_remedial");
+      formData.append("academic_session", foundationRemedialData.academicSession);
       formData.append("is_draft", "false");
 
       // Submit the form data
@@ -562,7 +610,7 @@ const JupebForm = () => {
       // Save to localStorage
       localStorage.setItem('applicationData', JSON.stringify({
         ...response,
-        program_type: "jupeb"
+        program_type: "foundation_remedial"
       }));
 
       toast.success("Application submitted successfully", {
@@ -605,7 +653,7 @@ const JupebForm = () => {
              
 
               <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-                {jupebData.personalDetails.nationality === "Nigerian" ? (
+                {foundationRemedialData.personalDetails.nationality === "Nigerian" ? (
                   <>
                     <div className="flex justify-between items-center mb-2">
                       <span className="font-semibold">Account Name:</span>
@@ -690,7 +738,7 @@ const JupebForm = () => {
             id="paymentEvidence"
             label="Payment Evidence (Required)"
             accept=".jpg,.jpeg,.png,.pdf"
-            value={jupebData.passportPhoto ? [jupebData.passportPhoto] : null}
+            value={foundationRemedialData.passportPhoto ? [foundationRemedialData.passportPhoto] : null}
             onChange={(files) => handleFileUpload("paymentEvidence", files![0])}
             onRemove={() => handleClearFile("paymentEvidence")}
             maxSize="5MB"
@@ -707,7 +755,7 @@ const JupebForm = () => {
               <Label>Surname *</Label>
               <Input
                 placeholder="Enter your surname"
-                value={jupebData.personalDetails.surname}
+                value={foundationRemedialData.personalDetails.surname}
                 onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
                 required
               />
@@ -716,7 +764,7 @@ const JupebForm = () => {
               <Label>First Name *</Label>
               <Input
                 placeholder="Enter your first name"
-                value={jupebData.personalDetails.firstName}
+                value={foundationRemedialData.personalDetails.firstName}
                 onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
                 required
               />
@@ -727,7 +775,7 @@ const JupebForm = () => {
             <Label>Other Names</Label>
             <Input
               placeholder="Enter other names (if any)"
-              value={jupebData.personalDetails.otherNames}
+              value={foundationRemedialData.personalDetails.otherNames}
               onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
             />
           </div>
@@ -735,7 +783,7 @@ const JupebForm = () => {
           <div className="space-y-2">
             <Label>Gender *</Label>
             <Select
-              value={jupebData.personalDetails.gender}
+              value={foundationRemedialData.personalDetails.gender}
               onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
             >
               <SelectTrigger>
@@ -748,12 +796,34 @@ const JupebForm = () => {
             </Select>
           </div>
 
+          <div className="space-y-2">
+            <Label>Blood Group</Label>
+            <Select
+              value={foundationRemedialData.personalDetails.bloodGroup}
+              onValueChange={(value) => handlePersonalDetailsChange("bloodGroup", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select blood group" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A-">A-</SelectItem>
+                <SelectItem value="B+">B+</SelectItem>
+                <SelectItem value="B-">B-</SelectItem>
+                <SelectItem value="AB+">AB+</SelectItem>
+                <SelectItem value="AB-">AB-</SelectItem>
+                <SelectItem value="O+">O+</SelectItem>
+                <SelectItem value="O-">O-</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Date of Birth */}
           <div className="grid grid-cols-3 gap-2">
             <div className="space-y-2">
               <Label>Day of Birth</Label>
               <Select
-                value={jupebData.personalDetails.dateOfBirth.day}
+                value={foundationRemedialData.personalDetails.dateOfBirth.day}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
               >
                 <SelectTrigger>
@@ -771,7 +841,7 @@ const JupebForm = () => {
             <div className="space-y-2">
               <Label>Month of Birth</Label>
               <Select
-                value={jupebData.personalDetails.dateOfBirth.month}
+                value={foundationRemedialData.personalDetails.dateOfBirth.month}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
               >
                 <SelectTrigger>
@@ -789,7 +859,7 @@ const JupebForm = () => {
             <div className="space-y-2">
               <Label>Year of Birth</Label>
               <Select
-                value={jupebData.personalDetails.dateOfBirth.year}
+                value={foundationRemedialData.personalDetails.dateOfBirth.year}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
               >
                 <SelectTrigger>
@@ -809,7 +879,7 @@ const JupebForm = () => {
           <div className="space-y-2">
             <Label>Nationality *</Label>
             <Select
-              value={jupebData.personalDetails.nationality}
+              value={foundationRemedialData.personalDetails.nationality}
               onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
             >
               <SelectTrigger>
@@ -825,11 +895,11 @@ const JupebForm = () => {
             </Select>
           </div>
 
-          {jupebData.personalDetails.nationality === "Nigerian" && (
+          {foundationRemedialData.personalDetails.nationality === "Nigerian" && (
             <div className="space-y-2">
               <Label>State of Origin *</Label>
               <Select
-                value={jupebData.personalDetails.stateOfOrigin}
+                value={foundationRemedialData.personalDetails.stateOfOrigin}
                 onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
               >
                 <SelectTrigger>
@@ -852,7 +922,7 @@ const JupebForm = () => {
               <PhoneInput
                 international
                 defaultCountry="NG"
-                value={jupebData.personalDetails.phoneNumber}
+                value={foundationRemedialData.personalDetails.phoneNumber}
                 onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
                 className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
                 placeholder="Enter phone number"
@@ -863,7 +933,7 @@ const JupebForm = () => {
               <Input
                 type="email"
                 placeholder="Enter your email"
-                value={jupebData.personalDetails.email}
+                value={foundationRemedialData.personalDetails.email}
                 onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
                 required
               />
@@ -874,7 +944,7 @@ const JupebForm = () => {
             <Label htmlFor="streetAddress">Street Address *</Label>
             <Textarea
               id="streetAddress"
-              value={jupebData.personalDetails.streetAddress}
+              value={foundationRemedialData.personalDetails.streetAddress}
               onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
               required
             />
@@ -885,7 +955,7 @@ const JupebForm = () => {
               <Label htmlFor="city">City *</Label>
               <Input
                 id="city"
-                value={jupebData.personalDetails.city}
+                value={foundationRemedialData.personalDetails.city}
                 onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
                 required
               />
@@ -893,7 +963,7 @@ const JupebForm = () => {
             <div className="space-y-2">
               <Label htmlFor="country">Country *</Label>
               <Select
-                value={jupebData.personalDetails.country}
+                value={foundationRemedialData.personalDetails.country}
                 onValueChange={(value) => handlePersonalDetailsChange("country", value)}
               >
                 <SelectTrigger>
@@ -913,7 +983,7 @@ const JupebForm = () => {
           <div className="space-y-2">
             <Label>Do you have any disabilities? *</Label>
             <Select
-              value={jupebData.personalDetails.hasDisabilities}
+              value={foundationRemedialData.personalDetails.hasDisabilities}
               onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
             >
               <SelectTrigger>
@@ -926,17 +996,289 @@ const JupebForm = () => {
             </Select>
           </div>
 
-          {jupebData.personalDetails.hasDisabilities === "yes" && (
+          {foundationRemedialData.personalDetails.hasDisabilities === "yes" && (
             <div className="space-y-2">
               <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
               <Textarea
                 id="disabilityDescription"
-                value={jupebData.personalDetails.disabilityDescription}
+                value={foundationRemedialData.personalDetails.disabilityDescription}
                 onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
                 required
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Parent/Guardian Information Section */}
+      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <h3 className="text-lg font-semibold">Parent/Guardian Information</h3>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Parent/Guardian Name *</Label>
+              <Input
+                placeholder="Enter parent/guardian name"
+                value={foundationRemedialData.parentGuardian.name}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  parentGuardian: {
+                    ...prev.parentGuardian,
+                    name: e.target.value
+                  }
+                }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Occupation *</Label>
+              <Input
+                placeholder="Enter occupation"
+                value={foundationRemedialData.parentGuardian.occupation}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  parentGuardian: {
+                    ...prev.parentGuardian,
+                    occupation: e.target.value
+                  }
+                }))}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Home Address *</Label>
+            <Textarea
+              placeholder="Enter home address"
+              value={foundationRemedialData.parentGuardian.homeAddress}
+              onChange={(e) => setFoundationRemedialData(prev => ({
+                ...prev,
+                parentGuardian: {
+                  ...prev.parentGuardian,
+                  homeAddress: e.target.value
+                }
+              }))}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Office Address</Label>
+            <Textarea
+              placeholder="Enter office address"
+              value={foundationRemedialData.parentGuardian.officeAddress}
+              onChange={(e) => setFoundationRemedialData(prev => ({
+                ...prev,
+                parentGuardian: {
+                  ...prev.parentGuardian,
+                  officeAddress: e.target.value
+                }
+              }))}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Mobile Number *</Label>
+              <PhoneInput
+                international
+                defaultCountry="NG"
+                value={foundationRemedialData.parentGuardian.mobileNumber}
+                onChange={(value) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  parentGuardian: {
+                    ...prev.parentGuardian,
+                    mobileNumber: value || ""
+                  }
+                }))}
+                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                placeholder="Enter mobile number"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                placeholder="Enter email address"
+                value={foundationRemedialData.parentGuardian.email}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  parentGuardian: {
+                    ...prev.parentGuardian,
+                    email: e.target.value
+                  }
+                }))}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Program Choice Section */}
+      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <h3 className="text-lg font-semibold">Program Choice</h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Programme of Choice *</Label>
+            <Select
+              value={foundationRemedialData.programChoice.program}
+              onValueChange={(value) => setFoundationRemedialData(prev => ({
+                ...prev,
+                programChoice: {
+                  ...prev.programChoice,
+                  program: value
+                }
+              }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select programme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="foundation">FOUNDATION AND REMEDIAL STUDIES (A'level)</SelectItem>
+                <SelectItem value="nabteb_olevel">NABTEB (O'level examination only)</SelectItem>
+                <SelectItem value="nabteb_olevel_classes">NABTEB (O'level examination and classes)</SelectItem>
+                <SelectItem value="jupeb">JUPEB (A'level)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Subject Combination</Label>
+            <Textarea
+              value={foundationRemedialData.programChoice.subjectCombination}
+              onChange={(e) => setFoundationRemedialData(prev => ({
+                ...prev,
+                programChoice: {
+                  ...prev.programChoice,
+                  subjectCombination: e.target.value
+                }
+              }))}
+              placeholder="Enter your subject combination"
+              className="min-h-[100px]"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium">First Choice of University, Department and Faculty *</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>University</Label>
+                <Input
+                  placeholder="Enter university"
+                  value={foundationRemedialData.programChoice.firstChoice.university}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      firstChoice: {
+                        ...prev.programChoice.firstChoice,
+                        university: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Input
+                  placeholder="Enter department"
+                  value={foundationRemedialData.programChoice.firstChoice.department}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      firstChoice: {
+                        ...prev.programChoice.firstChoice,
+                        department: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Faculty</Label>
+                <Input
+                  placeholder="Enter faculty"
+                  value={foundationRemedialData.programChoice.firstChoice.faculty}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      firstChoice: {
+                        ...prev.programChoice.firstChoice,
+                        faculty: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium">Second Choice of University, Department and Faculty *</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>University</Label>
+                <Input
+                  placeholder="Enter university"
+                  value={foundationRemedialData.programChoice.secondChoice.university}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      secondChoice: {
+                        ...prev.programChoice.secondChoice,
+                        university: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Input
+                  placeholder="Enter department"
+                  value={foundationRemedialData.programChoice.secondChoice.department}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      secondChoice: {
+                        ...prev.programChoice.secondChoice,
+                        department: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Faculty</Label>
+                <Input
+                  placeholder="Enter faculty"
+                  value={foundationRemedialData.programChoice.secondChoice.faculty}
+                  onChange={(e) => setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      secondChoice: {
+                        ...prev.programChoice.secondChoice,
+                        faculty: e.target.value
+                      }
+                    }
+                  }))}
+                  required
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -947,81 +1289,127 @@ const JupebForm = () => {
           {/* O'Level Results */}
           <div className="space-y-4">
             <h4 className="font-medium">O'Level Results *</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Exam Number *</Label>
-                <Input
-                  placeholder="Enter exam number"
-                  value={jupebData.academicQualifications.waecResults.examNumber}
-                  onChange={(e) => setJupebData(prev => ({
-                    ...prev,
-                    academicQualifications: {
-                      ...prev.academicQualifications,
-                      waecResults: {
-                        ...prev.academicQualifications.waecResults,
-                        examNumber: e.target.value
+            
+            {/* WAEC Results */}
+            <div className="space-y-4 p-4 border border-gray-200 rounded-md">
+              <h5 className="font-medium">WAEC Results</h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Exam Type</Label>
+                  <Select
+                    value={foundationRemedialData.academicQualifications.examResults.examType}
+                    onValueChange={(value) => setFoundationRemedialData(prev => ({
+                      ...prev,
+                      academicQualifications: {
+                        ...prev.academicQualifications,
+                        examResults: {
+                          ...prev.academicQualifications.examResults,
+                          examType: value
+                        }
                       }
-                    }
-                  }))}
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select exam type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="waec">WAEC</SelectItem>
+                      <SelectItem value="neco">NECO</SelectItem>
+                      <SelectItem value="nabteb">NABTEB</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Exam Number</Label>
+                  <Input
+                    value={foundationRemedialData.academicQualifications.examResults.examNumber}
+                    onChange={(e) => setFoundationRemedialData(prev => ({
+                      ...prev,
+                      academicQualifications: {
+                        ...prev.academicQualifications,
+                        examResults: {
+                          ...prev.academicQualifications.examResults,
+                          examNumber: e.target.value
+                        }
+                      }
+                    }))}
+                    placeholder="Enter exam number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Exam Year</Label>
+                  <Input
+                    value={foundationRemedialData.academicQualifications.examResults.examYear}
+                    onChange={(e) => setFoundationRemedialData(prev => ({
+                      ...prev,
+                      academicQualifications: {
+                        ...prev.academicQualifications,
+                        examResults: {
+                          ...prev.academicQualifications.examResults,
+                          examYear: e.target.value
+                        }
+                      }
+                    }))}
+                    placeholder="Enter exam year"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Subjects and Grades *</Label>
+                <Textarea
+                  placeholder="Enter subjects and grades (e.g., Mathematics: A1, English: B2)"
+                  value={foundationRemedialData.academicQualifications.examResults.subjects.map(s => `${s.subject}: ${s.grade}`).join(', ')}
+                  onChange={(e) => {
+                    const subjectsText = e.target.value;
+                    const subjectsArray = subjectsText.split(',').map(s => s.trim()).filter(s => s);
+                    const subjects = subjectsArray.map(s => {
+                      const [subject, grade] = s.split(':').map(part => part.trim());
+                      return { subject, grade };
+                    });
+                    
+                    setFoundationRemedialData(prev => ({
+                      ...prev,
+                      academicQualifications: {
+                        ...prev.academicQualifications,
+                        examResults: {
+                          ...prev.academicQualifications.examResults,
+                          subjects
+                        }
+                      }
+                    }));
+                  }}
                   required
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Exam Year *</Label>
-                <Select
-                  value={jupebData.academicQualifications.waecResults.examYear}
-                  onValueChange={(value) => setJupebData(prev => ({
-                    ...prev,
-                    academicQualifications: {
-                      ...prev.academicQualifications,
-                      waecResults: {
-                        ...prev.academicQualifications.waecResults,
-                        examYear: value
-                      }
+              <FileUploadField
+                id="waecDocuments"
+                label="Upload WAEC Results"
+                accept=".pdf,.jpg,.jpeg,.png"
+                value={foundationRemedialData.academicQualifications.examResults.documents}
+                onChange={(files) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  academicQualifications: {
+                    ...prev.academicQualifications,
+                    examResults: {
+                      ...prev.academicQualifications.examResults,
+                      documents: files ? files[0] : null
                     }
-                  }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.slice(-10).map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  }
+                }))}
+                onRemove={() => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  academicQualifications: {
+                    ...prev.academicQualifications,
+                    examResults: {
+                      ...prev.academicQualifications.examResults,
+                      documents: null
+                    }
+                  }
+                }))}
+              />
             </div>
-
-            <FileUploadField
-              id="waecDocuments"
-              label="Upload O'Level Results"
-              accept=".pdf"
-              value={jupebData.academicQualifications.waecResults.documents ? [jupebData.academicQualifications.waecResults.documents] : null}
-              onChange={(files) => setJupebData(prev => ({
-                ...prev,
-                academicQualifications: {
-                  ...prev.academicQualifications,
-                  waecResults: {
-                    ...prev.academicQualifications.waecResults,
-                    documents: files ? files[0] : null
-                  }
-                }
-              }))}
-              onRemove={() => setJupebData(prev => ({
-                ...prev,
-                academicQualifications: {
-                  ...prev.academicQualifications,
-                  waecResults: {
-                    ...prev.academicQualifications.waecResults,
-                    documents: null
-                  }
-                }
-              }))}
-            />
           </div>
         </div>
       </div>
@@ -1042,8 +1430,8 @@ const JupebForm = () => {
             <Label>Full Name (in lieu of signature) *</Label>
             <Input
               placeholder="Type your full name"
-              value={jupebData.declaration}
-              onChange={(e) => setJupebData(prev => ({ ...prev, declaration: e.target.value }))}
+              value={foundationRemedialData.declaration}
+              onChange={(e) => setFoundationRemedialData(prev => ({ ...prev, declaration: e.target.value }))}
               required
             />
           </div>
@@ -1092,4 +1480,4 @@ const JupebForm = () => {
   );
 };
 
-export default JupebForm; 
+export default FoundationForm; 

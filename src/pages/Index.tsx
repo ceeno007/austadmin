@@ -52,7 +52,7 @@ const Index = () => {
                 </Button>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
-                <h3 className="text-xl font-bold mb-3">JUPEB Program</h3>
+                <h3 className="text-xl font-bold mb-3">FOUNDATION AND REMEDIAL STUDIES Program</h3>
                 <p className="text-gray-600 mb-4">
                   One-year pre-university program for direct entry admission.
                 </p>

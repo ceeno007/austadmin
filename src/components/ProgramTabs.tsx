@@ -117,14 +117,14 @@ const programsData: Program[] = [
       "https://images.unsplash.com/photo-1603983227353-3f12f42e9d2d?auto=format&fit=crop&w=800&q=80",
   },
   {
-    id: "physics-jupeb",
+    id: "physics-foundation",
     title: "Physics",
-    category: "jupeb",
+    category: "foundation",
     description:
       "Preparatory program for university admission focusing on physics and related subjects.",
     requirements: [
       "Five O'Level credits",
-      "JUPEB registration",
+      "FOUNDATION AND REMEDIAL STUDIES registration",
       "Internal assessment",
     ],
     duration: "1 Year",
@@ -132,14 +132,14 @@ const programsData: Program[] = [
       "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80",
   },
   {
-    id: "biology-jupeb",
+    id: "biology-foundation",
     title: "Biology",
-    category: "jupeb",
+    category: "foundation",
     description:
       "Preparatory program for university admission focusing on biology and related subjects.",
     requirements: [
       "Five O'Level credits",
-      "JUPEB registration",
+      "FOUNDATION AND REMEDIAL STUDIES registration",
       "Internal assessment",
     ],
     duration: "1 Year",
@@ -177,7 +177,7 @@ const ProgramTabs = () => {
             <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-muted">
               <TabsTrigger value="undergraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Undergraduate</TabsTrigger>
               <TabsTrigger value="postgraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Postgraduate</TabsTrigger>
-              <TabsTrigger value="jupeb" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">JUPEB</TabsTrigger>
+              <TabsTrigger value="foundation" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
             </TabsList>
           </div>
 
@@ -193,7 +193,7 @@ const ProgramTabs = () => {
                         ? "Bachelor's Degree"
                         : selectedProgram.category === "postgraduate"
                         ? "Master's/PhD Program"
-                        : "JUPEB Program"}
+                        : "FOUNDATION AND REMEDIAL STUDIES Program"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

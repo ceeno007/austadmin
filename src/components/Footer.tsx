@@ -123,10 +123,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/programs#jupeb"
+                  to="/programs#foundation"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  JUPEB Programs
+                  FOUNDATION AND REMEDIAL STUDIES Programs
                 </Link>
               </li>
             </ul>

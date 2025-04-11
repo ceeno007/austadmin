@@ -670,9 +670,9 @@ const PostgraduateForm = () => {
         ...prev.academicQualifications,
         [qualificationField]: subField 
           ? {
-              ...prev.academicQualifications[qualificationField],
-              [subField]: value
-            }
+          ...prev.academicQualifications[qualificationField],
+          [subField]: value
+        }
           : value // This handles the case where we're setting the entire field (for otherQualifications)
       }
     }));
@@ -868,7 +868,7 @@ const PostgraduateForm = () => {
       toast.error("Please fill in all required fields");
       return;
     }
-
+    
     setIsSubmitting(true);
     try {
       const formData = new FormData();

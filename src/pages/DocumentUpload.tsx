@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import UndergraduateForm from "@/components/forms/UndergraduateForm";
 import PostgraduateForm from "@/components/forms/PostgraduateForm";
-import JupebForm from "@/components/forms/JupebForm";
+import FoundationForm from "@/components/forms/FoundationForm";
 import { useAuth } from "@/contexts/AuthContext";
 
 const DocumentUpload = () => {
@@ -179,6 +179,7 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
               {programType === "postgraduate" && "Postgraduate Program"}
               {programType === "phd" && "Ph.D. Program"}
               {programType === "jupeb" && "JUPEB Program"}
+              {programType === "foundation" && "FOUNDATION AND REMEDIAL STUDIES Program"}
             </h1>
             <p className="text-gray-600 mt-2">Please upload your required documents below</p>
           </div>
@@ -188,6 +189,8 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
               <PostgraduateForm />
             ) : programType === "jupeb" ? (
               <JupebForm />
+            ) : programType === "foundation" ? (
+              <FoundationForm />
             ) : (
               <UndergraduateForm />
             )}

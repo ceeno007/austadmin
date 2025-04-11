@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,12 +133,12 @@ const ApplicationForm = () => {
     "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
   ];
   
-  const programCategories = ["undergraduate", "postgraduate", "jupeb"];
+  const programCategories = ["undergraduate", "postgraduate", "foundation"];
   
   const programsByCategory: {[key: string]: string[]} = {
     undergraduate: ["Computer Science", "Business Administration", "Medicine & Surgery", "Law", "Electrical Engineering", "Mass Communication"],
     postgraduate: ["Computer Science (MSc)", "MBA", "Public Health (MPH)", "Civil Engineering (MEng)"],
-    jupeb: ["Physics", "Biology", "Chemistry", "Mathematics"]
+    foundation: ["Physics", "Biology", "Chemistry", "Mathematics"]
   };
 
   return (

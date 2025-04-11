@@ -59,7 +59,7 @@ const translations = {
     // Programs Page
     undergraduate: 'Undergraduate Programs',
     postgraduate: 'Postgraduate Programs',
-    jupeb: 'JUPEB Programs',
+    foundation: 'FOUNDATION AND REMEDIAL STUDIES Programs',
     duration: 'Duration',
     requirements: 'Requirements',
     apply: 'Apply Now',
@@ -144,7 +144,7 @@ const translations = {
     // Programs Page
     undergraduate: 'Programmes de Premier Cycle',
     postgraduate: 'Programmes de Cycle Supérieur',
-    jupeb: 'Programmes JUPEB',
+    foundation: 'Programmes de FONDATION ET ÉTUDES REMÉDIALES',
     duration: 'Durée',
     requirements: 'Prérequis',
     apply: 'Postuler',

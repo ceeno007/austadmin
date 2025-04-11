@@ -31,6 +31,7 @@ import PolicyImg from "@/assets/images/policy.jpg";
 import physicsImg from "@/assets/images/physics.jpg";
 import appliedStatsImg from "@/assets/images/applied-stats.jpg";
 import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
+import foundationScienceImg from "@/assets/images/jupeb-science.jpg";
 
 
 
@@ -44,7 +45,7 @@ const Programs = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const tabParam = queryParams.get("tab");
-    if (tabParam && ["undergraduate", "postgraduate", "jupeb"].includes(tabParam)) {
+    if (tabParam && ["undergraduate", "postgraduate", "foundation"].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
@@ -390,18 +391,14 @@ const Programs = () => {
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       }
     ],
-    jupeb: [
+    foundation: [
       {
-        title: "JUPEB Science",
-        duration: "1 year",
+        id: "foundation-science",
+        title: "Foundation Science",
+        description: "A comprehensive foundation program in science subjects",
+        image: foundationScienceImg,
+        duration: "1 Year",
         schoolFees: "₦1,343,000 total",
-        image: jupebScienceImg,
-        description: "Pre-degree program to prepare students for direct entry into science programs.",
-        requirements: [
-          "SSCE credits in relevant science subjects",
-          "Entrance exam",
-          "Application form completion"
-        ],
         pdf: "/pdfs/2024-2025 School of Foundation & Remedial Studies Fees.pdf"
       }
     ]
@@ -464,7 +461,7 @@ const Programs = () => {
               <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
                 <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
-                <TabsTrigger value="jupeb">JUPEB</TabsTrigger>
+                <TabsTrigger value="foundation">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
               </TabsList>
 
               <TabsContent value="undergraduate">
@@ -561,11 +558,11 @@ const Programs = () => {
                 ))}
               </TabsContent>
 
-              <TabsContent value="jupeb">
+              <TabsContent value="foundation">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tabs.jupeb.map((program) => (
+                  {tabs.foundation.map((program) => (
                     <div
-                      key={program.title}
+                      key={program.id}
                       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                     >
                       <div className="relative h-48">
@@ -577,22 +574,13 @@ const Programs = () => {
                       </div>
                       <div className="p-6">
                         <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
-                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
+                        <p className="text-gray-600 mb-4">{program.description}</p>
                         <div className="space-y-2 mb-4">
                           <p className="text-sm text-gray-500">
                             <span className="font-medium">Duration:</span> {program.duration}
                           </p>
                           <p className="text-sm text-gray-500">
                             <span className="font-medium">School Fees:</span> {program.schoolFees}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Application Fee:</span> ₦20,000
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Acceptance Fee:</span> ₦50,000
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Total Fees:</span> ₦1,413,000
                           </p>
                         </div>
                         <div className="flex justify-between items-center">

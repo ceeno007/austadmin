@@ -2,7 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
+import foundationScienceImg from "@/assets/images/foundation-science.jpg";
 
 const programs = {
   undergraduate: [
@@ -51,13 +52,14 @@ const programs = {
       link: "/apply/postgraduate"
     }
   ],
-  jupeb: [
+  foundation: [
     {
-      title: "JUPEB Foundation Program",
-      description: "One-year foundation program for direct entry into 200 level.",
+      title: "FOUNDATION AND REMEDIAL STUDIES Foundation Program",
+      description: "A comprehensive foundation program for university admission",
+      image: foundationScienceImg,
+      link: "/apply/foundation",
       duration: "1 Year",
-      requirements: "5 O'Level credits including Mathematics and English",
-      link: "/apply/jupeb"
+      requirements: "5 O'Level credits including Mathematics and English"
     }
   ]
 };
@@ -74,7 +76,7 @@ export default function ProgramsPage() {
         <TabsList className="grid w-full grid-cols-3 md:grid-cols-3 lg:w-auto lg:inline-flex mb-8">
           <TabsTrigger value="undergraduate" className="text-sm md:text-base">Undergraduate</TabsTrigger>
           <TabsTrigger value="postgraduate" className="text-sm md:text-base">Postgraduate</TabsTrigger>
-          <TabsTrigger value="jupeb" className="text-sm md:text-base">JUPEB</TabsTrigger>
+          <TabsTrigger value="foundation" className="text-sm md:text-base">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
         </TabsList>
 
         <TabsContent value="undergraduate">
@@ -90,7 +92,7 @@ export default function ProgramsPage() {
                     <p className="text-sm"><span className="font-medium">Duration:</span> {program.duration}</p>
                     <p className="text-sm"><span className="font-medium">Requirements:</span> {program.requirements}</p>
                   </div>
-                  <Link href={program.link}>
+                  <Link to={program.link}>
                     <Button className="w-full">
                       Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -114,7 +116,7 @@ export default function ProgramsPage() {
                     <p className="text-sm"><span className="font-medium">Duration:</span> {program.duration}</p>
                     <p className="text-sm"><span className="font-medium">Requirements:</span> {program.requirements}</p>
                   </div>
-                  <Link href={program.link}>
+                  <Link to={program.link}>
                     <Button className="w-full">
                       Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -125,9 +127,9 @@ export default function ProgramsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="jupeb">
+        <TabsContent value="foundation">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {programs.jupeb.map((program, index) => (
+            {programs.foundation.map((program, index) => (
               <Card key={index} className="flex flex-col">
                 <CardHeader>
                   <CardTitle className="text-lg md:text-xl">{program.title}</CardTitle>
@@ -138,7 +140,7 @@ export default function ProgramsPage() {
                     <p className="text-sm"><span className="font-medium">Duration:</span> {program.duration}</p>
                     <p className="text-sm"><span className="font-medium">Requirements:</span> {program.requirements}</p>
                   </div>
-                  <Link href={program.link}>
+                  <Link to={program.link}>
                     <Button className="w-full">
                       Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
