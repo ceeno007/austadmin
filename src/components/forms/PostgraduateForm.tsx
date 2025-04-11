@@ -66,10 +66,11 @@ interface FormData {
       endDate: DateField;
       documents: File[];
     };
-    otherQualifications?: File;
+    otherQualifications: File | null;
   };
   statementOfPurpose: File[];
   applicationFee: File | null;
+  paymentEvidence: File | null;
   references: {
     referee1: {
       name: string;
@@ -106,6 +107,7 @@ interface ApplicationData {
   qualification_type?: string;
   subject?: string;
   grade?: string;
+  cgpa?: string;
   start_date?: string;
   end_date?: string;
   first_referee_name?: string;
@@ -155,6 +157,17 @@ const programs = {
   ]
 };
 
+interface FileUploadFieldProps {
+  id: string;
+  label: string | React.ReactNode;
+  accept: string;
+  value: File | File[] | null;
+  onChange: (files: File[] | null) => void;
+  onRemove: () => void;
+  maxSize?: string;
+  multiple?: boolean;
+}
+
 const FileUploadField = ({ 
   id, 
   label, 
@@ -164,16 +177,7 @@ const FileUploadField = ({
   onRemove, 
   maxSize = "10MB",
   multiple = false 
-}: { 
-  id: string;
-  label: string;
-  accept: string;
-  value: File | File[] | null;
-  onChange: (files: File[] | null) => void;
-  onRemove: () => void;
-  maxSize?: string;
-  multiple?: boolean;
-}) => {
+}: FileUploadFieldProps) => {
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   const fileNames = hasFiles 
     ? Array.isArray(value) 
@@ -199,7 +203,7 @@ const FileUploadField = ({
           multiple={multiple}
           onChange={(e) => {
             const files = Array.from(e.target.files || []);
-            onChange(multiple ? files : files[0] ? [files[0]] : null);
+            onChange(files.length > 0 ? files : null);
           }}
         />
         <label
@@ -224,7 +228,7 @@ const FileUploadField = ({
             <div className="flex flex-col items-center justify-center w-full">
               <Upload className="h-8 w-8 text-gray-400" />
               <span className="mt-2 text-sm text-gray-600 text-center">
-                Click to upload {label}
+                Click to upload {typeof label === 'string' ? label : 'file'}
               </span>
               <span className="mt-1 text-xs text-gray-500 text-center">
                 Accepted formats: {acceptedTypes} (Max: {maxSize})
@@ -374,8 +378,10 @@ const PostgraduateForm = () => {
     applicantType: "Nigerian",
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
-    programType: "Postgraduate Diploma/Taught Masters",
+    programType: "MSc",
     program: "",
+    applicationFee: null,
+    paymentEvidence: null,
     personalDetails: {
       surname: "",
       firstName: "",
@@ -395,6 +401,7 @@ const PostgraduateForm = () => {
     academicQualifications: {
       qualification1: {
         type: "",
+        otherType: "",
         grade: "",
         cgpa: "",
         subject: "",
@@ -405,6 +412,7 @@ const PostgraduateForm = () => {
       },
       qualification2: {
         type: "",
+        otherType: "",
         grade: "",
         cgpa: "",
         subject: "",
@@ -416,7 +424,6 @@ const PostgraduateForm = () => {
       otherQualifications: null,
     },
     statementOfPurpose: [],
-    applicationFee: null,
     references: {
       referee1: {
         name: "",
@@ -551,11 +558,11 @@ const PostgraduateForm = () => {
         references: {
           referee1: {
             name: first_referee_name || prev.references.referee1.name,
-            email: first_referee_email || prev.references.referee1.email
+            email: first_referee_email || prev.references.referee1.email,
           },
           referee2: {
             name: second_referee_name || prev.references.referee2.name,
-            email: second_referee_email || prev.references.referee2.email
+            email: second_referee_email || prev.references.referee2.email,
           }
         }
       }));
@@ -633,17 +640,19 @@ const PostgraduateForm = () => {
 
   const handleAcademicQualificationChange = (
     qualificationField: "qualification1" | "qualification2" | "otherQualifications",
-    subField: "type" | "grade" | "cgpa" | "subject" | "institution" | "otherType" | "documents",
-    value: string | File[] | null
+    subField: "type" | "grade" | "cgpa" | "subject" | "institution" | "otherType" | "documents" | null,
+    value: string | File | File[] | null
   ) => {
     setPostgraduateData(prev => ({
       ...prev,
       academicQualifications: {
         ...prev.academicQualifications,
-        [qualificationField]: {
-          ...prev.academicQualifications[qualificationField],
-          [subField]: value
-        }
+        [qualificationField]: subField 
+          ? {
+              ...prev.academicQualifications[qualificationField],
+              [subField]: value
+            }
+          : value // This handles the case where we're setting the entire field (for otherQualifications)
       }
     }));
   };
@@ -655,13 +664,36 @@ const PostgraduateForm = () => {
     if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
         !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
         !personalDetails.streetAddress || !personalDetails.city || !personalDetails.country ||
-        !personalDetails.nationality || !personalDetails.phoneNumber ||
-        !personalDetails.email) {
+        !personalDetails.phoneNumber || !personalDetails.email) {
+      console.log('Personal details validation failed:', {
+        surname: !!personalDetails.surname,
+        firstName: !!personalDetails.firstName,
+        gender: !!personalDetails.gender,
+        dateOfBirth: !!personalDetails.dateOfBirth,
+        streetAddress: !!personalDetails.streetAddress,
+        city: !!personalDetails.city,
+        country: !!personalDetails.country,
+        phoneNumber: !!personalDetails.phoneNumber,
+        email: !!personalDetails.email
+      });
+      return false;
+    }
+
+    // Validate nationality based on applicant type
+    if ((applicantType === "Nigerian" && personalDetails.nationality !== "Nigerian") ||
+        (applicantType === "International" && !personalDetails.nationality)) {
+      console.log('Nationality validation failed:', {
+        applicantType,
+        nationality: personalDetails.nationality
+      });
       return false;
     }
 
     // Validate state of origin only for Nigerian applicants
     if (applicantType === "Nigerian" && !personalDetails.stateOfOrigin) {
+      console.log('State of origin validation failed:', {
+        stateOfOrigin: personalDetails.stateOfOrigin
+      });
       return false;
     }
 
@@ -671,6 +703,16 @@ const PostgraduateForm = () => {
         !qual1.startDate.day || !qual1.startDate.month || !qual1.startDate.year ||
         !qual1.endDate.day || !qual1.endDate.month || !qual1.endDate.year ||
         qual1.documents.length === 0) {
+      console.log('First qualification validation failed:', {
+        type: !!qual1.type,
+        grade: !!qual1.grade,
+        cgpa: !!qual1.cgpa,
+        subject: !!qual1.subject,
+        institution: !!qual1.institution,
+        startDate: !!qual1.startDate,
+        endDate: !!qual1.endDate,
+        documents: qual1.documents.length > 0
+      });
       return false;
     }
 
@@ -681,23 +723,58 @@ const PostgraduateForm = () => {
           !qual2.startDate.day || !qual2.startDate.month || !qual2.startDate.year ||
           !qual2.endDate.day || !qual2.endDate.month || !qual2.endDate.year ||
           qual2.documents.length === 0) {
+        console.log('Second qualification validation failed:', {
+          type: !!qual2?.type,
+          grade: !!qual2?.grade,
+          cgpa: !!qual2?.cgpa,
+          subject: !!qual2?.subject,
+          institution: !!qual2?.institution,
+          startDate: !!qual2?.startDate,
+          endDate: !!qual2?.endDate,
+          documents: qual2?.documents.length > 0
+        });
         return false;
       }
     }
 
     // Validate statement of purpose
     if (postgraduateData.statementOfPurpose.length === 0) {
+      console.log('Statement of purpose validation failed:', {
+        statementOfPurpose: postgraduateData.statementOfPurpose
+      });
       return false;
     }
 
     // Validate references
     const { referee1, referee2 } = postgraduateData.references;
     if (!referee1.name || !referee1.email || !referee2.name || !referee2.email) {
+      console.log('References validation failed:', {
+        referee1: {
+          name: !!referee1.name,
+          email: !!referee1.email
+        },
+        referee2: {
+          name: !!referee2.name,
+          email: !!referee2.email
+        }
+      });
       return false;
     }
 
     // Validate declaration
     if (!postgraduateData.declaration) {
+      console.log('Declaration validation failed:', {
+        declaration: postgraduateData.declaration
+      });
+      return false;
+    }
+
+    // Validate required files
+    if (!postgraduateData.passportPhoto || !postgraduateData.paymentEvidence) {
+      console.log('Required files validation failed:', {
+        passportPhoto: !!postgraduateData.passportPhoto,
+        paymentEvidence: !!postgraduateData.paymentEvidence
+      });
       return false;
     }
 
@@ -745,54 +822,120 @@ const PostgraduateForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid()) {
-      toast.error('Incomplete Application', {
-        description: 'Please fill in all required fields before submitting.',
+      toast.error('Form Validation Failed', {
+        description: 'Please fill in all required fields correctly before submitting.',
         duration: 5000,
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
       });
       return;
     }
     
     setIsSubmitting(true);
     try {
-      // Add your submit logic here
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      // Submit to your backend
-      toast.custom((t) => (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-          <Check className="h-5 w-5 text-green-600 mt-0.5" />
-          <div>
-            <h3 className="font-medium text-green-900">Application submitted successfully</h3>
-            <p className="text-green-700 text-sm mt-1">
-              Your application has been submitted. You will receive a confirmation email shortly.
-            </p>
-            <button 
-              onClick={() => console.log('Navigate to status page')}
-              className="mt-2 text-sm font-medium text-green-600 hover:text-green-800"
-            >
-              View Status →
-            </button>
-          </div>
-        </div>
-      ), {
-        duration: 8000,
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
+      // Create FormData object
+      const formData = new FormData();
+
+      // Get user ID from localStorage
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        toast.error('Authentication Error', {
+          description: 'User ID not found. Please log in again.',
+          duration: 5000,
+        });
+        return;
+      }
+      formData.append('user_id', userId);
+
+      // Personal Details
+      formData.append('first_name', postgraduateData.personalDetails.firstName);
+      formData.append('last_name', postgraduateData.personalDetails.surname);
+      formData.append('other_names', postgraduateData.personalDetails.otherNames);
+      formData.append('gender', postgraduateData.personalDetails.gender);
+      formData.append('date_of_birth', `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append('street_address', postgraduateData.personalDetails.streetAddress);
+      formData.append('city', postgraduateData.personalDetails.city);
+      formData.append('country', postgraduateData.personalDetails.country);
+      formData.append('state_of_origin', postgraduateData.personalDetails.stateOfOrigin);
+      formData.append('nationality', postgraduateData.personalDetails.nationality);
+      formData.append('phone_number', postgraduateData.personalDetails.phoneNumber);
+      formData.append('has_disability', postgraduateData.personalDetails.hasDisabilities === "Yes" ? "true" : "false");
+      formData.append('disability_description', postgraduateData.personalDetails.disabilityDescription);
+
+      // Program Details
+      formData.append('program_type', postgraduateData.programType);
+      formData.append('selected_program', postgraduateData.program);
+      formData.append('academic_session', postgraduateData.academicSession);
+
+      // Academic Qualifications
+      formData.append('qualification_type', postgraduateData.academicQualifications.qualification1.type);
+      formData.append('grade', postgraduateData.academicQualifications.qualification1.grade);
+      formData.append('cgpa', postgraduateData.academicQualifications.qualification1.cgpa);
+      formData.append('subject', postgraduateData.academicQualifications.qualification1.subject);
+      formData.append('awarding_institution', postgraduateData.academicQualifications.qualification1.institution);
+      formData.append('start_date', `${postgraduateData.academicQualifications.qualification1.startDate.year}-${postgraduateData.academicQualifications.qualification1.startDate.month}-${postgraduateData.academicQualifications.qualification1.startDate.day}`);
+      formData.append('end_date', `${postgraduateData.academicQualifications.qualification1.endDate.year}-${postgraduateData.academicQualifications.qualification1.endDate.month}-${postgraduateData.academicQualifications.qualification1.endDate.day}`);
+
+      // References
+      formData.append('first_referee_name', postgraduateData.references.referee1.name);
+      formData.append('first_referee_email', postgraduateData.references.referee1.email);
+      formData.append('second_referee_name', postgraduateData.references.referee2.name);
+      formData.append('second_referee_email', postgraduateData.references.referee2.email);
+
+      // Files
+      if (postgraduateData.passportPhoto) {
+        formData.append('passport_photo', postgraduateData.passportPhoto);
+      }
+      if (postgraduateData.statementOfPurpose.length > 0) {
+        formData.append('statement_of_purpose', postgraduateData.statementOfPurpose[0]);
+      }
+      if (postgraduateData.paymentEvidence) {
+        formData.append('payment_receipt', postgraduateData.paymentEvidence);
+      }
+      if (postgraduateData.academicQualifications.qualification1.documents.length > 0) {
+        formData.append('credentials_1', postgraduateData.academicQualifications.qualification1.documents[0]);
+      }
+      if (postgraduateData.academicQualifications.qualification2?.documents.length > 0) {
+        formData.append('credentials_2', postgraduateData.academicQualifications.qualification2.documents[0]);
+      }
+      if (postgraduateData.academicQualifications.otherQualifications) {
+        formData.append('other_qualifications', postgraduateData.academicQualifications.otherQualifications);
+      }
+
+      // Send the request to the backend
+      const response = await fetch('https://admissions-qmt4.onrender.com/application/upload', {
+        method: 'POST',
+        body: formData,
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      toast.success('Application Submitted Successfully', {
+        description: 'Your application has been submitted. You will receive a confirmation email shortly.',
+        duration: 5000,
+        action: {
+          label: "View Status",
+          onClick: () => window.location.href = '/application-status'
+        },
+      });
+      
+      // Clear form data from localStorage after successful submission
+      localStorage.removeItem('applicationData');
+      
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Submission failed', {
-        description: 'There was an error submitting your application. Please try again.',
-        duration: 5000,
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
+      toast.error('Submission Failed', {
+        description: error instanceof Error 
+          ? `Error: ${error.message}. Please try again or contact support if the problem persists.`
+          : 'There was an error submitting your application. Please try again.',
+        duration: 8000,
+        action: {
+          label: "Try Again",
+          onClick: () => window.location.reload()
+        },
       });
     } finally {
       setIsSubmitting(false);
@@ -1699,7 +1842,10 @@ const PostgraduateForm = () => {
             label="Upload Other Qualifications"
             accept=".pdf,.doc,.docx"
             value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
-            onChange={(files) => handleAcademicQualificationChange("otherQualifications", null, files)}
+            onChange={(files) => {
+              const file = files && files.length > 0 ? files[0] : null;
+              handleAcademicQualificationChange("otherQualifications", null, file);
+            }}
             onRemove={() => handleAcademicQualificationChange("otherQualifications", null, null)}
           />
         </div>
@@ -1730,16 +1876,17 @@ const PostgraduateForm = () => {
               </>
             }
             accept=".pdf,.doc,.docx"
-            value={postgraduateData.statementOfPurpose ? [postgraduateData.statementOfPurpose] : null}
+            value={postgraduateData.statementOfPurpose}
             onChange={(files) => setPostgraduateData(prev => ({
               ...prev,
-              statementOfPurpose: files ? files[0] : null
+              statementOfPurpose: files || []
             }))}
             onRemove={() => setPostgraduateData(prev => ({
               ...prev,
-              statementOfPurpose: null
+              statementOfPurpose: []
             }))}
             maxSize="5MB"
+            multiple
           />
         </div>
       </div>

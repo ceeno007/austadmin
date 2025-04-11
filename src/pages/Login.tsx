@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { apiService } from "@/services/api";
@@ -23,12 +23,7 @@ const Login = () => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please enter both email and password", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error("Please enter both email and password");
       return;
     }
     
@@ -48,12 +43,7 @@ const Login = () => {
       login(data.access_token, data);
       
       // Show success message
-      toast.success("Login successful!", {
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
-      });
+      toast.success("Login successful!");
       
       // Get the program type from the response data (check applications array first)
       let programType = null;

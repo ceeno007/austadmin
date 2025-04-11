@@ -1,11 +1,10 @@
 import React from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { Toaster } from "sonner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -27,15 +26,12 @@ import Hostels from "./pages/Hostels";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-// Make sure App is defined as a proper React component function
 const App: React.FC = () => {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <LanguageProvider>
-            <Toaster />
-            <Sonner />
             <BrowserRouter>
               <AuthProvider>
                 <Routes>
@@ -69,6 +65,12 @@ const App: React.FC = () => {
                   {/* Catch-all route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <Toaster 
+                  position="top-right"
+                  expand={true}
+                  richColors
+                  closeButton
+                />
               </AuthProvider>
             </BrowserRouter>
           </LanguageProvider>

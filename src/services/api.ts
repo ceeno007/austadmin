@@ -13,7 +13,8 @@ export const API_ENDPOINTS = {
   SEND_PASSWORD_RESET_OTP: `${API_BASE_URL}/send-password-reset-otp`,
   VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/verify-password-reset-otp`,
   RESET_PASSWORD: `${API_BASE_URL}/reset-password`,
-  // Add more endpoints as needed
+  APPLICATION_UPLOAD: `${API_BASE_URL}/application/upload`,
+
 };
 
 // Default Headers for JSON requests
@@ -291,5 +292,28 @@ export const apiService = {
     }
   },
 
-  // Add more methods as needed
+  /**
+ * Upload postgraduate application
+ * @param formData - FormData containing all fields and files
+ * @returns Promise with the API response
+ */
+uploadPostgraduateApplication: async (formData: FormData) => {
+  try {
+    const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
+      method: "POST",
+      body: formData, // Do not manually set Content-Type; browser handles it
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Postgraduate application upload failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Postgraduate application upload error:", error);
+    throw error;
+  }
+},
+
 };
