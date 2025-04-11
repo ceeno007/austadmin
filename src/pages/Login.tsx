@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { apiService } from "@/services/api";
@@ -23,7 +23,13 @@ const Login = () => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please enter both email and password");
+      toast.error("Please enter both email and password", {
+        description: "Both fields are required to log in.",
+        style: {
+          background: '#EF4444',
+          color: 'white',
+        }
+      });
       return;
     }
     
@@ -43,13 +49,18 @@ const Login = () => {
       login(data.access_token, data);
       
       // Show success message
-      toast.success("Login successful!");
+      toast.success("Login successful!", {
+        description: "Welcome back! Redirecting you to your dashboard.",
+        style: {
+          background: '#10B981',
+          color: 'white',
+        }
+      });
       
       // Get the program type from the response data (check applications array first)
       let programType = null;
       if (data.applications && data.applications.length > 0) {
         programType = data.applications[0].program_type?.toLowerCase();
-        console.log("Found program_type in applications:", programType);
       }
 
       // If not found in applications, fallback to other locations
@@ -57,7 +68,6 @@ const Login = () => {
         programType = data.program_type?.toLowerCase() || 
                      data.user?.program?.toLowerCase() || 
                      data.program?.toLowerCase();
-        console.log("Using fallback program type:", programType);
       }
       
       // Determine the destination based on program type
@@ -69,8 +79,6 @@ const Login = () => {
         
         // Construct the destination URL with query parameters
         destination = `/document-upload?type=${formType}`;
-        
-        console.log(`Redirecting to ${destination} based on program type: ${programType}`);
       }
       
       // Use navigate with replace to prevent back navigation to login
@@ -78,7 +86,13 @@ const Login = () => {
       
     } catch (error) {
       console.error("Login error details:", error);
-      toast.error(error instanceof Error ? error.message : "Invalid email or password");
+      toast.error("Login failed", {
+        description: error instanceof Error ? error.message : "Invalid email or password",
+        style: {
+          background: '#EF4444',
+          color: 'white',
+        }
+      });
     } finally {
       setIsLoading(false);
     }
