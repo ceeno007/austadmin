@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/services/api";
+import SEO from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -67,8 +66,14 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <SEO 
+        title="Contact Us | AUST"
+        description="Get in touch with AUST. Contact our admissions office, academic affairs, or student support team. Find our location, phone numbers, and email addresses."
+        keywords="AUST contact, admissions contact, student support, university location, contact form, email addresses"
+        url={`${window.location.origin}/contact`}
+        type="website"
+      />
       
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
@@ -248,9 +253,7 @@ const Contact = () => {
           </div>
         </section>
       </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 

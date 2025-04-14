@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, X, FileText } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-
-
+import { useOptimizedList } from "@/hooks/useOptimizedList";
+import SEO from "@/components/SEO";
 
 import softwareEngineeringImg from "@/assets/images/software-engineering.jpg";
 import computerScienceImg from "@/assets/images/computer-science.jpg";
@@ -33,13 +31,15 @@ import appliedStatsImg from "@/assets/images/applied-stats.jpg";
 import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
 import foundationScienceImg from "@/assets/images/jupeb-science.jpg";
 
-
-
 const Programs = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("undergraduate");
+  const [visibleItems, setVisibleItems] = useState<any[]>([]);
+  const [scrollTop, setScrollTop] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check for tab parameter in URL
   useEffect(() => {
@@ -49,6 +49,67 @@ const Programs = () => {
       setActiveTab(tabParam);
     }
   }, [location.search]);
+
+  // Get current programs based on active tab
+  const getCurrentPrograms = useCallback(() => {
+    if (activeTab === "postgraduate") {
+      return Object.values(categorizedPostgrad).flat();
+    }
+    return tabs[activeTab] || [];
+  }, [activeTab]);
+
+  // Calculate visible items based on scroll position
+  const calculateVisibleItems = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const itemHeight = 400; // Approximate height of a program card
+    const buffer = 5; // Number of items to render above and below visible area
+
+    const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
+    const endIndex = Math.min(
+      getCurrentPrograms().length,
+      Math.ceil((scrollTop + containerRect.height) / itemHeight) + buffer
+    );
+
+    setVisibleItems(getCurrentPrograms().slice(startIndex, endIndex));
+  }, [scrollTop, getCurrentPrograms]);
+
+  // Handle scroll events with debouncing
+  const handleScroll = useCallback(() => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (containerRef.current) {
+        setScrollTop(containerRef.current.scrollTop);
+      }
+    }, 50); // 50ms debounce
+  }, []);
+
+  // Set up scroll event listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, [handleScroll]);
+
+  // Update visible items when scroll position or programs change
+  useEffect(() => {
+    calculateVisibleItems();
+  }, [scrollTop, calculateVisibleItems]);
+
+  // Preload images for visible items
+  useEffect(() => {
+    visibleItems.forEach((item) => {
+      const img = new Image();
+      img.src = getImage(item);
+    });
+  }, [visibleItems]);
 
   // Updated images for each program to better match the course
   const tabs = {
@@ -437,11 +498,38 @@ const Programs = () => {
     setSelectedProgram(title);
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+  // Generate structured data for programs
+  const generateStructuredData = () => {
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "itemListElement": getCurrentPrograms().map((program, index) => ({
+        "@type": "EducationalProgram",
+        "name": program.title,
+        "description": program.description,
+        "provider": {
+          "@type": "CollegeOrUniversity",
+          "name": "African University of Science and Technology"
+        },
+        "timeToComplete": program.duration,
+        "educationalProgramMode": "full-time",
+        "position": index + 1
+      }))
+    };
+  };
 
-      <main className="flex-grow">
+  return (
+    <>
+      <SEO 
+        title="Academic Programs | AUST"
+        description="Explore AUST's comprehensive range of undergraduate, postgraduate, and foundation programs in science, technology, and business. Find your path to success with our world-class education."
+        keywords="AUST programs, undergraduate degrees, postgraduate programs, foundation courses, science and technology education, African university"
+        url={`${window.location.origin}/programs`}
+        type="website"
+        structuredData={generateStructuredData()}
+      />
+      
+      <main className="min-h-screen bg-gray-50">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4 text-center">
@@ -455,31 +543,32 @@ const Programs = () => {
         </section>
 
         {/* Programs Section */}
-        <section className="py-16">
+        <section className="py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="undergraduate">Undergraduate</TabsTrigger>
-                <TabsTrigger value="postgraduate">Postgraduate</TabsTrigger>
-                <TabsTrigger value="foundation">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 mb-8" role="tablist">
+                <TabsTrigger value="undergraduate" role="tab">Undergraduate</TabsTrigger>
+                <TabsTrigger value="postgraduate" role="tab">Postgraduate</TabsTrigger>
+                <TabsTrigger value="foundation" role="tab">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="undergraduate">
+              <TabsContent value="undergraduate" role="tabpanel">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {tabs.undergraduate.map((program) => (
-                    <div
+                    <article
                       key={program.title}
                       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                     >
                       <div className="relative h-48">
                         <img
                           src={getImage(program)}
-                          alt={program.title}
+                          alt={`${program.title} program`}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                       </div>
                       <div className="p-6">
-                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                        <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
                         <p className="text-gray-600 mb-4">{getDescription(program)}</p>
                         <div className="space-y-2 mb-4">
                           <p className="text-sm text-gray-500">
@@ -494,10 +583,16 @@ const Programs = () => {
                             variant="outline"
                             className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
                             onClick={() => handleProgramClick(program.title)}
+                            aria-label={`View details for ${program.title}`}
                           >
                             View Details
                           </Button>
-                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                          <a 
+                            href={program.pdf} 
+                            download 
+                            className="text-[#FF5500] hover:text-[#FF5500]/80"
+                            aria-label={`Download PDF for ${program.title}`}
+                          >
                             <Button variant="ghost" className="text-[#FF5500]">
                               <FileText className="w-4 h-4 mr-2" />
                               Download PDF
@@ -505,28 +600,31 @@ const Programs = () => {
                           </a>
                         </div>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </TabsContent>
 
-              <TabsContent value="postgraduate">
+              <TabsContent value="postgraduate" role="tabpanel">
                 {Object.entries(categorizedPostgrad).map(([category, programs]) => (
                   <div key={category} className="mb-12">
                     <h2 className="text-2xl font-bold text-[#FF5500] mb-4">{category} Programs</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {programs.map((program) => (
-                        <div key={program.title} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                        <article 
+                          key={program.title} 
+                          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                        >
                           <div className="relative h-48">
-                            <img src={getImage(program)} alt={program.title} className="w-full h-full object-cover" />
-                            {/* {program.type && (
-                              <div className="absolute top-2 right-2 bg-[#FF5500] text-white text-xs px-3 py-1 rounded-full">
-                                {program.type}
-                              </div>
-                            )} */}
+                            <img 
+                              src={getImage(program)} 
+                              alt={`${program.title} program`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
                           </div>
                           <div className="p-6">
-                            <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                            <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
                             <p className="text-gray-600 mb-4">{getDescription(program)}</p>
                             <div className="space-y-2 mb-4">
                               <p className="text-sm text-gray-500">
@@ -541,39 +639,46 @@ const Programs = () => {
                                 variant="outline"
                                 className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
                                 onClick={() => handleProgramClick(program.title)}
+                                aria-label={`View details for ${program.title}`}
                               >
                                 View Details
                               </Button>
-                              <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                              <a 
+                                href={program.pdf} 
+                                download 
+                                className="text-[#FF5500] hover:text-[#FF5500]/80"
+                                aria-label={`Download PDF for ${program.title}`}
+                              >
                                 <Button variant="ghost" className="text-[#FF5500]">
                                   <FileText className="w-4 h-4 mr-2" /> Download PDF
                                 </Button>
                               </a>
                             </div>
                           </div>
-                        </div>
+                        </article>
                       ))}
                     </div>
                   </div>
                 ))}
               </TabsContent>
 
-              <TabsContent value="foundation">
+              <TabsContent value="foundation" role="tabpanel">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {tabs.foundation.map((program) => (
-                    <div
+                    <article
                       key={program.id}
                       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                     >
                       <div className="relative h-48">
                         <img
                           src={getImage(program)}
-                          alt={program.title}
+                          alt={`${program.title} program`}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                       </div>
                       <div className="p-6">
-                        <h3 className="text-xl font-semibold mb-2">{program.title}</h3>
+                        <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
                         <p className="text-gray-600 mb-4">{program.description}</p>
                         <div className="space-y-2 mb-4">
                           <p className="text-sm text-gray-500">
@@ -588,10 +693,16 @@ const Programs = () => {
                             variant="outline"
                             className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
                             onClick={() => handleProgramClick(program.title)}
+                            aria-label={`View details for ${program.title}`}
                           >
                             View Details
                           </Button>
-                          <a href={program.pdf} download className="text-[#FF5500] hover:text-[#FF5500]/80">
+                          <a 
+                            href={program.pdf} 
+                            download 
+                            className="text-[#FF5500] hover:text-[#FF5500]/80"
+                            aria-label={`Download PDF for ${program.title}`}
+                          >
                             <Button variant="ghost" className="text-[#FF5500]">
                               <FileText className="w-4 h-4 mr-2" />
                               Download PDF
@@ -599,7 +710,7 @@ const Programs = () => {
                           </a>
                         </div>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </TabsContent>
@@ -609,11 +720,17 @@ const Programs = () => {
 
         {/* Modal for Selected Program */}
         {selectedProgram && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+          <div 
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="program-details-title"
+          >
             <div className="bg-white w-full max-w-xl p-6 rounded-xl relative animate-fade-in shadow-xl max-h-screen overflow-y-auto">
               <button
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
                 onClick={() => setSelectedProgram(null)}
+                aria-label="Close program details"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -625,10 +742,10 @@ const Programs = () => {
                   <>
                     <img
                       src={getImage(program)}
-                      alt={program.title}
+                      alt={`${program.title} program`}
                       className="w-full h-48 object-cover rounded-lg mb-4"
                     />
-                    <h2 className="text-2xl font-bold mb-2">{program.title}</h2>
+                    <h2 id="program-details-title" className="text-2xl font-bold mb-2">{program.title}</h2>
                     <p className="text-gray-600 mb-2">
                       {getDescription(program)}
                     </p>
@@ -638,7 +755,7 @@ const Programs = () => {
                     <p className="text-sm text-gray-500 mb-4">
                       School Fees: {program.schoolFees}
                     </p>
-                    <h4 className="font-semibold text-[#FF5500] mb-2">Requirements:</h4>
+                    <h3 className="font-semibold text-[#FF5500] mb-2">Requirements:</h3>
                     <ul className="space-y-1 mb-6">
                       {getRequirements(program).map((req: string, idx: number) => (
                         <li key={idx} className="flex items-start">
@@ -680,10 +797,8 @@ const Programs = () => {
           </div>
         )}
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 
-export default Programs;
+export default Programs; 

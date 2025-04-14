@@ -1,0 +1,28 @@
+{
+  "name": "Africa University of Science and Technology",
+  "short_name": "AUST",
+  "description": "Explore our comprehensive range of undergraduate, postgraduate, and foundation programs designed to prepare you for success in your chosen field.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF5500",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "categories": ["education", "university", "academic"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false
+} 

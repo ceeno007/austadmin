@@ -107,7 +107,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/programs#undergraduate"
+                  to="/programs?tab=undergraduate"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Undergraduate Programs
@@ -115,7 +115,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/programs#postgraduate"
+                  to="/programs?tab=postgraduate"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Postgraduate Programs
@@ -123,7 +123,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/programs#foundation"
+                  to="/programs?tab=foundation"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   FOUNDATION AND REMEDIAL STUDIES Programs

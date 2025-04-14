@@ -1,6 +1,4 @@
 import React from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import aboutImage from "@/assets/images/aboutimg.jpg";
 import { 
   GraduationCap, 
@@ -17,12 +15,18 @@ import {
   Leaf,
   CheckCircle2
 } from "lucide-react";
+import SEO from "@/components/SEO";
 
 const About = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-
+    <>
+      <SEO 
+        title="About AUST"
+        description="Learn about AUST's mission, vision, and commitment to academic excellence in science and technology education."
+        keywords="AUST, African University of Science and Technology, mission, vision, academic excellence, science and technology"
+        url={`${window.location.origin}/about`}
+        type="website"
+      />
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4">
@@ -171,9 +175,7 @@ const About = () => {
           </div>
         </section>
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

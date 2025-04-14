@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
@@ -16,6 +14,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import SEO from "@/components/SEO";
 import campusLife from "@/assets/images/campusLife.jpg";
 import research from "@/assets/images/research.jpg";
 import housing from "@/assets/images/housing.jpg";
@@ -25,8 +24,14 @@ import library from "@/assets/images/library.jpg";
 
 const CampusLife = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <SEO 
+        title="Campus Life | AUST"
+        description="Experience vibrant campus life at AUST with modern facilities, student organizations, and enriching activities. Discover our library, computer labs, research facilities, and more."
+        keywords="AUST campus life, student facilities, library, computer labs, research facilities, student organizations, campus events"
+        url={`${window.location.origin}/campus-life`}
+        type="website"
+      />
       
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
@@ -240,9 +245,7 @@ const CampusLife = () => {
           </div>
         </section>
       </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 

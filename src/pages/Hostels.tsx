@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home, CheckCircle2, ArrowRight, X, Image } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +9,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Pagination, Navigation } from 'swiper/modules';
 import ImageViewer from "@/components/ImageViewer";
+import SEO from "@/components/SEO";
 
 import nnamdi1 from "@/assets/images/hostel/nnamdi1.jpg";
 import nnamdi2 from "@/assets/images/hostel/nnamdi2.jpg";
@@ -155,8 +154,14 @@ const Hostels = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <SEO 
+        title="Student Hostels | AUST"
+        description="Explore AUST's comfortable and secure student accommodation options. View our hostel facilities, amenities, and pricing for both shared and single rooms."
+        keywords="AUST hostels, student accommodation, campus housing, shared rooms, single rooms, student facilities"
+        url={`${window.location.origin}/hostels`}
+        type="website"
+      />
       
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
@@ -330,9 +335,7 @@ const Hostels = () => {
           />
         )}
       </main>
-      
-      <Footer />
-    </div>
+    </>
   );
 };
 
