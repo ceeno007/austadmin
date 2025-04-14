@@ -18,7 +18,7 @@ const Footer = () => {
                 className="h-10 w-auto object-contain"
               />
               <span className="ml-2 text-xl font-clash-display font-bold">
-                AUST Abuja
+                AUST
               </span>
             </Link>
             <p className="text-gray-300 mb-4">
