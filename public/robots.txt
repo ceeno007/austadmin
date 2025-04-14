@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://your-university-domain.com/sitemap.xml
+Sitemap: https://aust.edu.ng/sitemap.xml
 
 # Disallow admin and private areas
 Disallow: /admin/

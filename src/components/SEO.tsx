@@ -15,12 +15,12 @@ const SEO: React.FC<SEOProps> = ({
   title,
   description,
   keywords = 'university, education, academic programs, undergraduate, postgraduate, foundation studies, higher education',
-  image = 'https://your-university-domain.com/og-image.jpg',
-  url = 'https://your-university-domain.com',
+  image = 'https://aust.edu.ng/admission/og-image.jpg',
+  url = 'https://aust.edu.ng/admission',
   type = 'website',
   structuredData
 }) => {
-  const siteTitle = 'Your University Name';
+  const siteTitle = 'African University of Science and Technology';
   const fullTitle = `${title} | ${siteTitle}`;
   
   return (
