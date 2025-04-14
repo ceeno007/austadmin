@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, X, FileText } from "lucide-react";
+import { ArrowRight, Check, X, FileText, Image as ImageIcon } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useOptimizedList } from "@/hooks/useOptimizedList";
 import SEO from "@/components/SEO";
@@ -31,6 +31,33 @@ import appliedStatsImg from "@/assets/images/applied-stats.jpg";
 import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
 import foundationScienceImg from "@/assets/images/jupeb-science.jpg";
 
+// Create an image map for reliable fallbacks
+const imageMap: Record<string, string> = {
+  "software-engineering": softwareEngineeringImg,
+  "computer-science": computerScienceImg,
+  "petroleum-engineering": petroleumEngineeringImg,
+  "accounting": accountingImg,
+  "business-admin": businessAdminImg,
+  "civil-engineering": civilEngineeringImg,
+  "materials-metallurgical": materialsEngineeringImg,
+  "mechanical": mechanicalEngineeringImg,
+  "aerospace": aerospaceImg,
+  "gis": gisImg,
+  "mit": mitImg,
+  "systems": systemsImg,
+  "modeling": modelingImg,
+  "math": mathImg,
+  "petroleum": petroleumImg,
+  "public-admin": publicAdminImg,
+  "space-physics": spacePhysicsImg,
+  "policy": PolicyImg,
+  "physics": physicsImg,
+  "applied-stats": appliedStatsImg,
+  "jupeb-science": jupebScienceImg,
+  "foundation-science": foundationScienceImg,
+  "default": defaultProgramImg
+};
+
 const Programs = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,6 +65,7 @@ const Programs = () => {
   const [activeTab, setActiveTab] = useState("undergraduate");
   const [visibleItems, setVisibleItems] = useState<any[]>([]);
   const [scrollTop, setScrollTop] = useState(0);
+  const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -106,10 +134,53 @@ const Programs = () => {
   // Preload images for visible items
   useEffect(() => {
     visibleItems.forEach((item) => {
+      if (!item) return;
+      
+      const imgSrc = getImage(item);
+      if (!imgSrc) return;
+      
+      // Skip if we already know this image fails to load
+      if (imageLoadErrors[imgSrc]) return;
+      
       const img = new Image();
-      img.src = getImage(item);
+      img.onload = () => {
+        // Image loaded successfully
+      };
+      img.onerror = () => {
+        // Mark this image as having an error
+        setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
+      };
+      img.src = imgSrc;
     });
-  }, [visibleItems]);
+  }, [visibleItems, imageLoadErrors]);
+
+  // Improved image handling function
+  const getImage = (program: any) => {
+    // If program has a direct image property, use it
+    if (program.image) {
+      return program.image;
+    }
+    
+    // Try to extract a key from the program title
+    const titleKey = program.title?.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    
+    // Check if we have a matching image in our map
+    for (const [key, img] of Object.entries(imageMap)) {
+      if (titleKey?.includes(key)) {
+        return img;
+      }
+    }
+    
+    // Return default image as last resort
+    return defaultProgramImg;
+  };
+
+  // Handle image load errors
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, program: any) => {
+    const imgSrc = getImage(program);
+    setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
+    e.currentTarget.src = defaultProgramImg;
+  };
 
   // Updated images for each program to better match the course
   const tabs = {
@@ -477,10 +548,6 @@ const Programs = () => {
     Others: tabs.postgraduate.filter((p) => getLabel(p.title) === "PGD" || getLabel(p.title) === null)
   };
 
-  const getImage = (program: any) =>
-    program.image ||
-    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80";
-
   const getDescription = (program: any) =>
     program.description ||
     "A comprehensive program designed to provide students with the knowledge and skills needed for success in their chosen field.";
@@ -565,7 +632,13 @@ const Programs = () => {
                           alt={`${program.title} program`}
                           className="w-full h-full object-cover"
                           loading="lazy"
+                          onError={(e) => handleImageError(e, program)}
                         />
+                        {imageLoadErrors[getImage(program)] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                            <ImageIcon className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
                       </div>
                       <div className="p-6">
                         <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
@@ -621,7 +694,13 @@ const Programs = () => {
                               alt={`${program.title} program`}
                               className="w-full h-full object-cover"
                               loading="lazy"
+                              onError={(e) => handleImageError(e, program)}
                             />
+                            {imageLoadErrors[getImage(program)] && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                <ImageIcon className="h-12 w-12 text-gray-400" />
+                              </div>
+                            )}
                           </div>
                           <div className="p-6">
                             <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
@@ -675,7 +754,13 @@ const Programs = () => {
                           alt={`${program.title} program`}
                           className="w-full h-full object-cover"
                           loading="lazy"
+                          onError={(e) => handleImageError(e, program)}
                         />
+                        {imageLoadErrors[getImage(program)] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                            <ImageIcon className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
                       </div>
                       <div className="p-6">
                         <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
