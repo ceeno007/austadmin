@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Toaster } from "sonner";
@@ -48,6 +48,24 @@ const queryClient = new QueryClient({
   },
 });
 
+// Create a component to conditionally render the Navbar
+const ConditionalNavbar = () => {
+  const location = useLocation();
+  const path = location.pathname;
+  
+  // Don't show Navbar on these routes
+  const noNavbarRoutes = [
+    '/document-upload',
+    '/application'
+  ];
+  
+  if (noNavbarRoutes.includes(path)) {
+    return null;
+  }
+  
+  return <Navbar />;
+};
+
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,7 +76,7 @@ const App: React.FC = () => {
               <AuthProvider>
                 <Suspense fallback={<LoadingSpinner />}>
                   <div className="flex flex-col min-h-screen">
-                    <Navbar />
+                    <ConditionalNavbar />
                     <main className="flex-grow">
                       <Routes>
                         {/* Public Routes */}

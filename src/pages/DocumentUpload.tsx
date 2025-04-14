@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import PortalNav from "@/components/PortalNav";
 import { Info } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
@@ -170,7 +169,6 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
 
   return (
     <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
-      <PortalNav userName={userName} />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -178,17 +176,14 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
               {programType === "undergraduate" && "Undergraduate Program"}
               {programType === "postgraduate" && "Postgraduate Program"}
               {programType === "phd" && "Ph.D. Program"}
-              {programType === "jupeb" && "JUPEB Program"}
               {programType === "foundation" && "FOUNDATION AND REMEDIAL STUDIES Program"}
             </h1>
             <p className="text-gray-600 mt-2">Please upload your required documents below</p>
           </div>
           
-                      <div className="space-y-6">
+          <div className="space-y-6">
             {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
               <PostgraduateForm />
-            ) : programType === "jupeb" ? (
-              <JupebForm />
             ) : programType === "foundation" ? (
               <FoundationForm />
             ) : (

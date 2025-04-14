@@ -6,6 +6,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useOptimizedList } from "@/hooks/useOptimizedList";
 import SEO from "@/components/SEO";
 
+// Import all program images
 import softwareEngineeringImg from "@/assets/images/software-engineering.jpg";
 import computerScienceImg from "@/assets/images/computer-science.jpg";
 import petroleumEngineeringImg from "@/assets/images/petroleum-engineering.jpg";
@@ -14,18 +15,16 @@ import businessAdminImg from "@/assets/images/business-admin.jpg";
 import civilEngineeringImg from "@/assets/images/civil-engineering.jpg";
 import materialsEngineeringImg from "@/assets/images/materials-metallurgical.jpg";
 import mechanicalEngineeringImg from "@/assets/images/mechanical.jpg";
-import defaultProgramImg from "@/assets/images/default.jpg";
-
+import academicImg from "@/assets/images/academic.jpg";
 import aerospaceImg from "@/assets/images/aerospace.jpg";
 import gisImg from "@/assets/images/gis.jpg";
-import mitImg from "@/assets/images/mit.jpg";
 import systemsImg from "@/assets/images/systems.jpg";
 import modelingImg from "@/assets/images/modeling.jpg";
 import mathImg from "@/assets/images/math.jpg";
-import petroleumImg from "@/assets/images/petroleum.jpg";
+import petroleumImg from "@/assets/images/petroleum-engineering.jpg";
 import publicAdminImg from "@/assets/images/public-admin.jpg";
 import spacePhysicsImg from "@/assets/images/space-physics.jpg";
-import PolicyImg from "@/assets/images/policy.jpg";
+import policyImg from "@/assets/images/policy.jpg";
 import physicsImg from "@/assets/images/physics.jpg";
 import appliedStatsImg from "@/assets/images/applied-stats.jpg";
 import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
@@ -43,19 +42,18 @@ const imageMap: Record<string, string> = {
   "mechanical": mechanicalEngineeringImg,
   "aerospace": aerospaceImg,
   "gis": gisImg,
-  "mit": mitImg,
   "systems": systemsImg,
   "modeling": modelingImg,
   "math": mathImg,
   "petroleum": petroleumImg,
   "public-admin": publicAdminImg,
   "space-physics": spacePhysicsImg,
-  "policy": PolicyImg,
+  "policy": policyImg,
   "physics": physicsImg,
   "applied-stats": appliedStatsImg,
   "jupeb-science": jupebScienceImg,
   "foundation-science": foundationScienceImg,
-  "default": defaultProgramImg
+  "default": academicImg
 };
 
 const Programs = () => {
@@ -171,15 +169,15 @@ const Programs = () => {
       }
     }
     
-    // Return default image as last resort
-    return defaultProgramImg;
+    // Return academic image as last resort
+    return academicImg;
   };
 
   // Handle image load errors
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, program: any) => {
     const imgSrc = getImage(program);
     setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
-    e.currentTarget.src = defaultProgramImg;
+    e.currentTarget.src = academicImg;
   };
 
   // Updated images for each program to better match the course
@@ -456,14 +454,14 @@ const Programs = () => {
         title: "Taught Masters in Public Policy",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: PolicyImg,
+        image: policyImg,
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {
         title: "M.Sc. Public Policy",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: PolicyImg,
+        image: policyImg,
         pdf: "/pdfs/2025 Postgraduate Fees.pdf"
       },
       {

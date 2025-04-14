@@ -14,13 +14,30 @@ export const API_ENDPOINTS = {
   VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/verify-password-reset-otp`,
   RESET_PASSWORD: `${API_BASE_URL}/reset-password`,
   APPLICATION_UPLOAD: `${API_BASE_URL}/application/upload`,
-  APPLICATION_DRAFT: `${API_BASE_URL}/application/draft`,
+  APPLICATION_DRAFT: `${API_BASE_URL}/postgraduate_saved`,
 };
 
 // Default Headers for JSON requests
 const defaultHeaders = {
   "Content-Type": "application/json",
   Accept: "application/json",
+};
+
+// Helper function to get authentication headers
+const getAuthHeaders = (includeContentType = true) => {
+  const token = localStorage.getItem('accessToken');
+  const headers: HeadersInit = {};
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  if (includeContentType) {
+    headers['Content-Type'] = 'application/json';
+    headers['Accept'] = 'application/json';
+  }
+  
+  return headers;
 };
 
 // API Service
@@ -95,9 +112,19 @@ export const apiService = {
    */
   uploadDocument: async (documentData: FormData) => {
     try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('accessToken');
+      
+      // Create headers with the token
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(API_ENDPOINTS.DOCUMENT_UPLOAD, {
         method: "POST",
-        body: documentData, // No need to set Content-Type; browser handles it
+        headers,
+        body: documentData, // Do not manually set Content-Type; browser handles it
       });
 
       if (!response.ok) {
@@ -293,75 +320,105 @@ export const apiService = {
   },
 
   /**
- * Upload postgraduate application
- * @param formData - FormData containing all fields and files
- * @returns Promise with the API response
- */
-uploadPostgraduateApplication: async (formData: FormData) => {
-  try {
-    const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
-      method: "POST",
-      body: formData, // Do not manually set Content-Type; browser handles it
-    });
+   * Upload postgraduate application
+   * @param formData - FormData containing all fields and files
+   * @returns Promise with the API response
+   */
+  uploadPostgraduateApplication: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('accessToken');
+      
+      // Create headers with the token
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
+        method: "POST",
+        headers,
+        body: formData, // Do not manually set Content-Type; browser handles it
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Postgraduate application upload failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Postgraduate application upload failed");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Postgraduate application upload error:", error);
+      throw error;
     }
+  },
 
-    return await response.json();
-  } catch (error) {
-    console.error("Postgraduate application upload error:", error);
-    throw error;
-  }
-},
+  /**
+   * Submit a postgraduate application
+   * @param formData - Application form data
+   * @returns Promise with the API response
+   */
+  submitApplication: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('accessToken');
+      
+      // Create headers with the token
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
 
-/**
- * Submit a postgraduate application
- * @param formData - Application form data
- * @returns Promise with the API response
- */
-submitApplication: async (formData: FormData) => {
-  try {
-    const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
-      method: "POST",
-      body: formData,
-    });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Application submission failed");
+      }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Application submission failed");
+      return await response.json();
+    } catch (error) {
+      console.error("Application submission error:", error);
+      throw error;
     }
+  },
 
-    return await response.json();
-  } catch (error) {
-    console.error("Application submission error:", error);
-    throw error;
-  }
-},
+  /**
+   * Submit a draft application
+   * @param formData - Application form data with is_draft flag
+   * @returns Promise with the API response
+   */
+  submitDraftApplication: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('accessToken');
+      
+      // Create headers with the token
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(API_ENDPOINTS.APPLICATION_DRAFT, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
 
-/**
- * Submit a draft application
- * @param formData - Application form data with is_draft flag
- * @returns Promise with the API response
- */
-submitDraftApplication: async (formData: FormData) => {
-  try {
-    const response = await fetch(API_ENDPOINTS.APPLICATION_DRAFT, {
-      method: "POST",
-      body: formData,
-    });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Draft application submission failed");
+      }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Draft application submission failed");
+      return await response.json();
+    } catch (error) {
+      console.error("Draft application submission error:", error);
+      throw error;
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Draft application submission error:", error);
-    throw error;
-  }
-},
+  },
 
 };

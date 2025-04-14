@@ -746,45 +746,41 @@ const PostgraduateForm = () => {
 
   const handleSaveAsDraft = async () => {
     setIsSaving(true);
+    
     try {
+      // Create a copy of the form data
       const formData = new FormData();
       
-      // Append personal details if they exist
-      if (postgraduateData.personalDetails.surname) {
-        formData.append("surname", postgraduateData.personalDetails.surname);
-      }
-      if (postgraduateData.personalDetails.firstName) {
-        formData.append("first_name", postgraduateData.personalDetails.firstName);
-      }
-      if (postgraduateData.personalDetails.gender) {
-        formData.append("gender", postgraduateData.personalDetails.gender);
-      }
-      if (postgraduateData.personalDetails.dateOfBirth.day && 
-          postgraduateData.personalDetails.dateOfBirth.month && 
-          postgraduateData.personalDetails.dateOfBirth.year) {
-        formData.append("date_of_birth", 
-          `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
-      }
-      if (postgraduateData.personalDetails.streetAddress) {
-        formData.append("street_address", postgraduateData.personalDetails.streetAddress);
-      }
-      if (postgraduateData.personalDetails.city) {
-        formData.append("city", postgraduateData.personalDetails.city);
-      }
-      if (postgraduateData.personalDetails.country) {
-        formData.append("country", postgraduateData.personalDetails.country);
-      }
-      if (postgraduateData.personalDetails.nationality) {
-        formData.append("nationality", postgraduateData.personalDetails.nationality);
-      }
-      if (postgraduateData.personalDetails.phoneNumber) {
-        formData.append("phone_number", postgraduateData.personalDetails.phoneNumber);
-      }
-      if (postgraduateData.personalDetails.email) {
-        formData.append("email", postgraduateData.personalDetails.email);
+      // Get the access token from localStorage
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Add the token to the form data
+      if (accessToken) {
+        formData.append('token', accessToken);
+      } else {
+        toast.error("Authentication error", {
+          description: "You are not logged in. Please log in and try again.",
+          duration: 5000,
+        });
+        return;
       }
       
-      // Append program details if they exist
+      // Add is_draft flag
+      formData.append('is_draft', 'true');
+      
+      // Append personal details
+      formData.append("surname", postgraduateData.personalDetails.surname);
+      formData.append("first_name", postgraduateData.personalDetails.firstName);
+      formData.append("gender", postgraduateData.personalDetails.gender);
+      formData.append("date_of_birth", `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append("street_address", postgraduateData.personalDetails.streetAddress);
+      formData.append("city", postgraduateData.personalDetails.city);
+      formData.append("country", postgraduateData.personalDetails.country);
+      formData.append("nationality", postgraduateData.personalDetails.nationality);
+      formData.append("phone_number", postgraduateData.personalDetails.phoneNumber);
+      formData.append("email", postgraduateData.personalDetails.email);
+      
+      // Append program details
       if (postgraduateData.programType) {
         formData.append("program_type", postgraduateData.programType);
       }
@@ -792,7 +788,7 @@ const PostgraduateForm = () => {
         formData.append("applicant_type", postgraduateData.applicantType);
       }
       
-      // Append academic qualifications if they exist
+      // Append academic qualifications
       if (postgraduateData.academicQualifications.qualification1.type) {
         formData.append("degree", postgraduateData.academicQualifications.qualification1.type);
       }
@@ -806,7 +802,7 @@ const PostgraduateForm = () => {
         formData.append("class_of_degree", postgraduateData.academicQualifications.qualification1.grade);
       }
       
-      // Append references if they exist
+      // Append references
       if (postgraduateData.references.referee1.name) {
         formData.append("referee1_name", postgraduateData.references.referee1.name);
       }
@@ -820,12 +816,12 @@ const PostgraduateForm = () => {
         formData.append("referee2_email", postgraduateData.references.referee2.email);
       }
       
-      // Append statement of purpose if it exists
+      // Append statement of purpose
       if (postgraduateData.statementOfPurpose.length > 0) {
         formData.append("statement_of_purpose", postgraduateData.statementOfPurpose[0]);
       }
       
-      // Append declaration if it exists
+      // Append declaration
       if (postgraduateData.declaration) {
         formData.append("declaration", postgraduateData.declaration.toString());
       }
@@ -837,9 +833,6 @@ const PostgraduateForm = () => {
       if (postgraduateData.paymentEvidence) {
         formData.append("payment_evidence", postgraduateData.paymentEvidence);
       }
-
-      // Add draft flag
-      formData.append("is_draft", "true");
       
       // Use the new submitDraftApplication function instead of submitApplication
       const response = await apiService.submitDraftApplication(formData);
@@ -863,15 +856,29 @@ const PostgraduateForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!isFormValid()) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    
     setIsSubmitting(true);
+    
     try {
+      if (!isFormValid()) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
       const formData = new FormData();
+      
+      // Get the access token from localStorage
+      const accessToken = localStorage.getItem('accessToken');
+      
+      // Add the token to the form data
+      if (accessToken) {
+        formData.append('token', accessToken);
+      } else {
+        toast.error("Authentication error", {
+          description: "You are not logged in. Please log in and try again.",
+          duration: 5000,
+        });
+        return;
+      }
       
       // Append personal details
       formData.append("surname", postgraduateData.personalDetails.surname);
