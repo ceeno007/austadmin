@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://aust.edu.ng/</loc>
+    <loc>https://aust.edu.ng/admission/</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/programs</loc>
+    <loc>https://aust.edu.ng/admission/programs</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/programs?tab=undergraduate</loc>
+    <loc>https://aust.edu.ng/admission/programs?tab=undergraduate</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/programs?tab=postgraduate</loc>
+    <loc>https://aust.edu.ng/admission/programs?tab=postgraduate</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/programs?tab=foundation</loc>
+    <loc>https://aust.edu.ng/admission/programs?tab=foundation</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/about</loc>
+    <loc>https://aust.edu.ng/admission/about</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/contact</loc>
+    <loc>https://aust.edu.ng/admission/contact</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/signup</loc>
+    <loc>https://aust.edu.ng/admission/signup</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://aust.edu.ng/login</loc>
+    <loc>https://aust.edu.ng/admission/login</loc>
     <lastmod>2024-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
