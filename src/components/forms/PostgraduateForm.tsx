@@ -330,6 +330,12 @@ interface University {
 const PostgraduateForm = () => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
+  const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
+  const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
+  const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
 
   useEffect(() => {
     try {
@@ -609,6 +615,8 @@ const PostgraduateForm = () => {
   const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
   const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
   const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
+  // Add cache for university results
+  const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
 
   // Generate years from 1950 to current year
   const currentYear = new Date().getFullYear();
@@ -953,15 +961,31 @@ const PostgraduateForm = () => {
     }
   };
 
-  // Function to fetch universities
+  // Function to fetch universities with caching and optimization
   const fetchUniversities = async (query: string) => {
-    if (query.length < 2) return;
+    if (query.length < 3) {
+      setUniversities([]);
+      return;
+    }
+    
+    // Check cache first
+    if (universityCache[query]) {
+      setUniversities(universityCache[query]);
+      return;
+    }
     
     setIsLoadingUniversities(true);
     try {
       const response = await fetch(`http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
       const data = await response.json();
-      setUniversities(data);
+      // Limit results to 20 universities for better performance
+      const limitedData = data.slice(0, 20);
+      setUniversities(limitedData);
+      // Cache the results
+      setUniversityCache(prev => ({
+        ...prev,
+        [query]: limitedData
+      }));
     } catch (error) {
       toast.error("Failed to fetch universities");
       console.error("Error fetching universities:", error);
@@ -970,20 +994,32 @@ const PostgraduateForm = () => {
     }
   };
 
-  // Debounce search query
+  // Set debounce delay to standard 500ms
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery) {
         fetchUniversities(searchQuery);
       }
-    }, 300);
+    }, 500); // Standard 500ms debounce delay
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
   // Function to handle university selection
   const handleUniversitySelect = (universityName: string, qualificationField: "qualification1" | "qualification2") => {
-    handleAcademicQualificationChange(qualificationField, "institution", universityName);
+    setPostgraduateData(prev => ({
+      ...prev,
+      academicQualifications: {
+        ...prev.academicQualifications,
+        [qualificationField]: {
+          ...prev.academicQualifications[qualificationField],
+          institution: universityName
+        }
+      }
+    }));
+    // Clear the search query after selection
+    setSearchQuery("");
+    // Close the popover
     if (qualificationField === "qualification1") {
       setOpenUniversityPopover(false);
     } else {
@@ -991,7 +1027,50 @@ const PostgraduateForm = () => {
     }
   };
 
-  // Replace the institution input field with this new component
+  // Update the CommandInput to show minimum character message and loading state
+  const renderCommandInput = () => (
+    <div className="space-y-2">
+      <CommandInput
+        placeholder="Search universities... (minimum 3 characters)"
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
+      {searchQuery.length > 0 && searchQuery.length < 3 && (
+        <p className="px-2 text-xs text-gray-500">Please enter at least 3 characters to search</p>
+      )}
+      {isLoadingUniversities && (
+        <p className="px-2 text-xs text-gray-500">Searching universities...</p>
+      )}
+    </div>
+  );
+
+  // Update the CommandItem to handle long names and make it selectable
+  const renderUniversityItem = (university: University, qualificationField: "qualification1" | "qualification2") => (
+    <CommandItem
+      key={university.name}
+      value={university.name}
+      onSelect={() => handleUniversitySelect(university.name, qualificationField)}
+      className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
+    >
+      <div className="flex flex-col w-full">
+        <span className="truncate text-gray-900" title={university.name}>
+          {university.name}
+        </span>
+        <span className="text-xs text-gray-500 truncate" title={university.country}>
+          {university.country}
+        </span>
+      </div>
+    </CommandItem>
+  );
+
+  // Update the CommandGroup to ensure proper scrolling and interaction
+  const renderCommandGroup = (qualificationField: "qualification1" | "qualification2") => (
+    <CommandGroup className="max-h-[300px] overflow-auto">
+      {universities.map((university) => renderUniversityItem(university, qualificationField))}
+    </CommandGroup>
+  );
+
+  // Update the PopoverContent to ensure proper positioning and interaction
   const renderInstitutionField = () => (
     <div className="space-y-2">
       <Label>Institution <span className="text-red-500">Required</span></Label>
@@ -1003,42 +1082,25 @@ const PostgraduateForm = () => {
             aria-expanded={openUniversityPopover}
             className="w-full justify-between"
           >
-            {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+            <span className="truncate">
+              {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+            </span>
             <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-full p-0" align="start">
           <Command>
-            <CommandInput
-              placeholder="Search universities..."
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-            />
+            {renderCommandInput()}
             <CommandEmpty>
               {isLoadingUniversities ? (
                 <div className="p-4 text-center text-sm">Loading...</div>
+              ) : searchQuery.length < 3 ? (
+                <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
               ) : (
                 <div className="p-4 text-center text-sm">No universities found.</div>
               )}
             </CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-auto">
-              {universities.map((university) => (
-                <CommandItem
-                  key={university.name}
-                  value={university.name}
-                  onSelect={() => {
-                    handleAcademicQualificationChange("qualification1", "institution", university.name);
-                    setOpenUniversityPopover(false);
-                  }}
-                  className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
-                >
-                  <div className="flex flex-col">
-                    <span>{university.name}</span>
-                    <span className="text-xs text-gray-500">{university.country}</span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {renderCommandGroup("qualification1")}
           </Command>
         </PopoverContent>
       </Popover>
@@ -1048,7 +1110,7 @@ const PostgraduateForm = () => {
     </div>
   );
 
-  // Update the qualification2 institution field
+  // Update renderInstitutionField2 similarly
   const renderInstitutionField2 = () => (
     <div className="space-y-2">
       <Label>Institution <span className="text-red-500">Required</span></Label>
@@ -1060,39 +1122,25 @@ const PostgraduateForm = () => {
             aria-expanded={openUniversityPopover2}
             className="w-full justify-between"
           >
-            {postgraduateData.academicQualifications.qualification2?.institution || "Search for your institution..."}
+            <span className="truncate">
+              {postgraduateData.academicQualifications.qualification2?.institution || "Search for your institution..."}
+            </span>
             <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-full p-0" align="start">
           <Command>
-            <CommandInput
-              placeholder="Search universities..."
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-            />
+            {renderCommandInput()}
             <CommandEmpty>
               {isLoadingUniversities ? (
                 <div className="p-4 text-center text-sm">Loading...</div>
+              ) : searchQuery.length < 3 ? (
+                <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
               ) : (
                 <div className="p-4 text-center text-sm">No universities found.</div>
               )}
             </CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-auto">
-              {universities.map((university) => (
-                <CommandItem
-                  key={university.name}
-                  value={university.name}
-                  onSelect={() => handleUniversitySelect(university.name, "qualification2")}
-                  className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
-                >
-                  <div className="flex flex-col">
-                    <span>{university.name}</span>
-                    <span className="text-xs text-gray-500">{university.country}</span>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {renderCommandGroup("qualification2")}
           </Command>
         </PopoverContent>
       </Popover>
@@ -1638,42 +1686,25 @@ const PostgraduateForm = () => {
                     aria-expanded={openUniversityPopover}
                     className="w-full justify-between"
                   >
-                    {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+                    <span className="truncate">
+                      {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+                    </span>
                     <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-full p-0" align="start">
                   <Command>
-                    <CommandInput
-                      placeholder="Search universities..."
-                      value={searchQuery}
-                      onValueChange={setSearchQuery}
-                    />
+                    {renderCommandInput()}
                     <CommandEmpty>
                       {isLoadingUniversities ? (
                         <div className="p-4 text-center text-sm">Loading...</div>
+                      ) : searchQuery.length < 3 ? (
+                        <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
                       ) : (
                         <div className="p-4 text-center text-sm">No universities found.</div>
                       )}
                     </CommandEmpty>
-                    <CommandGroup className="max-h-[300px] overflow-auto">
-                      {universities.map((university) => (
-                        <CommandItem
-                          key={university.name}
-                          value={university.name}
-                          onSelect={() => {
-                            handleAcademicQualificationChange("qualification1", "institution", university.name);
-                            setOpenUniversityPopover(false);
-                          }}
-                          className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
-                        >
-                          <div className="flex flex-col">
-                            <span>{university.name}</span>
-                            <span className="text-xs text-gray-500">{university.country}</span>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                    {renderCommandGroup("qualification1")}
                   </Command>
                 </PopoverContent>
               </Popover>

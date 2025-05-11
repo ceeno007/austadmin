@@ -645,104 +645,22 @@ const FoundationForm = () => {
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800 space-y-2">
-              <strong>Application Fee (Non-refundable):</strong>
+              <strong>Application Fees (Non-refundable):</strong>
               <br />
               <span className="block mt-2">
                 <strong>Nigerian Applicants:</strong> ₦20,000
               </span>
-             
-
-              <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-                {foundationRemedialData.personalDetails.nationality === "Nigerian" ? (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Account Name:</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("African University of Science and Technology (AUST)", "nairaAccName")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["nairaAccName"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p className="mb-2">African University of Science and Technology (AUST)</p>
-
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Account Number (NGN):</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("1016087221", "nairaAccNum")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["nairaAccNum"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p className="mb-2">1016087221</p>
-
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Bank:</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("UBA Plc", "nairaBank")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["nairaBank"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p>UBA Plc</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Account Name:</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("African University of Science and Technology (AUST USD)", "usdAccName")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["usdAccName"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p className="mb-2">African University of Science and Technology (AUST USD)</p>
-
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Account Number (USD):</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("3050500123", "usdAccNum")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["usdAccNum"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p className="mb-2">3050500123</p>
-
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold">Bank:</span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy("Zenith Bank", "usdBank")}
-                        className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                      >
-                        {copyStatus["usdBank"] ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <p>Zenith Bank</p>
-                  </>
-                )}
+              <div className="mt-4">
+                <p className="font-medium">Payment Process:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Payment will be processed through Paystack</li>
+                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+                  <li>The Paystack payment popup will appear automatically when you click "Submit Application"</li>
+                  <li>A payment receipt will be automatically generated after successful payment</li>
+                </ul>
               </div>
             </p>
           </div>
-
-          <FileUploadField
-            id="paymentEvidence"
-            label="Payment Evidence (Required)"
-            accept=".jpg,.jpeg,.png,.pdf"
-            value={foundationRemedialData.passportPhoto ? [foundationRemedialData.passportPhoto] : null}
-            onChange={(files) => handleFileUpload("paymentEvidence", files![0])}
-            onRemove={() => handleClearFile("paymentEvidence")}
-            maxSize="5MB"
-          />
         </div>
       </div>
 
@@ -1418,14 +1336,6 @@ const FoundationForm = () => {
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Declaration *</h3>
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              By writing my name below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-              <br />- cancel my application
-              <br />- if admitted, be dismissed from the University
-              <br />- if degree already awarded, rescind degree awarded
-            </p>
-          </div>
           <div className="mt-4 p-4 bg-gray-100 rounded-lg">
             <p className="text-sm text-gray-700">
               By clicking submit, you agree that all information provided is true and accurate. You understand that any false information may result in the rejection of your application.
@@ -1435,42 +1345,51 @@ const FoundationForm = () => {
       </div>
 
       {/* Form Buttons */}
-      <div className="flex justify-end space-x-4">
-        <button
-          type="button"
-          className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary hover:bg-primary/5 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-transparent"
-          onClick={handleSaveAsDraft}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Saving...
-            </span>
-          ) : (
-            "Save as Draft"
-          )}
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/80 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          disabled={!isFormValid() || isSubmitting}
-        >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Submitting...
-            </span>
-          ) : (
-            "Submit Application"
-          )}
-        </button>
+      <div className="space-y-4">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-blue-800">
+            <strong>Payment Information:</strong>
+            <br />
+            When you click the "Submit Application" button below, you will be redirected to Paystack to complete your payment of ₦20,000. Please ensure you have your payment details ready.
+          </p>
+        </div>
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary hover:bg-primary/5 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-transparent"
+            onClick={handleSaveAsDraft}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Saving...
+              </span>
+            ) : (
+              "Save as Draft"
+            )}
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/80 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={!isFormValid() || isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Submitting...
+              </span>
+            ) : (
+              "Submit Application"
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );
