@@ -67,6 +67,7 @@ interface UndergraduateFormData {
   passportPhoto: File | null;
   academicSession: string;
   program: string;
+  selectedCourse: string;
   personalDetails: {
     surname: string;
     firstName: string;
@@ -85,6 +86,24 @@ interface UndergraduateFormData {
   };
   academicQualifications: {
     waecResults: {
+      examNumber: string;
+      examYear: string;
+      subjects: Array<{
+        subject: string;
+        grade: string;
+      }>;
+      documents: File | null;
+    };
+    necoResults: {
+      examNumber: string;
+      examYear: string;
+      subjects: Array<{
+        subject: string;
+        grade: string;
+      }>;
+      documents: File | null;
+    };
+    nabtebResults: {
       examNumber: string;
       examYear: string;
       subjects: Array<{
@@ -247,10 +266,25 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   return placeholderFile;
 };
 
+const undergraduatePrograms = [
+  "B.Sc. Software Engineering",
+  "B.Sc. Computer Science",
+  "B.Eng. Petroleum and Energy Resources Engineering",
+  "B.Sc. Accounting",
+  "B.Sc. Business Administration",
+  "B.Eng. Civil Engineering",
+  "B.Eng. Materials & Metallurgical Engineering",
+  "B.Eng. Mechanical Engineering"
+];
+
 const UndergraduateForm = () => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
+
+  // Generate years from current year to 5 years back
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
   useEffect(() => {
     try {
@@ -289,6 +323,7 @@ const UndergraduateForm = () => {
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
     program: "",
+    selectedCourse: "",
     personalDetails: {
       surname: "",
       firstName: "",
@@ -312,6 +347,18 @@ const UndergraduateForm = () => {
         subjects: [],
         documents: null
       },
+      necoResults: {
+        examNumber: "",
+        examYear: "",
+        subjects: [],
+        documents: null
+      },
+      nabtebResults: {
+        examNumber: "",
+        examYear: "",
+        subjects: [],
+        documents: null
+      },
       jambResults: {
         regNumber: "",
         examYear: "",
@@ -326,9 +373,7 @@ const UndergraduateForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
 
-  // Generate years from current year to 5 years back
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  // Replace the static years array with the dynamic one
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -703,6 +748,27 @@ const UndergraduateForm = () => {
         <Input id="otherNames" value={undergraduateData.personalDetails.otherNames} onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)} />
       </div>
       <div className="space-y-2">
+        <Label htmlFor="selectedCourse">Course of Study *</Label>
+        <Select 
+          value={undergraduateData.selectedCourse} 
+          onValueChange={(value) => setUndergraduateData(prev => ({
+            ...prev,
+            selectedCourse: value
+          }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select your course" />
+          </SelectTrigger>
+          <SelectContent>
+            {undergraduatePrograms.map((course) => (
+              <SelectItem key={course} value={course}>
+                {course}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
         <Label htmlFor="gender">Gender *</Label>
         <Select value={undergraduateData.personalDetails.gender} onValueChange={(value) => handlePersonalDetailsChange('gender', value)}>
           <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
@@ -803,14 +869,22 @@ const UndergraduateForm = () => {
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Academic Qualifications</h3>
         <div className="space-y-6">
-          {/* O'Level Results */}
+          {/* WAEC Results */}
           <div className="space-y-4">
-            <h4 className="font-medium">O'Level Results *</h4>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">WAEC Results</h3>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><span className="font-medium">Compulsory Subjects:</span> English Language, Mathematics, and at least 3 other relevant subjects</p>
+                <p><span className="font-medium">Minimum Grade:</span> Credit (C6) in all compulsory subjects</p>
+                <p><span className="font-medium">Optional:</span> Additional subjects to strengthen your application</p>
+                <p className="text-blue-600 italic">Note: Original result must be provided</p>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Exam Number *</Label>
+                <Label>Exam Number</Label>
                 <Input
-                  placeholder="Enter exam number"
+                  placeholder="Enter WAEC exam number"
                   value={undergraduateData.academicQualifications.waecResults.examNumber}
                   onChange={(e) => setUndergraduateData(prev => ({
                     ...prev,
@@ -822,12 +896,10 @@ const UndergraduateForm = () => {
                       }
                     }
                   }))}
-                  required
                 />
               </div>
-
               <div className="space-y-2">
-                <Label>Exam Year *</Label>
+                <Label>Exam Year</Label>
                 <Select
                   value={undergraduateData.academicQualifications.waecResults.examYear}
                   onValueChange={(value) => setUndergraduateData(prev => ({
@@ -854,11 +926,10 @@ const UndergraduateForm = () => {
                 </Select>
               </div>
             </div>
-
             <FileUploadField
               id="waecDocuments"
-              label="Upload O'Level Results"
-              accept=".pdf"
+              label="Upload WAEC Result (Optional)"
+              accept=".pdf,.jpg,.jpeg,.png"
               value={undergraduateData.academicQualifications.waecResults.documents ? [undergraduateData.academicQualifications.waecResults.documents] : null}
               onChange={(files) => setUndergraduateData(prev => ({
                 ...prev,
@@ -883,9 +954,187 @@ const UndergraduateForm = () => {
             />
           </div>
 
+          {/* NECO Results */}
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">NECO Results</h3>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><span className="font-medium">Compulsory Subjects:</span> English Language, Mathematics, and at least 3 other relevant subjects</p>
+                <p><span className="font-medium">Minimum Grade:</span> Credit (C6) in all compulsory subjects</p>
+                <p><span className="font-medium">Optional:</span> Additional subjects to strengthen your application</p>
+                <p className="text-blue-600 italic">Note: Original result must be provided</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Exam Number</Label>
+                <Input
+                  placeholder="Enter NECO exam number"
+                  value={undergraduateData.academicQualifications.necoResults?.examNumber || ""}
+                  onChange={(e) => setUndergraduateData(prev => ({
+                    ...prev,
+                    academicQualifications: {
+                      ...prev.academicQualifications,
+                      necoResults: {
+                        ...prev.academicQualifications.necoResults,
+                        examNumber: e.target.value
+                      }
+                    }
+                  }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Exam Year</Label>
+                <Select
+                  value={undergraduateData.academicQualifications.necoResults?.examYear || ""}
+                  onValueChange={(value) => setUndergraduateData(prev => ({
+                    ...prev,
+                    academicQualifications: {
+                      ...prev.academicQualifications,
+                      necoResults: {
+                        ...prev.academicQualifications.necoResults,
+                        examYear: value
+                      }
+                    }
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.slice(-10).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <FileUploadField
+              id="necoDocuments"
+              label="Upload NECO Result (Optional)"
+              accept=".pdf,.jpg,.jpeg,.png"
+              value={undergraduateData.academicQualifications.necoResults?.documents ? [undergraduateData.academicQualifications.necoResults.documents] : null}
+              onChange={(files) => setUndergraduateData(prev => ({
+                ...prev,
+                academicQualifications: {
+                  ...prev.academicQualifications,
+                  necoResults: {
+                    ...prev.academicQualifications.necoResults,
+                    documents: files ? files[0] : null
+                  }
+                }
+              }))}
+              onRemove={() => setUndergraduateData(prev => ({
+                ...prev,
+                academicQualifications: {
+                  ...prev.academicQualifications,
+                  necoResults: {
+                    ...prev.academicQualifications.necoResults,
+                    documents: null
+                  }
+                }
+              }))}
+            />
+          </div>
+
+          {/* NABTEB Results */}
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">NABTEB Results</h3>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><span className="font-medium">Compulsory Subjects:</span> English Language, Mathematics, and at least 3 other relevant subjects</p>
+                <p><span className="font-medium">Minimum Grade:</span> Credit (C6) in all compulsory subjects</p>
+                <p><span className="font-medium">Optional:</span> Additional subjects to strengthen your application</p>
+                <p className="text-blue-600 italic">Note: Original result must be provided</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Exam Number</Label>
+                <Input
+                  placeholder="Enter NABTEB exam number"
+                  value={undergraduateData.academicQualifications.nabtebResults?.examNumber || ""}
+                  onChange={(e) => setUndergraduateData(prev => ({
+                    ...prev,
+                    academicQualifications: {
+                      ...prev.academicQualifications,
+                      nabtebResults: {
+                        ...prev.academicQualifications.nabtebResults,
+                        examNumber: e.target.value
+                      }
+                    }
+                  }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Exam Year</Label>
+                <Select
+                  value={undergraduateData.academicQualifications.nabtebResults?.examYear || ""}
+                  onValueChange={(value) => setUndergraduateData(prev => ({
+                    ...prev,
+                    academicQualifications: {
+                      ...prev.academicQualifications,
+                      nabtebResults: {
+                        ...prev.academicQualifications.nabtebResults,
+                        examYear: value
+                      }
+                    }
+                  }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.slice(-10).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <FileUploadField
+              id="nabtebDocuments"
+              label="Upload NABTEB Result (Optional)"
+              accept=".pdf,.jpg,.jpeg,.png"
+              value={undergraduateData.academicQualifications.nabtebResults?.documents ? [undergraduateData.academicQualifications.nabtebResults.documents] : null}
+              onChange={(files) => setUndergraduateData(prev => ({
+                ...prev,
+                academicQualifications: {
+                  ...prev.academicQualifications,
+                  nabtebResults: {
+                    ...prev.academicQualifications.nabtebResults,
+                    documents: files ? files[0] : null
+                  }
+                }
+              }))}
+              onRemove={() => setUndergraduateData(prev => ({
+                ...prev,
+                academicQualifications: {
+                  ...prev.academicQualifications,
+                  nabtebResults: {
+                    ...prev.academicQualifications.nabtebResults,
+                    documents: null
+                  }
+                }
+              }))}
+            />
+          </div>
+
           {/* JAMB Results */}
           <div className="space-y-4">
-            <h4 className="font-medium">JAMB Results *</h4>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">JAMB Results</h3>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><span className="font-medium">Compulsory:</span> JAMB UTME/DE registration number and score</p>
+                <p><span className="font-medium">Minimum Score:</span> 140 points for {undergraduateData.academicSession} session</p>
+                <p><span className="font-medium">Compulsory:</span> AUST must be your first choice institution</p>
+                <p className="text-blue-600 italic">Note: Original JAMB result slip must be presented during screening</p>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Registration Number *</Label>
@@ -905,7 +1154,6 @@ const UndergraduateForm = () => {
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>JAMB Score *</Label>
                 <Input
@@ -925,7 +1173,6 @@ const UndergraduateForm = () => {
                   required
                 />
               </div>
-
               <div className="space-y-2">
                 <Label>JAMB Year *</Label>
                 <Select
@@ -954,11 +1201,10 @@ const UndergraduateForm = () => {
                 </Select>
               </div>
             </div>
-
             <FileUploadField
               id="jambDocuments"
-              label="Upload JAMB Result"
-              accept=".pdf"
+              label="Upload JAMB Result (Optional)"
+              accept=".pdf,.jpg,.jpeg,.png"
               value={undergraduateData.academicQualifications.jambResults.documents ? [undergraduateData.academicQualifications.jambResults.documents] : null}
               onChange={(files) => setUndergraduateData(prev => ({
                 ...prev,
@@ -997,14 +1243,10 @@ const UndergraduateForm = () => {
               <br />- if degree already awarded, rescind degree awarded.
             </p>
           </div>
-          <div className="space-y-2">
-            <Label>Full Name (in lieu of signature) *</Label>
-            <Input
-              placeholder="Type your full name"
-              value={undergraduateData.declaration}
-              onChange={(e) => setUndergraduateData(prev => ({ ...prev, declaration: e.target.value }))}
-              required
-            />
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+            <p className="text-sm text-gray-700">
+              By clicking submit, you agree that all information provided is true and accurate. You understand that any false information may result in the rejection of your application.
+            </p>
           </div>
         </div>
       </div>

@@ -23,4 +23,27 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name === 'logo/aust-logo.png') {
+            return 'logo/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
+      external: ['lovable-uploads/**'],
+    },
+  },
+  publicDir: 'public',
+  optimizeDeps: {
+    exclude: ['lovable-uploads']
+  }
 }));

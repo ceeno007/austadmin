@@ -9,12 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, X, Check } from "lucide-react";
+import { Upload, X, Check, Search } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { apiService } from "../../services/api";
+import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface DateField {
   day: string;
@@ -316,6 +319,14 @@ const nigerianStates = [
   "Taraba", "Yobe", "Zamfara"
 ];
 
+// Add interface for University
+interface University {
+  name: string;
+  country: string;
+  domains: string[];
+  web_pages: string[];
+}
+
 const PostgraduateForm = () => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -593,6 +604,11 @@ const PostgraduateForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
+  const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
+  const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
 
   // Generate years from 1950 to current year
   const currentYear = new Date().getFullYear();
@@ -937,6 +953,155 @@ const PostgraduateForm = () => {
     }
   };
 
+  // Function to fetch universities
+  const fetchUniversities = async (query: string) => {
+    if (query.length < 2) return;
+    
+    setIsLoadingUniversities(true);
+    try {
+      const response = await fetch(`http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      setUniversities(data);
+    } catch (error) {
+      toast.error("Failed to fetch universities");
+      console.error("Error fetching universities:", error);
+    } finally {
+      setIsLoadingUniversities(false);
+    }
+  };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        fetchUniversities(searchQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Function to handle university selection
+  const handleUniversitySelect = (universityName: string, qualificationField: "qualification1" | "qualification2") => {
+    handleAcademicQualificationChange(qualificationField, "institution", universityName);
+    if (qualificationField === "qualification1") {
+      setOpenUniversityPopover(false);
+    } else {
+      setOpenUniversityPopover2(false);
+    }
+  };
+
+  // Replace the institution input field with this new component
+  const renderInstitutionField = () => (
+    <div className="space-y-2">
+      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openUniversityPopover}
+            className="w-full justify-between"
+          >
+            {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search universities..."
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
+            <CommandEmpty>
+              {isLoadingUniversities ? (
+                <div className="p-4 text-center text-sm">Loading...</div>
+              ) : (
+                <div className="p-4 text-center text-sm">No universities found.</div>
+              )}
+            </CommandEmpty>
+            <CommandGroup className="max-h-[300px] overflow-auto">
+              {universities.map((university) => (
+                <CommandItem
+                  key={university.name}
+                  value={university.name}
+                  onSelect={() => {
+                    handleAcademicQualificationChange("qualification1", "institution", university.name);
+                    setOpenUniversityPopover(false);
+                  }}
+                  className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
+                >
+                  <div className="flex flex-col">
+                    <span>{university.name}</span>
+                    <span className="text-xs text-gray-500">{university.country}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <p className="text-xs text-gray-500">
+        Start typing to search for your institution. If your institution is not listed, you can type it manually.
+      </p>
+    </div>
+  );
+
+  // Update the qualification2 institution field
+  const renderInstitutionField2 = () => (
+    <div className="space-y-2">
+      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openUniversityPopover2}
+            className="w-full justify-between"
+          >
+            {postgraduateData.academicQualifications.qualification2?.institution || "Search for your institution..."}
+            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search universities..."
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
+            <CommandEmpty>
+              {isLoadingUniversities ? (
+                <div className="p-4 text-center text-sm">Loading...</div>
+              ) : (
+                <div className="p-4 text-center text-sm">No universities found.</div>
+              )}
+            </CommandEmpty>
+            <CommandGroup className="max-h-[300px] overflow-auto">
+              {universities.map((university) => (
+                <CommandItem
+                  key={university.name}
+                  value={university.name}
+                  onSelect={() => handleUniversitySelect(university.name, "qualification2")}
+                  className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
+                >
+                  <div className="flex flex-col">
+                    <span>{university.name}</span>
+                    <span className="text-xs text-gray-500">{university.country}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <p className="text-xs text-gray-500">
+        Start typing to search for your institution. If your institution is not listed, you can type it manually.
+      </p>
+    </div>
+  );
+
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -949,90 +1114,20 @@ const PostgraduateForm = () => {
         <strong>Application Fees (Non-refundable):</strong>
         <br />
         <span className="block mt-2">
-          <strong>Nigerian Applicants:</strong> ₦20,000
+          <strong>Nigerian Applicants:</strong> ₦50,000
         </span>
         <span className="block mt-2">
-          <strong>International Applicants:</strong> $50
+          <strong>International Applicants:</strong> $100
         </span>
-
-        <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-          {postgraduateData.applicantType === "Nigerian" ? (
-            <>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Account Name:</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("African University of Science and Technology (AUST)", "nairaAccName")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["nairaAccName"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p className="mb-2">African University of Science and Technology (AUST)</p>
-
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Account Number (NGN):</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("1016087221", "nairaAccNum")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["nairaAccNum"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p className="mb-2">1016087221</p>
-
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Bank:</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("UBA Plc", "nairaBank")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["nairaBank"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p>UBA Plc</p>
-            </>
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Account Name:</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("African University of Science and Technology (AUST USD)", "usdAccName")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["usdAccName"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p className="mb-2">African University of Science and Technology (AUST USD)</p>
-
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Account Number (USD):</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("3050500123", "usdAccNum")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["usdAccNum"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p className="mb-2">3050500123</p>
-
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">Bank:</span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("Zenith Bank", "usdBank")}
-                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-2"
-                >
-                  {copyStatus["usdBank"] ? "Copied!" : "Copy"}
-                </button>
-              </div>
-              <p>Zenith Bank</p>
-            </>
-          )}
+        <div className="mt-4">
+          <p className="font-medium">Payment Process:</p>
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>Payment will be processed through Paystack</li>
+            <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+            <li>International applicants will be redirected to Paystack USD payment gateway</li>
+            <li>The Paystack payment popup will appear automatically when you click "Submit Application"</li>
+            <li>A payment receipt will be automatically generated after successful payment</li>
+          </ul>
         </div>
       </p>
     </div>
@@ -1067,27 +1162,6 @@ const PostgraduateForm = () => {
         </div>
       </div>
     </div>
-
-    {/* Upload Payment Evidence */}
-    <FileUploadField
-      id="paymentEvidence"
-      label={
-        <>
-          Payment Evidence <span className="text-red-500 text-xs italic">Required</span>
-        </>
-      }
-      accept=".jpg,.jpeg,.png,.pdf"
-      value={postgraduateData.paymentEvidence ? [postgraduateData.paymentEvidence] : null}
-      onChange={(files) => setPostgraduateData(prev => ({
-        ...prev,
-        paymentEvidence: files ? files[0] : null
-      }))}
-      onRemove={() => setPostgraduateData(prev => ({
-        ...prev,
-        paymentEvidence: null
-      }))}
-      maxSize="5MB"
-    />
   </div>
 </div>
 
@@ -1433,6 +1507,48 @@ const PostgraduateForm = () => {
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Academic Qualifications</h3>
         
+        {/* Required Documents Section */}
+        <div className="space-y-4">
+          <h4 className="font-medium">Required Documents</h4>
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              Please upload the following documents:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Original Degree Certificate</li>
+                <li>Official Academic Transcript</li>
+              </ul>
+            </p>
+          </div>
+
+          <FileUploadField
+            id="degreeCertificate"
+            label={
+              <>
+                Degree Certificate <span className="text-red-500 text-xs italic">Required</span>
+              </>
+            }
+            accept=".pdf,.jpg,.jpeg,.png"
+            value={postgraduateData.academicQualifications.qualification1.documents}
+            onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
+            onRemove={() => handleAcademicQualificationChange("qualification1", "documents", [])}
+            multiple
+          />
+
+          <FileUploadField
+            id="academicTranscript"
+            label={
+              <>
+                Academic Transcript <span className="text-red-500 text-xs italic">Required</span>
+              </>
+            }
+            accept=".pdf,.jpg,.jpeg,.png"
+            value={postgraduateData.academicQualifications.qualification1.documents}
+            onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
+            onRemove={() => handleAcademicQualificationChange("qualification1", "documents", [])}
+            multiple
+          />
+        </div>
+
         {/* First Academic Qualification */}
         <div className="space-y-4">
           <h4 className="font-medium"><b>First Academic Qualification</b></h4>
@@ -1468,11 +1584,21 @@ const PostgraduateForm = () => {
 
             <div className="space-y-2">
               <Label>Grade <span className="text-red-500">Required</span></Label>
-              <Input
-                placeholder="Enter grade"
+              <Select
                 value={postgraduateData.academicQualifications.qualification1.grade}
-                onChange={(e) => handleAcademicQualificationChange("qualification1", "grade", e.target.value)}
-              />
+                onValueChange={(value) => handleAcademicQualificationChange("qualification1", "grade", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="First Class">First Class</SelectItem>
+                  <SelectItem value="Second Class Upper">Second Class Upper</SelectItem>
+                  <SelectItem value="Second Class Lower">Second Class Lower</SelectItem>
+                  <SelectItem value="Third Class">Third Class</SelectItem>
+                  <SelectItem value="Pass">Pass</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -1486,7 +1612,6 @@ const PostgraduateForm = () => {
                 value={postgraduateData.academicQualifications.qualification1.cgpa}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Only allow numbers and decimal point
                   if (value === '' || /^\d*\.?\d*$/.test(value)) {
                     handleAcademicQualificationChange("qualification1", "cgpa", value);
                   }
@@ -1505,11 +1630,56 @@ const PostgraduateForm = () => {
 
             <div className="space-y-2">
               <Label>Institution <span className="text-red-500">Required</span></Label>
-              <Input
-                placeholder="Enter institution name"
-                value={postgraduateData.academicQualifications.qualification1.institution}
-                onChange={(e) => handleAcademicQualificationChange("qualification1", "institution", e.target.value)}
-              />
+              <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openUniversityPopover}
+                    className="w-full justify-between"
+                  >
+                    {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
+                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search universities..."
+                      value={searchQuery}
+                      onValueChange={setSearchQuery}
+                    />
+                    <CommandEmpty>
+                      {isLoadingUniversities ? (
+                        <div className="p-4 text-center text-sm">Loading...</div>
+                      ) : (
+                        <div className="p-4 text-center text-sm">No universities found.</div>
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-auto">
+                      {universities.map((university) => (
+                        <CommandItem
+                          key={university.name}
+                          value={university.name}
+                          onSelect={() => {
+                            handleAcademicQualificationChange("qualification1", "institution", university.name);
+                            setOpenUniversityPopover(false);
+                          }}
+                          className="aria-selected:bg-blue-100 focus:bg-blue-100 hover:bg-blue-100"
+                        >
+                          <div className="flex flex-col">
+                            <span>{university.name}</span>
+                            <span className="text-xs text-gray-500">{university.country}</span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-gray-500">
+                Start typing to search for your institution. If your institution is not listed, you can type it manually.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -1597,204 +1767,6 @@ const PostgraduateForm = () => {
                   </SelectContent>
                 </Select>
                 <Select
-                  value={postgraduateData.academicQualifications.qualification1.endDate.year}
-                  onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "year", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <FileUploadField
-            id="qualification1Documents"
-            label={
-              <>
-                Upload Qualification Documents <span className="text-red-500 text-xs italic">Required</span>
-              </>
-            }
-            accept=".pdf,.doc,.docx"
-            value={postgraduateData.academicQualifications.qualification1.documents}
-            onChange={(files) => handleAcademicQualificationChange("qualification1", "documents", files)}
-            onRemove={() => handleAcademicQualificationChange("qualification1", "documents", [])}
-            multiple
-          />
-        </div>
-
-        {/* Second Academic Qualification (Only for PhD) */}
-        {postgraduateData.programType === "PhD" && (
-          <div className="space-y-4">
-            <h4 className="font-medium"><b>Second Academic Qualification</b></h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Qualification Type <span className="text-red-500">Required</span></Label>
-                <Select
-                  value={postgraduateData.academicQualifications.qualification2?.type}
-                  onValueChange={(value) => handleAcademicQualificationChange("qualification2", "type", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select qualification type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                    <SelectItem value="masters">Master's Degree</SelectItem>
-                    <SelectItem value="phd">PhD</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {postgraduateData.academicQualifications.qualification2?.type === "other" && (
-                <div className="space-y-2">
-                  <Label>Specify Other Qualification <span className="text-red-500">Required</span></Label>
-                  <Input
-                    placeholder="Enter other qualification"
-                    value={postgraduateData.academicQualifications.qualification2.otherType}
-                    onChange={(e) => handleAcademicQualificationChange("qualification2", "otherType", e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>Grade <span className="text-red-500">Required</span></Label>
-                <Input
-                  placeholder="Enter grade"
-                  value={postgraduateData.academicQualifications.qualification2?.grade}
-                  onChange={(e) => handleAcademicQualificationChange("qualification2", "grade", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>CGPA <span className="text-red-500">Required</span></Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="5"
-                  placeholder="Enter CGPA"
-                  value={postgraduateData.academicQualifications.qualification2?.cgpa}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numbers and decimal point
-                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                      handleAcademicQualificationChange("qualification2", "cgpa", value);
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Subject <span className="text-red-500">Required</span></Label>
-                <Input
-                  placeholder="Enter subject"
-                  value={postgraduateData.academicQualifications.qualification2?.subject}
-                  onChange={(e) => handleAcademicQualificationChange("qualification2", "subject", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Institution <span className="text-red-500">Required</span></Label>
-                <Input
-                  placeholder="Enter institution name"
-                  value={postgraduateData.academicQualifications.qualification2?.institution}
-                  onChange={(e) => handleAcademicQualificationChange("qualification2", "institution", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Start Date <span className="text-red-500">Required</span></Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Select
-                    value={postgraduateData.academicQualifications.qualification2?.startDate.day}
-                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "day", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Day" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {days.map((day) => (
-                        <SelectItem key={day} value={day}>
-                          {day}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={postgraduateData.academicQualifications.qualification2?.startDate.month}
-                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "month", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {months.map((month, index) => (
-                        <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                          {month}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={postgraduateData.academicQualifications.qualification2?.startDate.year}
-                    onValueChange={(value) => handleAcademicDateChange("qualification2", "startDate", "year", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {years.map((year) => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>End Date <span className="text-red-500">Required</span></Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Select
-                    value={postgraduateData.academicQualifications.qualification2?.endDate.day}
-                    onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "day", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Day" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {days.map((day) => (
-                        <SelectItem key={day} value={day}>
-                          {day}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={postgraduateData.academicQualifications.qualification2?.endDate.month}
-                    onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "month", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {months.map((month, index) => (
-                        <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                          {month}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
                     value={postgraduateData.academicQualifications.qualification2?.endDate.year}
                     onValueChange={(value) => handleAcademicDateChange("qualification2", "endDate", "year", value)}
                   >
@@ -1827,7 +1799,7 @@ const PostgraduateForm = () => {
               multiple
             />
           </div>
-        )}
+        
 
         {/* Other Qualifications */}
         <div className="space-y-4">
@@ -1849,25 +1821,41 @@ const PostgraduateForm = () => {
       {/* Statement of Purpose */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">
-          Statement of Purpose 
+          {postgraduateData.programType === "PhD" ? "Research Proposal" : "Statement of Purpose"}
         </h3>
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
-              As an applicant, please provide a one page summary of your reason for selecting the course for which you are applying. You should include:
-              <br />- Your interest and experience in this subject area
-              <br />- A brief research proposal (compulsory for all Ph.D. applicants)
-              <br />- Your reason for choosing the particular course
-              <br />- How the course of study connects to your future plan
-              <br /><br />
-              It is compulsory that ALL Ph.D. applicants complete this section, as we cannot process your application without it.
+              {postgraduateData.programType === "PhD" ? (
+                <>
+                  For PhD applicants, please provide a detailed research proposal (not more than two pages) that includes:
+                  <br />- Research Title and Abstract
+                  <br />- Introduction and Background
+                  <br />- Literature Review
+                  <br />- Research Objectives and Questions
+                  <br />- Methodology and Research Design
+                  <br />- Expected Outcomes and Impact
+                  <br />- Timeline and Milestones
+                  <br />- References
+                  <br />- Budget and Resources Required
+                  <br /><br />
+                  This research proposal is mandatory for all PhD applicants and must not exceed two pages.
+                </>
+              ) : (
+                <>
+                  As an applicant, please provide a one page summary of your reason for selecting the course for which you are applying. You should include:
+                  <br />- Your interest and experience in this subject area
+                  <br />- Your reason for choosing the particular course
+                  <br />- How the course of study connects to your future plan
+                </>
+              )}
             </p>
           </div>
           <FileUploadField
             id="statementOfPurpose"
             label={
               <>
-                Statement of Purpose {postgraduateData.programType === "PhD" && <span className="text-red-500 text-xs italic">Required</span>}
+                {postgraduateData.programType === "PhD" ? "Research Proposal" : "Statement of Purpose"} <span className="text-red-500 text-xs italic">Required</span>
               </>
             }
             accept=".pdf,.doc,.docx"
@@ -1885,6 +1873,76 @@ const PostgraduateForm = () => {
           />
         </div>
       </div>
+
+      {/* Additional Documents for PhD Applicants */}
+      {postgraduateData.programType === "PhD" && (
+        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+          <h3 className="text-lg font-semibold">Additional Required Documents for PhD Applicants</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800">
+                Please upload the following additional documents required for PhD applications:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Updated CV/Resume</li>
+                  <li>Birth Certificate or Declaration of Age</li>
+                  <li>O'Level Results (WAEC/NECO)</li>
+                  <li>Bachelor's Degree Certificate and Transcript</li>
+                  <li>Master's Degree Certificate and Transcript</li>
+                  <li>Payment Receipt for Application Form</li>
+                </ul>
+              </p>
+            </div>
+
+            <FileUploadField
+              id="cv"
+              label={
+                <>
+                  Updated CV/Resume <span className="text-red-500 text-xs italic">Required</span>
+                </>
+              }
+              accept=".pdf,.doc,.docx"
+              value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
+              onChange={(files) => {
+                const file = files && files.length > 0 ? files[0] : null;
+                handleAcademicQualificationChange("otherQualifications", null, file);
+              }}
+              onRemove={() => handleAcademicQualificationChange("otherQualifications", null, null)}
+            />
+
+            <FileUploadField
+              id="birthCertificate"
+              label={
+                <>
+                  Birth Certificate/Declaration of Age <span className="text-red-500 text-xs italic">Required</span>
+                </>
+              }
+              accept=".pdf,.jpg,.jpeg,.png"
+              value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
+              onChange={(files) => {
+                const file = files && files.length > 0 ? files[0] : null;
+                handleAcademicQualificationChange("otherQualifications", null, file);
+              }}
+              onRemove={() => handleAcademicQualificationChange("otherQualifications", null, null)}
+            />
+
+            <FileUploadField
+              id="olevelResults"
+              label={
+                <>
+                  O'Level Results (WAEC/NECO) <span className="text-red-500 text-xs italic">Required</span>
+                </>
+              }
+              accept=".pdf,.jpg,.jpeg,.png"
+              value={postgraduateData.academicQualifications.otherQualifications ? [postgraduateData.academicQualifications.otherQualifications] : null}
+              onChange={(files) => {
+                const file = files && files.length > 0 ? files[0] : null;
+                handleAcademicQualificationChange("otherQualifications", null, file);
+              }}
+              onRemove={() => handleAcademicQualificationChange("otherQualifications", null, null)}
+            />
+          </div>
+        </div>
+      )}
 
      {/* References Section */}
 <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -1996,20 +2054,27 @@ const PostgraduateForm = () => {
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
-              By signing below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+              By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
               <br />- cancel my application.
               <br />- if admitted, be dismissed from the University.
               <br />- if degree already awarded, rescind degree awarded.
             </p>
           </div>
-          <div className="space-y-2">
-            <Label>Full Name (in lieu of signature) <span className="text-red-500 text-xs italic">Required</span></Label>
-            <Input
-              placeholder="Type your full name"
-              value={postgraduateData.declaration}
-              onChange={(e) => setPostgraduateData(prev => ({ ...prev, declaration: e.target.value }))}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="declaration"
+              checked={postgraduateData.declaration === "true"}
+              onChange={(e) => setPostgraduateData(prev => ({ 
+                ...prev, 
+                declaration: e.target.checked ? "true" : "" 
+              }))}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required
             />
+            <label htmlFor="declaration" className="text-sm text-gray-700">
+              I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
+            </label>
           </div>
         </div>
       </div>
@@ -2020,7 +2085,6 @@ const PostgraduateForm = () => {
         <div className="space-y-4">
           <div className="space-y-2">
             <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-            
               <li>A student copy of your academic transcripts and a copy of the certificate/diploma for degrees received (with notarized English translations where applicable) MUST be sent with this application form.</li>
               <li>Applicants should arrange for official transcripts to be sent to the University directly from degree issuing institution(s).</li>
               <li>TWO references should be supplied using the provided reference form link.</li>
@@ -2029,43 +2093,44 @@ const PostgraduateForm = () => {
         </div>
       </div>
 
+      {/* Payment Information */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">Payment Information</h3>
+        <div className="space-y-2 text-blue-800">
+          <p className="text-sm">
+            <span className="font-medium">Application Fee:</span> ₦50,000 (Nigerian Applicants) / $100 (International Applicants)
+          </p>
+          <p className="text-sm">
+            <span className="font-medium">Payment Method:</span> Paystack
+          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-sm font-medium">Important Notes:</p>
+            <ul className="list-disc list-inside text-sm space-y-1">
+              <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+              <li>International applicants will be redirected to Paystack USD payment gateway</li>
+              <li>Payment must be completed to submit your application</li>
+              <li>A payment receipt will be automatically generated after successful payment</li>
+            </ul>
+          </div>
+          <p className="text-sm italic text-blue-600 mt-2">
+            When you click "Submit Application", the Paystack payment popup will appear automatically.
+          </p>
+        </div>
+      </div>
+
       {/* Form Buttons */}
       <div className="flex justify-end space-x-4">
-        <button
+        <Button
           type="button"
-          className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary hover:bg-primary/5 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-transparent"
+          variant="outline"
           onClick={handleSaveAsDraft}
-          disabled={isSaving}
+          disabled={isSubmitting}
         >
-          {isSaving ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Saving...
-            </span>
-          ) : (
-            "Save as Draft"
-          )}
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/80 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          disabled={!isFormValid() || isSubmitting}
-        >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Submitting...
-            </span>
-          ) : (
-            "Submit Application"
-          )}
-        </button>
+          Save as Draft
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Submit Application"}
+        </Button>
       </div>
     </form>
   );

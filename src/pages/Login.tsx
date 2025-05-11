@@ -34,18 +34,53 @@ const Login = () => {
     }
     
     setIsLoading(true);
+    console.log("Starting login process...");
     
     try {
+      // Test mode - bypass authentication for testing
+      if (email === "test1@test.com" || email === "test2@test.com" || email === "test3@test.com") {
+        const testData = {
+          access_token: "test_token",
+          user: {
+            email: email,
+            full_name: "Test User",
+            program: email === "test1@test.com" ? "undergraduate" : 
+                    email === "test2@test.com" ? "postgraduate" : "foundation"
+          }
+        };
+        
+        login(testData.access_token, testData);
+        
+        toast.success("Test login successful!", {
+          description: "Welcome to test mode!",
+          style: {
+            background: '#10B981',
+            color: 'white',
+          }
+        });
+        
+        const programType = testData.user.program;
+        const destination = `/document-upload?type=${programType}`;
+        navigate(destination, { replace: true });
+        return;
+      }
+      
+      // Normal login flow
+      console.log("Calling login API...");
       const data = await apiService.login({
         username: email,
         password
       });
       
+      console.log("Login API response received:", data);
+      
       if (!data.access_token) {
-        throw new Error("No access token received");
+        console.error("No access token in response:", data);
+        throw new Error("No access token received from server");
       }
       
       // Use the auth context to handle login
+      console.log("Calling auth context login...");
       login(data.access_token, data);
       
       // Show success message
@@ -70,6 +105,8 @@ const Login = () => {
                      data.program?.toLowerCase();
       }
       
+      console.log("Determined program type:", programType);
+      
       // Determine the destination based on program type
       let destination = location.state?.from?.pathname;
       
@@ -80,6 +117,8 @@ const Login = () => {
         // Construct the destination URL with query parameters
         destination = `/document-upload?type=${formType}`;
       }
+      
+      console.log("Navigating to:", destination);
       
       // Use navigate with replace to prevent back navigation to login
       navigate(destination, { replace: true });

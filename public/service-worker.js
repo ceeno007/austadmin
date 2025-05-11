@@ -1,4 +1,5 @@
-const CACHE_NAME = 'vibrant-admissions-hub-v1';
+const CACHE_VERSION = 'v1';
+const CACHE_NAME = `aust-admissions-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,6 +11,9 @@ const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo192.png',
   '/logo512.png',
+  '/logo/aust-logo.png',
+  '/assets/index.css',
+  '/assets/index.js'
 ];
 
 // Install event - cache static assets
@@ -84,12 +88,28 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data.text(),
-    icon: '/logo192.png',
-    badge: '/favicon.ico',
+    icon: '/logo/aust-logo.png',
+    badge: '/logo/aust-logo.png',
     vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    },
+    actions: [
+      {
+        action: 'explore',
+        title: 'View Details',
+        icon: '/logo/aust-logo.png'
+      },
+      {
+        action: 'close',
+        title: 'Close',
+        icon: '/logo/aust-logo.png'
+      }
+    ]
   };
 
   event.waitUntil(
-    self.registration.showNotification('Vibrant Admissions Hub', options)
+    self.registration.showNotification('AUST Admissions', options)
   );
 }); 

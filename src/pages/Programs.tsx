@@ -59,13 +59,16 @@ const imageMap: Record<string, string> = {
 const Programs = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("undergraduate");
   const [visibleItems, setVisibleItems] = useState<any[]>([]);
   const [scrollTop, setScrollTop] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Get current and next year for academic session
+  const currentYear = new Date().getFullYear();
+  const academicSession = `${currentYear}/${currentYear + 1}`;
 
   // Check for tab parameter in URL
   useEffect(() => {
@@ -192,7 +195,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
           "UTME Subjects: Mathematics, Physics, and one other Science subject",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Software Engineering [Undergraduate].pdf"
       },
@@ -205,7 +208,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including English, Mathematics, Physics/Data Processing",
           "UTME Subjects: Mathematics, Physics, and one other Science subject",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Computer Science [Undergraduate].pdf"
       },
@@ -218,7 +221,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Physics, Chemistry, Mathematics, and English",
           "UTME Subjects: Chemistry, Mathematics, Physics",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Petroleum and Energy Resources Engineering [Undergraduate].pdf"
       },
@@ -231,7 +234,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
           "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
@@ -244,7 +247,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
           "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
@@ -257,7 +260,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
           "UTME Subjects: Mathematics, Physics, Chemistry",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Civil Engineering [Undergraduate].pdf"
       },
@@ -270,7 +273,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
           "UTME Subjects: Mathematics, Physics, Chemistry",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Materials and Metallurgical Engineering [Undergraduate].pdf"
       },
@@ -283,7 +286,7 @@ const Programs = () => {
         requirements: [
           "Five SSC credits including Mathematics, Physics, Chemistry, and English",
           "UTME Subjects: Mathematics, Physics, Chemistry",
-          "JAMB score of 200+"
+          `JAMB score of 200+ for ${academicSession} session`
         ],
         pdf: "/pdfs/Departmental Handbook - Mechanical Engineering [Undergraduate].pdf"
       }
@@ -559,10 +562,6 @@ const Programs = () => {
       "Reference Letters"
     ];
 
-  const handleProgramClick = (title: string) => {
-    setSelectedProgram(title);
-  };
-
   // Generate structured data for programs
   const generateStructuredData = () => {
     return {
@@ -649,15 +648,7 @@ const Programs = () => {
                             <span className="font-medium">School Fees:</span> {program.schoolFees}
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <Button
-                            variant="outline"
-                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                            onClick={() => handleProgramClick(program.title)}
-                            aria-label={`View details for ${program.title}`}
-                          >
-                            View Details
-                          </Button>
+                        <div className="flex justify-end">
                           <a 
                             href={program.pdf} 
                             download 
@@ -711,15 +702,7 @@ const Programs = () => {
                                 <span className="font-medium">School Fees:</span> {program.schoolFees}
                               </p>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <Button
-                                variant="outline"
-                                className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                                onClick={() => handleProgramClick(program.title)}
-                                aria-label={`View details for ${program.title}`}
-                              >
-                                View Details
-                              </Button>
+                            <div className="flex justify-end">
                               <a 
                                 href={program.pdf} 
                                 download 
@@ -771,15 +754,7 @@ const Programs = () => {
                             <span className="font-medium">School Fees:</span> {program.schoolFees}
                           </p>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <Button
-                            variant="outline"
-                            className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                            onClick={() => handleProgramClick(program.title)}
-                            aria-label={`View details for ${program.title}`}
-                          >
-                            View Details
-                          </Button>
+                        <div className="flex justify-end">
                           <a 
                             href={program.pdf} 
                             download 
@@ -800,85 +775,6 @@ const Programs = () => {
             </Tabs>
           </div>
         </section>
-
-        {/* Modal for Selected Program */}
-        {selectedProgram && (
-          <div 
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="program-details-title"
-          >
-            <div className="bg-white w-full max-w-xl p-6 rounded-xl relative animate-fade-in shadow-xl max-h-screen overflow-y-auto">
-              <button
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                onClick={() => setSelectedProgram(null)}
-                aria-label="Close program details"
-              >
-                <X className="h-5 w-5" />
-              </button>
-              {(() => {
-                const program = tabs[activeTab].find((p: any) => p.title === selectedProgram);
-                if (!program) return null;
-
-                return (
-                  <>
-                    <img
-                      src={getImage(program)}
-                      alt={`${program.title} program`}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                    <h2 id="program-details-title" className="text-2xl font-bold mb-2">{program.title}</h2>
-                    <p className="text-gray-600 mb-2">
-                      {getDescription(program)}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-1">
-                      Duration: {program.duration}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-4">
-                      School Fees: {program.schoolFees}
-                    </p>
-                    <h3 className="font-semibold text-[#FF5500] mb-2">Requirements:</h3>
-                    <ul className="space-y-1 mb-6">
-                      {getRequirements(program).map((req: string, idx: number) => (
-                        <li key={idx} className="flex items-start">
-                          <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
-                          <span>{req}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="grid gap-4">
-                      <Button
-                        asChild
-                        className="bg-[#FF5500] hover:bg-[#e64d00] w-full"
-                      >
-                        <Link to="/signup" className="flex items-center justify-center">
-                          Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-
-                      {/* View PDF Button (if PDF exists) */}
-                      {program.pdf && (
-                        <Button
-                          onClick={() => {
-                            console.log("Navigating to PDF:", program.pdf);
-                            navigate(
-                              `/view-pdf?src=${encodeURIComponent(program.pdf)}&title=${encodeURIComponent(program.title)}`
-                            );
-                          }}
-                          className="w-full bg-gray-100 border hover:bg-gray-200 text-sm text-gray-700 flex items-center justify-center"
-                        >
-                          <FileText className="w-4 h-4 mr-2" /> View Full Program Handbook
-                        </Button>
-                      )}
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        )}
       </main>
     </>
   );

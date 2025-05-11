@@ -181,16 +181,33 @@ const Footer = () => {
               Sitemap
             </Link>
           </div>
-          <div className="mt-4 text-sm text-gray-500">
-            Made with <span className="text-red-500">❤</span> by{" "}
-            <a
-              href="https://austinspire.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#FF5500] hover:text-[#e64d00] transition-colors"
-            >
-              AUSTInspire
-            </a>
+          {/* Lovable, cancelable badge */}
+          <div id="austinspire-badge" className="fixed bottom-8 right-8 z-50">
+            <div className="flex items-center space-x-2 bg-white/90 shadow-lg rounded-full px-5 py-2 border border-amber-300 backdrop-blur-md animate-fade-in">
+              <span className="text-amber-600 text-xs font-semibold flex items-center">
+                Made with <span className="mx-1 text-red-500">❤</span> by
+                <a
+                  href="https://austinspire.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 text-[#FF5500] hover:text-[#e64d00] transition-colors font-bold"
+                >
+                  AUSTInspire
+                </a>
+              </span>
+              <button
+                aria-label="Close badge"
+                onClick={() => {
+                  const badge = document.getElementById('austinspire-badge');
+                  if (badge) badge.style.display = 'none';
+                }}
+                className="ml-2 text-gray-400 hover:text-gray-700 focus:outline-none"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>

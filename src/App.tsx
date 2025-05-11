@@ -36,34 +36,38 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// Create a new QueryClient instance with optimized settings
+// Create a QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 30 * 60 * 1000, // 30 minutes (renamed from cacheTime)
-      retry: 1,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
     },
   },
 });
 
-// Create a component to conditionally render the Navbar
+// Conditional Navbar component
 const ConditionalNavbar = () => {
   const location = useLocation();
-  const path = location.pathname;
+  const isDocumentUpload = location.pathname === '/document-upload';
   
-  // Don't show Navbar on these routes
-  const noNavbarRoutes = [
-    '/document-upload',
-    '/application'
-  ];
-  
-  if (noNavbarRoutes.includes(path)) {
+  if (isDocumentUpload) {
     return null;
   }
   
   return <Navbar />;
+};
+
+// Conditional Footer component
+const ConditionalFooter = () => {
+  const location = useLocation();
+  const isDocumentUpload = location.pathname === '/document-upload';
+  
+  if (isDocumentUpload) {
+    return null;
+  }
+  
+  return <Footer />;
 };
 
 const App: React.FC = () => {
@@ -110,7 +114,7 @@ const App: React.FC = () => {
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </main>
-                    <Footer />
+                    <ConditionalFooter />
                   </div>
                 </Suspense>
                 <Toaster 

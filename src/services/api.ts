@@ -83,24 +83,42 @@ export const apiService = {
     formData.append("password", credentials.password);
   
     try {
+      console.log("Attempting login to:", API_ENDPOINTS.LOGIN);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: formData.toString(),
+        signal: controller.signal
       });
-  
+      
+      clearTimeout(timeoutId);
+      
+      console.log("Login response status:", response.status);
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Login failed");
+        console.error("Login error response:", errorData);
+        throw new Error(errorData.detail || `Login failed with status ${response.status}`);
       }
   
-      // Return the full response data
-      return await response.json();
+      const data = await response.json();
+      console.log("Login successful, received data:", { ...data, access_token: data.access_token ? "present" : "missing" });
+      return data;
     } catch (error) {
       console.error("Login error:", error);
-      throw error;
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error("Login request timed out. Please try again.");
+        }
+        throw error;
+      }
+      throw new Error("An unexpected error occurred during login");
     }
   },
   

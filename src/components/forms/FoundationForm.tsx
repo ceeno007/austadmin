@@ -1426,14 +1426,10 @@ const FoundationForm = () => {
               <br />- if degree already awarded, rescind degree awarded
             </p>
           </div>
-          <div className="space-y-2">
-            <Label>Full Name (in lieu of signature) *</Label>
-            <Input
-              placeholder="Type your full name"
-              value={foundationRemedialData.declaration}
-              onChange={(e) => setFoundationRemedialData(prev => ({ ...prev, declaration: e.target.value }))}
-              required
-            />
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+            <p className="text-sm text-gray-700">
+              By clicking submit, you agree that all information provided is true and accurate. You understand that any false information may result in the rejection of your application.
+            </p>
           </div>
         </div>
       </div>
