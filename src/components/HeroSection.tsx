@@ -4,8 +4,12 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, GraduationCap, Globe } from "lucide-react";
 
 const HeroSection = () => {
+  // Get current and next year for academic session
+  const currentYear = new Date().getFullYear();
+  const academicSession = `${currentYear}/${currentYear + 1}`;
+
   return (
-    <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 w-full h-full">
         <video
@@ -22,11 +26,11 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 py-12">
         <div className="max-w-3xl mx-auto text-center text-white">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#FF5500] text-white text-sm font-medium mb-4">
-            <Calendar className="mr-2 h-4 w-4" />
-            2024/2025 Admissions Now Open
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-4 border border-white/20">
+            <Calendar className="mr-2 h-4 w-4 text-[#FF5500]" />
+            {academicSession} Admissions Now Open
           </div>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">

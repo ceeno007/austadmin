@@ -1,10 +1,32 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, X } from "lucide-react";
 import XLogo from "@/components/icons/XLogo"; // Update path as needed
 import austLogo from "@/assets/images/austlogo.webp";
 
 const Footer = () => {
+  const [showBadge, setShowBadge] = useState(false);
+
+  useEffect(() => {
+    // Check if badge was previously dismissed
+    const badgeDismissed = localStorage.getItem('austinspireBadgeDismissed');
+    
+    if (!badgeDismissed) {
+      // Show badge after 20 seconds if not previously dismissed
+      const timer = setTimeout(() => {
+        setShowBadge(true);
+      }, 20000); // 20 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleDismissBadge = () => {
+    setShowBadge(false);
+    // Store dismissal in localStorage
+    localStorage.setItem('austinspireBadgeDismissed', 'true');
+  };
+
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
@@ -182,33 +204,21 @@ const Footer = () => {
             </Link>
           </div>
           {/* Lovable, cancelable badge */}
-          <div id="austinspire-badge" className="fixed bottom-8 right-8 z-50">
-            <div className="flex items-center space-x-2 bg-white/90 shadow-lg rounded-full px-5 py-2 border border-amber-300 backdrop-blur-md animate-fade-in">
-              <span className="text-amber-600 text-xs font-semibold flex items-center">
-                Made with <span className="mx-1 text-red-500">❤</span> by
-                <a
-                  href="https://austinspire.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-1 text-[#FF5500] hover:text-[#e64d00] transition-colors font-bold"
+          {showBadge && (
+            <div className="fixed bottom-4 right-4 z-50 animate-fade-in" style={{ animationDelay: '20s' }}>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-3 flex items-center space-x-3">
+                <span className="text-[10px] sm:text-xs text-white/90">
+                  Made with love by Austinspire
+                </span>
+                <button
+                  onClick={handleDismissBadge}
+                  className="text-white/70 hover:text-white transition-colors flex-shrink-0"
                 >
-                  AUSTInspire
-                </a>
-              </span>
-              <button
-                aria-label="Close badge"
-                onClick={() => {
-                  const badge = document.getElementById('austinspire-badge');
-                  if (badge) badge.style.display = 'none';
-                }}
-                className="ml-2 text-gray-400 hover:text-gray-700 focus:outline-none"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                  <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </footer>

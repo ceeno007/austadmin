@@ -122,6 +122,11 @@ interface University {
   web_pages: string[];
 }
 
+interface FoundationFormProps {
+  onPayment: (amount: number, email: string, metadata: Record<string, any>) => Promise<void>;
+  isProcessingPayment: boolean;
+}
+
 const FileUploadField = ({ 
   id, 
   label, 
@@ -497,7 +502,7 @@ const universities = {
   ]
 };
 
-const FoundationForm = () => {
+const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -788,86 +793,35 @@ const FoundationForm = () => {
     }
   };
 
+  const handlePayment = async () => {
+    const amount = 25000; // ₦25,000 in kobo
+    const email = foundationRemedialData.personalDetails.email;
+    const metadata = {
+      program_type: "foundation",
+      academic_session: foundationRemedialData.academicSession,
+      selected_program: foundationRemedialData.program,
+    };
+
+    await onPayment(amount, email, metadata);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!isFormValid()) {
-      toast.error("Incomplete Application", {
-        description: "Please fill in all required fields before submitting.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Please fill in all required fields");
       return;
     }
-    
-    setIsSubmitting(true);
+
     try {
-      const formData = new FormData();
+      // Initialize payment first
+      await handlePayment();
       
-      // Add personal details
-      formData.append("surname", foundationRemedialData.personalDetails.surname);
-      formData.append("first_name", foundationRemedialData.personalDetails.firstName);
-      formData.append("other_names", foundationRemedialData.personalDetails.otherNames);
-      formData.append("gender", foundationRemedialData.personalDetails.gender);
-      formData.append("date_of_birth", `${foundationRemedialData.personalDetails.dateOfBirth.year}-${foundationRemedialData.personalDetails.dateOfBirth.month}-${foundationRemedialData.personalDetails.dateOfBirth.day}`);
-      formData.append("street_address", foundationRemedialData.personalDetails.streetAddress);
-      formData.append("city", foundationRemedialData.personalDetails.city);
-      formData.append("country", foundationRemedialData.personalDetails.country);
-      formData.append("state_of_origin", foundationRemedialData.personalDetails.stateOfOrigin);
-      formData.append("nationality", foundationRemedialData.personalDetails.nationality);
-      formData.append("phone_number", foundationRemedialData.personalDetails.phoneNumber);
-      formData.append("email", foundationRemedialData.personalDetails.email);
-      formData.append("has_disability", foundationRemedialData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
-      formData.append("disability_description", foundationRemedialData.personalDetails.disabilityDescription);
-
-      // Add academic qualifications
-      formData.append("exam_number", foundationRemedialData.academicQualifications.examResults.examNumber);
-      formData.append("exam_year", foundationRemedialData.academicQualifications.examResults.examYear);
-
-      // Add files if they exist
-      if (foundationRemedialData.passportPhoto) {
-        formData.append("passport_photo", foundationRemedialData.passportPhoto);
-      }
-      if (foundationRemedialData.academicQualifications.examResults.documents) {
-        formData.append("waec_result", foundationRemedialData.academicQualifications.examResults.documents);
-      }
-
-      // Add program type and academic session
-      formData.append("program_type", "foundation_remedial");
-      formData.append("academic_session", foundationRemedialData.academicSession);
-      formData.append("is_draft", "false");
-
-      // Submit the form data
-      const response = await apiService.submitApplication(formData);
-      
-      // Save to localStorage
-      localStorage.setItem('applicationData', JSON.stringify({
-        ...response,
-        program_type: "foundation_remedial"
-      }));
-
-      toast.success("Application submitted successfully", {
-        description: "Your application has been submitted. You will receive a confirmation email shortly.",
-        style: {
-          background: '#10B981',
-          color: 'white',
-        }
-      });
-
-      // Redirect to congratulatory page
-      navigate("/application-success");
+      // The rest of the form submission will be handled after successful payment
+      // This will be triggered by the payment verification callback
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error("Submission failed", {
-        description: "There was an error submitting your application. Please try again.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
-    } finally {
-      setIsSubmitting(false);
+      console.error('Form submission error:', error);
+      toast.error("Failed to submit form");
     }
   };
 
@@ -956,7 +910,7 @@ const FoundationForm = () => {
   }, [searchQuery]);
 
   return (
-    <form className="space-y-8" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* Application Fee Payment Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Application Fee Payment</h3>
@@ -1965,41 +1919,20 @@ const FoundationForm = () => {
           </p>
         </div>
         <div className="flex justify-end space-x-4">
-          <button
+          <Button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary hover:bg-primary/5 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-transparent"
+            variant="outline"
             onClick={handleSaveAsDraft}
-            disabled={isSaving}
+            disabled={isProcessingPayment}
           >
-            {isSaving ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Saving...
-              </span>
-            ) : (
-              "Save as Draft"
-            )}
-          </button>
-          <button
+            Save as Draft
+          </Button>
+          <Button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/80 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            disabled={!isFormValid() || isSubmitting}
+            disabled={isProcessingPayment}
           >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Submitting...
-              </span>
-            ) : (
-              "Submit Application"
-            )}
-          </button>
+            {isProcessingPayment ? "Processing Payment..." : "Submit Application"}
+          </Button>
         </div>
       </div>
     </form>

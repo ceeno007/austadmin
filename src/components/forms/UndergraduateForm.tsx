@@ -50,17 +50,29 @@ interface ApplicationData {
   email?: string;
   has_disability?: boolean;
   disability_description?: string;
+  blood_group?: string;
   jamb_reg_number?: string;
   jamb_score?: string;
   jamb_year?: string;
   exam_number?: string;
   exam_year?: string;
-  // File paths
+  exam_type?: string;
+  subjects?: string;
   passport_photo_path?: string;
   payment_receipt_path?: string;
   waec_result_path?: string;
   jamb_result_path?: string;
   other_qualifications_path?: string;
+}
+
+interface ExamResults {
+  examNumber: string;
+  examYear: string;
+  subjects: Array<{
+    subject: string;
+    grade: string;
+  }>;
+  documents: File | null;
 }
 
 interface UndergraduateFormData {
@@ -86,33 +98,9 @@ interface UndergraduateFormData {
     bloodGroup: string;
   };
   academicQualifications: {
-    waecResults: {
-      examNumber: string;
-      examYear: string;
-      subjects: Array<{
-        subject: string;
-        grade: string;
-      }>;
-      documents: File | null;
-    };
-    necoResults: {
-      examNumber: string;
-      examYear: string;
-      subjects: Array<{
-        subject: string;
-        grade: string;
-      }>;
-      documents: File | null;
-    };
-    nabtebResults: {
-      examNumber: string;
-      examYear: string;
-      subjects: Array<{
-        subject: string;
-        grade: string;
-      }>;
-      documents: File | null;
-    };
+    waecResults: ExamResults;
+    necoResults: ExamResults;
+    nabtebResults: ExamResults;
     jambResults: {
       regNumber: string;
       examYear: string;
@@ -134,7 +122,7 @@ const FileUploadField = ({
   multiple = false 
 }: { 
   id: string;
-  label: string;
+  label: React.ReactNode;
   accept: string;
   value: File | File[] | null;
   onChange: (files: File[] | null) => void;
@@ -379,7 +367,69 @@ const undergraduatePrograms = [
  * }
  */
 
-const UndergraduateForm = () => {
+interface DraftResponse {
+  id: string;
+  status: string;
+  message: string;
+  created_at: string;
+  updated_at: string;
+  application_details: {
+    academic_session: string;
+    program_type: string;
+    personal_details: {
+      surname: string;
+      first_name: string;
+      other_names: string;
+      gender: string;
+      date_of_birth: string;
+      street_address: string;
+      city: string;
+      country: string;
+      state_of_origin: string;
+      nationality: string;
+      phone_number: string;
+      email: string;
+      has_disability: boolean;
+      disability_description: string;
+      blood_group: string;
+    };
+    academic_qualifications: {
+      o_level: {
+        exam_type: string;
+        exam_number: string;
+        exam_year: string;
+        subjects: Array<{
+          subject: string;
+          grade: string;
+        }>;
+      };
+      jamb: {
+        registration_number: string;
+        exam_year: string;
+        score: string;
+      };
+    };
+    course_preferences: {
+      first_choice: string;
+      second_choice: string;
+    };
+    documents: {
+      passport_photo: string;
+      birth_certificate: string;
+      state_of_origin_certificate: string;
+      payment_receipt: string;
+      o_level_result: string;
+      jamb_result: string;
+    };
+  };
+}
+
+interface UndergraduateFormProps {
+  onPayment: (amount: number, email: string, metadata: Record<string, any>) => Promise<void>;
+  isProcessingPayment: boolean;
+}
+
+const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -478,6 +528,7 @@ const UndergraduateForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedExamType, setSelectedExamType] = useState<string>("waec");
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
 
   // Replace the static years array with the dynamic one
@@ -515,7 +566,11 @@ const UndergraduateForm = () => {
         // JAMB specific
         jamb_reg_number,
         jamb_score,
-        jamb_year
+        jamb_year,
+        exam_number,
+        exam_year,
+        exam_type,
+        subjects
       } = applicationData;
       
       // Create placeholder files
@@ -638,7 +693,37 @@ const UndergraduateForm = () => {
   };
 
   const isFormValid = () => {
-    // Add validation logic here
+    const { personalDetails, academicQualifications, passportPhoto, selectedCourse } = undergraduateData;
+    
+    // Check required personal details
+    if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
+        !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
+        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.stateOfOrigin ||
+        !personalDetails.phoneNumber || !personalDetails.email) {
+      return false;
+    }
+
+    // Check if at least one O'Level result is provided
+    const hasOLevelResult = academicQualifications.waecResults.subjects.length > 0 ||
+                           academicQualifications.necoResults.subjects.length > 0 ||
+                           academicQualifications.nabtebResults.subjects.length > 0;
+
+    if (!hasOLevelResult) {
+      return false;
+    }
+
+    // Check JAMB results
+    if (!academicQualifications.jambResults.regNumber || 
+        !academicQualifications.jambResults.examYear || 
+        !academicQualifications.jambResults.score) {
+      return false;
+    }
+
+    // Check required documents
+    if (!passportPhoto || !selectedCourse) {
+      return false;
+    }
+
     return true;
   };
 
@@ -650,73 +735,67 @@ const UndergraduateForm = () => {
   useEffect(() => {
     const loadDraft = async () => {
       try {
-        const response = await apiService.getDraftApplication();
-        if (response) {
+        const response = await apiService.getDraftApplication() as DraftResponse;
+        if (response && response.application_details) {
           setDraftId(response.id);
           setIsDraft(true);
           
-          // Populate form with draft data
+          const details = response.application_details;
+          
           setUndergraduateData({
-            passportPhoto: response.passport_photo ? createPlaceholderFile(response.passport_photo) : null,
-            academicSession: response.academic_session || getCurrentAcademicSession(),
-            program: response.program || "",
-            selectedCourse: response.selected_course || "",
+            passportPhoto: details.documents.passport_photo ? createPlaceholderFile(details.documents.passport_photo) : null,
+            academicSession: details.academic_session || getCurrentAcademicSession(),
+            program: details.program_type || "",
+            selectedCourse: details.course_preferences.first_choice || "",
             personalDetails: {
-              surname: response.surname || "",
-              firstName: response.first_name || "",
-              otherNames: response.other_names || "",
-              gender: response.gender || "",
-              dateOfBirth: response.date_of_birth ? {
-                day: new Date(response.date_of_birth).getDate().toString().padStart(2, '0'),
-                month: (new Date(response.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
-                year: new Date(response.date_of_birth).getFullYear().toString()
+              surname: details.personal_details.surname || "",
+              firstName: details.personal_details.first_name || "",
+              otherNames: details.personal_details.other_names || "",
+              gender: details.personal_details.gender || "",
+              dateOfBirth: details.personal_details.date_of_birth ? {
+                day: new Date(details.personal_details.date_of_birth).getDate().toString().padStart(2, '0'),
+                month: (new Date(details.personal_details.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
+                year: new Date(details.personal_details.date_of_birth).getFullYear().toString()
               } : { day: "", month: "", year: "" },
-              streetAddress: response.street_address || "",
-              city: response.city || "",
-              country: response.country || "Nigeria",
-              stateOfOrigin: response.state_of_origin || "",
-              nationality: response.nationality || "Nigerian",
-              phoneNumber: response.phone_number || "",
-              email: response.email || "",
-              hasDisabilities: response.has_disability ? "yes" : "no",
-              disabilityDescription: response.disability_description || "",
-              bloodGroup: response.blood_group || "",
+              streetAddress: details.personal_details.street_address || "",
+              city: details.personal_details.city || "",
+              country: details.personal_details.country || "Nigeria",
+              stateOfOrigin: details.personal_details.state_of_origin || "",
+              nationality: details.personal_details.nationality || "Nigerian",
+              phoneNumber: details.personal_details.phone_number || "",
+              email: details.personal_details.email || "",
+              hasDisabilities: details.personal_details.has_disability ? "yes" : "no",
+              disabilityDescription: details.personal_details.disability_description || "",
+              bloodGroup: details.personal_details.blood_group || "",
             },
             academicQualifications: {
               waecResults: {
-                examNumber: response.waec_exam_number || "",
-                examYear: response.waec_exam_year || "",
-                subjects: response.waec_subjects || [],
-                documents: response.waec_result ? createPlaceholderFile(response.waec_result) : null
+                examNumber: details.academic_qualifications.o_level.exam_number || "",
+                examYear: details.academic_qualifications.o_level.exam_year || "",
+                subjects: details.academic_qualifications.o_level.subjects || [],
+                documents: details.documents.o_level_result ? createPlaceholderFile(details.documents.o_level_result) : null,
               },
               necoResults: {
-                examNumber: response.neco_exam_number || "",
-                examYear: response.neco_exam_year || "",
-                subjects: response.neco_subjects || [],
-                documents: response.neco_result ? createPlaceholderFile(response.neco_result) : null
+                examNumber: "",
+                examYear: "",
+                subjects: [],
+                documents: null,
               },
               nabtebResults: {
-                examNumber: response.nabteb_exam_number || "",
-                examYear: response.nabteb_exam_year || "",
-                subjects: response.nabteb_subjects || [],
-                documents: response.nabteb_result ? createPlaceholderFile(response.nabteb_result) : null
+                examNumber: "",
+                examYear: "",
+                subjects: [],
+                documents: null,
               },
               jambResults: {
-                regNumber: response.jamb_reg_number || "",
-                examYear: response.jamb_year || "",
-                score: response.jamb_score || "",
-                documents: response.jamb_result ? createPlaceholderFile(response.jamb_result) : null
-              }
+                regNumber: details.academic_qualifications.jamb.registration_number || "",
+                examYear: details.academic_qualifications.jamb.exam_year || "",
+                score: details.academic_qualifications.jamb.score || "",
+                documents: details.documents.jamb_result ? createPlaceholderFile(details.documents.jamb_result) : null,
+              },
             },
-            declaration: ""
+            declaration: "",
           });
-
-          // Set selected exams based on available results
-          const selectedExams = [];
-          if (response.waec_exam_number) selectedExams.push('waec');
-          if (response.neco_exam_number) selectedExams.push('neco');
-          if (response.nabteb_exam_number) selectedExams.push('nabteb');
-          setSelectedExams(selectedExams);
         }
       } catch (error) {
         console.error('Error loading draft:', error);
@@ -751,32 +830,19 @@ const UndergraduateForm = () => {
       formData.append("disability_description", undergraduateData.personalDetails.disabilityDescription);
       formData.append("blood_group", undergraduateData.personalDetails.bloodGroup);
 
+      // Add academic session and program details
+      formData.append("academic_session", undergraduateData.academicSession);
+      formData.append("program_type", "undergraduate");
+      formData.append("selected_course", undergraduateData.selectedCourse);
+
       // Add O'Level results
-      if (selectedExams.includes('waec')) {
-        formData.append("waec_exam_number", undergraduateData.academicQualifications.waecResults.examNumber);
-        formData.append("waec_exam_year", undergraduateData.academicQualifications.waecResults.examYear);
-        formData.append("waec_subjects", JSON.stringify(undergraduateData.academicQualifications.waecResults.subjects));
-        if (undergraduateData.academicQualifications.waecResults.documents) {
-          formData.append("waec_result", undergraduateData.academicQualifications.waecResults.documents);
-        }
-      }
-
-      if (selectedExams.includes('neco')) {
-        formData.append("neco_exam_number", undergraduateData.academicQualifications.necoResults.examNumber);
-        formData.append("neco_exam_year", undergraduateData.academicQualifications.necoResults.examYear);
-        formData.append("neco_subjects", JSON.stringify(undergraduateData.academicQualifications.necoResults.subjects));
-        if (undergraduateData.academicQualifications.necoResults.documents) {
-          formData.append("neco_result", undergraduateData.academicQualifications.necoResults.documents);
-        }
-      }
-
-      if (selectedExams.includes('nabteb')) {
-        formData.append("nabteb_exam_number", undergraduateData.academicQualifications.nabtebResults.examNumber);
-        formData.append("nabteb_exam_year", undergraduateData.academicQualifications.nabtebResults.examYear);
-        formData.append("nabteb_subjects", JSON.stringify(undergraduateData.academicQualifications.nabtebResults.subjects));
-        if (undergraduateData.academicQualifications.nabtebResults.documents) {
-          formData.append("nabteb_result", undergraduateData.academicQualifications.nabtebResults.documents);
-        }
+      const examResults = undergraduateData.academicQualifications[`${selectedExamType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
+      formData.append("exam_type", selectedExamType);
+      formData.append("exam_number", examResults.examNumber);
+      formData.append("exam_year", examResults.examYear);
+      formData.append("subjects", JSON.stringify(examResults.subjects));
+      if (examResults.documents) {
+        formData.append("result_document", examResults.documents);
       }
 
       // Add JAMB results
@@ -787,27 +853,27 @@ const UndergraduateForm = () => {
         formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
       }
 
-      // Add files
+      // Add documents
       if (undergraduateData.passportPhoto) {
         formData.append("passport_photo", undergraduateData.passportPhoto);
       }
 
-      // Add program type and academic session
-      formData.append("program_type", "undergraduate");
-      formData.append("academic_session", undergraduateData.academicSession);
+      // Add declaration
+      formData.append("declaration", undergraduateData.declaration);
+
+      // Set is_draft to true
       formData.append("is_draft", "true");
 
-      // If we have a draft ID, update it; otherwise create new
-      const response = draftId 
-        ? await apiService.updateDraftApplication(draftId, formData)
-        : await apiService.saveDraftApplication(formData);
-
-      setDraftId(response.id);
-      setIsDraft(true);
-
-      toast.success("Application saved as draft", {
-        description: "Your application has been saved successfully. You can continue editing later.",
-      });
+      // Save the draft
+      const response = await apiService.submitDraftApplication(formData) as DraftResponse;
+      
+      if (response.id) {
+        setDraftId(response.id);
+        setIsDraft(true);
+        toast.success("Draft saved successfully", {
+          description: "Your application has been saved as a draft.",
+        });
+      }
     } catch (error) {
       console.error('Error saving draft:', error);
       toast.error("Failed to save draft", {
@@ -815,51 +881,6 @@ const UndergraduateForm = () => {
       });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isFormValid()) {
-      toast.error("Incomplete Application", {
-        description: "Please fill in all required fields before submitting.",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      const formData = new FormData();
-      
-      // Add all the same fields as in handleSaveAsDraft
-      // ... (copy all the formData.append calls from handleSaveAsDraft)
-      
-      // Set is_draft to false for final submission
-      formData.append("is_draft", "false");
-
-      // Submit the form data
-      const response = await apiService.submitApplication(formData);
-      
-      // Clear draft data if it exists
-      if (draftId) {
-        await apiService.deleteDraftApplication(draftId);
-        setDraftId(null);
-        setIsDraft(false);
-      }
-
-      toast.success("Application submitted successfully", {
-        description: "Your application has been submitted. You will receive a confirmation email shortly.",
-      });
-
-      // Redirect to congratulatory page
-      navigate("/application-success");
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error("Submission failed", {
-        description: "There was an error submitting your application. Please try again.",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -878,8 +899,40 @@ const UndergraduateForm = () => {
     });
   };
 
+  const handlePayment = async () => {
+    const amount = 50000; // ₦50,000 in kobo
+    const email = undergraduateData.personalDetails.email;
+    const metadata = {
+      program_type: "undergraduate",
+      academic_session: undergraduateData.academicSession,
+      selected_course: undergraduateData.selectedCourse,
+    };
+
+    await onPayment(amount, email, metadata);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isFormValid()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      // Initialize payment first
+      await handlePayment();
+      
+      // The rest of the form submission will be handled after successful payment
+      // This will be triggered by the payment verification callback
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error("Failed to submit form");
+    }
+  };
+
   return (
-    <form className="space-y-8" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* JAMB Notice */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-orange-500 p-6 bg-orange-50">
         <h3 className="text-lg font-semibold text-orange-700">Important JAMB Notice</h3>
@@ -1881,41 +1934,20 @@ const UndergraduateForm = () => {
 
       {/* Form Buttons */}
       <div className="flex justify-end space-x-4">
-        <button
+        <Button
           type="button"
-          className="px-4 py-2 text-sm font-medium text-primary border-2 border-primary hover:bg-primary/5 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-transparent"
+          variant="outline"
           onClick={handleSaveAsDraft}
-          disabled={isSaving}
+          disabled={isProcessingPayment}
         >
-          {isSaving ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Saving...
-            </span>
-          ) : (
-            "Save as Draft"
-          )}
-        </button>
-        <button
+          Save as Draft
+        </Button>
+        <Button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/80 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          disabled={!isFormValid() || isSubmitting}
+          disabled={isProcessingPayment}
         >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Submitting...
-            </span>
-          ) : (
-            "Submit Application"
-          )}
-        </button>
+          {isProcessingPayment ? "Processing Payment..." : "Submit Application"}
+        </Button>
       </div>
     </form>
   );

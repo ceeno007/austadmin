@@ -3,23 +3,20 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { lazyLoad } from "@/utils/performance";
 import { HelmetProvider } from 'react-helmet-async';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Index from './pages/Index';
-import Programs from './pages/Programs';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import ViewPDF from './pages/ViewPDF';
-import ApplicationSuccess from '@/pages/ApplicationSuccess';
+import ConditionalNavbar from './components/ConditionalNavbar';
+import ConditionalFooter from './components/ConditionalFooter';
 
-// Lazy load components for code splitting
+// Lazy load all page components for better performance
+const Index = lazy(() => import('./pages/Index'));
+const Programs = lazy(() => import('./pages/Programs'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUp = lazy(() => import('./pages/SignUp'));
+const ViewPDF = lazy(() => import('./pages/ViewPDF'));
 const ApplicationForm = lazy(() => import("./pages/ApplicationForm"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CampusLife = lazy(() => import("./pages/CampusLife"));
@@ -47,28 +44,52 @@ const queryClient = new QueryClient({
   },
 });
 
-// Conditional Navbar component
-const ConditionalNavbar = () => {
+// App Layout component that uses the location hook
+const AppLayout: React.FC = () => {
   const location = useLocation();
-  const isDocumentUpload = location.pathname === '/document-upload';
-  
-  if (isDocumentUpload) {
-    return null;
-  }
-  
-  return <Navbar />;
-};
+  const isAuthPage = location.pathname === '/login' || 
+                    location.pathname === '/signup' || 
+                    location.pathname === '/forgot-password';
 
-// Conditional Footer component
-const ConditionalFooter = () => {
-  const location = useLocation();
-  const isDocumentUpload = location.pathname === '/document-upload';
-  
-  if (isDocumentUpload) {
-    return null;
-  }
-  
-  return <Footer />;
+  return (
+    <div className="flex flex-col min-h-screen">
+      {!isAuthPage && <ConditionalNavbar />}
+      <main className={`flex-grow ${!isAuthPage ? 'pt-[72px]' : ''}`}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/programs" element={<Programs />} />
+          <Route path="/campus" element={<CampusLife />} />
+          <Route path="/hostels" element={<Hostels />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/sitemap" element={<Sitemap />} />
+
+          {/* Protected Routes */}
+          <Route path="/application" element={
+            <ProtectedRoute>
+              <ApplicationForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/document-upload" element={
+            <ProtectedRoute>
+              <DocumentUpload />
+            </ProtectedRoute>
+          } />
+          <Route path="/view-pdf" element={<ViewPDF />} />
+
+          {/* Catch-all route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      {!isAuthPage && <ConditionalFooter />}
+    </div>
+  );
 };
 
 const App: React.FC = () => {
@@ -76,62 +97,14 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <TooltipProvider>
-          <LanguageProvider>
-            <BrowserRouter>
-              <AuthProvider>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <div className="flex flex-col min-h-screen">
-                    <ConditionalNavbar />
-                    <main className="flex-grow">
-                      <Routes>
-                        {/* Public Routes */}
-                        <Route path="/" element={<Index />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/signup" element={<SignUp />} />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/programs" element={<Programs />} />
-                        <Route path="/campus" element={<CampusLife />} />
-                        <Route path="/hostels" element={<Hostels />} />
-                        <Route path="/contact" element={<Contact />} />
-                        <Route path="/privacy" element={<Privacy />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/sitemap" element={<Sitemap />} />
-
-                        {/* Protected Routes */}
-                        <Route path="/application" element={
-                          <ProtectedRoute>
-                            <ApplicationForm />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/document-upload" element={
-                          <ProtectedRoute>
-                            <DocumentUpload />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/view-pdf" element={<ViewPDF />} />
-                        <Route path="/application-success" element={
-                          <ProtectedRoute>
-                            <ApplicationSuccess />
-                          </ProtectedRoute>
-                        } />
-
-                        {/* Catch-all route */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </main>
-                    <ConditionalFooter />
-                  </div>
-                </Suspense>
-                <Toaster 
-                  position="top-right"
-                  expand={true}
-                  richColors
-                  closeButton
-                />
-              </AuthProvider>
-            </BrowserRouter>
-          </LanguageProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <Suspense fallback={<LoadingSpinner />}>
+                <AppLayout />
+              </Suspense>
+              <Toaster />
+            </AuthProvider>
+          </BrowserRouter>
         </TooltipProvider>
       </HelmetProvider>
     </QueryClientProvider>

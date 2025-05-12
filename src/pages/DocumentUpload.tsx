@@ -17,6 +17,8 @@ import UndergraduateForm from "@/components/forms/UndergraduateForm";
 import PostgraduateForm from "@/components/forms/PostgraduateForm";
 import FoundationForm from "@/components/forms/FoundationForm";
 import { useAuth } from "@/contexts/AuthContext";
+import paymentService from "@/services/payment";
+import ApplicationStatusCheck from '@/components/ApplicationStatusCheck';
 
 const DocumentUpload = () => {
   const { toast } = useToast();
@@ -24,7 +26,8 @@ const DocumentUpload = () => {
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const typeFromUrl = searchParams.get("type");
-  const { checkAuth, logout } = useAuth();
+  const { checkAuth, logout, isAuthenticated } = useAuth();
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const [activeTab, setActiveTab] = useState(() => {
     // Use URL parameter first, then localStorage, then default to "undergraduate"
@@ -173,64 +176,133 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
     navigate('/login');
   };
 
-  return (
-    <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {programType === "undergraduate" && "Undergraduate Program"}
-                {programType === "postgraduate" && "Postgraduate Program"}
-                {programType === "phd" && "Ph.D. Program"}
-                {programType === "foundation" && "FOUNDATION AND REMEDIAL STUDIES Program"}
-              </h1>
-              <p className="text-gray-600 mt-2">Please upload your required documents below</p>
-            </div>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-          
-          <div className="space-y-6">
-            {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
-              <PostgraduateForm />
-            ) : programType === "foundation" ? (
-              <FoundationForm />
-            ) : (
-              <UndergraduateForm />
-            )}
-          </div>
-        </div>
-      </main>
-      <Toaster />
+  // Handle payment initialization
+  const handlePayment = async (amount: number, email: string, metadata: Record<string, any> = {}) => {
+    try {
+      setIsProcessingPayment(true);
+      const response = await paymentService.initializePayment(amount, email, metadata);
+      
+      if (response.status === 'success' && response.data?.authorization_url) {
+        // Redirect to Paystack payment page
+        window.location.href = response.data.authorization_url;
+      } else {
+        toast({
+          title: "Payment Error",
+          description: response.message || "Failed to initialize payment",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "An error occurred while processing your payment",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
 
-      <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-[#FF5500] flex items-center gap-2">
-              <Info className="h-6 w-6" />
-              {modalContent?.title}
-            </DialogTitle>
-            <DialogDescription className="text-gray-600">
-              Please read the following information carefully before proceeding with your application.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 space-y-4 text-gray-700">
-            {modalContent?.content.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+  // Handle payment verification
+  const verifyPayment = async (reference: string) => {
+    try {
+      const response = await paymentService.verifyPayment(reference);
+      
+      if (response.status === 'success' && response.data?.status === 'success') {
+        toast({
+          title: "Payment Successful",
+          description: "Your payment has been processed successfully",
+        });
+        // Handle successful payment (e.g., enable document upload)
+        return true;
+      } else {
+        toast({
+          title: "Payment Failed",
+          description: response.message || "Payment verification failed",
+          variant: "destructive",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      toast({
+        title: "Payment Error",
+        description: "Failed to verify payment status",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  // Check for payment reference in URL (Paystack callback)
+  useEffect(() => {
+    const reference = searchParams.get('reference');
+    if (reference) {
+      verifyPayment(reference);
+    }
+  }, [searchParams]);
+
+  return (
+    <ApplicationStatusCheck>
+      <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {programType === "undergraduate" && "Undergraduate Program"}
+                  {programType === "postgraduate" && "Postgraduate Program"}
+                  {programType === "phd" && "Ph.D. Program"}
+                  {programType === "foundation" && "FOUNDATION AND REMEDIAL STUDIES Program"}
+                </h1>
+                <p className="text-gray-600 mt-2">Please upload your required documents below</p>
+              </div>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+            
+            <div className="space-y-6">
+              {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
+                <PostgraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+              ) : programType === "foundation" ? (
+                <FoundationForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+              ) : (
+                <UndergraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+              )}
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </main>
+        <Toaster />
+
+        <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-[#FF5500] flex items-center gap-2">
+                <Info className="h-6 w-6" />
+                {modalContent?.title}
+              </DialogTitle>
+              <DialogDescription className="text-gray-600">
+                Please read the following information carefully before proceeding with your application.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 space-y-4 text-gray-700">
+              {modalContent?.content.split('\n\n').map((paragraph, index) => (
+                <p key={index} className="leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </ApplicationStatusCheck>
   );
 };
 

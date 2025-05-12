@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, X, FileText, Image as ImageIcon } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useOptimizedList } from "@/hooks/useOptimizedList";
+import { FileText, Image as ImageIcon, ChevronRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 
 // Import all program images
@@ -57,14 +62,9 @@ const imageMap: Record<string, string> = {
 };
 
 const Programs = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("undergraduate");
-  const [visibleItems, setVisibleItems] = useState<any[]>([]);
-  const [scrollTop, setScrollTop] = useState(0);
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get current and next year for academic session
   const currentYear = new Date().getFullYear();
@@ -80,99 +80,27 @@ const Programs = () => {
   }, [location.search]);
 
   // Get current programs based on active tab
-  const getCurrentPrograms = useCallback(() => {
+  const getCurrentPrograms = () => {
     if (activeTab === "postgraduate") {
       return Object.values(categorizedPostgrad).flat();
     }
     return tabs[activeTab] || [];
-  }, [activeTab]);
-
-  // Calculate visible items based on scroll position
-  const calculateVisibleItems = useCallback(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const itemHeight = 400; // Approximate height of a program card
-    const buffer = 5; // Number of items to render above and below visible area
-
-    const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
-    const endIndex = Math.min(
-      getCurrentPrograms().length,
-      Math.ceil((scrollTop + containerRect.height) / itemHeight) + buffer
-    );
-
-    setVisibleItems(getCurrentPrograms().slice(startIndex, endIndex));
-  }, [scrollTop, getCurrentPrograms]);
-
-  // Handle scroll events with debouncing
-  const handleScroll = useCallback(() => {
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-
-    scrollTimeoutRef.current = setTimeout(() => {
-      if (containerRef.current) {
-        setScrollTop(containerRef.current.scrollTop);
-      }
-    }, 50); // 50ms debounce
-  }, []);
-
-  // Set up scroll event listener
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
-  }, [handleScroll]);
-
-  // Update visible items when scroll position or programs change
-  useEffect(() => {
-    calculateVisibleItems();
-  }, [scrollTop, calculateVisibleItems]);
-
-  // Preload images for visible items
-  useEffect(() => {
-    visibleItems.forEach((item) => {
-      if (!item) return;
-      
-      const imgSrc = getImage(item);
-      if (!imgSrc) return;
-      
-      // Skip if we already know this image fails to load
-      if (imageLoadErrors[imgSrc]) return;
-      
-      const img = new Image();
-      img.onload = () => {
-        // Image loaded successfully
-      };
-      img.onerror = () => {
-        // Mark this image as having an error
-        setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
-      };
-      img.src = imgSrc;
-    });
-  }, [visibleItems, imageLoadErrors]);
+  };
 
   // Improved image handling function
   const getImage = (program: any) => {
-    // If program has a direct image property, use it
     if (program.image) {
       return program.image;
     }
     
-    // Try to extract a key from the program title
     const titleKey = program.title?.toLowerCase().replace(/[^a-z0-9]/g, '-');
     
-    // Check if we have a matching image in our map
     for (const [key, img] of Object.entries(imageMap)) {
       if (titleKey?.includes(key)) {
         return img;
       }
     }
     
-    // Return academic image as last resort
     return academicImg;
   };
 
@@ -183,20 +111,35 @@ const Programs = () => {
     e.currentTarget.src = academicImg;
   };
 
-  // Updated images for each program to better match the course
+  // Updated program data with detailed requirements
   const tabs = {
     undergraduate: [
       {
         title: "B.Sc. Software Engineering",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image:softwareEngineeringImg,
+        image: softwareEngineeringImg,
         description: "Focus on software development methodologies, tools, and systems design.",
-        requirements: [
-          "Five SSC credits including English, Mathematics, Physics/Data Processing",
-          "UTME Subjects: Mathematics, Physics, and one other Science subject",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Any two other Science subjects"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• One other Science subject",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics and Physics",
+            "• ND/HND in Computer Science or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Software Engineering [Undergraduate].pdf"
       },
       {
@@ -205,11 +148,26 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: computerScienceImg,
         description: "Develop skills in algorithms, software engineering, and computer systems.",
-        requirements: [
-          "Five SSC credits including English, Mathematics, Physics/Data Processing",
-          "UTME Subjects: Mathematics, Physics, and one other Science subject",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Any two other Science subjects"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• One other Science subject",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics and Physics",
+            "• ND/HND in Computer Science or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Computer Science [Undergraduate].pdf"
       },
       {
@@ -218,11 +176,27 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: petroleumEngineeringImg,
         description: "Explore oil and gas engineering principles and practices.",
-        requirements: [
-          "Five SSC credits including Physics, Chemistry, Mathematics, and English",
-          "UTME Subjects: Chemistry, Mathematics, Physics",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            "• One other Science subject"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics, Physics, and Chemistry",
+            "• ND/HND in Petroleum Engineering or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Petroleum and Energy Resources Engineering [Undergraduate].pdf"
       },
       {
@@ -231,11 +205,25 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: accountingImg ,
         description: "Gain expertise in financial reporting, auditing, and corporate accounting principles.",
-        requirements: [
-          "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
-          "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Economics",
+            "• Two other relevant subjects"
+          ],
+          jamb: [
+            "• Economics",
+            "• One other Social Science subject",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics and Economics",
+            "• ND/HND in Accounting or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
       {
@@ -244,11 +232,25 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: businessAdminImg,
         description: "Understand organizational behavior, management, and entrepreneurship strategies.",
-        requirements: [
-          "Five SSC credits including Mathematics, English, Economics and two other relevant subjects",
-          "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Economics",
+            "• Two other relevant subjects"
+          ],
+          jamb: [
+            "• Economics",
+            "• One other Social Science subject",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics and Economics",
+            "• ND/HND in Business Administration or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
       },
       {
@@ -257,11 +259,26 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: civilEngineeringImg,
         description: "Design and construct infrastructure like roads, bridges, and water systems.",
-        requirements: [
-          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
-          "UTME Subjects: Mathematics, Physics, Chemistry",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics, Physics, and Chemistry",
+            "• ND/HND in Civil Engineering or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Civil Engineering [Undergraduate].pdf"
       },
       {
@@ -270,11 +287,26 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: materialsEngineeringImg,
         description: "Learn the development and application of metallic and composite materials.",
-        requirements: [
-          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
-          "UTME Subjects: Mathematics, Physics, Chemistry",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics, Physics, and Chemistry",
+            "• ND/HND in Materials Engineering or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Materials and Metallurgical Engineering [Undergraduate].pdf"
       },
       {
@@ -283,50 +315,52 @@ const Programs = () => {
         schoolFees: "₦2,212,727 per session",
         image: mechanicalEngineeringImg,
         description: "Apply physics and materials science for the design and analysis of mechanical systems.",
-        requirements: [
-          "Five SSC credits including Mathematics, Physics, Chemistry, and English",
-          "UTME Subjects: Mathematics, Physics, Chemistry",
-          `JAMB score of 200+ for ${academicSession} session`
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics, Physics, and Chemistry",
+            "• ND/HND in Mechanical Engineering or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/Departmental Handbook - Mechanical Engineering [Undergraduate].pdf"
       }
     ],
     postgraduate: [
-   
-      {
-        title: "M.Sc. Applied Statistics",
-        duration: "1.5 years",
-        schoolFees: "₦1,800,000 total",
-        image: appliedStatsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
-      },
-      {
-        title: "M.Sc. Aerospace Engineering",
-        duration: "1.5 years",
-        schoolFees: "₦1,800,000 total",
-        image: aerospaceImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
-      },
-      {
-        title: "Ph.D. Aerospace Engineering",
-        duration: "3 years",
-        schoolFees: "₦4,200,000 total",
-        image: aerospaceImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
-      },
       {
         title: "M.Sc. Computer Science",
         duration: "2 years",
         schoolFees: "₦2,500,000",
         image: computerScienceImg,
         description: "Advanced study of computer science principles and research methodologies.",
-        requirements: [
-          "First Class or Second Class Upper",
-          "Relevant Bachelor's Degree",
-          "Research Proposal",
-          "Academic Transcripts",
-          "Reference Letters"
-        ],
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Computer Science or related field",
+            "• Minimum CGPA of 3.5/5.0 or 4.0/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Statement of Purpose",
+            "• CV/Resume",
+            "• Evidence of English Proficiency (if applicable)"
+          ]
+        },
         pdf: "/pdfs/Curriculum Handbook - M.Sc. Computer Science [Class of 2025].pdf",
         type: "Masters"
       },
@@ -336,13 +370,22 @@ const Programs = () => {
         schoolFees: "₦4,200,000 total",
         image: computerScienceImg,
         description: "Doctoral research in advanced computer science topics.",
-        requirements: [
-          "First Class or Second Class Upper",
-          "Relevant Master's Degree",
-          "Research Proposal",
-          "Academic Transcripts",
-          "Reference Letters"
-        ],
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Computer Science or related field",
+            "• Minimum CGPA of 3.5/5.0 or 4.0/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Statement of Purpose",
+            "• CV/Resume",
+            "• Evidence of English Proficiency (if applicable)"
+          ]
+        },
         pdf: "/pdfs/2025 Postgraduate Fees.pdf",
         type: "Ph.D."
       },
@@ -373,13 +416,22 @@ const Programs = () => {
         schoolFees: "₦2,500,000",
         image: businessAdminImg,
         description: "Study the intersection of business and technology management.",
-        requirements: [
-          "First Class or Second Class Upper",
-          "Relevant Bachelor's Degree",
-          "Research Proposal",
-          "Academic Transcripts",
-          "Reference Letters"
-        ],
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Computer Science or related field",
+            "• Minimum CGPA of 3.5/5.0 or 4.0/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Statement of Purpose",
+            "• CV/Resume",
+            "• Evidence of English Proficiency (if applicable)"
+          ]
+        },
         pdf: "/pdfs/Curriculum Handbook - M.Sc. Management of Information Technology [Class of 2025].pdf",
         type: "Masters"
       },
@@ -417,11 +469,26 @@ const Programs = () => {
         schoolFees: "₦1,200,000 total",
         image: petroleumEngineeringImg,
         description: "Postgraduate diploma in petroleum engineering fundamentals.",
-        requirements: [
-          "Bachelor's Degree in relevant field",
-          "Academic Transcripts",
-          "Reference Letters"
-        ],
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry"
+          ],
+          jamb: [
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            `• Minimum JAMB score: 200 for ${academicSession} session`
+          ],
+          directEntry: [
+            "• A Level passes in Mathematics, Physics, and Chemistry",
+            "• ND/HND in Petroleum Engineering or related field",
+            "• Minimum of 10 points in IJMB"
+          ]
+        },
         pdf: "/pdfs/2025 Postgraduate Fees.pdf",
         type: "PGD"
       },
@@ -532,6 +599,21 @@ const Programs = () => {
         image: foundationScienceImg,
         duration: "1 Year",
         schoolFees: "₦1,343,000 total",
+        requirements: {
+          ssc: [
+            "Five SSCE/WAEC/NECO credits including:",
+            "• English Language",
+            "• Mathematics",
+            "• Physics",
+            "• Chemistry",
+            "• Biology"
+          ],
+          additional: [
+            "• Minimum age: 16 years",
+            "• Pass in Basic Science subjects",
+            "• Good conduct certificate"
+          ]
+        },
         pdf: "/pdfs/2024-2025 School of Foundation & Remedial Studies Fees.pdf"
       }
     ]
@@ -595,106 +677,176 @@ const Programs = () => {
       
       <main className="min-h-screen bg-gray-50">
         {/* Hero Section */}
-        <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
+        <section className="py-8 sm:py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
               Explore Our <span className="text-[#FF5500]">Programs</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               Discover our wide range of undergraduate, postgraduate, and JUPEB programs designed to prepare you for success in your chosen field.
             </p>
           </div>
         </section>
 
         {/* Programs Section */}
-        <section className="py-16" aria-label="Academic Programs">
+        <section className="py-8 sm:py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-8" role="tablist">
-                <TabsTrigger value="undergraduate" role="tab">Undergraduate</TabsTrigger>
-                <TabsTrigger value="postgraduate" role="tab">Postgraduate</TabsTrigger>
-                <TabsTrigger value="foundation" role="tab">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
-              </TabsList>
+            {/* Simple Tab Navigation */}
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
+              <button
+                onClick={() => setActiveTab("undergraduate")}
+                className={`px-4 py-2 rounded text-sm sm:text-base ${
+                  activeTab === "undergraduate"
+                    ? "bg-[#FF5500] text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Undergraduate
+              </button>
+              <button
+                onClick={() => setActiveTab("postgraduate")}
+                className={`px-4 py-2 rounded text-sm sm:text-base ${
+                  activeTab === "postgraduate"
+                    ? "bg-[#FF5500] text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Postgraduate
+              </button>
+              <button
+                onClick={() => setActiveTab("foundation")}
+                className={`px-4 py-2 rounded text-sm sm:text-base ${
+                  activeTab === "foundation"
+                    ? "bg-[#FF5500] text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                <span className="hidden sm:inline">FOUNDATION AND REMEDIAL STUDIES</span>
+                <span className="sm:hidden">Foundation</span>
+              </button>
+            </div>
 
-              <TabsContent value="undergraduate" role="tabpanel">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tabs.undergraduate.map((program) => (
-                    <article
-                      key={program.title}
-                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      <div className="relative h-48">
-                        <img
-                          src={getImage(program)}
-                          alt={`${program.title} program`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => handleImageError(e, program)}
-                        />
-                        {imageLoadErrors[getImage(program)] && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                            <ImageIcon className="h-12 w-12 text-gray-400" />
+            {/* Program Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {getCurrentPrograms().map((program) => (
+                <div
+                  key={program.title}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow mb-4 sm:mb-0"
+                >
+                  <div className="relative h-48">
+                    <img
+                      src={getImage(program)}
+                      alt={`${program.title} program`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => handleImageError(e, program)}
+                    />
+                    {imageLoadErrors[getImage(program)] && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <ImageIcon className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 sm:p-6">
+                    <h2 className="text-lg sm:text-xl font-semibold mb-2">{program.title}</h2>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2">{program.description}</p>
+                    
+                    <div className="space-y-2 mb-4">
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        <span className="font-medium">Duration:</span> {program.duration}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        <span className="font-medium">School Fees:</span> {program.schoolFees}
+                      </p>
+                    </div>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white">
+                          View More <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-bold text-[#FF5500]">{program.title}</DialogTitle>
+                        </DialogHeader>
+                        
+                        <div className="space-y-6">
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">Program Description</h3>
+                            <p className="text-gray-600">{program.description}</p>
                           </div>
-                        )}
-                      </div>
-                      <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
-                        <p className="text-gray-600 mb-4">{getDescription(program)}</p>
-                        <div className="space-y-2 mb-4">
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Duration:</span> {program.duration}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">School Fees:</span> {program.schoolFees}
-                          </p>
-                        </div>
-                        <div className="flex justify-end">
-                          <a 
-                            href={program.pdf} 
-                            download 
-                            className="text-[#FF5500] hover:text-[#FF5500]/80"
-                            aria-label={`Download PDF for ${program.title}`}
-                          >
-                            <Button variant="ghost" className="text-[#FF5500]">
-                              <FileText className="w-4 h-4 mr-2" />
-                              Download PDF
-                            </Button>
-                          </a>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </TabsContent>
 
-              <TabsContent value="postgraduate" role="tabpanel">
-                {Object.entries(categorizedPostgrad).map(([category, programs]) => (
-                  <div key={category} className="mb-12">
-                    <h2 className="text-2xl font-bold text-[#FF5500] mb-4">{category} Programs</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {programs.map((program) => (
-                        <article 
-                          key={program.title} 
-                          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                        >
-                          <div className="relative h-48">
-                            <img 
-                              src={getImage(program)} 
-                              alt={`${program.title} program`}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                              onError={(e) => handleImageError(e, program)}
-                            />
-                            {imageLoadErrors[getImage(program)] && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                                <ImageIcon className="h-12 w-12 text-gray-400" />
+                          <div>
+                            <h3 className="text-lg font-semibold mb-2">Requirements</h3>
+                            {program.requirements && (
+                              <div className="space-y-4">
+                                {program.requirements.ssc && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">SSCE/WAEC/NECO:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.ssc.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {program.requirements.jamb && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">JAMB:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.jamb.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {program.requirements.directEntry && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">Direct Entry:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.directEntry.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {program.requirements.academic && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">Academic Requirements:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.academic.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {program.requirements.documents && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">Required Documents:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.documents.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                {program.requirements.additional && (
+                                  <div>
+                                    <h4 className="font-medium text-gray-700">Additional Requirements:</h4>
+                                    <ul className="list-disc list-inside text-gray-600">
+                                      {program.requirements.additional.map((req, index) => (
+                                        <li key={index}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
-                          <div className="p-6">
-                            <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
-                            <p className="text-gray-600 mb-4">{getDescription(program)}</p>
-                            <div className="space-y-2 mb-4">
+
+                          <div className="flex justify-between items-center pt-4 border-t">
+                            <div className="space-y-1">
                               <p className="text-sm text-gray-500">
                                 <span className="font-medium">Duration:</span> {program.duration}
                               </p>
@@ -702,77 +854,24 @@ const Programs = () => {
                                 <span className="font-medium">School Fees:</span> {program.schoolFees}
                               </p>
                             </div>
-                            <div className="flex justify-end">
-                              <a 
-                                href={program.pdf} 
-                                download 
-                                className="text-[#FF5500] hover:text-[#FF5500]/80"
-                                aria-label={`Download PDF for ${program.title}`}
-                              >
-                                <Button variant="ghost" className="text-[#FF5500]">
-                                  <FileText className="w-4 h-4 mr-2" /> Download PDF
-                                </Button>
-                              </a>
-                            </div>
+                            <a
+                              href={program.pdf}
+                              download
+                              className="text-[#FF5500] hover:text-[#FF5500]/80"
+                            >
+                              <Button variant="ghost" className="text-[#FF5500]">
+                                <FileText className="w-4 h-4 mr-2" />
+                                Download Brochure
+                              </Button>
+                            </a>
                           </div>
-                        </article>
-                      ))}
-                    </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
-                ))}
-              </TabsContent>
-
-              <TabsContent value="foundation" role="tabpanel">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tabs.foundation.map((program) => (
-                    <article
-                      key={program.id}
-                      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      <div className="relative h-48">
-                        <img
-                          src={getImage(program)}
-                          alt={`${program.title} program`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          onError={(e) => handleImageError(e, program)}
-                        />
-                        {imageLoadErrors[getImage(program)] && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                            <ImageIcon className="h-12 w-12 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-2">{program.title}</h2>
-                        <p className="text-gray-600 mb-4">{program.description}</p>
-                        <div className="space-y-2 mb-4">
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">Duration:</span> {program.duration}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium">School Fees:</span> {program.schoolFees}
-                          </p>
-                        </div>
-                        <div className="flex justify-end">
-                          <a 
-                            href={program.pdf} 
-                            download 
-                            className="text-[#FF5500] hover:text-[#FF5500]/80"
-                            aria-label={`Download PDF for ${program.title}`}
-                          >
-                            <Button variant="ghost" className="text-[#FF5500]">
-                              <FileText className="w-4 h-4 mr-2" />
-                              Download PDF
-                            </Button>
-                          </a>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
                 </div>
-              </TabsContent>
-            </Tabs>
+              ))}
+            </div>
           </div>
         </section>
       </main>

@@ -248,7 +248,7 @@ const Contact = () => {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title="AUST Location"
-              ></iframe>
+              />
             </div>
           </div>
         </section>

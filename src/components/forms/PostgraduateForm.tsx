@@ -328,7 +328,12 @@ interface University {
   web_pages: string[];
 }
 
-const PostgraduateForm = () => {
+interface PostgraduateFormProps {
+  onPayment: (amount: number, email: string, metadata: Record<string, any>) => Promise<void>;
+  isProcessingPayment: boolean;
+}
+
+const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormProps) => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
   const [universities, setUniversities] = useState<University[]>([]);
@@ -902,96 +907,35 @@ const PostgraduateForm = () => {
     return academicDomains.some(domain => email.toLowerCase().includes(domain));
   };
 
+  const handlePayment = async () => {
+    const amount = 75000; // ₦75,000 in kobo
+    const email = postgraduateData.personalDetails.email;
+    const metadata = {
+      program_type: "postgraduate",
+      academic_session: postgraduateData.academicSession,
+      selected_course: postgraduateData.program,
+    };
+
+    await onPayment(amount, email, metadata);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    
+    if (!isFormValid()) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
     try {
-      // Validate referee emails
-      if (!validateRefereeEmail(postgraduateData.references.referee1.email) || !validateRefereeEmail(postgraduateData.references.referee2.email)) {
-        setError('Please provide valid academic email addresses for both referees');
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (!isFormValid()) {
-        toast.error("Please fill in all required fields");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const formData = new FormData();
+      // Initialize payment first
+      await handlePayment();
       
-      // Get the access token from localStorage
-      const accessToken = localStorage.getItem('accessToken');
-      
-      // Add the token to the form data
-      if (accessToken) {
-        formData.append('token', accessToken);
-      } else {
-        toast.error("Authentication error", {
-          description: "You are not logged in. Please log in and try again.",
-          duration: 5000,
-        });
-        return;
-      }
-      
-      // Append personal details
-      formData.append("surname", postgraduateData.personalDetails.surname);
-      formData.append("first_name", postgraduateData.personalDetails.firstName);
-      formData.append("gender", postgraduateData.personalDetails.gender);
-      formData.append("date_of_birth", `${postgraduateData.personalDetails.dateOfBirth.year}-${postgraduateData.personalDetails.dateOfBirth.month}-${postgraduateData.personalDetails.dateOfBirth.day}`);
-      formData.append("street_address", postgraduateData.personalDetails.streetAddress);
-      formData.append("city", postgraduateData.personalDetails.city);
-      formData.append("country", postgraduateData.personalDetails.country);
-      formData.append("nationality", postgraduateData.personalDetails.nationality);
-      formData.append("phone_number", postgraduateData.personalDetails.phoneNumber);
-      formData.append("email", postgraduateData.personalDetails.email);
-      
-      // Append program details
-      formData.append("program_type", postgraduateData.programType);
-      formData.append("applicant_type", postgraduateData.applicantType);
-      
-      // Append academic qualifications
-      formData.append("degree", postgraduateData.academicQualifications.qualification1.type);
-      formData.append("institution", postgraduateData.academicQualifications.qualification1.institution);
-      formData.append("year", postgraduateData.academicQualifications.qualification1.endDate.year);
-      formData.append("class_of_degree", postgraduateData.academicQualifications.qualification1.grade);
-      
-      // Append references
-      formData.append("referee1_name", postgraduateData.references.referee1.name);
-      formData.append("referee1_email", postgraduateData.references.referee1.email);
-      formData.append("referee2_name", postgraduateData.references.referee2.name);
-      formData.append("referee2_email", postgraduateData.references.referee2.email);
-      
-      // Append statement of purpose
-      if (postgraduateData.statementOfPurpose.length > 0) {
-        formData.append("statement_of_purpose", postgraduateData.statementOfPurpose[0]);
-      }
-      
-      // Append declaration
-      formData.append("declaration", postgraduateData.declaration.toString());
-      
-      // Append files if they exist
-      if (postgraduateData.passportPhoto) {
-        formData.append("passport_photo", postgraduateData.passportPhoto);
-      }
-      if (postgraduateData.paymentEvidence) {
-        formData.append("payment_evidence", postgraduateData.paymentEvidence);
-      }
-      
-      const response = await apiService.submitApplication(formData);
-      toast.success("Application submitted successfully!");
-      
-      // Clear form data from localStorage after successful submission
-      localStorage.removeItem("postgraduateApplicationData");
-      
-      // After successful submission
-      navigate('/application-success');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setIsSubmitting(false);
+      // The rest of the form submission will be handled after successful payment
+      // This will be triggered by the payment verification callback
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error("Failed to submit form");
     }
   };
 
@@ -1185,7 +1129,7 @@ const PostgraduateForm = () => {
   );
 
   return (
-    <form className="space-y-8" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-8">
      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
   <h3 className="text-lg font-semibold">Application Fee Payment</h3>
   <div className="space-y-4">
@@ -2189,12 +2133,15 @@ const PostgraduateForm = () => {
           type="button"
           variant="outline"
           onClick={handleSaveAsDraft}
-          disabled={isSubmitting}
+          disabled={isSaving}
         >
           Save as Draft
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit Application"}
+        <Button
+          type="submit"
+          disabled={isSaving}
+        >
+          {isSaving ? "Saving..." : "Submit Application"}
         </Button>
       </div>
     </form>

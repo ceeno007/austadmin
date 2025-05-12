@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+interface User {
+  email: string;
+  full_name: string;
+  program?: string;
+  id?: string;
+  uuid?: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
+  user: User | null;
   login: (token: string, userData: any) => void;
   logout: () => void;
   checkAuth: () => boolean;
@@ -20,6 +29,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   // Check authentication status on mount
@@ -45,6 +55,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('programType');
       localStorage.removeItem('userEmail');
       localStorage.removeItem('userId');
+      setUser(null);
+    } else {
+      // Set user data from localStorage
+      const userData = JSON.parse(applicationData || '{}');
+      setUser({
+        email: userData.email || userData.user?.email || '',
+        full_name: userData.full_name || userData.user?.full_name || '',
+        program: userData.program || userData.user?.program || '',
+        id: userData.id || userData.user?.id || '',
+        uuid: userData.uuid || userData.user?.uuid || ''
+      });
     }
     
     return isValid;
@@ -89,8 +110,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (programType) {
       localStorage.setItem('programType', programType.toLowerCase());
-    //   console.log(`Program type set to: ${programType.toLowerCase()} from API response`);
     }
+    
+    // Set user data
+    setUser({
+      email: userData.email || userData.user?.email || '',
+      full_name: userData.full_name || userData.user?.full_name || '',
+      program: programType,
+      id: userData.id || userData.user?.id || '',
+      uuid: userData.uuid || userData.user?.uuid || ''
+    });
     
     setIsAuthenticated(true);
   };
@@ -106,13 +135,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Update authentication state
     setIsAuthenticated(false);
+    setUser(null);
     
     // Redirect to login
     navigate('/login', { replace: true });
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

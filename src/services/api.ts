@@ -1,22 +1,24 @@
 import axios from 'axios';
 
 // API Base URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  SIGNUP: `${API_BASE_URL}/signup`,
-  LOGIN: `${API_BASE_URL}/token`,
-  DOCUMENT_UPLOAD: `${API_BASE_URL}/document-upload`,
-  FORGOT_PASSWORD: `${API_BASE_URL}/forgot-password`,
+  SIGNUP: `${API_BASE_URL}/auth/signup`,
+  LOGIN: `${API_BASE_URL}/auth/login`,
+  DOCUMENT_UPLOAD: `${API_BASE_URL}/documents/upload`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
   CONTACT: `${API_BASE_URL}/contact`,
-  SEND_VERIFICATION: `${API_BASE_URL}/send-verification`,
-  VERIFY_EMAIL: `${API_BASE_URL}/verify-email`,
-  SEND_PASSWORD_RESET_OTP: `${API_BASE_URL}/send-password-reset-otp`,
-  VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/verify-password-reset-otp`,
-  RESET_PASSWORD: `${API_BASE_URL}/reset-password`,
-  APPLICATION_UPLOAD: `${API_BASE_URL}/application/upload`,
-  APPLICATION_DRAFT: `${API_BASE_URL}/postgraduate_saved`,
+  SEND_VERIFICATION: `${API_BASE_URL}/auth/send-verification`,
+  VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
+  SEND_PASSWORD_RESET_OTP: `${API_BASE_URL}/auth/send-password-reset-otp`,
+  VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/auth/verify-password-reset-otp`,
+  RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
+  APPLICATION_UPLOAD: `${API_BASE_URL}/applications/upload`,
+  APPLICATION_DRAFT: `${API_BASE_URL}/applications/draft`,
+  INITIALIZE_PAYMENT: `${API_BASE_URL}/payments/initialize`,
+  VERIFY_PAYMENT: `${API_BASE_URL}/payments/verify`,
 };
 
 // Default Headers for JSON requests
@@ -80,44 +82,23 @@ const apiService = {
    * @returns Promise with the API response
    */
   login: async (credentials: { username: string; password: string }) => {
-    const formData = new URLSearchParams();
-    formData.append("username", credentials.username);
-    formData.append("password", credentials.password);
-  
     try {
-      console.log("Attempting login to:", API_ENDPOINTS.LOGIN);
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-        signal: controller.signal
+        headers: defaultHeaders,
+        body: JSON.stringify(credentials),
       });
-      
-      clearTimeout(timeoutId);
-      
-      console.log("Login response status:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Login error response:", errorData);
-        throw new Error(errorData.detail || `Login failed with status ${response.status}`);
+        throw new Error(errorData.message || `Login failed with status ${response.status}`);
       }
   
       const data = await response.json();
-      console.log("Login successful, received data:", { ...data, access_token: data.access_token ? "present" : "missing" });
       return data;
     } catch (error) {
       console.error("Login error:", error);
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          throw new Error("Login request timed out. Please try again.");
-        }
         throw error;
       }
       throw new Error("An unexpected error occurred during login");

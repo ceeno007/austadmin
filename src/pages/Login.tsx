@@ -24,17 +24,18 @@ const Login = () => {
     
     if (!email || !password) {
       toast.error("Please enter both email and password", {
-        description: "Both fields are required to log in.",
+        description: "All fields are required to log in",
+        duration: 5000,
         style: {
-          background: '#EF4444',
-          color: 'white',
+          background: '#FEE2E2',
+          color: '#991B1B',
+          border: '1px solid #FCA5A5',
         }
       });
       return;
     }
     
     setIsLoading(true);
-    console.log("Starting login process...");
     
     try {
       // Test mode - bypass authentication for testing
@@ -50,12 +51,13 @@ const Login = () => {
         };
         
         login(testData.access_token, testData);
-        
         toast.success("Test login successful!", {
-          description: "Welcome to test mode!",
+          description: "Welcome back! Redirecting to your dashboard...",
+          duration: 3000,
           style: {
-            background: '#10B981',
-            color: 'white',
+            background: '#DCFCE7',
+            color: '#166534',
+            border: '1px solid #86EFAC',
           }
         });
         
@@ -66,70 +68,57 @@ const Login = () => {
       }
       
       // Normal login flow
-      console.log("Calling login API...");
       const data = await apiService.login({
         username: email,
         password
       });
       
-      console.log("Login API response received:", data);
-      
       if (!data.access_token) {
-        console.error("No access token in response:", data);
         throw new Error("No access token received from server");
       }
       
-      // Use the auth context to handle login
-      console.log("Calling auth context login...");
       login(data.access_token, data);
-      
-      // Show success message
       toast.success("Login successful!", {
-        description: "Welcome back! Redirecting you to your dashboard.",
+        description: "Welcome back! Redirecting to your dashboard...",
+        duration: 3000,
         style: {
-          background: '#10B981',
-          color: 'white',
+          background: '#DCFCE7',
+          color: '#166534',
+          border: '1px solid #86EFAC',
         }
       });
       
-      // Get the program type from the response data (check applications array first)
+      // Get the program type from the response data
       let programType = null;
       if (data.applications && data.applications.length > 0) {
         programType = data.applications[0].program_type?.toLowerCase();
       }
 
-      // If not found in applications, fallback to other locations
       if (!programType) {
         programType = data.program_type?.toLowerCase() || 
                      data.user?.program?.toLowerCase() || 
                      data.program?.toLowerCase();
       }
       
-      console.log("Determined program type:", programType);
-      
-      // Determine the destination based on program type
+      // Determine the destination
       let destination = location.state?.from?.pathname;
       
       if (!destination) {
-        // Default to using the program type from response, falling back to undergraduate if not available
         const formType = programType || "undergraduate";
-        
-        // Construct the destination URL with query parameters
         destination = `/document-upload?type=${formType}`;
       }
       
-      console.log("Navigating to:", destination);
-      
-      // Use navigate with replace to prevent back navigation to login
       navigate(destination, { replace: true });
       
     } catch (error) {
-      console.error("Login error details:", error);
+      console.error("Login error:", error);
       toast.error("Login failed", {
         description: error instanceof Error ? error.message : "Invalid email or password",
+        duration: 5000,
         style: {
-          background: '#EF4444',
-          color: 'white',
+          background: '#FEE2E2',
+          color: '#991B1B',
+          border: '1px solid #FCA5A5',
         }
       });
     } finally {
@@ -203,7 +192,7 @@ const Login = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full bg-primary" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </form>
