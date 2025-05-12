@@ -208,7 +208,7 @@ const Footer = () => {
             <div className="fixed bottom-4 right-4 z-50 animate-fade-in" style={{ animationDelay: '20s' }}>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-3 flex items-center space-x-3">
                 <span className="text-[10px] sm:text-xs text-white/90">
-                  Made with love by Austinspire
+                  Made with ❤️ by Austinspire
                 </span>
                 <button
                   onClick={handleDismissBadge}

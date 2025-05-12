@@ -82,9 +82,6 @@ const DocumentUpload = () => {
     return "User";
   });
 
-  const [showInfoModal, setShowInfoModal] = useState(false);
-  const [modalContent, setModalContent] = useState<{ title: string; content: string } | null>(null);
-
   // Update program type when URL parameter changes
   useEffect(() => {
     if (typeFromUrl) {
@@ -147,29 +144,6 @@ const DocumentUpload = () => {
     // Cleanup interval on unmount
     return () => clearInterval(interval);
   }, []);
-
-  // Add useEffect to show undergraduate popup on mount
-  useEffect(() => {
-    if (programType === "undergraduate") {
-      const hasShownUndergraduatePopup = localStorage.getItem('hasShownUndergraduatePopup');
-      if (!hasShownUndergraduatePopup) {
-        setModalContent({
-          title: "Undergraduate Programs",
-          content: `Applications for all our first-year undergraduate degrees must be made online through the JAMB E-facility Portal. Walk-in applicants who did not select AUST as their school of first choice will also need to visit the JAMB Portal to make the necessary changes to their choice of school on their page. For Direct Entry students applying for our 200 Level programs should send an email to admissions@aust.edu.ng or visit the Admissions Office (MH 113, Mandela Hall).
-
-The minimum cutoff JAMB score for the University for the 2024/2025 Session is 140.
-
-Applicants with a minimum score of 140 who had previously selected AUST as their first choice will automatically be given admission, after meeting the entry requirements for the program being applied for. Walk-in applicants who did not select AUST as their school of first choice, and have met the entry requirements for their program, should take the following steps:
-
-• Visit the JAMB E-facility Portal at https://jamb.gov.ng/efacility and log in with your email address and password.
-• Click on the 'Application for Correction of Data (2024)' from the list of services on the left panel.
-• From the drop-down menu, select the 'Course/Institution' option and make the necessary changes to AUST.`,
-        });
-        setShowInfoModal(true);
-        localStorage.setItem('hasShownUndergraduatePopup', 'true');
-      }
-    }
-  }, [programType]); 
 
   const handleLogout = () => {
     logout();
@@ -280,27 +254,6 @@ Applicants with a minimum score of 140 who had previously selected AUST as their
           </div>
         </main>
         <Toaster />
-
-        <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-[#FF5500] flex items-center gap-2">
-                <Info className="h-6 w-6" />
-                {modalContent?.title}
-              </DialogTitle>
-              <DialogDescription className="text-gray-600">
-                Please read the following information carefully before proceeding with your application.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4 space-y-4 text-gray-700">
-              {modalContent?.content.split('\n\n').map((paragraph, index) => (
-                <p key={index} className="leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </ApplicationStatusCheck>
   );

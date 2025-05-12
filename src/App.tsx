@@ -50,11 +50,12 @@ const AppLayout: React.FC = () => {
   const isAuthPage = location.pathname === '/login' || 
                     location.pathname === '/signup' || 
                     location.pathname === '/forgot-password';
+  const isDocumentUpload = location.pathname === '/document-upload';
 
   return (
     <div className="flex flex-col min-h-screen">
       {!isAuthPage && <ConditionalNavbar />}
-      <main className={`flex-grow ${!isAuthPage ? 'pt-[72px]' : ''}`}>
+      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload ? 'pt-[72px]' : ''}`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
