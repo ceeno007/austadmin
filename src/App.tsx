@@ -17,6 +17,7 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ViewPDF from './pages/ViewPDF';
+import ApplicationSuccess from '@/pages/ApplicationSuccess';
 
 // Lazy load components for code splitting
 const ApplicationForm = lazy(() => import("./pages/ApplicationForm"));
@@ -109,6 +110,11 @@ const App: React.FC = () => {
                           </ProtectedRoute>
                         } />
                         <Route path="/view-pdf" element={<ViewPDF />} />
+                        <Route path="/application-success" element={
+                          <ProtectedRoute>
+                            <ApplicationSuccess />
+                          </ProtectedRoute>
+                        } />
 
                         {/* Catch-all route */}
                         <Route path="*" element={<NotFound />} />

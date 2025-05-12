@@ -18,6 +18,7 @@ import { apiService } from "../../services/api";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useNavigate } from 'react-router-dom';
 
 interface DateField {
   day: string;
@@ -336,6 +337,8 @@ const PostgraduateForm = () => {
   const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
   const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
   const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     try {
@@ -610,13 +613,6 @@ const PostgraduateForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
-  const [universities, setUniversities] = useState<University[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
-  const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
-  const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
-  // Add cache for university results
-  const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
 
   // Generate years from 1950 to current year
   const currentYear = new Date().getFullYear();
@@ -878,13 +874,50 @@ const PostgraduateForm = () => {
     }
   };
 
+  const validateRefereeEmail = (email: string): boolean => {
+    // Check if it's a valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return false;
+    }
+
+    // Check if it's an academic email (contains .edu, .ac, or other academic domains)
+    const academicDomains = [
+      '.edu',
+      '.ac.',
+      '.sch.',
+      '.school',
+      '.college',
+      '.university',
+      '.institute',
+      '.edu.',
+      '.ac',
+      '.sch',
+      '.school.',
+      '.college.',
+      '.university.',
+      '.institute.'
+    ];
+
+    return academicDomains.some(domain => email.toLowerCase().includes(domain));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+    setError(null);
+
     try {
+      // Validate referee emails
+      if (!validateRefereeEmail(postgraduateData.references.referee1.email) || !validateRefereeEmail(postgraduateData.references.referee2.email)) {
+        setError('Please provide valid academic email addresses for both referees');
+        setIsSubmitting(false);
+        return;
+      }
+
       if (!isFormValid()) {
         toast.error("Please fill in all required fields");
+        setIsSubmitting(false);
         return;
       }
 
@@ -954,9 +987,10 @@ const PostgraduateForm = () => {
       // Clear form data from localStorage after successful submission
       localStorage.removeItem("postgraduateApplicationData");
       
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to submit application");
-    } finally {
+      // After successful submission
+      navigate('/application-success');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setIsSubmitting(false);
     }
   };

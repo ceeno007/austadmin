@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, CheckCircle2, AlertCircle, Check, Copy } from "lucide-react";
@@ -13,6 +13,9 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { apiService } from "@/services/api";
 import { useNavigate } from "react-router-dom";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search } from "lucide-react";
 
 interface DocumentField {
   id: string;
@@ -110,6 +113,13 @@ interface FoundationRemedialFormData {
     };
   };
   declaration: string;
+}
+
+interface University {
+  name: string;
+  country: string;
+  domains: string[];
+  web_pages: string[];
 }
 
 const FileUploadField = ({ 
@@ -263,6 +273,230 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   return placeholderFile;
 };
 
+// Add these predefined subject combinations
+const subjectCombinations = {
+  "Science": [
+    "Physics, Chemistry, Biology",
+    "Physics, Chemistry, Mathematics",
+    "Biology, Chemistry, Mathematics"
+  ],
+  "Engineering": [
+    "Physics, Chemistry, Mathematics",
+    "Physics, Further Mathematics, Mathematics"
+  ],
+  "Medicine": [
+    "Biology, Chemistry, Physics",
+    "Biology, Chemistry, Mathematics"
+  ],
+  "Social Sciences": [
+    "Economics, Government, Mathematics",
+    "Economics, Government, Literature",
+    "Economics, Government, Geography"
+  ],
+  "Arts": [
+    "Literature, Government, History",
+    "Literature, Government, Christian Religious Studies",
+    "Literature, Government, Islamic Religious Studies"
+  ]
+};
+
+// Add these constants at the top of the file with other constants
+const commonSubjects = [
+  "Mathematics",
+  "English Language",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Agricultural Science",
+  "Economics",
+  "Government",
+  "Literature in English",
+  "Christian Religious Studies",
+  "Islamic Religious Studies",
+  "Geography",
+  "History",
+  "Further Mathematics",
+  "Technical Drawing",
+  "Food and Nutrition",
+  "Commerce",
+  "Accounting",
+  "Computer Studies",
+  "French",
+  "Yoruba",
+  "Igbo",
+  "Hausa"
+];
+
+const grades = [
+  "A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"
+];
+
+// Add this constant at the top of the file with other constants
+const universities = {
+  "Nigeria": [
+    "University of Lagos (UNILAG)",
+    "University of Ibadan (UI)",
+    "Obafemi Awolowo University (OAU)",
+    "University of Nigeria, Nsukka (UNN)",
+    "Ahmadu Bello University (ABU)",
+    "University of Benin (UNIBEN)",
+    "University of Ilorin (UNILORIN)",
+    "University of Port Harcourt (UNIPORT)",
+    "University of Calabar (UNICAL)",
+    "Federal University of Technology, Akure (FUTA)",
+    "Covenant University",
+    "Babcock University",
+    "Afe Babalola University",
+    "Bells University of Technology",
+    "Bingham University",
+    "Bowen University",
+    "Caleb University",
+    "Caritas University",
+    "Chrisland University",
+    "Crawford University",
+    "Crown Hill University",
+    "Edwin Clark University",
+    "Elizade University",
+    "Evangel University",
+    "Fountain University",
+    "Godfrey Okoye University",
+    "Gregory University",
+    "Hallmark University",
+    "Hezekiah University",
+    "Igbinedion University",
+    "Joseph Ayo Babalola University",
+    "Kings University",
+    "Kola Daisi University",
+    "Landmark University",
+    "Lead City University",
+    "Madonna University",
+    "McPherson University",
+    "Mountain Top University",
+    "Nile University of Nigeria",
+    "Novena University",
+    "Obong University",
+    "Oduduwa University",
+    "Pan-Atlantic University",
+    "Paul University",
+    "Redeemer's University",
+    "Rhema University",
+    "Ritman University",
+    "Salem University",
+    "Samuel Adegboyega University",
+    "Southwestern University",
+    "Summit University",
+    "Tansian University",
+    "Trinity University",
+    "Veritas University",
+    "Wellspring University",
+    "Wesley University",
+    "Western Delta University",
+    "Achievers University",
+    "Adeleke University",
+    "Admiralty University",
+    "Al-Hikmah University",
+    "Al-Qalam University",
+    "Anchor University",
+    "Arthur Jarvis University",
+    "Atiba University",
+    "Augustine University",
+    "Baze University",
+    "Benson Idahosa University",
+    "Bingham University",
+    "BlueCrest University",
+    "Capital City University",
+    "Clifford University",
+    "Coal City University",
+    "Dominion University",
+    "Eastern Palm University",
+    "Eko University of Medical and Health Sciences",
+    "Elizade University",
+    "Evangel University",
+    "First Technical University",
+    "Fountain University",
+    "Godfrey Okoye University",
+    "Greenfield University",
+    "Hallmark University",
+    "Hezekiah University",
+    "Igbinedion University",
+    "Joseph Ayo Babalola University",
+    "Kings University",
+    "Kola Daisi University",
+    "Landmark University",
+    "Lead City University",
+    "Madonna University",
+    "McPherson University",
+    "Mountain Top University",
+    "Nile University of Nigeria",
+    "Novena University",
+    "Obong University",
+    "Oduduwa University",
+    "Pan-Atlantic University",
+    "Paul University",
+    "Redeemer's University",
+    "Rhema University",
+    "Ritman University",
+    "Salem University",
+    "Samuel Adegboyega University",
+    "Southwestern University",
+    "Summit University",
+    "Tansian University",
+    "Trinity University",
+    "Veritas University",
+    "Wellspring University",
+    "Wesley University",
+    "Western Delta University"
+  ],
+  "United States": [
+    "Harvard University",
+    "Stanford University",
+    "Massachusetts Institute of Technology (MIT)",
+    "California Institute of Technology (Caltech)",
+    "University of California, Berkeley",
+    "Yale University",
+    "Princeton University",
+    "Columbia University",
+    "University of Chicago",
+    "University of Pennsylvania"
+  ],
+  "United Kingdom": [
+    "University of Oxford",
+    "University of Cambridge",
+    "Imperial College London",
+    "University College London (UCL)",
+    "University of Edinburgh",
+    "University of Manchester",
+    "King's College London",
+    "London School of Economics (LSE)",
+    "University of Bristol",
+    "University of Warwick"
+  ],
+  "Canada": [
+    "University of Toronto",
+    "University of British Columbia",
+    "McGill University",
+    "University of Alberta",
+    "University of Montreal",
+    "University of Waterloo",
+    "University of Calgary",
+    "University of Ottawa",
+    "University of Western Ontario",
+    "Queen's University"
+  ],
+  "Australia": [
+    "University of Melbourne",
+    "University of Sydney",
+    "University of Queensland",
+    "Monash University",
+    "University of New South Wales",
+    "Australian National University",
+    "University of Western Australia",
+    "University of Adelaide",
+    "University of Technology Sydney",
+    "RMIT University"
+  ]
+};
+
 const FoundationForm = () => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -360,9 +594,9 @@ const FoundationForm = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
 
-  // Generate years from current year to 5 years back
+  // Generate years from current year to 30 years back
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 31 }, (_, i) => currentYear - i);
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -637,6 +871,90 @@ const FoundationForm = () => {
     }
   };
 
+  const [firstChoiceSearch, setFirstChoiceSearch] = useState("");
+  const [secondChoiceSearch, setSecondChoiceSearch] = useState("");
+  const [openUniversityPopover, setOpenUniversityPopover] = useState(false);
+  const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleUniversitySelect = (universityName: string, choice: "firstChoice" | "secondChoice") => {
+    setFoundationRemedialData(prev => ({
+      ...prev,
+      programChoice: {
+        ...prev.programChoice,
+        [choice]: {
+          ...prev.programChoice[choice],
+          university: universityName
+        }
+      }
+    }));
+    setSearchQuery("");
+    if (choice === "firstChoice") {
+      setOpenUniversityPopover(false);
+    } else {
+      setOpenUniversityPopover2(false);
+    }
+  };
+
+  const renderCommandInput = () => (
+    <div className="space-y-2">
+      <CommandInput
+        placeholder="Search universities... (minimum 3 characters)"
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
+      {searchQuery.length > 0 && searchQuery.length < 3 && (
+        <p className="px-2 text-xs text-gray-500">Please enter at least 3 characters to search</p>
+      )}
+    </div>
+  );
+
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
+  const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
+
+  const fetchUniversities = async (query: string) => {
+    if (query.length < 3) {
+      setUniversities([]);
+      return;
+    }
+    
+    // Check cache first
+    if (universityCache[query]) {
+      setUniversities(universityCache[query]);
+      return;
+    }
+    
+    setIsLoadingUniversities(true);
+    try {
+      const response = await fetch(`http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      // Limit results to 20 universities for better performance
+      const limitedData = data.slice(0, 20);
+      setUniversities(limitedData);
+      // Cache the results
+      setUniversityCache(prev => ({
+        ...prev,
+        [query]: limitedData
+      }));
+    } catch (error) {
+      toast.error("Failed to fetch universities");
+      console.error("Error fetching universities:", error);
+    } finally {
+      setIsLoadingUniversities(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        fetchUniversities(searchQuery);
+      }
+    }, 500); // Standard 500ms debounce delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
       {/* Application Fee Payment Section */}
@@ -670,7 +988,7 @@ const FoundationForm = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Surname *</Label>
+              <Label>Surname <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 placeholder="Enter your surname"
                 value={foundationRemedialData.personalDetails.surname}
@@ -679,7 +997,7 @@ const FoundationForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>First Name *</Label>
+              <Label>First Name <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 placeholder="Enter your first name"
                 value={foundationRemedialData.personalDetails.firstName}
@@ -698,54 +1016,56 @@ const FoundationForm = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Gender *</Label>
-            <Select
-              value={foundationRemedialData.personalDetails.gender}
-              onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Blood Group</Label>
-            <Select
-              value={foundationRemedialData.personalDetails.bloodGroup}
-              onValueChange={(value) => handlePersonalDetailsChange("bloodGroup", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select blood group" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="A+">A+</SelectItem>
-                <SelectItem value="A-">A-</SelectItem>
-                <SelectItem value="B+">B+</SelectItem>
-                <SelectItem value="B-">B-</SelectItem>
-                <SelectItem value="AB+">AB+</SelectItem>
-                <SelectItem value="AB-">AB-</SelectItem>
-                <SelectItem value="O+">O+</SelectItem>
-                <SelectItem value="O-">O-</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Gender <span className="text-red-500 text-xs italic">Required</span></Label>
+              <Select
+                value={foundationRemedialData.personalDetails.gender}
+                onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Blood Group</Label>
+              <p className="text-red-500 text-xs italic">Required</p>
+              <Select
+                value={foundationRemedialData.personalDetails.bloodGroup}
+                onValueChange={(value) => handlePersonalDetailsChange("bloodGroup", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A+">A+</SelectItem>
+                  <SelectItem value="A-">A-</SelectItem>
+                  <SelectItem value="B+">B+</SelectItem>
+                  <SelectItem value="B-">B-</SelectItem>
+                  <SelectItem value="AB+">AB+</SelectItem>
+                  <SelectItem value="AB-">AB-</SelectItem>
+                  <SelectItem value="O+">O+</SelectItem>
+                  <SelectItem value="O-">O-</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Date of Birth */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-2">
-              <Label>Day of Birth</Label>
+          <div className="space-y-2">
+            <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="grid grid-cols-3 gap-2">
               <Select
                 value={foundationRemedialData.personalDetails.dateOfBirth.day}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select day" />
+                  <SelectValue placeholder="Day" />
                 </SelectTrigger>
                 <SelectContent>
                   {days.map((day) => (
@@ -755,33 +1075,27 @@ const FoundationForm = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Month of Birth</Label>
               <Select
                 value={foundationRemedialData.personalDetails.dateOfBirth.month}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
+                  <SelectValue placeholder="Month" />
                 </SelectTrigger>
                 <SelectContent>
                   {months.map((month, index) => (
-                    <SelectItem key={month} value={(index + 1).toString().padStart(2, "0")}>
+                    <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
                       {month}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Year of Birth</Label>
               <Select
                 value={foundationRemedialData.personalDetails.dateOfBirth.year}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
+                  <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
                   {years.map((year) => (
@@ -794,49 +1108,50 @@ const FoundationForm = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Nationality *</Label>
-            <Select
-              value={foundationRemedialData.personalDetails.nationality}
-              onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select nationality" />
-              </SelectTrigger>
-              <SelectContent>
-                {countries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {foundationRemedialData.personalDetails.nationality === "Nigerian" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>State of Origin *</Label>
+              <Label>Nationality <span className="text-red-500 text-xs italic">Required</span></Label>
               <Select
-                value={foundationRemedialData.personalDetails.stateOfOrigin}
-                onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+                value={foundationRemedialData.personalDetails.nationality}
+                onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select state of origin" />
+                  <SelectValue placeholder="Select nationality" />
                 </SelectTrigger>
                 <SelectContent>
-                  {nigeriaStates.map((state) => (
-                    <SelectItem key={state} value={state}>
-                      {state}
+                  {countries.map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          )}
+            {foundationRemedialData.personalDetails.nationality === "Nigerian" && (
+              <div className="space-y-2">
+                <Label>State of Origin <span className="text-red-500 text-xs italic">Required</span></Label>
+                <Select
+                  value={foundationRemedialData.personalDetails.stateOfOrigin}
+                  onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select state of origin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {nigeriaStates.map((state) => (
+                      <SelectItem key={state} value={state}>
+                        {state}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Phone Number *</Label>
+              <Label>Phone Number <span className="text-red-500 text-xs italic">Required</span></Label>
               <PhoneInput
                 international
                 defaultCountry="NG"
@@ -847,7 +1162,7 @@ const FoundationForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Email *</Label>
+              <Label>Email <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 type="email"
                 placeholder="Enter your email"
@@ -859,7 +1174,7 @@ const FoundationForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="streetAddress">Street Address *</Label>
+            <Label htmlFor="streetAddress">Street Address <span className="text-red-500 text-xs italic">Required</span></Label>
             <Textarea
               id="streetAddress"
               value={foundationRemedialData.personalDetails.streetAddress}
@@ -870,7 +1185,7 @@ const FoundationForm = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">City *</Label>
+              <Label htmlFor="city">City <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 id="city"
                 value={foundationRemedialData.personalDetails.city}
@@ -879,7 +1194,7 @@ const FoundationForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country">Country *</Label>
+              <Label htmlFor="country">Country <span className="text-red-500 text-xs italic">Required</span></Label>
               <Select
                 value={foundationRemedialData.personalDetails.country}
                 onValueChange={(value) => handlePersonalDetailsChange("country", value)}
@@ -899,7 +1214,7 @@ const FoundationForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Do you have any disabilities? *</Label>
+            <Label>Do you have any disabilities? <span className="text-red-500 text-xs italic">Required</span></Label>
             <Select
               value={foundationRemedialData.personalDetails.hasDisabilities}
               onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
@@ -934,7 +1249,7 @@ const FoundationForm = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Parent/Guardian Name *</Label>
+              <Label>Parent/Guardian Name <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 placeholder="Enter parent/guardian name"
                 value={foundationRemedialData.parentGuardian.name}
@@ -949,7 +1264,7 @@ const FoundationForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Occupation *</Label>
+              <Label>Occupation <span className="text-red-500 text-xs italic">Required</span></Label>
               <Input
                 placeholder="Enter occupation"
                 value={foundationRemedialData.parentGuardian.occupation}
@@ -966,7 +1281,7 @@ const FoundationForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Home Address *</Label>
+            <Label>Home Address <span className="text-red-500 text-xs italic">Required</span></Label>
             <Textarea
               placeholder="Enter home address"
               value={foundationRemedialData.parentGuardian.homeAddress}
@@ -998,7 +1313,7 @@ const FoundationForm = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Mobile Number *</Label>
+              <Label>Mobile Number <span className="text-red-500 text-xs italic">Required</span></Label>
               <PhoneInput
                 international
                 defaultCountry="NG"
@@ -1016,7 +1331,10 @@ const FoundationForm = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Email Address</Label>
+              <Label className="flex items-center gap-2">
+                Email Address
+                <span className="text-red-500 text-xs italic">Required</span>
+              </Label>
               <Input
                 type="email"
                 placeholder="Enter email address"
@@ -1028,6 +1346,7 @@ const FoundationForm = () => {
                     email: e.target.value
                   }
                 }))}
+                required
               />
             </div>
           </div>
@@ -1039,7 +1358,7 @@ const FoundationForm = () => {
         <h3 className="text-lg font-semibold">Program Choice</h3>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Programme of Choice *</Label>
+            <Label>Programme of Choice <span className="text-red-500 text-xs italic">Required</span></Label>
             <Select
               value={foundationRemedialData.programChoice.program}
               onValueChange={(value) => setFoundationRemedialData(prev => ({
@@ -1062,139 +1381,314 @@ const FoundationForm = () => {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Subject Combination</Label>
-            <Textarea
-              value={foundationRemedialData.programChoice.subjectCombination}
-              onChange={(e) => setFoundationRemedialData(prev => ({
-                ...prev,
-                programChoice: {
-                  ...prev.programChoice,
-                  subjectCombination: e.target.value
-                }
-              }))}
-              placeholder="Enter your subject combination"
-              className="min-h-[100px]"
-            />
-          </div>
-
           <div className="space-y-4">
-            <h4 className="font-medium">First Choice of University, Department and Faculty *</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Label>Subject Combination <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-4">
+              {/* Predefined Combinations */}
               <div className="space-y-2">
-                <Label>University</Label>
-                <Input
-                  placeholder="Enter university"
-                  value={foundationRemedialData.programChoice.firstChoice.university}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      firstChoice: {
-                        ...prev.programChoice.firstChoice,
-                        university: e.target.value
-                      }
+                <Label className="text-sm text-gray-600">Select from predefined combinations:</Label>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    if (value) {
+                      setFoundationRemedialData(prev => ({
+                        ...prev,
+                        programChoice: {
+                          ...prev.programChoice,
+                          subjectCombination: value
+                        }
+                      }));
                     }
-                  }))}
-                  required
-                />
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a subject combination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(subjectCombinations).map(([category, combinations]) => (
+                      <SelectGroup key={category}>
+                        <SelectLabel>{category}</SelectLabel>
+                        {combinations.map((combination) => (
+                          <SelectItem key={combination} value={combination}>
+                            {combination}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Custom Combination */}
               <div className="space-y-2">
-                <Label>Department</Label>
-                <Input
-                  placeholder="Enter department"
-                  value={foundationRemedialData.programChoice.firstChoice.department}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      firstChoice: {
-                        ...prev.programChoice.firstChoice,
-                        department: e.target.value
+                <Label className="text-sm text-gray-600">Or enter your own combination:</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter subject (e.g., Physics)"
+                    value={foundationRemedialData.programChoice.subjectCombination}
+                    onChange={(e) => setFoundationRemedialData(prev => ({
+                      ...prev,
+                      programChoice: {
+                        ...prev.programChoice,
+                        subjectCombination: e.target.value
                       }
-                    }
-                  }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Faculty</Label>
-                <Input
-                  placeholder="Enter faculty"
-                  value={foundationRemedialData.programChoice.firstChoice.faculty}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      firstChoice: {
-                        ...prev.programChoice.firstChoice,
-                        faculty: e.target.value
+                    }))}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const currentSubjects = foundationRemedialData.programChoice.subjectCombination
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(s => s);
+                      
+                      if (currentSubjects.length < 3) {
+                        toast.error("Please enter at least 3 subjects");
+                        return;
                       }
-                    }
-                  }))}
-                  required
-                />
+                    }}
+                  >
+                    Validate
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Enter your subjects separated by commas (e.g., Physics, Chemistry, Mathematics)
+                </p>
               </div>
+
+              {/* Selected Subjects Display */}
+              {foundationRemedialData.programChoice.subjectCombination && (
+                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                  <h4 className="text-sm font-medium mb-2">Selected Subjects:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {foundationRemedialData.programChoice.subjectCombination
+                      .split(',')
+                      .map((subject, index) => (
+                        <div
+                          key={index}
+                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2"
+                        >
+                          {subject.trim()}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const subjects = foundationRemedialData.programChoice.subjectCombination
+                                .split(',')
+                                .map(s => s.trim())
+                                .filter((_, i) => i !== index);
+                              setFoundationRemedialData(prev => ({
+                                ...prev,
+                                programChoice: {
+                                  ...prev.programChoice,
+                                  subjectCombination: subjects.join(', ')
+                                }
+                              }));
+                            }}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="space-y-4">
-            <h4 className="font-medium">Second Choice of University, Department and Faculty *</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>University</Label>
-                <Input
-                  placeholder="Enter university"
-                  value={foundationRemedialData.programChoice.secondChoice.university}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      secondChoice: {
-                        ...prev.programChoice.secondChoice,
-                        university: e.target.value
-                      }
+            <h4 className="font-medium flex items-center gap-2">
+              First Choice of University, Department and Faculty
+              <span className="text-red-500 text-xs italic">Required</span>
+            </h4>
+            <div className="space-y-2">
+              <Label>University</Label>
+              <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openUniversityPopover}
+                    className="w-full justify-between"
+                  >
+                    <span className="truncate">
+                      {foundationRemedialData.programChoice.firstChoice.university || "Search for your university..."}
+                    </span>
+                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    {renderCommandInput()}
+                    <CommandEmpty>
+                      {isLoadingUniversities ? (
+                        <div className="p-4 text-center text-sm">Loading...</div>
+                      ) : searchQuery.length < 3 ? (
+                        <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
+                      ) : (
+                        <div className="p-4 text-center text-sm">No universities found.</div>
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-auto">
+                      {universities.map((university) => (
+                        <CommandItem
+                          key={university.name}
+                          value={university.name}
+                          onSelect={() => handleUniversitySelect(university.name, "firstChoice")}
+                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
+                        >
+                          <div className="flex flex-col w-full">
+                            <span className="truncate text-gray-900" title={university.name}>
+                              {university.name}
+                            </span>
+                            <span className="text-xs text-gray-500 truncate" title={university.country}>
+                              {university.country}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-gray-500">
+                Start typing to search for your university. If your university is not listed, you can type it manually.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Department</Label>
+              <Input
+                placeholder="Enter department"
+                value={foundationRemedialData.programChoice.firstChoice.department}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  programChoice: {
+                    ...prev.programChoice,
+                    firstChoice: {
+                      ...prev.programChoice.firstChoice,
+                      department: e.target.value
                     }
-                  }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Department</Label>
-                <Input
-                  placeholder="Enter department"
-                  value={foundationRemedialData.programChoice.secondChoice.department}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      secondChoice: {
-                        ...prev.programChoice.secondChoice,
-                        department: e.target.value
-                      }
+                  }
+                }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Faculty</Label>
+              <Input
+                placeholder="Enter faculty"
+                value={foundationRemedialData.programChoice.firstChoice.faculty}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  programChoice: {
+                    ...prev.programChoice,
+                    firstChoice: {
+                      ...prev.programChoice.firstChoice,
+                      faculty: e.target.value
                     }
-                  }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Faculty</Label>
-                <Input
-                  placeholder="Enter faculty"
-                  value={foundationRemedialData.programChoice.secondChoice.faculty}
-                  onChange={(e) => setFoundationRemedialData(prev => ({
-                    ...prev,
-                    programChoice: {
-                      ...prev.programChoice,
-                      secondChoice: {
-                        ...prev.programChoice.secondChoice,
-                        faculty: e.target.value
-                      }
+                  }
+                }))}
+                required
+              />
+     
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium flex items-center gap-2">
+              Second Choice of University, Department and Faculty
+              <span className="text-red-500 text-xs italic">Required</span>
+            </h4>
+            <div className="space-y-2">
+              <Label>University</Label>
+              <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openUniversityPopover2}
+                    className="w-full justify-between"
+                  >
+                    <span className="truncate">
+                      {foundationRemedialData.programChoice.secondChoice.university || "Search for your university..."}
+                    </span>
+                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    {renderCommandInput()}
+                    <CommandEmpty>
+                      {isLoadingUniversities ? (
+                        <div className="p-4 text-center text-sm">Loading...</div>
+                      ) : searchQuery.length < 3 ? (
+                        <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
+                      ) : (
+                        <div className="p-4 text-center text-sm">No universities found.</div>
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup className="max-h-[300px] overflow-auto">
+                      {universities.map((university) => (
+                        <CommandItem
+                          key={university.name}
+                          value={university.name}
+                          onSelect={() => handleUniversitySelect(university.name, "secondChoice")}
+                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
+                        >
+                          <div className="flex flex-col w-full">
+                            <span className="truncate text-gray-900" title={university.name}>
+                              {university.name}
+                            </span>
+                            <span className="text-xs text-gray-500 truncate" title={university.country}>
+                              {university.country}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-gray-500">
+                Start typing to search for your university. If your university is not listed, you can type it manually.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Department</Label>
+              <Input
+                placeholder="Enter department"
+                value={foundationRemedialData.programChoice.secondChoice.department}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  programChoice: {
+                    ...prev.programChoice,
+                    secondChoice: {
+                      ...prev.programChoice.secondChoice,
+                      department: e.target.value
                     }
-                  }))}
-                  required
-                />
-              </div>
+                  }
+                }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Faculty</Label>
+              <Input
+                placeholder="Enter faculty"
+                value={foundationRemedialData.programChoice.secondChoice.faculty}
+                onChange={(e) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  programChoice: {
+                    ...prev.programChoice,
+                    secondChoice: {
+                      ...prev.programChoice.secondChoice,
+                      faculty: e.target.value
+                    }
+                  }
+                }))}
+                required
+              />
             </div>
           </div>
         </div>
@@ -1207,6 +1701,7 @@ const FoundationForm = () => {
           {/* O'Level Results */}
           <div className="space-y-4">
             <h4 className="font-medium">O'Level Results *</h4>
+            <p className="text-red-500 text-xs italic">Required</p>
             
             {/* WAEC Results */}
             <div className="space-y-4 p-4 border border-gray-200 rounded-md">
@@ -1214,6 +1709,7 @@ const FoundationForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Exam Type</Label>
+                  <p className="text-red-500 text-xs italic">Required</p>
                   <Select
                     value={foundationRemedialData.academicQualifications.examResults.examType}
                     onValueChange={(value) => setFoundationRemedialData(prev => ({
@@ -1239,6 +1735,7 @@ const FoundationForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Exam Number</Label>
+                  <p className="text-red-500 text-xs italic">Required</p>
                   <Input
                     value={foundationRemedialData.academicQualifications.examResults.examNumber}
                     onChange={(e) => setFoundationRemedialData(prev => ({
@@ -1256,6 +1753,7 @@ const FoundationForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Exam Year</Label>
+                  <p className="text-red-500 text-xs italic">Required</p>
                   <Input
                     value={foundationRemedialData.academicQualifications.examResults.examYear}
                     onChange={(e) => setFoundationRemedialData(prev => ({
@@ -1273,37 +1771,150 @@ const FoundationForm = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Subjects and Grades *</Label>
-                <Textarea
-                  placeholder="Enter subjects and grades (e.g., Mathematics: A1, English: B2)"
-                  value={foundationRemedialData.academicQualifications.examResults.subjects.map(s => `${s.subject}: ${s.grade}`).join(', ')}
-                  onChange={(e) => {
-                    const subjectsText = e.target.value;
-                    const subjectsArray = subjectsText.split(',').map(s => s.trim()).filter(s => s);
-                    const subjects = subjectsArray.map(s => {
-                      const [subject, grade] = s.split(':').map(part => part.trim());
-                      return { subject, grade };
-                    });
-                    
-                    setFoundationRemedialData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        examResults: {
-                          ...prev.academicQualifications.examResults,
-                          subjects
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label>Subjects and Grades <span className="text-red-500 text-xs italic">Required</span></Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFoundationRemedialData(prev => ({
+                        ...prev,
+                        academicQualifications: {
+                          ...prev.academicQualifications,
+                          examResults: {
+                            ...prev.academicQualifications.examResults,
+                            subjects: [
+                              ...prev.academicQualifications.examResults.subjects,
+                              { subject: "", grade: "" }
+                            ]
+                          }
                         }
-                      }
-                    }));
-                  }}
-                  required
-                />
+                      }));
+                    }}
+                  >
+                    Add Subject
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {foundationRemedialData.academicQualifications.examResults.subjects.map((subject, index) => (
+                    <div key={index} className="flex gap-3 items-start">
+                      <div className="flex-1">
+                        <Select
+                          value={subject.subject}
+                          onValueChange={(value) => {
+                            const newSubjects = [...foundationRemedialData.academicQualifications.examResults.subjects];
+                            newSubjects[index] = { ...newSubjects[index], subject: value };
+                            setFoundationRemedialData(prev => ({
+                              ...prev,
+                              academicQualifications: {
+                                ...prev.academicQualifications,
+                                examResults: {
+                                  ...prev.academicQualifications.examResults,
+                                  subjects: newSubjects
+                                }
+                              }
+                            }));
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select subject" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {commonSubjects.map((subj) => (
+                              <SelectItem key={subj} value={subj}>
+                                {subj}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="w-32">
+                        <Select
+                          value={subject.grade}
+                          onValueChange={(value) => {
+                            const newSubjects = [...foundationRemedialData.academicQualifications.examResults.subjects];
+                            newSubjects[index] = { ...newSubjects[index], grade: value };
+                            setFoundationRemedialData(prev => ({
+                              ...prev,
+                              academicQualifications: {
+                                ...prev.academicQualifications,
+                                examResults: {
+                                  ...prev.academicQualifications.examResults,
+                                  subjects: newSubjects
+                                }
+                              }
+                            }));
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Grade" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {grades.map((grade) => (
+                              <SelectItem key={grade} value={grade}>
+                                {grade}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const newSubjects = foundationRemedialData.academicQualifications.examResults.subjects.filter((_, i) => i !== index);
+                          setFoundationRemedialData(prev => ({
+                            ...prev,
+                            academicQualifications: {
+                              ...prev.academicQualifications,
+                              examResults: {
+                                ...prev.academicQualifications.examResults,
+                                subjects: newSubjects
+                              }
+                            }
+                          }));
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                {foundationRemedialData.academicQualifications.examResults.subjects.length === 0 && (
+                  <div className="text-sm text-gray-500 italic">
+                    Click "Add Subject" to add your subjects and grades
+                  </div>
+                )}
+
+                {foundationRemedialData.academicQualifications.examResults.subjects.length > 0 && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                    <h4 className="text-sm font-medium mb-2">Selected Subjects:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {foundationRemedialData.academicQualifications.examResults.subjects.map((subject, index) => (
+                        <div
+                          key={index}
+                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                        >
+                          {subject.subject}: {subject.grade}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
+              <Label className="flex items-center gap-2">
+                Upload WAEC Results
+                <span className="text-red-500 text-xs italic">Required</span>
+              </Label>
               <FileUploadField
                 id="waecDocuments"
-                label="Upload WAEC Results"
+                label=""
                 accept=".pdf,.jpg,.jpeg,.png"
                 value={foundationRemedialData.academicQualifications.examResults.documents}
                 onChange={(files) => setFoundationRemedialData(prev => ({
@@ -1334,7 +1945,7 @@ const FoundationForm = () => {
 
       {/* Declaration Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Declaration *</h3>
+        <h3 className="text-lg font-semibold">Declaration <span className="text-red-500 text-xs italic">Required</span></h3>
         <div className="space-y-4">
           <div className="mt-4 p-4 bg-gray-100 rounded-lg">
             <p className="text-sm text-gray-700">

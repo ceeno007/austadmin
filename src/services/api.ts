@@ -1,5 +1,7 @@
+import axios from 'axios';
+
 // API Base URL
-const API_BASE_URL = "https://admissions-qmt4.onrender.com";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -41,7 +43,7 @@ const getAuthHeaders = (includeContentType = true) => {
 };
 
 // API Service
-export const apiService = {
+const apiService = {
   /**
    * Sign up a new user
    * @param userData - User registration data
@@ -377,32 +379,12 @@ export const apiService = {
    * @returns Promise with the API response
    */
   submitApplication: async (formData: FormData) => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('accessToken');
-      
-      // Create headers with the token
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(API_ENDPOINTS.APPLICATION_UPLOAD, {
-        method: "POST",
-        headers,
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Application submission failed");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Application submission error:", error);
-      throw error;
-    }
+    const response = await axios.post(`${API_BASE_URL}/applications`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
 
   /**
@@ -411,32 +393,35 @@ export const apiService = {
    * @returns Promise with the API response
    */
   submitDraftApplication: async (formData: FormData) => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('accessToken');
-      
-      // Create headers with the token
-      const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(API_ENDPOINTS.APPLICATION_DRAFT, {
-        method: "POST",
-        headers,
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Draft application submission failed");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Draft application submission error:", error);
-      throw error;
-    }
+    const response = await axios.post(`${API_BASE_URL}/applications/draft`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   },
 
+  // Update existing draft
+  updateDraftApplication: async (draftId: string, formData: FormData) => {
+    const response = await axios.put(`${API_BASE_URL}/applications/draft/${draftId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Get draft application
+  getDraftApplication: async () => {
+    const response = await axios.get(`${API_BASE_URL}/applications/draft`);
+    return response.data;
+  },
+
+  // Delete draft application
+  deleteDraftApplication: async (draftId: string) => {
+    const response = await axios.delete(`${API_BASE_URL}/applications/draft/${draftId}`);
+    return response.data;
+  },
 };
+
+export { apiService };

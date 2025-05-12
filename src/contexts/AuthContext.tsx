@@ -29,8 +29,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuth = () => {
     const token = localStorage.getItem('accessToken');
-    const isValid = !!token;
+    const applicationData = localStorage.getItem('applicationData');
+    
+    // Check if both token and application data exist
+    const isValid = !!(token && applicationData);
+    
+    // Update authentication state
     setIsAuthenticated(isValid);
+    
+    // If not valid, clear any stale data
+    if (!isValid) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('applicationData');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('programType');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userId');
+    }
+    
     return isValid;
   };
 
