@@ -721,7 +721,7 @@ const Programs = () => {
                     : "bg-gray-200 text-gray-700"
                 }`}
               >
-                <span className="hidden sm:inline">FOUNDATION AND REMEDIAL STUDIES</span>
+                <span className="hidden sm:inline">Foundation and Remedial Studies</span>
                 <span className="sm:hidden">Foundation</span>
               </button>
             </div>

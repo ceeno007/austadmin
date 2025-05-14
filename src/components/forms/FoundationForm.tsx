@@ -76,7 +76,6 @@ interface FoundationRemedialFormData {
     email: string;
     hasDisabilities: string;
     disabilityDescription: string;
-    bloodGroup: string;
   };
   parentGuardian: {
     name: string;
@@ -336,172 +335,6 @@ const grades = [
   "A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"
 ];
 
-// Add this constant at the top of the file with other constants
-const universities = {
-  "Nigeria": [
-    "University of Lagos (UNILAG)",
-    "University of Ibadan (UI)",
-    "Obafemi Awolowo University (OAU)",
-    "University of Nigeria, Nsukka (UNN)",
-    "Ahmadu Bello University (ABU)",
-    "University of Benin (UNIBEN)",
-    "University of Ilorin (UNILORIN)",
-    "University of Port Harcourt (UNIPORT)",
-    "University of Calabar (UNICAL)",
-    "Federal University of Technology, Akure (FUTA)",
-    "Covenant University",
-    "Babcock University",
-    "Afe Babalola University",
-    "Bells University of Technology",
-    "Bingham University",
-    "Bowen University",
-    "Caleb University",
-    "Caritas University",
-    "Chrisland University",
-    "Crawford University",
-    "Crown Hill University",
-    "Edwin Clark University",
-    "Elizade University",
-    "Evangel University",
-    "Fountain University",
-    "Godfrey Okoye University",
-    "Gregory University",
-    "Hallmark University",
-    "Hezekiah University",
-    "Igbinedion University",
-    "Joseph Ayo Babalola University",
-    "Kings University",
-    "Kola Daisi University",
-    "Landmark University",
-    "Lead City University",
-    "Madonna University",
-    "McPherson University",
-    "Mountain Top University",
-    "Nile University of Nigeria",
-    "Novena University",
-    "Obong University",
-    "Oduduwa University",
-    "Pan-Atlantic University",
-    "Paul University",
-    "Redeemer's University",
-    "Rhema University",
-    "Ritman University",
-    "Salem University",
-    "Samuel Adegboyega University",
-    "Southwestern University",
-    "Summit University",
-    "Tansian University",
-    "Trinity University",
-    "Veritas University",
-    "Wellspring University",
-    "Wesley University",
-    "Western Delta University",
-    "Achievers University",
-    "Adeleke University",
-    "Admiralty University",
-    "Al-Hikmah University",
-    "Al-Qalam University",
-    "Anchor University",
-    "Arthur Jarvis University",
-    "Atiba University",
-    "Augustine University",
-    "Baze University",
-    "Benson Idahosa University",
-    "Bingham University",
-    "BlueCrest University",
-    "Capital City University",
-    "Clifford University",
-    "Coal City University",
-    "Dominion University",
-    "Eastern Palm University",
-    "Eko University of Medical and Health Sciences",
-    "Elizade University",
-    "Evangel University",
-    "First Technical University",
-    "Fountain University",
-    "Godfrey Okoye University",
-    "Greenfield University",
-    "Hallmark University",
-    "Hezekiah University",
-    "Igbinedion University",
-    "Joseph Ayo Babalola University",
-    "Kings University",
-    "Kola Daisi University",
-    "Landmark University",
-    "Lead City University",
-    "Madonna University",
-    "McPherson University",
-    "Mountain Top University",
-    "Nile University of Nigeria",
-    "Novena University",
-    "Obong University",
-    "Oduduwa University",
-    "Pan-Atlantic University",
-    "Paul University",
-    "Redeemer's University",
-    "Rhema University",
-    "Ritman University",
-    "Salem University",
-    "Samuel Adegboyega University",
-    "Southwestern University",
-    "Summit University",
-    "Tansian University",
-    "Trinity University",
-    "Veritas University",
-    "Wellspring University",
-    "Wesley University",
-    "Western Delta University"
-  ],
-  "United States": [
-    "Harvard University",
-    "Stanford University",
-    "Massachusetts Institute of Technology (MIT)",
-    "California Institute of Technology (Caltech)",
-    "University of California, Berkeley",
-    "Yale University",
-    "Princeton University",
-    "Columbia University",
-    "University of Chicago",
-    "University of Pennsylvania"
-  ],
-  "United Kingdom": [
-    "University of Oxford",
-    "University of Cambridge",
-    "Imperial College London",
-    "University College London (UCL)",
-    "University of Edinburgh",
-    "University of Manchester",
-    "King's College London",
-    "London School of Economics (LSE)",
-    "University of Bristol",
-    "University of Warwick"
-  ],
-  "Canada": [
-    "University of Toronto",
-    "University of British Columbia",
-    "McGill University",
-    "University of Alberta",
-    "University of Montreal",
-    "University of Waterloo",
-    "University of Calgary",
-    "University of Ottawa",
-    "University of Western Ontario",
-    "Queen's University"
-  ],
-  "Australia": [
-    "University of Melbourne",
-    "University of Sydney",
-    "University of Queensland",
-    "Monash University",
-    "University of New South Wales",
-    "Australian National University",
-    "University of Western Australia",
-    "University of Adelaide",
-    "University of Technology Sydney",
-    "RMIT University"
-  ]
-};
-
 const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -559,7 +392,6 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       email: "",
       hasDisabilities: "no",
       disabilityDescription: "",
-      bloodGroup: "",
     },
     parentGuardian: {
       name: "",
@@ -749,7 +581,12 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   };
 
   const isFormValid = () => {
-    // Add validation logic here
+    // Check if declaration is checked
+    if (foundationRemedialData.declaration !== "true") {
+      toast.error("Please agree to the declaration before proceeding");
+      return false;
+    }
+    
     return true;
   };
 
@@ -860,13 +697,17 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       {searchQuery.length > 0 && searchQuery.length < 3 && (
         <p className="px-2 text-xs text-gray-500">Please enter at least 3 characters to search</p>
       )}
+      {isLoadingUniversities && (
+        <p className="px-2 text-xs text-gray-500">Searching universities...</p>
+      )}
     </div>
   );
 
   const [universities, setUniversities] = useState<University[]>([]);
   const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
-  const [universityCache, setUniversityCache] = useState<{ [key: string]: University[] }>({});
+  const [universityCache, setUniversityCache] = useState<Record<string, University[]>>({});
 
+  // Function to fetch universities with caching and optimization
   const fetchUniversities = async (query: string) => {
     if (query.length < 3) {
       setUniversities([]);
@@ -881,7 +722,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     
     setIsLoadingUniversities(true);
     try {
-      const response = await fetch(`http://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
       const data = await response.json();
       // Limit results to 20 universities for better performance
       const limitedData = data.slice(0, 20);
@@ -899,6 +740,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     }
   };
 
+  // Set debounce delay to standard 500ms
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery) {
@@ -909,32 +751,115 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Update the CommandItem to handle long names and make it selectable
+  const renderUniversityItem = (university: University, choice: "firstChoice" | "secondChoice") => (
+    <CommandItem
+      key={university.name}
+      value={university.name}
+      onSelect={() => handleUniversitySelect(university.name, choice)}
+      className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
+    >
+      <div className="flex flex-col w-full">
+        <span className="truncate text-gray-900" title={university.name}>
+          {university.name}
+        </span>
+        <span className="text-xs text-gray-500 truncate" title={university.country}>
+          {university.country}
+        </span>
+      </div>
+    </CommandItem>
+  );
+
+  // Update the CommandGroup to ensure proper scrolling and interaction
+  const renderCommandGroup = (choice: "firstChoice" | "secondChoice") => (
+    <CommandGroup className="max-h-[300px] overflow-auto">
+      {universities.map((university) => renderUniversityItem(university, choice))}
+    </CommandGroup>
+  );
+
+  // Update the PopoverContent to ensure proper positioning and interaction
+  const renderInstitutionField = () => (
+    <div className="space-y-2">
+      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openUniversityPopover}
+            className="w-full justify-between"
+          >
+            <span className="truncate">
+              {foundationRemedialData.programChoice.firstChoice.university || "Search for your institution..."}
+            </span>
+            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            {renderCommandInput()}
+            <CommandEmpty>
+              {isLoadingUniversities ? (
+                <div className="p-4 text-center text-sm">Loading...</div>
+              ) : searchQuery.length < 3 ? (
+                <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
+              ) : (
+                <div className="p-4 text-center text-sm">No universities found.</div>
+              )}
+            </CommandEmpty>
+            {renderCommandGroup("firstChoice")}
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <p className="text-xs text-gray-500">
+        Start typing to search for your institution. If your institution is not listed, you can type it manually.
+      </p>
+    </div>
+  );
+
+  // Update renderInstitutionField2 similarly
+  const renderInstitutionField2 = () => (
+    <div className="space-y-2">
+      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openUniversityPopover2}
+            className="w-full justify-between"
+          >
+            <span className="truncate">
+              {foundationRemedialData.programChoice.secondChoice.university || "Search for your institution..."}
+            </span>
+            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            {renderCommandInput()}
+            <CommandEmpty>
+              {isLoadingUniversities ? (
+                <div className="p-4 text-center text-sm">Loading...</div>
+              ) : searchQuery.length < 3 ? (
+                <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
+              ) : (
+                <div className="p-4 text-center text-sm">No universities found.</div>
+              )}
+            </CommandEmpty>
+            {renderCommandGroup("secondChoice")}
+          </Command>
+        </PopoverContent>
+      </Popover>
+      <p className="text-xs text-gray-500">
+        Start typing to search for your institution. If your institution is not listed, you can type it manually.
+      </p>
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Application Fee Payment Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Application Fee Payment</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800 space-y-2">
-              <strong>Application Fees (Non-refundable):</strong>
-              <br />
-              <span className="block mt-2">
-                <strong>Nigerian Applicants:</strong> ₦20,000
-              </span>
-              <div className="mt-4">
-                <p className="font-medium">Payment Process:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Payment will be processed through Paystack</li>
-                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
-                  <li>The Paystack payment popup will appear automatically when you click "Submit Application"</li>
-                  <li>A payment receipt will be automatically generated after successful payment</li>
-                </ul>
-              </div>
-            </p>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Personal Details Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -971,6 +896,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Gender */}
             <div className="space-y-2">
               <Label>Gender <span className="text-red-500 text-xs italic">Required</span></Label>
               <Select
@@ -986,79 +912,57 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Blood Group</Label>
-              <p className="text-red-500 text-xs italic">Required</p>
-              <Select
-                value={foundationRemedialData.personalDetails.bloodGroup}
-                onValueChange={(value) => handlePersonalDetailsChange("bloodGroup", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select blood group" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A+">A+</SelectItem>
-                  <SelectItem value="A-">A-</SelectItem>
-                  <SelectItem value="B+">B+</SelectItem>
-                  <SelectItem value="B-">B-</SelectItem>
-                  <SelectItem value="AB+">AB+</SelectItem>
-                  <SelectItem value="AB-">AB-</SelectItem>
-                  <SelectItem value="O+">O+</SelectItem>
-                  <SelectItem value="O-">O-</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          {/* Date of Birth */}
-          <div className="space-y-2">
-            <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
-            <div className="grid grid-cols-3 gap-2">
-              <Select
-                value={foundationRemedialData.personalDetails.dateOfBirth.day}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {days.map((day) => (
-                    <SelectItem key={day} value={day}>
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={foundationRemedialData.personalDetails.dateOfBirth.month}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month, index) => (
-                    <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={foundationRemedialData.personalDetails.dateOfBirth.year}
-                onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Date of Birth */}
+            <div className="space-y-2">
+              <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Select
+                  value={foundationRemedialData.personalDetails.dateOfBirth.day}
+                  onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {days.map((day) => (
+                      <SelectItem key={day} value={day}>
+                        {day}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={foundationRemedialData.personalDetails.dateOfBirth.month}
+                  onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map((month, index) => (
+                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={foundationRemedialData.personalDetails.dateOfBirth.year}
+                  onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -1197,142 +1101,61 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
         </div>
       </div>
 
-      {/* Parent/Guardian Information Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Parent/Guardian Information</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Parent/Guardian Name <span className="text-red-500 text-xs italic">Required</span></Label>
-              <Input
-                placeholder="Enter parent/guardian name"
-                value={foundationRemedialData.parentGuardian.name}
-                onChange={(e) => setFoundationRemedialData(prev => ({
-                  ...prev,
-                  parentGuardian: {
-                    ...prev.parentGuardian,
-                    name: e.target.value
-                  }
-                }))}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Occupation <span className="text-red-500 text-xs italic">Required</span></Label>
-              <Input
-                placeholder="Enter occupation"
-                value={foundationRemedialData.parentGuardian.occupation}
-                onChange={(e) => setFoundationRemedialData(prev => ({
-                  ...prev,
-                  parentGuardian: {
-                    ...prev.parentGuardian,
-                    occupation: e.target.value
-                  }
-                }))}
-                required
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Home Address <span className="text-red-500 text-xs italic">Required</span></Label>
-            <Textarea
-              placeholder="Enter home address"
-              value={foundationRemedialData.parentGuardian.homeAddress}
-              onChange={(e) => setFoundationRemedialData(prev => ({
-                ...prev,
-                parentGuardian: {
-                  ...prev.parentGuardian,
-                  homeAddress: e.target.value
-                }
-              }))}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Office Address</Label>
-            <Textarea
-              placeholder="Enter office address"
-              value={foundationRemedialData.parentGuardian.officeAddress}
-              onChange={(e) => setFoundationRemedialData(prev => ({
-                ...prev,
-                parentGuardian: {
-                  ...prev.parentGuardian,
-                  officeAddress: e.target.value
-                }
-              }))}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Mobile Number <span className="text-red-500 text-xs italic">Required</span></Label>
-              <PhoneInput
-                international
-                defaultCountry="NG"
-                value={foundationRemedialData.parentGuardian.mobileNumber}
-                onChange={(value) => setFoundationRemedialData(prev => ({
-                  ...prev,
-                  parentGuardian: {
-                    ...prev.parentGuardian,
-                    mobileNumber: value || ""
-                  }
-                }))}
-                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
-                placeholder="Enter mobile number"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                Email Address
-                <span className="text-red-500 text-xs italic">Required</span>
-              </Label>
-              <Input
-                type="email"
-                placeholder="Enter email address"
-                value={foundationRemedialData.parentGuardian.email}
-                onChange={(e) => setFoundationRemedialData(prev => ({
-                  ...prev,
-                  parentGuardian: {
-                    ...prev.parentGuardian,
-                    email: e.target.value
-                  }
-                }))}
-                required
-              />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Program Choice Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Program Choice</h3>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Programme of Choice <span className="text-red-500 text-xs italic">Required</span></Label>
-            <Select
-              value={foundationRemedialData.programChoice.program}
-              onValueChange={(value) => setFoundationRemedialData(prev => ({
-                ...prev,
-                programChoice: {
-                  ...prev.programChoice,
-                  program: value
-                }
-              }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select programme" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="foundation">FOUNDATION AND REMEDIAL STUDIES (A'level)</SelectItem>
-                <SelectItem value="nabteb_olevel">NABTEB (O'level examination only)</SelectItem>
-                <SelectItem value="nabteb_olevel_classes">NABTEB (O'level examination and classes)</SelectItem>
-                <SelectItem value="jupeb">JUPEB (A'level)</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Academic Session <span className="text-red-500 text-xs italic">Required</span></Label>
+              <Select
+                value={foundationRemedialData.academicSession}
+                onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, academicSession: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select academic session" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(() => {
+                    const currentYear = new Date().getFullYear();
+                    return [
+                      <SelectItem key={`${currentYear}/${currentYear+1}`} value={`${currentYear}/${currentYear+1}`}>
+                        {`${currentYear}/${currentYear+1} Academic Session`}
+                      </SelectItem>,
+                      <SelectItem key={`${currentYear+1}/${currentYear+2}`} value={`${currentYear+1}/${currentYear+2}`}>
+                        {`${currentYear+1}/${currentYear+2} Academic Session`}
+                      </SelectItem>
+                    ];
+                  })()}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Programme of Choice <span className="text-red-500 text-xs italic">Required</span></Label>
+              <Select
+                value={foundationRemedialData.programChoice.program}
+                onValueChange={(value) => setFoundationRemedialData(prev => ({
+                  ...prev,
+                  programChoice: {
+                    ...prev.programChoice,
+                    program: value
+                  }
+                }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select programme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="foundation">Foundation and Remedial Studies (A'level)</SelectItem>
+                  <SelectItem value="nabteb_olevel">NABTEB (O'level examination only)</SelectItem>
+                  <SelectItem value="nabteb_olevel_classes">NABTEB (O'level examination and classes)</SelectItem>
+                  <SelectItem value="jupeb">JUPEB (A'level)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -1456,60 +1279,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
               First Choice of University, Department and Faculty
               <span className="text-red-500 text-xs italic">Required</span>
             </h4>
-            <div className="space-y-2">
-              <Label>University</Label>
-              <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openUniversityPopover}
-                    className="w-full justify-between"
-                  >
-                    <span className="truncate">
-                      {foundationRemedialData.programChoice.firstChoice.university || "Search for your university..."}
-                    </span>
-                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    {renderCommandInput()}
-                    <CommandEmpty>
-                      {isLoadingUniversities ? (
-                        <div className="p-4 text-center text-sm">Loading...</div>
-                      ) : searchQuery.length < 3 ? (
-                        <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
-                      ) : (
-                        <div className="p-4 text-center text-sm">No universities found.</div>
-                      )}
-                    </CommandEmpty>
-                    <CommandGroup className="max-h-[300px] overflow-auto">
-                      {universities.map((university) => (
-                        <CommandItem
-                          key={university.name}
-                          value={university.name}
-                          onSelect={() => handleUniversitySelect(university.name, "firstChoice")}
-                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
-                        >
-                          <div className="flex flex-col w-full">
-                            <span className="truncate text-gray-900" title={university.name}>
-                              {university.name}
-                            </span>
-                            <span className="text-xs text-gray-500 truncate" title={university.country}>
-                              {university.country}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <p className="text-xs text-gray-500">
-                Start typing to search for your university. If your university is not listed, you can type it manually.
-              </p>
-            </div>
+            {renderInstitutionField()}
             <div className="space-y-2">
               <Label>Department</Label>
               <Input
@@ -1545,7 +1315,6 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
                 }))}
                 required
               />
-     
             </div>
           </div>
 
@@ -1554,60 +1323,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
               Second Choice of University, Department and Faculty
               <span className="text-red-500 text-xs italic">Required</span>
             </h4>
-            <div className="space-y-2">
-              <Label>University</Label>
-              <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openUniversityPopover2}
-                    className="w-full justify-between"
-                  >
-                    <span className="truncate">
-                      {foundationRemedialData.programChoice.secondChoice.university || "Search for your university..."}
-                    </span>
-                    <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    {renderCommandInput()}
-                    <CommandEmpty>
-                      {isLoadingUniversities ? (
-                        <div className="p-4 text-center text-sm">Loading...</div>
-                      ) : searchQuery.length < 3 ? (
-                        <div className="p-4 text-center text-sm">Enter at least 3 characters to search</div>
-                      ) : (
-                        <div className="p-4 text-center text-sm">No universities found.</div>
-                      )}
-                    </CommandEmpty>
-                    <CommandGroup className="max-h-[300px] overflow-auto">
-                      {universities.map((university) => (
-                        <CommandItem
-                          key={university.name}
-                          value={university.name}
-                          onSelect={() => handleUniversitySelect(university.name, "secondChoice")}
-                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
-                        >
-                          <div className="flex flex-col w-full">
-                            <span className="truncate text-gray-900" title={university.name}>
-                              {university.name}
-                            </span>
-                            <span className="text-xs text-gray-500 truncate" title={university.country}>
-                              {university.country}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <p className="text-xs text-gray-500">
-                Start typing to search for your university. If your university is not listed, you can type it manually.
-              </p>
-            </div>
+            {renderInstitutionField2()}
             <div className="space-y-2">
               <Label>Department</Label>
               <Input
@@ -1654,7 +1370,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
         <div className="space-y-6">
           {/* O'Level Results */}
           <div className="space-y-4">
-            <h4 className="font-medium">O'Level Results *</h4>
+            <h4 className="font-medium">O'Level Results</h4>
             <p className="text-red-500 text-xs italic">Required</p>
             
             {/* WAEC Results */}
@@ -1901,9 +1617,53 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Declaration <span className="text-red-500 text-xs italic">Required</span></h3>
         <div className="space-y-4">
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <p className="text-sm text-gray-700">
-              By clicking submit, you agree that all information provided is true and accurate. You understand that any false information may result in the rejection of your application.
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+              <br />- cancel my application.
+              <br />- if admitted, be dismissed from the University.
+              <br />- if degree already awarded, rescind degree awarded.
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="declaration"
+              checked={foundationRemedialData.declaration === "true"}
+              onChange={(e) => setFoundationRemedialData(prev => ({ 
+                ...prev, 
+                declaration: e.target.checked ? "true" : "" 
+              }))}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              required
+            />
+            <label htmlFor="declaration" className="text-sm text-gray-700">
+              I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Application Fee Payment Section */}
+      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <h3 className="text-lg font-semibold">Application Fee Payment</h3>
+        <div className="space-y-4">
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800 space-y-2">
+              <strong>Application Fees (Non-refundable):</strong>
+              <br />
+              <span className="block mt-2">
+                <strong>Nigerian Applicants:</strong> ₦20,000
+              </span>
+              <div className="mt-4">
+                <p className="font-medium">Payment Process:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Payment will be processed through Paystack</li>
+                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+                  <li>The Paystack payment popup will appear automatically when you click "Proceed to Payment"</li>
+                  <li>A payment receipt will be automatically generated after successful payment</li>
+                </ul>
+              </div>
             </p>
           </div>
         </div>
@@ -1911,13 +1671,6 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
 
       {/* Form Buttons */}
       <div className="space-y-4">
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
-            <strong>Payment Information:</strong>
-            <br />
-            When you click the "Submit Application" button below, you will be redirected to Paystack to complete your payment of ₦20,000. Please ensure you have your payment details ready.
-          </p>
-        </div>
         <div className="flex justify-end space-x-4">
           <Button
             type="button"
@@ -1931,7 +1684,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
             type="submit"
             disabled={isProcessingPayment}
           >
-            {isProcessingPayment ? "Processing Payment..." : "Submit Application"}
+            {isProcessingPayment ? "Processing Payment..." : "Proceed to Payment"}
           </Button>
         </div>
       </div>

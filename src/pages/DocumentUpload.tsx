@@ -228,7 +228,7 @@ const DocumentUpload = () => {
                   {programType === "undergraduate" && "Undergraduate Program"}
                   {programType === "postgraduate" && "Postgraduate Program"}
                   {programType === "phd" && "Ph.D. Program"}
-                  {programType === "foundation" && "FOUNDATION AND REMEDIAL STUDIES Program"}
+                  {programType === "foundation" && "Foundation and Remedial Studies Program"}
                 </h1>
                 <p className="text-gray-600 mt-2">Please upload your required documents below</p>
               </div>

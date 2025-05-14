@@ -124,7 +124,7 @@ const programsData: Program[] = [
       "Preparatory program for university admission focusing on physics and related subjects.",
     requirements: [
       "Five O'Level credits",
-      "FOUNDATION AND REMEDIAL STUDIES registration",
+      "Foundation and Remedial Studies registration",
       "Internal assessment",
     ],
     duration: "1 Year",
@@ -139,7 +139,7 @@ const programsData: Program[] = [
       "Preparatory program for university admission focusing on biology and related subjects.",
     requirements: [
       "Five O'Level credits",
-      "FOUNDATION AND REMEDIAL STUDIES registration",
+      "Foundation and Remedial Studies registration",
       "Internal assessment",
     ],
     duration: "1 Year",
@@ -177,7 +177,7 @@ const ProgramTabs = () => {
             <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-muted">
               <TabsTrigger value="undergraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Undergraduate</TabsTrigger>
               <TabsTrigger value="postgraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Postgraduate</TabsTrigger>
-              <TabsTrigger value="foundation" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">FOUNDATION AND REMEDIAL STUDIES</TabsTrigger>
+              <TabsTrigger value="foundation" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Foundation and Remedial Studies</TabsTrigger>
             </TabsList>
           </div>
 
@@ -193,7 +193,7 @@ const ProgramTabs = () => {
                         ? "Bachelor's Degree"
                         : selectedProgram.category === "postgraduate"
                         ? "Master's/PhD Program"
-                        : "FOUNDATION AND REMEDIAL STUDIES Program"}
+                        : "Foundation and Remedial Studies Program"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>

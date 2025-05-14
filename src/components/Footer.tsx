@@ -148,7 +148,7 @@ const Footer = () => {
                   to="/programs?tab=foundation"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  FOUNDATION AND REMEDIAL STUDIES Programs
+                  Foundation and Remedial Studies Programs
                 </Link>
               </li>
             </ul>

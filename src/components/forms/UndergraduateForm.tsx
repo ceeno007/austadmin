@@ -95,7 +95,7 @@ interface UndergraduateFormData {
     email: string;
     hasDisabilities: string;
     disabilityDescription: string;
-    bloodGroup: string;
+    bloodGroup?: string;
   };
   academicQualifications: {
     waecResults: ExamResults;
@@ -305,14 +305,14 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
 };
 
 const undergraduatePrograms = [
-  "B.Sc. Software Engineering",
-  "B.Sc. Computer Science",
+  "B.Eng. Civil Engineering",
+  "B.Eng. Materials & Metallurgical Engineering",
+  "B.Eng. Mechanical Engineering",
   "B.Eng. Petroleum and Energy Resources Engineering",
   "B.Sc. Accounting",
   "B.Sc. Business Administration",
-  "B.Eng. Civil Engineering",
-  "B.Eng. Materials & Metallurgical Engineering",
-  "B.Eng. Mechanical Engineering"
+  "B.Sc. Computer Science",
+  "B.Sc. Software Engineering"
 ];
 
 /**
@@ -442,6 +442,9 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   // Generate years from current year to 5 years back
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
+  // Add state for showing payment selection modal
+  const [showPaymentSelection, setShowPaymentSelection] = useState(false);
+
   useEffect(() => {
     try {
       const storedData = localStorage.getItem('applicationData');
@@ -495,7 +498,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       email: "",
       hasDisabilities: "no",
       disabilityDescription: "",
-      bloodGroup: "",
     },
     academicQualifications: {
       waecResults: {
@@ -605,7 +607,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           email: email || prev.personalDetails.email,
           hasDisabilities: has_disability ? "yes" : "no",
           disabilityDescription: disability_description || prev.personalDetails.disabilityDescription,
-          bloodGroup: applicationData.bloodGroup || prev.personalDetails.bloodGroup,
+          bloodGroup: applicationData.blood_group || prev.personalDetails.bloodGroup,
         },
         academicQualifications: {
           ...prev.academicQualifications,
@@ -693,7 +695,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   };
 
   const isFormValid = () => {
-    const { personalDetails, academicQualifications, passportPhoto, selectedCourse } = undergraduateData;
+    const { personalDetails, academicQualifications, passportPhoto, selectedCourse, declaration } = undergraduateData;
+    
+    // Check declaration
+    if (declaration !== "true") {
+      toast.error("Please agree to the declaration before proceeding");
+      return false;
+    }
     
     // Check required personal details
     if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
@@ -828,7 +836,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       formData.append("email", undergraduateData.personalDetails.email);
       formData.append("has_disability", undergraduateData.personalDetails.hasDisabilities === "yes" ? "true" : "false");
       formData.append("disability_description", undergraduateData.personalDetails.disabilityDescription);
-      formData.append("blood_group", undergraduateData.personalDetails.bloodGroup);
 
       // Add academic session and program details
       formData.append("academic_session", undergraduateData.academicSession);
@@ -899,13 +906,27 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     });
   };
 
-  const handlePayment = async () => {
-    const amount = 50000; // ₦50,000 in kobo
+  const handlePaymentAsNigerian = async () => {
+    const amount = 20000; // ₦20,000 in kobo
     const email = undergraduateData.personalDetails.email;
     const metadata = {
       program_type: "undergraduate",
       academic_session: undergraduateData.academicSession,
       selected_course: undergraduateData.selectedCourse,
+      residence: "nigerian"
+    };
+
+    await onPayment(amount, email, metadata);
+  };
+
+  const handlePaymentAsInternational = async () => {
+    const amount = 50 * 100; // $50 in cents
+    const email = undergraduateData.personalDetails.email;
+    const metadata = {
+      program_type: "undergraduate",
+      academic_session: undergraduateData.academicSession,
+      selected_course: undergraduateData.selectedCourse,
+      residence: "international"
     };
 
     await onPayment(amount, email, metadata);
@@ -919,50 +940,43 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       return;
     }
 
-    try {
-      // Initialize payment first
-      await handlePayment();
-      
-      // The rest of the form submission will be handled after successful payment
-      // This will be triggered by the payment verification callback
-    } catch (error) {
-      console.error('Form submission error:', error);
-      toast.error("Failed to submit form");
-    }
+    // Show payment selection screen instead of directly processing payment
+    setShowPaymentSelection(true);
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* JAMB Notice */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-orange-500 p-6 bg-orange-50">
-        <h3 className="text-lg font-semibold text-orange-700">Important JAMB Notice</h3>
-        <div className="space-y-4">
-          <p className="text-orange-700">
-            The African University of Science and Technology (AUST) requires all undergraduate applicants to:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-orange-700">
-            <li>Register for JAMB UTME/DE examination</li>
-            <li>Select AUST as your first choice institution</li>
-            <li>Take the JAMB examination</li>
-            <li>Meet the minimum cutoff mark (140 for {academicYear})</li>
-            <li>Receive admission from JAMB</li>
-            <li>Complete this application form</li>
-          </ol>
-          <div className="mt-4">
-            <a 
-              href="https://efacility.jamb.gov.ng/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
-            >
-              Visit JAMB Portal
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+    return (
+    <>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* JAMB Notice */}
+        <div className="space-y-6 rounded-lg border-2 border-dashed border-orange-500 p-6 bg-orange-50">
+          <h3 className="text-lg font-semibold text-orange-700">Important JAMB Notice</h3>
+          <div className="space-y-4">
+            <p className="text-orange-700">
+              The African University of Science and Technology (AUST) requires all undergraduate applicants to:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-orange-700">
+              <li>Register for JAMB UTME/DE examination</li>
+              <li>Select AUST as your first choice institution</li>
+              <li>Take the JAMB examination</li>
+              <li>Meet the minimum cutoff mark (140 for {academicYear})</li>
+              <li>Receive admission from JAMB</li>
+              <li>Complete this application form</li>
+            </ol>
+            <div className="mt-4">
+              <a 
+                href="https://efacility.jamb.gov.ng/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
+              >
+                Visit JAMB Portal
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
 {/* Personal Details Section */}
 <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -1000,6 +1014,33 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           value={undergraduateData.personalDetails.otherNames} 
           onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)} 
         />
+      </div>
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          Academic Session
+          <span className="text-red-500 text-xs italic">Required</span>
+        </Label>
+        <Select
+          value={undergraduateData.academicSession}
+          onValueChange={(value) => setUndergraduateData(prev => ({ ...prev, academicSession: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select academic session" />
+          </SelectTrigger>
+          <SelectContent>
+            {(() => {
+              const currentYear = new Date().getFullYear();
+              return [
+                <SelectItem key={`${currentYear}/${currentYear+1}`} value={`${currentYear}/${currentYear+1}`}>
+                  {`${currentYear}/${currentYear+1} Academic Session`}
+                </SelectItem>,
+                <SelectItem key={`${currentYear+1}/${currentYear+2}`} value={`${currentYear+1}/${currentYear+2}`}>
+                  {`${currentYear+1}/${currentYear+2} Academic Session`}
+                </SelectItem>
+              ];
+            })()}
+          </SelectContent>
+        </Select>
       </div>
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
@@ -1181,6 +1222,55 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     </div>
 
     <div className="space-y-2">
+      <Label htmlFor="streetAddress" className="flex items-center gap-2">
+        Street Address
+        <span className="text-red-500 text-xs italic">Required</span>
+      </Label>
+      <Textarea
+        id="streetAddress"
+        value={undergraduateData.personalDetails.streetAddress}
+        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="city" className="flex items-center gap-2">
+          City
+          <span className="text-red-500 text-xs italic">Required</span>
+        </Label>
+        <Input
+          id="city"
+          value={undergraduateData.personalDetails.city}
+          onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="country" className="flex items-center gap-2">
+          Country
+          <span className="text-red-500 text-xs italic">Required</span>
+        </Label>
+        <Select
+          value={undergraduateData.personalDetails.country}
+          onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
       <Label className="flex items-center gap-2">
         Do you have any disabilities?
         <span className="text-red-500 text-xs italic">Required</span>
@@ -1211,23 +1301,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
     )}
 
-    <div className="space-y-2">
-      <Label>Blood Group</Label>
-      <p className="text-red-500 text-xs italic">Required</p>
-      <Select
-        value={undergraduateData.personalDetails.bloodGroup}
-        onValueChange={(value) => handlePersonalDetailsChange("bloodGroup", value)}
-      >
-        <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="A">A</SelectItem>
-          <SelectItem value="B">B</SelectItem>
-          <SelectItem value="AB">AB</SelectItem>
-          <SelectItem value="O">O</SelectItem>
-          <SelectItem value="Unknown">Unknown</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+
   </div>
 </div>
 
@@ -1241,7 +1315,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               O'Level Results
               <span className="text-red-500 text-xs italic">Required</span>
             </h4>
-            <p className="text-sm text-gray-600">Select up to 2 exam results to submit</p>
+            <p className="text-sm text-gray-600">Please select a maximum of two exam results for submission</p>
             
             {/* WAEC Results */}
             <div className="space-y-4 p-4 border border-gray-200 rounded-md">
@@ -1924,13 +1998,105 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Declaration</h3>
         <div className="space-y-4">
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <p className="text-sm text-gray-700">
-              By clicking submit, you agree that all information provided is true and accurate. You understand that any false information may result in the rejection of your application.
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
+              <br />- cancel my application.
+              <br />- if admitted, be dismissed from the University.
+              <br />- if degree already awarded, rescind degree awarded.
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="declaration"
+              checked={undergraduateData.declaration === "true"}
+              onChange={(e) => setUndergraduateData(prev => ({ 
+                ...prev, 
+                declaration: e.target.checked ? "true" : "" 
+              }))}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              required
+            />
+            <label htmlFor="declaration" className="text-sm text-gray-700">
+              I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Application Fee Payment Section */}
+      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+        <h3 className="text-lg font-semibold">Application Fee Payment</h3>
+        <div className="space-y-4">
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800 space-y-2">
+              <strong>Application Fees (Non-refundable):</strong>
+              <br />
+              <span className="block mt-2">
+                <strong>Nigerian Applicants:</strong> ₦20,000
+              </span>
+              <span className="block mt-2">
+                <strong>International Applicants:</strong> $50
+              </span>
+              <div className="mt-4">
+                <p className="font-medium">Payment Process:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Payment will be processed through Paystack</li>
+                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+                  <li>International applicants will be redirected to Paystack USD payment gateway</li>
+                  <li>The Paystack payment popup will appear automatically when you click "Proceed to Payment"</li>
+                  <li>A payment receipt will be automatically generated after successful payment</li>
+                </ul>
+              </div>
             </p>
           </div>
         </div>
       </div>
+      
+      {showPaymentSelection && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-6 text-center">Select Payment Option</h2>
+            <p className="text-gray-600 mb-6 text-center">
+              Please select your payment option based on your residence status.
+            </p>
+            
+            <div className="space-y-4">
+              <button 
+                onClick={handlePaymentAsNigerian}
+                className="w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center justify-center"
+                disabled={isProcessingPayment}
+              >
+                <span className="mr-2">🇳🇬</span>
+                Pay as Nigerian Resident (₦20,000)
+              </button>
+              
+              <button 
+                onClick={handlePaymentAsInternational}
+                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center justify-center"
+                disabled={isProcessingPayment}
+              >
+                <span className="mr-2">🌍</span>
+                Pay as International Resident ($50)
+              </button>
+              
+              <button 
+                onClick={() => setShowPaymentSelection(false)}
+                className="w-full py-2 px-4 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition mt-4"
+              >
+                Cancel
+              </button>
+            </div>
+            
+            {isProcessingPayment && (
+              <div className="text-center mt-4 text-sm text-gray-600">
+                Processing payment, please wait...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Form Buttons */}
       <div className="flex justify-end space-x-4">
@@ -1946,11 +2112,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           type="submit"
           disabled={isProcessingPayment}
         >
-          {isProcessingPayment ? "Processing Payment..." : "Submit Application"}
+          {isProcessingPayment ? "Processing Payment..." : "Proceed to Payment"}
         </Button>
       </div>
     </form>
-  );
+  </>
+);
 };
 
 export default UndergraduateForm; 
