@@ -203,7 +203,7 @@ const Footer = () => {
               Sitemap
             </Link>
           </div>
-          {/* Lovable, cancelable badge */}
+          {/* Dismissible badge */}
           {showBadge && (
             <div className="fixed bottom-4 right-4 z-50 animate-fade-in" style={{ animationDelay: '20s' }}>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 p-3 flex items-center space-x-3">

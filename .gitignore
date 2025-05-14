@@ -32,5 +32,4 @@ yarn-error.log*
 *.sw?
 
 # Project specific
-/lovable-uploads
 *.log
