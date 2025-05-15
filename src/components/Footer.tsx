@@ -92,14 +92,14 @@ const Footer = () => {
                 <Instagram className="h-5 w-5" />
               </a>
 
-              <a
+              {/* <a
                 href="https://www.youtube.com/@AUSTAbuja"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gray-800 p-2 rounded-full text-gray-400 hover:bg-[#FF5500] hover:text-white transition-all duration-300 transform hover:scale-110"
               >
                 <Youtube className="h-5 w-5" />
-              </a>
+              </a> */}
             </div>
           </div>
 
