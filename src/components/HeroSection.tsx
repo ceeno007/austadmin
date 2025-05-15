@@ -63,7 +63,7 @@ const HeroSection = () => {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
               <Globe className="h-6 w-6 text-[#FF5500] mx-auto mb-1" />
               <p className="text-xl font-bold">30+</p>
-              <p className="text-xs text-gray-300">African Countries</p>
+              <p className="text-xs text-gray-300">Countries</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
               <Calendar className="h-6 w-6 text-[#FF5500] mx-auto mb-1" />

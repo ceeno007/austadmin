@@ -977,13 +977,13 @@ const Programs: React.FC = () => {
             </DialogTrigger>
             <DialogContent 
               ref={dialogRef}
-              className="max-w-2xl max-h-[80vh] overflow-y-auto fixed"
+              className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border-gray-200/50 shadow-xl"
               onPointerDownOutside={(e) => {
                 e.preventDefault();
               }}
             >
               <DialogHeader>
-                <DialogTitle>{program.title}</DialogTitle>
+                <DialogTitle className="text-xl font-semibold text-center">{program.title}</DialogTitle>
               </DialogHeader>
               
               <div className="mt-4 space-y-4">
@@ -1120,7 +1120,7 @@ const Programs: React.FC = () => {
               Explore Our <span className="text-[#FF5500]">Programs</span>
             </h1>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our wide range of undergraduate, postgraduate, and JUPEB programs designed to prepare you for success in your chosen field.
+              Discover our wide range of undergraduate, postgraduate, and foundation programs designed to prepare you for success in your chosen field.
             </p>
           </div>
         </section>
@@ -1129,15 +1129,15 @@ const Programs: React.FC = () => {
         <section className="py-8 sm:py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
             {/* Simple Tab Navigation */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-8 sm:mb-12">
               {Object.entries(TABS).map(([key, value]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(value)}
-                  className={`px-4 py-2 rounded text-sm sm:text-base ${
+                  className={`px-6 py-3 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 transform hover:scale-105 ${
                     activeTab === value
-                      ? "bg-[#FF5500] text-white"
-                      : "bg-gray-200 text-gray-700"
+                      ? "bg-[#FF5500] text-white shadow-lg shadow-[#FF5500]/20"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md"
                   }`}
                 >
                   {key === 'FOUNDATION' ? (

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ExternalLink } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import austLogo from "@/assets/images/austlogo.webp";
 import { cn } from "@/lib/utils";
@@ -150,7 +150,7 @@ const Navbar = () => {
           
           {/* Menu Content */}
           <div className="fixed top-[72px] left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg">
-            <div className="container mx-auto px-4 py-4 space-y-4">
+            <div className="container mx-auto px-4 py-6 space-y-4">
               {navLinks.map((link) => (
                 link.external ? (
                   <a 
@@ -160,7 +160,7 @@ const Navbar = () => {
                       handleStoreClick(e);
                       setIsMenuOpen(false);
                     }}
-                    className="block font-medium transition-colors py-2 hover:text-[#FF5500]"
+                    className="block font-medium transition-colors py-3 px-4 rounded-lg hover:bg-gray-50 hover:text-[#FF5500]"
                   >
                     {link.label}
                   </a>
@@ -169,8 +169,8 @@ const Navbar = () => {
                     key={link.path}
                     to={link.path} 
                     className={cn(
-                      "block font-medium transition-colors py-2",
-                      isActive(link.path) ? "text-[#FF5500]" : "hover:text-[#FF5500]"
+                      "block font-medium transition-colors py-3 px-4 rounded-lg",
+                      isActive(link.path) ? "text-[#FF5500] bg-gray-50" : "hover:bg-gray-50 hover:text-[#FF5500]"
                     )}
                     onClick={() => handleNavigation(link.path)}
                   >
@@ -178,11 +178,11 @@ const Navbar = () => {
                   </Link>
                 )
               ))}
-              <div className="pt-4 space-y-2">
-                <Button asChild variant="outline" className="w-full">
+              <div className="pt-6 space-y-3">
+                <Button asChild variant="outline" className="w-full rounded-xl">
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button asChild className="w-full bg-[#FF5500] hover:bg-[#e64d00]">
+                <Button asChild className="w-full rounded-xl bg-[#FF5500] hover:bg-[#e64d00]">
                   <Link to="/signup">Apply Now</Link>
                 </Button>
               </div>
@@ -192,24 +192,27 @@ const Navbar = () => {
       )}
 
       <Dialog open={showStoreDialog} onOpenChange={setShowStoreDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>External Link</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-md rounded-2xl border-gray-200/50 shadow-xl">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-semibold">External Link</DialogTitle>
+            <DialogDescription className="text-gray-600">
               You are about to visit the AUST Store on an external website. Would you like to continue?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="sm:justify-end">
-            <DialogClose asChild>
-              <Button variant="secondary">Cancel</Button>
-            </DialogClose>
-            <Button
-              onClick={handleConfirmNavigation}
-              className="bg-[#FF5500] hover:bg-[#e64d00]"
-            >
-              Continue to Store
-            </Button>
-          </DialogFooter>
+          <div className="flex flex-col items-center justify-center gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <DialogClose asChild>
+                <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
+              </DialogClose>
+              <Button
+                onClick={handleConfirmNavigation}
+                className="w-full sm:w-auto bg-[#FF5500] hover:bg-[#e64d00] flex items-center gap-2"
+              >
+                Continue to Store
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>

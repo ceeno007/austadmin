@@ -105,7 +105,7 @@ const Hostels = () => {
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%203.jpg?updatedAt=1747307294452",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Kitchenette.jpg?updatedAt=1747307297156",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%202.jpg?updatedAt=1747307301317",
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Wardrobe.jpg?updatedAt=1747307455731"
+       
       ],
       description: "Single room with modern amenities and privacy.",
       features: [
