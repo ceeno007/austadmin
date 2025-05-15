@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { apiService } from "@/services/api";
+import apiService from "@/services/api";
 import { useNavigate } from "react-router-dom";
 
 interface DocumentField {

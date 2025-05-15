@@ -208,7 +208,7 @@ const Footer = () => {
             <div className="fixed bottom-4 right-4 z-50 animate-fade-in" style={{ animationDelay: '20s' }}>
               <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-3 flex items-center space-x-3">
                 <span className="text-[10px] sm:text-xs text-white">
-                  Made with ❤️ by Austinspire
+                  Made with ❤️ by <a href="https://austinspire.com" target="_blank" rel="noopener noreferrer" className="hover:underline">AUSTInspire</a>
                 </span>
                 <button
                   onClick={handleDismissBadge}

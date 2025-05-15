@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { apiService } from "@/services/api";
+import apiService, { API_ENDPOINTS } from "@/services/api";
 
 const SignUp = () => {
   const [fullName, setFullName] = useState("");
@@ -174,19 +174,32 @@ const SignUp = () => {
     }
     
     setIsLoading(true);
+    console.log("Starting signup process with email:", email);
+    
+    // Force display a loading toast to ensure toast functionality works
+    toast.loading("Creating account...", {
+      id: "signup-status",
+      duration: 5000
+    });
     
     // Use the API service for signup
-    apiService.signup({
+    console.log("Making fastApiSignup request to:", API_ENDPOINTS.FASTAPI_SIGNUP);
+    
+    apiService.fastApiSignup({
       email,
       full_name: fullName,
       program: programType,
       password
     })
       .then((data) => {
+        console.log("Signup successful, received data:", data);
         // Store user's name and program type
         localStorage.setItem("userName", fullName);
         localStorage.setItem("programType", programType);
+        
+        // Update the loading toast to success
         toast.success("Account created", {
+          id: "signup-status",
           description: "Your account has been created successfully. Please log in to continue.",
           style: {
             background: '#10B981',
@@ -197,7 +210,19 @@ const SignUp = () => {
       })
       .catch((error) => {
         console.error("Error during signup:", error);
+        // Check for Axios error structure
+        if (error.response) {
+          console.error("Error response data:", error.response.data);
+          console.error("Error response status:", error.response.status);
+          console.error("Error response headers:", error.response.headers);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("Error request - no response received:", error.request);
+        }
+        
+        // Update the loading toast to error
         toast.error("Signup failed", {
+          id: "signup-status",
           description: error.message || "Failed to create account. Please try again.",
           style: {
             background: '#EF4444',

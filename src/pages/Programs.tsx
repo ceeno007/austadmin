@@ -11,54 +11,24 @@ import {
 } from "@/components/ui/dialog";
 import SEO from "@/components/SEO";
 
-// Import all program images
-import softwareEngineeringImg from "@/assets/images/software-engineering.jpg";
-import computerScienceImg from "@/assets/images/computer-science.jpg";
-import petroleumEngineeringImg from "@/assets/images/petroleum-engineering.jpg";
-import accountingImg from "@/assets/images/accounting.jpg";
-import businessAdminImg from "@/assets/images/business-admin.jpg";
-import civilEngineeringImg from "@/assets/images/civil-engineering.jpg";
-import materialsEngineeringImg from "@/assets/images/materials-metallurgical.jpg";
-import mechanicalEngineeringImg from "@/assets/images/mechanical.jpg";
-import academicImg from "@/assets/images/academic.jpg";
-import aerospaceImg from "@/assets/images/aerospace.jpg";
-import gisImg from "@/assets/images/gis.jpg";
-import systemsImg from "@/assets/images/systems.jpg";
-import modelingImg from "@/assets/images/modeling.jpg";
-import mathImg from "@/assets/images/math.jpg";
-import petroleumImg from "@/assets/images/petroleum-engineering.jpg";
-import publicAdminImg from "@/assets/images/public-admin.jpg";
-import spacePhysicsImg from "@/assets/images/space-physics.jpg";
-import policyImg from "@/assets/images/policy.jpg";
-import physicsImg from "@/assets/images/physics.jpg";
-import appliedStatsImg from "@/assets/images/applied-stats.jpg";
-import jupebScienceImg from "@/assets/images/jupeb-science.jpg";
-import foundationScienceImg from "@/assets/images/jupeb-science.jpg";
-
-// Create an image map for reliable fallbacks
+// Image URLs from ImageKit
 const imageMap: Record<string, string> = {
-  "software-engineering": softwareEngineeringImg,
-  "computer-science": computerScienceImg,
-  "petroleum-engineering": petroleumEngineeringImg,
-  "accounting": accountingImg,
-  "business-admin": businessAdminImg,
-  "civil-engineering": civilEngineeringImg,
-  "materials-metallurgical": materialsEngineeringImg,
-  "mechanical": mechanicalEngineeringImg,
-  "aerospace": aerospaceImg,
-  "gis": gisImg,
-  "systems": systemsImg,
-  "modeling": modelingImg,
-  "math": mathImg,
-  "petroleum": petroleumImg,
-  "public-admin": publicAdminImg,
-  "space-physics": spacePhysicsImg,
-  "policy": policyImg,
-  "physics": physicsImg,
-  "applied-stats": appliedStatsImg,
-  "jupeb-science": jupebScienceImg,
-  "foundation-science": foundationScienceImg,
-  "default": academicImg
+  "software-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/software-engineering.jpg",
+  "computer-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/programming-background-with-person-working-with-codes-computer.jpg",
+  "petroleum-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/petroleum-engineering.jpg",
+  "accounting": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/accounting.jpg",
+  "business-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/business-admin.jpg",
+  "civil-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/civil-engineering.jpg",
+  "aerospace": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/aerospace.jpg",
+  "gis": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/gis.jpg",
+  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/math.jpg",
+  "public-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/public-admin.jpg",
+  "space-physics": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/space-physics.jpg",
+  "policy": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/policy.jpg",
+  "applied-stats": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/applied-stats.jpg",
+  "jupeb-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/jupeb-science.jpg",
+  "foundation-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/jupeb-science.jpg",
+  "default": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg"
 };
 
 const Programs = () => {
@@ -101,14 +71,14 @@ const Programs = () => {
       }
     }
     
-    return academicImg;
+    return imageMap["default"];
   };
 
   // Handle image load errors
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, program: any) => {
     const imgSrc = getImage(program);
     setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
-    e.currentTarget.src = academicImg;
+    e.currentTarget.src = imageMap["default"];
   };
 
   // Updated program data with detailed requirements
@@ -118,7 +88,7 @@ const Programs = () => {
         title: "B.Sc. Software Engineering",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: softwareEngineeringImg,
+        image: imageMap["software-engineering"] || imageMap["default"],
         description: "Focus on software development methodologies, tools, and systems design.",
         requirements: {
           ssc: [
@@ -140,13 +110,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Software Engineering [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Software%20Engineering%20_Undergraduate_.pdf"
       },
       {
         title: "B.Sc. Computer Science",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: computerScienceImg,
+        image: imageMap["computer-science"] || imageMap["default"],
         description: "Develop skills in algorithms, software engineering, and computer systems.",
         requirements: {
           ssc: [
@@ -168,13 +138,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Computer Science [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Computer%20Science%20_Undergraduate_.pdf"
       },
       {
         title: "B.Eng. Petroleum and Energy Resources Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: petroleumEngineeringImg,
+        image: imageMap["petroleum-engineering"] || imageMap["default"],
         description: "Explore oil and gas engineering principles and practices.",
         requirements: {
           ssc: [
@@ -197,13 +167,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Petroleum and Energy Resources Engineering [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Petroleum%20and%20Energy%20Resources%20Engineering%20_Undergraduate_.pdf"
       },
       {
         title: "B.Sc. Accounting",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: accountingImg ,
+        image: imageMap["accounting"] || imageMap["default"],
         description: "Gain expertise in financial reporting, auditing, and corporate accounting principles.",
         requirements: {
           ssc: [
@@ -224,13 +194,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Accounting%20_Undergraduate_.pdf"
       },
       {
         title: "B.Sc. Business Administration",
         duration: "4 years",
         schoolFees: "₦2,212,727 per session",
-        image: businessAdminImg,
+        image: imageMap["business-admin"] || imageMap["default"],
         description: "Understand organizational behavior, management, and entrepreneurship strategies.",
         requirements: {
           ssc: [
@@ -251,13 +221,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Accounting [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Business%20Administration%20_Undergraduate_.pdf"
       },
       {
         title: "B.Eng. Civil Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: civilEngineeringImg,
+        image: imageMap["civil-engineering"] || imageMap["default"],
         description: "Design and construct infrastructure like roads, bridges, and water systems.",
         requirements: {
           ssc: [
@@ -279,13 +249,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Civil Engineering [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Civil%20Engineering%20_Undergraduate_.pdf"
       },
       {
         title: "B.Eng. Materials & Metallurgical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: materialsEngineeringImg,
+        image: imageMap["default"],
         description: "Learn the development and application of metallic and composite materials.",
         requirements: {
           ssc: [
@@ -307,13 +277,13 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Materials and Metallurgical Engineering [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Materials%20and%20Metallurgical%20Engineering%20_Undergraduate_.pdf"
       },
       {
         title: "B.Eng. Mechanical Engineering",
         duration: "5 years",
         schoolFees: "₦2,212,727 per session",
-        image: mechanicalEngineeringImg,
+        image: imageMap["default"],
         description: "Apply physics and materials science for the design and analysis of mechanical systems.",
         requirements: {
           ssc: [
@@ -335,7 +305,7 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/Departmental Handbook - Mechanical Engineering [Undergraduate].pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Departmental%20Handbook%20-%20Mechanical%20Engineering%20_Undergraduate_.pdf"
       }
     ],
     postgraduate: [
@@ -343,12 +313,12 @@ const Programs = () => {
         title: "M.Sc. Computer Science",
         duration: "2 years",
         schoolFees: "₦2,500,000",
-        image: computerScienceImg,
+        image: imageMap["computer-science"] || imageMap["default"],
         description: "Advanced study of computer science principles and research methodologies.",
         requirements: {
           academic: [
-            "• First Class or Second Class Upper in Computer Science or related field",
-            "• Minimum CGPA of 3.5/5.0 or 4.0/5.0"
+            "• First Class, Second Class Upper, or Second Class Lower in Computer Science or related field",
+            "• Minimum CGPA of 2.5/5.0"
           ],
           documents: [
             "• Academic Transcripts",
@@ -361,60 +331,88 @@ const Programs = () => {
             "• Evidence of English Proficiency (if applicable)"
           ]
         },
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Computer Science [Class of 2025].pdf",
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Computer%20Science%20_Class%20of%202025_.pdf",
         type: "Masters"
       },
       {
         title: "Ph.D. Computer Science",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: computerScienceImg,
-        description: "Doctoral research in advanced computer science topics.",
+        image: imageMap["computer-science"] || imageMap["default"],
+        description: "Advanced research program focusing on computer science innovations, artificial intelligence, data science, and software engineering methodologies.",
         requirements: {
           academic: [
-            "• First Class or Second Class Upper in Computer Science or related field",
-            "• Minimum CGPA of 3.5/5.0 or 4.0/5.0"
+            "• Masters degree in Computer Science or related field with minimum CGPA of 3.5/5.0",
+            "• Strong research background in computer science",
+            "• Proficiency in programming and analytical skills"
           ],
           documents: [
-            "• Academic Transcripts",
-            "• Research Proposal",
-            "• Two Academic Reference Letters"
+            "• Academic Transcripts (B.Sc. and M.Sc.)",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters",
+            "• Statement of Purpose"
           ],
           additional: [
-            "• Statement of Purpose",
+            "• Research publications (if any)",
             "• CV/Resume",
-            "• Evidence of English Proficiency (if applicable)"
+            "• IELTS/TOEFL (for international students)"
           ]
         },
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf",
         type: "Ph.D."
       },
       {
         title: "M.Sc. Geoinformatics & GIS",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: gisImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["gis"] || imageMap["default"],
+        description: "Advanced study in geographical information systems, spatial analysis, remote sensing, and geospatial technologies.",
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Geography, Environmental Science, Computer Science, or related field",
+            "• Minimum CGPA of 3.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Two Academic Reference Letters",
+            "• Statement of Purpose"
+          ],
+          additional: [
+            "• Basic knowledge of GIS software",
+            "• Computer literacy",
+            "• Evidence of English Proficiency"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Ph.D. Geoinformatics & GIS",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: gisImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
-      },
-      {
-        title: "Taught Masters in Management of Information Technology",
-        duration: "1 year",
-        schoolFees: "₦1,200,000 total",
-        image: businessAdminImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["gis"] || imageMap["default"],
+        description: "Doctoral research in advanced geospatial technologies, spatial data science, and environmental modeling.",
+        requirements: {
+          academic: [
+            "• Masters degree in GIS, Geography, or related field with minimum CGPA of 3.5/5.0",
+            "• Strong research background in geospatial sciences"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters"
+          ],
+          additional: [
+            "• Advanced GIS software proficiency",
+            "• Research publications (if any)",
+            "• Programming skills"
+          ]
+        },
+        type: "Ph.D."
       },
       {
         title: "M.Sc. Management of Information Technology",
         duration: "2 years",
         schoolFees: "₦2,500,000",
-        image: businessAdminImg,
+        image: imageMap["business-admin"] || imageMap["default"],
         description: "Study the intersection of business and technology management.",
         requirements: {
           academic: [
@@ -432,42 +430,74 @@ const Programs = () => {
             "• Evidence of English Proficiency (if applicable)"
           ]
         },
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Management of Information Technology [Class of 2025].pdf",
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Management%20of%20Information%20Technology%20_Class%20of%202025_.pdf",
         type: "Masters"
       },
       {
         title: "M.Sc. Materials Science & Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image:materialsEngineeringImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["default"],
+        description: "Study of advanced materials, their properties, processing techniques, and applications in modern engineering.",
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Engineering, Physics, Chemistry, or related field",
+            "• Minimum CGPA of 3.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Two Academic Reference Letters",
+            "• Research Proposal"
+          ],
+          additional: [
+            "• Laboratory experience",
+            "• Basic knowledge of materials characterization",
+            "• Mathematical and analytical skills"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Ph.D. Materials Science & Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image:materialsEngineeringImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
-      },
-      {
-        title: "Taught Masters in Mathematical Modeling",
-        duration: "1 year",
-        schoolFees: "₦1,200,000 total",
-        image:modelingImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["default"]
       },
       {
         title: "M.Sc. Mathematical Modeling",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image:modelingImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["math"] || imageMap["default"],
+        description: "Advanced study in mathematical modeling, numerical analysis, and computational mathematics for solving real-world problems.",
+        requirements: {
+          academic: [
+            "• First Class or Second Class Upper in Mathematics, Physics, Engineering, or related field",
+            "• Strong background in advanced mathematics"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Two Academic Reference Letters",
+            "• Statement of Purpose"
+          ],
+          additional: [
+            "• Programming skills",
+            "• Knowledge of mathematical software",
+            "• Analytical problem-solving ability"
+          ]
+        },
+        type: "Masters"
+      },
+      {
+        title: "Taught Masters in Mathematical Modeling",
+        duration: "1 year",
+        schoolFees: "₦1,200,000 total",
+        image: imageMap["default"]
       },
       {
         title: "PGD Petroleum Engineering",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: petroleumEngineeringImg,
+        image: imageMap["petroleum-engineering"] || imageMap["default"],
         description: "Postgraduate diploma in petroleum engineering fundamentals.",
         requirements: {
           ssc: [
@@ -489,106 +519,273 @@ const Programs = () => {
             "• Minimum of 10 points in IJMB"
           ]
         },
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf",
         type: "PGD"
       },
       {
         title: "M.Sc. Petroleum Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: petroleumEngineeringImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["petroleum-engineering"] || imageMap["default"],
+        description: "Advanced study in petroleum engineering principles, reservoir management, and energy resources optimization.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Petroleum Engineering or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Statement of Purpose",
+            "• CV/Resume",
+            "• Industry experience (if any)"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Ph.D. Petroleum Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image:petroleumEngineeringImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["petroleum-engineering"] || imageMap["default"],
+        description: "Advanced research in petroleum engineering, focusing on innovative extraction methods and sustainable energy solutions.",
+        requirements: {
+          academic: [
+            "• Masters degree in Petroleum Engineering or related field",
+            "• Minimum CGPA of 3.0/5.0 at Masters level"
+          ],
+          documents: [
+            "• Academic Transcripts (B.Eng/B.Sc. and M.Sc.)",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters"
+          ],
+          additional: [
+            "• Research publications (if any)",
+            "• Industry experience",
+            "• IELTS/TOEFL (for international students)"
+          ]
+        },
+        type: "Ph.D."
       },
       {
         title: "Taught Masters in Public Administration",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image:publicAdminImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["public-admin"] || imageMap["default"]
       },
       {
         title: "M.Sc. Public Administration",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image:publicAdminImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["public-admin"] || imageMap["default"],
+        description: "Advanced study in public sector management, policy implementation, and administrative theory.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Public Administration or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Statement of Purpose",
+            "• CV/Resume",
+            "• Public sector experience (if any)"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Taught Masters in Public Policy",
         duration: "1 year",
         schoolFees: "₦1,200,000 total",
-        image: policyImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["policy"] || imageMap["default"]
       },
       {
         title: "M.Sc. Public Policy",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: policyImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["policy"] || imageMap["default"]
       },
       {
         title: "M.Sc. Pure & Applied Mathematics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: mathImg,
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Pure and Applied Mathematics [Class of 2025].pdf"
+        image: imageMap["math"] || imageMap["default"],
+        description: "Advanced study in pure and applied mathematics, focusing on mathematical analysis, algebra, and applications.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Mathematics or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Strong background in advanced mathematics",
+            "• Statement of Purpose",
+            "• CV/Resume"
+          ]
+        },
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Pure%20and%20Applied%20Mathematics%20_Class%20of%202025_.pdf",
+        type: "Masters"
       },
       {
         title: "Ph.D. Pure & Applied Mathematics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: mathImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["math"] || imageMap["default"],
+        description: "Doctoral research in mathematical theory and applications, including analysis, algebra, and mathematical modeling.",
+        requirements: {
+          academic: [
+            "• Masters degree in Mathematics or related field",
+            "• Minimum CGPA of 3.0/5.0 at Masters level"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters"
+          ],
+          additional: [
+            "• Research publications (if any)",
+            "• Advanced mathematical knowledge",
+            "• Teaching/Research experience preferred"
+          ]
+        },
+        type: "Ph.D."
       },
       {
         title: "M.Sc. Space Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: spacePhysicsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["space-physics"] || imageMap["default"],
+        description: "Advanced study in space physics, astrophysics, and cosmic radiation.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Physics or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Strong background in physics and mathematics",
+            "• Programming skills",
+            "• Laboratory experience"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Ph.D. Space Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image:spacePhysicsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["space-physics"] || imageMap["default"],
+        description: "Doctoral research in space physics, focusing on solar-terrestrial relationships and space weather.",
+        requirements: {
+          academic: [
+            "• Masters degree in Space Physics, Physics or related field",
+            "• Minimum CGPA of 3.0/5.0 at Masters level"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters"
+          ],
+          additional: [
+            "• Research publications (if any)",
+            "• Advanced programming skills",
+            "• Research experience in physics"
+          ]
+        },
+        type: "Ph.D."
       },
       {
         title: "M.Sc. Systems Engineering",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: systemsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["default"],
+        description: "Advanced study in systems engineering principles, system design, and integration methodologies.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Engineering or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Knowledge of systems modeling",
+            "• Programming/Technical skills",
+            "• Industry experience (preferred)"
+          ]
+        },
+        type: "Masters"
       },
       {
         title: "Ph.D. Systems Engineering",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: systemsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["default"]
       },
       {
         title: "M.Sc. Theoretical & Applied Physics",
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
-        image: physicsImg,
-        pdf: "/pdfs/Curriculum Handbook - M.Sc. Theoretical and Applied Physics [Class of 2025].pdf"
+        image: imageMap["default"],
+        description: "Advanced study in theoretical physics principles and their practical applications in modern technology.",
+        requirements: {
+          academic: [
+            "• First Class, Second Class Upper, or Second Class Lower in Physics or related field",
+            "• Minimum CGPA of 2.5/5.0"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Research Proposal",
+            "• Two Academic Reference Letters"
+          ],
+          additional: [
+            "• Strong mathematical background",
+            "• Laboratory experience",
+            "• Programming skills"
+          ]
+        },
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Theoretical%20and%20Applied%20Physics%20_Class%20of%202025_.pdf",
+        type: "Masters"
       },
       {
         title: "Ph.D. Theoretical & Applied Physics",
         duration: "3 years",
         schoolFees: "₦4,200,000 total",
-        image: physicsImg,
-        pdf: "/pdfs/2025 Postgraduate Fees.pdf"
+        image: imageMap["default"],
+        description: "Doctoral research in theoretical and applied physics, focusing on quantum mechanics, particle physics, and modern physics applications.",
+        requirements: {
+          academic: [
+            "• Masters degree in Physics or related field",
+            "• Minimum CGPA of 3.0/5.0 at Masters level"
+          ],
+          documents: [
+            "• Academic Transcripts",
+            "• Detailed Research Proposal",
+            "• Three Academic Reference Letters"
+          ],
+          additional: [
+            "• Research publications (if any)",
+            "• Advanced mathematical skills",
+            "• Research experience in physics"
+          ]
+        },
+        type: "Ph.D."
       }
     ],
     foundation: [
@@ -596,7 +793,7 @@ const Programs = () => {
         id: "foundation-science",
         title: "Foundation Science",
         description: "A comprehensive foundation program in science subjects",
-        image: foundationScienceImg,
+        image: imageMap["foundation-science"] || imageMap["default"],
         duration: "1 Year",
         schoolFees: "₦1,343,000 total",
         requirements: {
@@ -614,7 +811,7 @@ const Programs = () => {
             "• Good conduct certificate"
           ]
         },
-        pdf: "/pdfs/2024-2025 School of Foundation & Remedial Studies Fees.pdf"
+        pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/2024-2025%20School%20of%20Foundation%20&%20Remedial%20Studies%20Fees.pdf"
       }
     ]
   };
@@ -854,16 +1051,19 @@ const Programs = () => {
                                 <span className="font-medium">School Fees:</span> {program.schoolFees}
                               </p>
                             </div>
-                            <a
-                              href={program.pdf}
-                              download
-                              className="text-[#FF5500] hover:text-[#FF5500]/80"
-                            >
-                              <Button variant="ghost" className="text-[#FF5500]">
-                                <FileText className="w-4 h-4 mr-2" />
-                                Download Brochure
-                              </Button>
-                            </a>
+                            {program.pdf && (
+                              <a
+                                href={program.pdf}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#FF5500] hover:text-[#FF5500]/80"
+                              >
+                                <Button variant="ghost" className="text-[#FF5500]">
+                                  <FileText className="w-4 h-4 mr-2" />
+                                  View Brochure
+                                </Button>
+                              </a>
+                            )}
                           </div>
                         </div>
                       </DialogContent>
@@ -879,4 +1079,4 @@ const Programs = () => {
   );
 };
 
-export default Programs; 
+export default Programs;

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiService } from "@/services/api";
+import apiService from "@/services/api";
 import SEO from "@/components/SEO";
 
 const Contact = () => {

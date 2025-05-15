@@ -2,9 +2,6 @@ import React from "react";
 import HeroSection from "@/components/HeroSection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import communityImage from "@/assets/images/community.jpg";
-import academicImage from "@/assets/images/academic.jpg";
-import careerSupportImage from "@/assets/images/career_support.jpg";
 
 const Index = () => {
   return (
@@ -79,7 +76,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
               <img
-                src={academicImage}
+                src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/academic.jpg"
                 alt="Academics"
                 className="w-full h-40 object-cover"
               />
@@ -93,7 +90,7 @@ const Index = () => {
 
             <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
               <img
-                src={communityImage}
+                src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/campus.jpg"
                 alt="Community"
                 className="w-full h-40 object-cover"
               />
@@ -107,7 +104,7 @@ const Index = () => {
 
             <div className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden">
               <img
-                src={careerSupportImage}
+                src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/career_support.jpg"
                 alt="Career Support"
                 className="w-full h-40 object-cover"
               />

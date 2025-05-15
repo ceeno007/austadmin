@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
-import { apiService } from "../../services/api";
+import apiService from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -352,6 +352,29 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   useEffect(() => {
     try {
+      // First, try to fetch any saved postgraduate draft from the specific endpoint
+      const fetchPostgraduateDraft = async () => {
+        try {
+          const draftData = await apiService.getPostgraduateDraft();
+          
+          if (draftData) {
+            console.log("Retrieved postgraduate draft from specific endpoint:", draftData);
+            
+            // Process the draft data similar to applicationData
+            setApplicationData(draftData);
+            
+            // Make sure we're on the right form type
+            localStorage.setItem("programType", "postgraduate");
+          }
+        } catch (error) {
+          console.error("Error fetching postgraduate draft:", error);
+          // Continue to fallback to general application data
+        }
+      };
+      
+      fetchPostgraduateDraft();
+      
+      // Fallback: Check application data from localStorage
       const storedData = localStorage.getItem('applicationData');
       if (storedData) {
         const parsedData = JSON.parse(storedData);
@@ -870,8 +893,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         formData.append("payment_evidence", postgraduateData.paymentEvidence);
       }
       
-      // Use the new submitDraftApplication function instead of submitApplication
-      const response = await apiService.submitDraftApplication(formData);
+      // Use the postgraduate-specific draft endpoint at https://admissions-jcvy.onrender.com/postgraduate/saved
+      // instead of the general draft endpoint
+      const response = await apiService.savePostgraduateFormDataAsDraft(formData);
       
       // Save to localStorage for later retrieval
       localStorage.setItem("postgraduateApplicationData", JSON.stringify(postgraduateData));

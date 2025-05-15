@@ -98,27 +98,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('userId', userData.user.uuid);
     }
     
-    // First check for program type in applications array (this is where it's located in the response)
+    // Process program type from API response
+    // The FastAPI response format includes:
+    // {
+    //   access_token: "token",
+    //   token_type: "bearer",
+    //   user: { email, uuid, program, full_name }
+    //   postgraduate_applications: []
+    // }
     let programType;
-    if (userData.applications && userData.applications.length > 0) {
+    
+    // Check first in the user object from the FastAPI response
+    if (userData.user && userData.user.program) {
+      programType = userData.user.program;
+      console.log("Found program in user object:", programType);
+    }
+    // Then check for program type in applications array (this is where it's located in the response)
+    else if (userData.applications && userData.applications.length > 0) {
       programType = userData.applications[0].program_type;
       console.log("Found program_type in applications:", programType);
-    } else {
-      // Fallback to other locations if not found in applications
-      programType = userData.program_type || userData.user?.program || userData.program;
+    } 
+    // Check for postgraduate applications specifically
+    else if (userData.postgraduate_applications && userData.postgraduate_applications.length > 0) {
+      programType = 'postgraduate';
+      console.log("Found postgraduate applications, setting type to postgraduate");
+    }
+    // Fallback to other locations if not found above
+    else {
+      programType = userData.program_type || userData.program;
     }
     
     if (programType) {
+      // Store program type in lowercase for consistency
       localStorage.setItem('programType', programType.toLowerCase());
     }
     
     // Set user data
     setUser({
-      email: userData.email || userData.user?.email || '',
-      full_name: userData.full_name || userData.user?.full_name || '',
+      email: userData.user?.email || userData.email || '',
+      full_name: userData.user?.full_name || userData.full_name || userData.name || '',
       program: programType,
-      id: userData.id || userData.user?.id || '',
-      uuid: userData.uuid || userData.user?.uuid || ''
+      id: userData.user?.id || userData.id || '',
+      uuid: userData.user?.uuid || userData.uuid || ''
     });
     
     setIsAuthenticated(true);

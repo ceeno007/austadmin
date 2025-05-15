@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
-import { apiService } from "@/services/api";
+import apiService from "@/services/api";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");

@@ -1,12 +1,13 @@
 import axios from 'axios';
 
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admissions-qmt4.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admissions-jcvy.onrender.com';
+const FASTAPI_BASE_URL = 'https://admissions-jcvy.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
   SIGNUP: `${API_BASE_URL}/auth/signup`,
-  LOGIN: `${API_BASE_URL}/auth/login`,
+  LOGIN: `${API_BASE_URL}/token`,
   DOCUMENT_UPLOAD: `${API_BASE_URL}/documents/upload`,
   FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
   CONTACT: `${API_BASE_URL}/contact`,
@@ -19,6 +20,10 @@ export const API_ENDPOINTS = {
   APPLICATION_DRAFT: `${API_BASE_URL}/applications/draft`,
   INITIALIZE_PAYMENT: `${API_BASE_URL}/payments/initialize`,
   VERIFY_PAYMENT: `${API_BASE_URL}/payments/verify`,
+  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/token`,
+  FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
+  FASTAPI_POSTGRADUATE_SAVED: `${FASTAPI_BASE_URL}/postgraduate/saved`,
+  FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/signup`,
 };
 
 // Default Headers for JSON requests
@@ -44,8 +49,108 @@ const getAuthHeaders = (includeContentType = true) => {
   return headers;
 };
 
+// FastAPI OAuth token response type
+interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
+  scope?: string;
+}
+
+// Postgraduate document upload interface
+interface PostgraduateDocumentData {
+  // Personal information
+  first_name: string;
+  surname: string;
+  other_names?: string;
+  gender: string;
+  date_of_birth: string;
+  blood_group: string;
+  nationality: string;
+  state_of_origin: string;
+  has_disability: boolean;
+  disability_description?: string;
+  
+  // Contact information
+  street_address: string;
+  city: string;
+  country: string;
+  phone_number: string;
+  email: string;
+  
+  // Academic information
+  o_level_exam_type: string;
+  o_level_exam_year: string;
+  o_level_exam_number: string;
+  o_level_subjects: string;
+  jamb_registration_number: string;
+  jamb_exam_year: string;
+  jamb_score: string;
+  
+  // University information
+  first_degree_institution: string;
+  first_degree_course: string;
+  first_degree_class: string;
+  first_degree_year: string;
+  
+  // Second degree (optional)
+  second_degree_institution?: string;
+  second_degree_course?: string;
+  second_degree_class?: string;
+  second_degree_year?: string;
+  
+  // Program details
+  program_level: string;
+  preferred_course: string;
+  second_choice_course?: string;
+  research_area?: string;
+  
+  // Referee information
+  first_referee_name: string;
+  first_referee_email: string;
+  second_referee_name: string;
+  second_referee_email: string;
+  
+  // Supervisor (if applicable)
+  supervisor_name?: string;
+}
+
 // API Service
 const apiService = {
+  /**
+   * Sign up a new user using FastAPI endpoint
+   * @param userData - User registration data
+   * @returns Promise with the API response
+   */
+  fastApiSignup: async (userData: {
+    email: string;
+    full_name: string;
+    program: string;
+    password: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_SIGNUP,
+        userData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("FastAPI Signup error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred during signup");
+    }
+  },
+
   /**
    * Sign up a new user
    * @param userData - User registration data
@@ -403,6 +508,300 @@ const apiService = {
     const response = await axios.delete(`${API_BASE_URL}/applications/draft/${draftId}`);
     return response.data;
   },
+
+  /**
+   * Sign in using FastAPI token endpoint (OAuth2 password flow)
+   * @param credentials - User login credentials
+   * @returns Promise with the token response
+   */
+  fastApiSignin: async (credentials: { 
+    username: string; 
+    password: string;
+    client_id?: string;
+    client_secret?: string;
+    scope?: string;
+  }): Promise<TokenResponse> => {
+    try {
+      // Create form data for x-www-form-urlencoded format
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'password');
+      formData.append('username', credentials.username);
+      formData.append('password', credentials.password);
+      formData.append('scope', credentials.scope || '');
+      formData.append('client_id', credentials.client_id || '');
+      formData.append('client_secret', credentials.client_secret || '');
+      
+      const response = await axios.post<TokenResponse>(API_ENDPOINTS.FASTAPI_TOKEN, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        }
+      });
+      
+      // Store the token in localStorage
+      if (response.data.access_token) {
+        localStorage.setItem('fastApiAccessToken', response.data.access_token);
+        
+        // If there's a refresh token, store it too
+        if (response.data.refresh_token) {
+          localStorage.setItem('fastApiRefreshToken', response.data.refresh_token);
+        }
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("FastAPI Signin error:", error);
+      // Check if error has a response property (typical for Axios errors)
+      if (error.response && error.response.data && error.response.data.detail) {
+        // The FastAPI error format is { "detail": "Incorrect email or password" }
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An unexpected error occurred during authentication");
+    }
+  },
+
+  /**
+   * Upload postgraduate documents to FastAPI endpoint
+   * @param data - Object containing all postgraduate document fields and files
+   * @returns Promise with the API response
+   */
+  uploadPostgraduateDocuments: async (
+    data: PostgraduateDocumentData,
+    files: {
+      passport_photo: File;
+      o_level_result: File;
+      birth_certificate: File;
+      state_of_origin_certificate: File;
+      first_degree_certificate: File;
+      first_degree_transcript: File;
+      second_degree_certificate?: File;
+      second_degree_transcript?: File;
+      jamb_result?: File;
+      cv: File;
+      research_proposal?: File;
+      recommendation_letters: File;
+      payment_receipt: File;
+    }
+  ) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('fastApiAccessToken');
+      
+      // Create a FormData object
+      const formData = new FormData();
+      
+      // Add all text fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined) {
+          // Convert boolean to string
+          if (typeof value === 'boolean') {
+            formData.append(key, value.toString());
+          } else {
+            formData.append(key, value);
+          }
+        }
+      });
+      
+      // Add all files
+      Object.entries(files).forEach(([key, file]) => {
+        if (file) {
+          formData.append(key, file);
+        }
+      });
+      
+      // Make the request
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
+        formData,
+        {
+          headers: {
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Postgraduate document upload error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred during document upload");
+    }
+  },
+
+  /**
+   * Upload postgraduate documents using a pre-built FormData object
+   * This allows for more flexibility when building the form data
+   * @param formData - FormData object containing all fields and files
+   * @returns Promise with the API response
+   */
+  uploadPostgraduateFormData: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('fastApiAccessToken');
+      
+      // Make the request
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
+        formData,
+        {
+          headers: {
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Postgraduate document upload error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred during document upload");
+    }
+  },
+
+  /**
+   * Save postgraduate application as draft
+   * @param data - Object containing all postgraduate document fields and files
+   * @returns Promise with the API response
+   */
+  savePostgraduateAsDraft: async (
+    data: Partial<PostgraduateDocumentData>,
+    files?: Partial<{
+      passport_photo: File;
+      o_level_result: File;
+      birth_certificate: File;
+      state_of_origin_certificate: File;
+      first_degree_certificate: File;
+      first_degree_transcript: File;
+      second_degree_certificate: File;
+      second_degree_transcript: File;
+      jamb_result: File;
+      cv: File;
+      research_proposal: File;
+      recommendation_letters: File;
+      payment_receipt: File;
+    }>
+  ) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('fastApiAccessToken');
+      
+      // Create a FormData object
+      const formData = new FormData();
+      
+      // Add all text fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined) {
+          // Convert boolean to string
+          if (typeof value === 'boolean') {
+            formData.append(key, value.toString());
+          } else {
+            formData.append(key, value as string);
+          }
+        }
+      });
+      
+      // Add files if provided
+      if (files) {
+        Object.entries(files).forEach(([key, file]) => {
+          if (file) {
+            formData.append(key, file);
+          }
+        });
+      }
+      
+      // Make the request
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
+        formData,
+        {
+          headers: {
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Save postgraduate application as draft error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while saving the application as draft");
+    }
+  },
+
+  /**
+   * Save postgraduate application as draft using a pre-built FormData object
+   * @param formData - FormData object containing fields and files to save
+   * @returns Promise with the API response
+   */
+  savePostgraduateFormDataAsDraft: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('fastApiAccessToken');
+      
+      // Make the request
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
+        formData,
+        {
+          headers: {
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Save postgraduate application as draft error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while saving the application as draft");
+    }
+  },
+
+  /**
+   * Get saved postgraduate application draft
+   * @returns Promise with the saved draft data
+   */
+  getPostgraduateDraft: async () => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('fastApiAccessToken');
+      
+      if (!token) {
+        throw new Error("Authentication required to retrieve draft");
+      }
+      
+      // Make the request
+      const response = await axios.get(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Get postgraduate draft error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while retrieving the saved application");
+    }
+  },
 };
 
-export { apiService };
+export default apiService;

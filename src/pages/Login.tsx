@@ -7,7 +7,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
-import { apiService } from "@/services/api";
+import apiService, { API_ENDPOINTS } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
@@ -36,6 +36,13 @@ const Login = () => {
     }
     
     setIsLoading(true);
+    console.log("Attempting login with email:", email);
+    
+    // Force display a loading toast to ensure toast functionality works
+    toast.loading("Logging in...", {
+      id: "login-status",
+      duration: 5000
+    });
     
     try {
       // Test mode - bypass authentication for testing
@@ -67,18 +74,35 @@ const Login = () => {
         return;
       }
       
-      // Normal login flow
-      const data = await apiService.login({
+      console.log("Making fastApiSignin request to:", API_ENDPOINTS.FASTAPI_TOKEN);
+      
+      // Use FastAPI signin method instead of regular login
+      const data = await apiService.fastApiSignin({
         username: email,
         password
       });
+      
+      console.log("Login response received:", data);
       
       if (!data.access_token) {
         throw new Error("No access token received from server");
       }
       
+      // Use the user data directly from the response instead of creating a placeholder
+      // The response format looks like: 
+      // {
+      //   access_token: "token",
+      //   token_type: "bearer",
+      //   user: { email, uuid, program, full_name }
+      //   postgraduate_applications: []
+      // }
+      
+      console.log("Logging in user with data:", data);
       login(data.access_token, data);
+      
+      // Update the loading toast to success
       toast.success("Login successful!", {
+        id: "login-status",
         description: "Welcome back! Redirecting to your dashboard...",
         duration: 3000,
         style: {
@@ -89,30 +113,36 @@ const Login = () => {
       });
       
       // Get the program type from the response data
-      let programType = null;
-      if (data.applications && data.applications.length > 0) {
-        programType = data.applications[0].program_type?.toLowerCase();
-      }
-
-      if (!programType) {
-        programType = data.program_type?.toLowerCase() || 
-                     data.user?.program?.toLowerCase() || 
-                     data.program?.toLowerCase();
-      }
+      let programType = data.user?.program?.toLowerCase() || "undergraduate";
+      
+      // Store user's program type in localStorage for future reference
+      localStorage.setItem("programType", programType);
       
       // Determine the destination
       let destination = location.state?.from?.pathname;
       
       if (!destination) {
-        const formType = programType || "undergraduate";
-        destination = `/document-upload?type=${formType}`;
+        destination = `/document-upload?type=${programType}`;
       }
       
+      console.log("Navigating to:", destination, "with program type:", programType);
       navigate(destination, { replace: true });
       
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error details:", error); 
+      // Check for Axios error structure
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error request - no response received:", error.request);
+      }
+      
+      // Update the loading toast to error
       toast.error("Login failed", {
+        id: "login-status",
         description: error instanceof Error ? error.message : "Invalid email or password",
         duration: 5000,
         style: {

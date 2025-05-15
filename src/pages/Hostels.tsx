@@ -11,28 +11,10 @@ import { Pagination, Navigation } from 'swiper/modules';
 import ImageViewer from "@/components/ImageViewer";
 import SEO from "@/components/SEO";
 
-import nnamdi1 from "@/assets/images/hostel/nnamdi1.jpg";
-import nnamdi2 from "@/assets/images/hostel/nnamdi2.jpg";
-import kwame1 from "@/assets/images/hostel/Kwame Nkrumah1.jpg";
-import kwame2 from "@/assets/images/hostel/Kwame Nkrumah2.jpg";
-import kwame3 from "@/assets/images/hostel/Kwame Nkrumah3.jpg";
-import kwame4 from "@/assets/images/hostel/Kwame Nkrumah4.jpg";
-import kwame5 from "@/assets/images/hostel/Kwame Nkrumah5.jpg";
-import kwame6 from "@/assets/images/hostel/Kwame Nkrumah6.jpg";
-import kwame7 from "@/assets/images/hostel/Kwame Nkrumah7.jpg";
-
-import julius1 from "@/assets/images/hostel/Julius Nyerere1.jpg";
-import julius2 from "@/assets/images/hostel/Julius Nyerere2.jpg";
-import julius3 from "@/assets/images/hostel/Julius Nyerere3.jpg";
-import julius4 from "@/assets/images/hostel/Julius Nyerere4.jpg";
-import julius5 from "@/assets/images/hostel/Julius Nyerere5.jpg";
-
-
-
-
 const Hostels = () => {
   const [selectedHostel, setSelectedHostel] = useState<any | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 
   // Hostel data
   const hostels = [
@@ -43,9 +25,9 @@ const Hostels = () => {
       feePerSemester: "N280,000",
       totalFee: "N560,000",
       images: [
-        nnamdi1,
-        nnamdi2,
-       
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Room%20(2).jpg?updatedAt=1747307202535",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Study.jpg?updatedAt=1747307214591",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Toilet.jpg?updatedAt=1747307223294"
       ],
       description: "Comfortable shared accommodation in a vibrant community setting.",
       features: [
@@ -63,15 +45,13 @@ const Hostels = () => {
       feePerSemester: "N280,000",
       totalFee: "N560,000",
       images: [
-        kwame1,
-        kwame2,
-        kwame3,
-        kwame4,
-        kwame5,
-        kwame6,
-        kwame7,
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/IMG_8005.jpg?updatedAt=1747307361297",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Room%202.jpg?updatedAt=1747307371806",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Study%20(2).jpg?updatedAt=1747307404873",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Study.jpg?updatedAt=1747307412176",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Toilet.jpg?updatedAt=1747307415061"
       ],
-      description: "Affordable shared accommodation with modern amenities.",
+      description: "Shared accommodation with modern amenities.",
       features: [
         "Shared bathroom facilities",
         "Study desk and chair",
@@ -87,13 +67,10 @@ const Hostels = () => {
       feePerSemester: "N350,000",
       totalFee: "N700,000",
       images: [
-        kwame1,
-        kwame2,
-        kwame3,
-        kwame4,
-        kwame5,
-        kwame6,
-        kwame7,
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Room%202.jpg?updatedAt=1747307444703",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Toilet.jpg?updatedAt=1747307453392",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Study.jpg?updatedAt=1747307450473",
+        
       ],
       description: "Private room with enhanced privacy and comfort.",
       features: [
@@ -111,15 +88,12 @@ const Hostels = () => {
       feePerSemester: "N455,000",
       totalFee: "N910,000",
       images: [
-        julius5,
-        julius1,
-        julius2,
-        julius3,
-        julius4,
-        
-       ,
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%203.jpg?updatedAt=1747307294452",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Kitchenette.jpg?updatedAt=1747307297156",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%202.jpg?updatedAt=1747307301317",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Wardrobe.jpg?updatedAt=1747307455731"
       ],
-      description: "Premium single room with modern amenities and privacy.",
+      description: "Single room with modern amenities and privacy.",
       features: [
         "Private bathroom",
         "Study desk and chair",
@@ -136,13 +110,13 @@ const Hostels = () => {
       feePerSemester: "N238,000",
       totalFee: "N476,000",
       images: [
-        julius5,
-        julius1,
-        julius2,
-        julius3,
-        julius4,
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Room%202.jpg?updatedAt=1747307228940",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Kitchenette.jpg?updatedAt=1747307233197",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Room.jpg?updatedAt=1747307262597",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Toilet.jpg?updatedAt=1747307279402",
+        
       ],
-      description: "Economical shared accommodation in a premium hall.",
+      description: "Shared accommodation in a comfortable hall.",
       features: [
         "Shared bathroom facilities",
         "Study desk and chair",
@@ -163,6 +137,32 @@ const Hostels = () => {
         type="website"
       />
       
+      {/* Custom styles for Swiper navigation and pagination */}
+      <style>{`
+        .swiper-button-next,
+        .swiper-button-prev {
+          color: #FF5500 !important;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        
+        .swiper-container:hover .swiper-button-next,
+        .swiper-container:hover .swiper-button-prev,
+        .swiper:hover .swiper-button-next,
+        .swiper:hover .swiper-button-prev {
+          opacity: 1;
+        }
+        
+        .swiper-pagination-bullet-active {
+          background: #FF5500 !important;
+        }
+        
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+          display: none;
+        }
+      `}</style>
+      
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4">
@@ -178,7 +178,7 @@ const Hostels = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img 
-                    src={kwame1}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/_dsc9455_51379157351_o.jpg?updatedAt=1747307126141"
                     alt="AUST Student Housing"
                     className="w-full h-80 object-cover"
                   />
@@ -261,32 +261,41 @@ const Hostels = () => {
 
         {/* Hostel Modal */}
         {selectedHostel && (
-          <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-xl max-w-4xl w-full my-8 max-h-[85vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold">{selectedHostel.name}</h2>
                   <button 
                     onClick={() => setSelectedHostel(null)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="bg-[#FF5500] text-white p-2 rounded-full flex items-center justify-center shadow-md hover:bg-[#e64d00] transition-colors"
                   >
                     <X className="h-6 w-6" />
                   </button>
                 </div>
                 
-                <div className="mb-6">
+                <div className="mb-6 relative">
                   <Swiper
                     modules={[Pagination, Navigation]}
                     spaceBetween={20}
-                    navigation
-                    pagination={{ clickable: true }}
-                    className="rounded-lg overflow-hidden"
+                    navigation={{
+                      nextEl: '.swiper-button-next',
+                      prevEl: '.swiper-button-prev',
+                    }}
+                    pagination={{ 
+                      clickable: true,
+                      bulletActiveClass: 'swiper-pagination-bullet-active !bg-[#FF5500]'
+                    }}
+                    className="rounded-lg overflow-hidden swiper-custom"
                   >
                     {selectedHostel.images.map((image: string, index: number) => (
                       <SwiperSlide key={index}>
                         <div 
                           className="cursor-pointer"
-                          onClick={() => setSelectedImage(image)}
+                          onClick={() => {
+                            setSelectedImage(image);
+                            setSelectedImageIndex(index);
+                          }}
                         >
                           <img
                             src={image}
@@ -296,6 +305,12 @@ const Hostels = () => {
                         </div>
                       </SwiperSlide>
                     ))}
+                    <div className="swiper-button-prev absolute left-2 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md cursor-pointer">
+                      <ArrowRight className="h-5 w-5 text-[#FF5500] transform rotate-180" />
+                    </div>
+                    <div className="swiper-button-next absolute right-2 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md cursor-pointer">
+                      <ArrowRight className="h-5 w-5 text-[#FF5500]" />
+                    </div>
                   </Swiper>
                 </div>
 
@@ -328,10 +343,24 @@ const Hostels = () => {
         )}
 
         {/* Image Viewer */}
-        {selectedImage && (
+        {selectedImage && selectedHostel && (
           <ImageViewer 
             imageUrl={selectedImage} 
             onClose={() => setSelectedImage(null)} 
+            onNext={() => {
+              const currentIndex = selectedImageIndex;
+              const nextIndex = (currentIndex + 1) % selectedHostel.images.length;
+              setSelectedImage(selectedHostel.images[nextIndex]);
+              setSelectedImageIndex(nextIndex);
+            }}
+            onPrevious={() => {
+              const currentIndex = selectedImageIndex;
+              const prevIndex = (currentIndex - 1 + selectedHostel.images.length) % selectedHostel.images.length;
+              setSelectedImage(selectedHostel.images[prevIndex]);
+              setSelectedImageIndex(prevIndex);
+            }}
+            hasNext={selectedHostel.images.length > 1}
+            hasPrevious={selectedHostel.images.length > 1}
           />
         )}
       </main>

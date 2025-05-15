@@ -1,5 +1,4 @@
 import React from "react";
-import aboutImage from "@/assets/images/aboutimg.jpg";
 import { 
   GraduationCap, 
   Globe, 
@@ -48,7 +47,7 @@ const About = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img
-                    src={aboutImage}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/aboutimg.jpg"
                     alt="AUST Campus"
                     className="w-full h-80 object-cover"
                   />
