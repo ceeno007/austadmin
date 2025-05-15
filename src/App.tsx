@@ -8,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { HelmetProvider } from 'react-helmet-async';
 import ConditionalNavbar from './components/ConditionalNavbar';
 import ConditionalFooter from './components/ConditionalFooter';
+import PerformanceOptimizer from './components/PerformanceOptimizer';
+import { addResourceHints, registerServiceWorker } from './utils/performance';
 
 // Lazy load all page components for better performance
 const Index = lazy(() => import('./pages/Index'));
@@ -34,12 +36,14 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// Create a QueryClient instance
+// Create a QueryClient instance with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       gcTime: 1000 * 60 * 30, // 30 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
     },
   },
 });
@@ -94,16 +98,24 @@ const AppLayout: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  // Initialize performance optimizations
+  React.useEffect(() => {
+    addResourceHints();
+    registerServiceWorker();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              <Suspense fallback={<LoadingSpinner />}>
-                <AppLayout />
-              </Suspense>
-              <Toaster />
+              <PerformanceOptimizer>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <AppLayout />
+                </Suspense>
+                <Toaster />
+              </PerformanceOptimizer>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

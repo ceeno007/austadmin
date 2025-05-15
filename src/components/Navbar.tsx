@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ExternalLink } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -19,36 +19,36 @@ const Navbar = () => {
   const [showStoreDialog, setShowStoreDialog] = useState(false);
   const location = useLocation();
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
-  };
+  }, []);
 
-  const isActive = (path: string) => {
+  const isActive = useCallback((path: string) => {
     if (path === "/" && location.pathname !== "/") return false;
     return location.pathname.startsWith(path);
-  };
+  }, [location.pathname]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
 
-  const handleStoreClick = (e: React.MouseEvent) => {
+  const handleStoreClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setShowStoreDialog(true);
-  };
+  }, []);
 
-  const handleConfirmNavigation = () => {
+  const handleConfirmNavigation = useCallback(() => {
     window.open("https://yahvebrand.store/aust-store", "_blank");
     setShowStoreDialog(false);
-  };
+  }, []);
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = useCallback((path: string) => {
     scrollToTop();
     setIsMenuOpen(false);
-  };
+  }, [scrollToTop]);
 
   const navLinks = [
     { path: "/", label: "Home" },
@@ -66,7 +66,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm">
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm will-change-transform">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
@@ -76,6 +76,9 @@ const Navbar = () => {
                   src={austLogo} 
                   alt="AUST Logo" 
                   className="h-12 w-auto object-contain"
+                  loading="eager"
+                  width={48}
+                  height={48}
                 />
               </Link>
             </div>
@@ -127,6 +130,7 @@ const Navbar = () => {
               <button 
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900"
                 onClick={toggleMenu}
+                aria-label="Toggle menu"
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -219,4 +223,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar);

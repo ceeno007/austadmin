@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, X } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 
 // Custom X (Twitter) logo component
-const XLogo = () => (
+const XLogo = memo(() => (
   <svg
     viewBox="0 0 24 24"
     className="h-5 w-5"
@@ -13,7 +13,9 @@ const XLogo = () => (
   >
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
-);
+));
+
+XLogo.displayName = 'XLogo';
 
 const Footer = () => {
   const [showBadge, setShowBadge] = useState(false);
@@ -30,17 +32,17 @@ const Footer = () => {
     }
   }, []);
 
-  const handleDismissBadge = () => {
+  const handleDismissBadge = useCallback(() => {
     setShowBadge(false);
     localStorage.setItem('austinspireBadgeDismissed', 'true');
-  };
+  }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
-  };
+  }, []);
 
   return (
     <footer className="bg-gray-900 text-white pt-20 pb-8">
@@ -53,6 +55,9 @@ const Footer = () => {
                 src={austLogo}
                 alt="AUST Logo"
                 className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+                loading="eager"
+                width={48}
+                height={48}
               />
               <span className="ml-3 text-2xl font-clash-display font-bold text-white">
                 AUST
@@ -70,6 +75,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gray-800 p-2 rounded-full text-gray-400 hover:bg-[#FF5500] hover:text-white transition-all duration-300 transform hover:scale-110"
+                aria-label="Facebook"
               >
                 <Facebook className="h-5 w-5" />
               </a>
@@ -79,6 +85,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gray-800 p-2 rounded-full text-gray-400 hover:bg-[#FF5500] hover:text-white transition-all duration-300 transform hover:scale-110"
+                aria-label="Twitter"
               >
                 <XLogo />
               </a>
@@ -88,18 +95,10 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-gray-800 p-2 rounded-full text-gray-400 hover:bg-[#FF5500] hover:text-white transition-all duration-300 transform hover:scale-110"
+                aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
               </a>
-
-              {/* <a
-                href="https://www.youtube.com/@AUSTAbuja"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 p-2 rounded-full text-gray-400 hover:bg-[#FF5500] hover:text-white transition-all duration-300 transform hover:scale-110"
-              >
-                <Youtube className="h-5 w-5" />
-              </a> */}
             </div>
           </div>
 
@@ -251,6 +250,7 @@ const Footer = () => {
               <button
                 onClick={handleDismissBadge}
                 className="text-white/70 hover:text-white transition-colors flex-shrink-0 hover:bg-gray-700/50 p-1 rounded-full"
+                aria-label="Dismiss badge"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -262,4 +262,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default memo(Footer);
