@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useEffect, Suspense, useRef, useMemo, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FileText, Image as ImageIcon, ChevronRight } from "lucide-react";
@@ -12,7 +12,43 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import SEO from "@/components/SEO";
 
-// Image URLs from ImageKit
+// Types
+interface ProgramRequirements {
+  ssc?: string[];
+  jamb?: string[];
+  directEntry?: string[];
+  academic?: string[];
+  documents?: string[];
+  additional?: string[];
+}
+
+interface Program {
+  id?: string;
+  title: string;
+  duration: string;
+  schoolFees: string;
+  image?: string;
+  description?: string;
+  requirements?: ProgramRequirements;
+  pdf?: string;
+  type?: 'Masters' | 'Ph.D.' | 'PGD' | string; // Make type more flexible
+}
+
+interface ProgramCardProps {
+  program: Program;
+  index: number;
+}
+
+// Constants
+const TABS = {
+  UNDERGRADUATE: 'undergraduate',
+  POSTGRADUATE: 'postgraduate',
+  FOUNDATION: 'foundation'
+} as const;
+
+type TabType = typeof TABS[keyof typeof TABS];
+
+// Image handling utilities
 const imageMap: Record<string, string> = {
   "software-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/software-engineering.jpg",
   "computer-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/programming-background-with-person-working-with-codes-computer.jpg",
@@ -22,7 +58,7 @@ const imageMap: Record<string, string> = {
   "civil-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/civil-engineering.jpg",
   "aerospace": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/aerospace.jpg",
   "gis": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/gis.jpg",
-  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/math.jpg",
+  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg",
   "public-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/public-admin.jpg",
   "space-physics": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/space-physics.jpg",
   "policy": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/policy.jpg",
@@ -32,57 +68,59 @@ const imageMap: Record<string, string> = {
   "default": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg"
 };
 
-const Programs = () => {
+// Create loading fallback component
+const ProgramsSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {[1,2,3].map(i => (
+      <Skeleton key={i} className="h-[400px] w-full" />
+    ))}
+  </div>
+);
+
+const Programs: React.FC = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState("undergraduate");
+  const [activeTab, setActiveTab] = useState<TabType>(TABS.UNDERGRADUATE);
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
+  const [openDialog, setOpenDialog] = useState<Record<string, boolean>>({});
 
   // Get current and next year for academic session
-  const currentYear = new Date().getFullYear();
-  const academicSession = `${currentYear}/${currentYear + 1}`;
+  const academicSession = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return `${currentYear}/${currentYear + 1}`;
+  }, []);
 
-  // Check for tab parameter in URL
+  // Effect for URL params
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const tabParam = queryParams.get("tab");
-    if (tabParam && ["undergraduate", "postgraduate", "foundation"].includes(tabParam)) {
+    const tabParam = queryParams.get("tab") as TabType;
+    if (tabParam && Object.values(TABS).includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
 
-  // Get current programs based on active tab
-  const getCurrentPrograms = () => {
-    if (activeTab === "postgraduate") {
-      return Object.values(categorizedPostgrad).flat();
-    }
-    return tabs[activeTab] || [];
-  };
-
-  // Improved image handling function
-  const getImage = (program: any) => {
-    if (program.image) {
-      return program.image;
-    }
+  // Utility functions
+  const getImage = useCallback((program: Program): string => {
+    if (program.image) return program.image;
     
     const titleKey = program.title?.toLowerCase().replace(/[^a-z0-9]/g, '-');
     
     for (const [key, img] of Object.entries(imageMap)) {
-      if (titleKey?.includes(key)) {
-        return img;
-      }
+      if (titleKey?.includes(key)) return img;
     }
     
     return imageMap["default"];
-  };
+  }, []);
 
-  // Handle image load errors
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, program: any) => {
+  const handleImageError = useCallback((
+    e: React.SyntheticEvent<HTMLImageElement, Event>, 
+    program: Program
+  ) => {
     const imgSrc = getImage(program);
     setImageLoadErrors(prev => ({...prev, [imgSrc]: true}));
     e.currentTarget.src = imageMap["default"];
-  };
+  }, [getImage]);
 
-  // Updated program data with detailed requirements
+  // Program data
   const tabs = {
     undergraduate: [
       {
@@ -666,7 +704,6 @@ const Programs = () => {
         duration: "1.5 years",
         schoolFees: "₦1,800,000 total",
         image: imageMap["space-physics"] || imageMap["default"],
-        description: "Advanced study in space physics, astrophysics, and cosmic radiation.",
         requirements: {
           academic: [
             "• First Class, Second Class Upper, or Second Class Lower in Physics or related field",
@@ -842,28 +879,51 @@ const Programs = () => {
       "Reference Letters"
     ];
 
-  // Generate structured data for programs
-  const generateStructuredData = () => {
-    return {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "itemListElement": getCurrentPrograms().map((program, index) => ({
-        "@type": "EducationalProgram",
-        "name": program.title,
-        "description": program.description,
-        "provider": {
-          "@type": "CollegeOrUniversity",
-          "name": "African University of Science and Technology"
-        },
-        "timeToComplete": program.duration,
-        "educationalProgramMode": "full-time",
-        "position": index + 1
-      }))
-    };
+  // Get current programs based on active tab
+  const isProgramWithRequirements = (program: any): program is Program => {
+    return program && program.requirements !== undefined;
   };
 
-  // Update the ProgramCard component
-  const ProgramCard = ({ program, index }) => {
+  const getCurrentPrograms = useCallback((): Program[] => {
+    if (activeTab === TABS.POSTGRADUATE) {
+      return tabs.postgraduate.filter(isProgramWithRequirements);
+    }
+    return (tabs[activeTab as TabType] || []) as Program[];
+  }, [activeTab]);
+
+  // Generate structured data for programs
+  const generateStructuredData = useCallback(() => ({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": getCurrentPrograms().map((program, index) => ({
+      "@type": "EducationalProgram",
+      "name": program.title,
+      "description": program.description,
+      "provider": {
+        "@type": "CollegeOrUniversity",
+        "name": "African University of Science and Technology"
+      },
+      "timeToComplete": program.duration,
+      "educationalProgramMode": "full-time",
+      "position": index + 1
+    }))
+  }), [getCurrentPrograms]);
+
+  // Updated program data with detailed requirements
+  const ProgramCard: React.FC<ProgramCardProps> = ({ program, index }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dialogRef = useRef<HTMLDivElement>(null);
+
+    const handleOpenChange = useCallback((open: boolean) => {
+      setIsOpen(open);
+    }, []);
+
+    const handleButtonClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsOpen(true);
+    };
+
     return (
       <div 
         className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg"
@@ -901,17 +961,139 @@ const Programs = () => {
             </p>
           </div>
   
-          <Dialog>
+          <Dialog 
+            open={isOpen}
+            onOpenChange={handleOpenChange}
+            modal={true}
+          >
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
                 className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
+                onClick={handleButtonClick}
               >
                 View More <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              {/* ... existing dialog content ... */}
+            <DialogContent 
+              ref={dialogRef}
+              className="max-w-2xl max-h-[80vh] overflow-y-auto fixed"
+              onPointerDownOutside={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <DialogHeader>
+                <DialogTitle>{program.title}</DialogTitle>
+              </DialogHeader>
+              
+              <div className="mt-4 space-y-4">
+                {/* Description */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Description</h3>
+                  <p className="text-gray-600">{program.description}</p>
+                </div>
+          
+                {/* Duration and Fees */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium">Duration</h4>
+                    <p className="text-gray-600">{program.duration}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">School Fees</h4>
+                    <p className="text-gray-600">{program.schoolFees}</p>
+                  </div>
+                </div>
+          
+                {/* Requirements */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Entry Requirements</h3>
+                  {program.type === "Masters" || program.type === "Ph.D." ? (
+                    <div className="space-y-4">
+                      {program.requirements.academic && (
+                        <div>
+                          <h4 className="font-medium mb-1">Academic Requirements</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.academic.map((req: string, i: number) => (
+                              <li key={i}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {program.requirements.documents && (
+                        <div>
+                          <h4 className="font-medium mb-1">Required Documents</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.documents.map((doc: string, i: number) => (
+                              <li key={i}>{doc}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {program.requirements.additional && (
+                        <div>
+                          <h4 className="font-medium mb-1">Additional Requirements</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.additional.map((req: string, i: number) => (
+                              <li key={i}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {program.requirements.ssc && (
+                        <div>
+                          <h4 className="font-medium mb-1">O'Level Requirements</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.ssc.map((req: string, i: number) => (
+                              <li key={i}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {program.requirements.jamb && (
+                        <div>
+                          <h4 className="font-medium mb-1">JAMB Subjects</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.jamb.map((sub: string, i: number) => (
+                              <li key={i}>{sub}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {program.requirements.directEntry && (
+                        <div>
+                          <h4 className="font-medium mb-1">Direct Entry Requirements</h4>
+                          <ul className="list-disc pl-5 text-gray-600 space-y-1">
+                            {program.requirements.directEntry.map((req: string, i: number) => (
+                              <li key={i}>{req}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+          
+                {/* PDF Download Button */}
+                {program.pdf && (
+                  <div className="mt-6">
+                    <a
+                      href={program.pdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#FF5500] hover:text-[#FF5500]/80"
+                    >
+                      <Button variant="ghost" className="text-[#FF5500]">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Download Brochure
+                      </Button>
+                    </a>
+                  </div>
+                )}
+              </div>
             </DialogContent>
           </Dialog>
         </div>
@@ -920,7 +1102,7 @@ const Programs = () => {
   };
 
   return (
-    <>
+    <Suspense fallback={<ProgramsSkeleton />}>
       <SEO 
         title="Academic Programs | AUST"
         description="Explore AUST's comprehensive range of undergraduate, postgraduate, and foundation programs in science, technology, and business. Find your path to success with our world-class education."
@@ -948,37 +1130,26 @@ const Programs = () => {
           <div className="container mx-auto px-4">
             {/* Simple Tab Navigation */}
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
-              <button
-                onClick={() => setActiveTab("undergraduate")}
-                className={`px-4 py-2 rounded text-sm sm:text-base ${
-                  activeTab === "undergraduate"
-                    ? "bg-[#FF5500] text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Undergraduate
-              </button>
-              <button
-                onClick={() => setActiveTab("postgraduate")}
-                className={`px-4 py-2 rounded text-sm sm:text-base ${
-                  activeTab === "postgraduate"
-                    ? "bg-[#FF5500] text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                Postgraduate
-              </button>
-              <button
-                onClick={() => setActiveTab("foundation")}
-                className={`px-4 py-2 rounded text-sm sm:text-base ${
-                  activeTab === "foundation"
-                    ? "bg-[#FF5500] text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                <span className="hidden sm:inline">Foundation and Remedial Studies</span>
-                <span className="sm:hidden">Foundation</span>
-              </button>
+              {Object.entries(TABS).map(([key, value]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(value)}
+                  className={`px-4 py-2 rounded text-sm sm:text-base ${
+                    activeTab === value
+                      ? "bg-[#FF5500] text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {key === 'FOUNDATION' ? (
+                    <>
+                      <span className="hidden sm:inline">Foundation and Remedial Studies</span>
+                      <span className="sm:hidden">Foundation</span>
+                    </>
+                  ) : (
+                    key.charAt(0) + key.slice(1).toLowerCase()
+                  )}
+                </button>
+              ))}
             </div>
 
             {/* Program Cards */}
@@ -1001,7 +1172,7 @@ const Programs = () => {
           </div>
         </section>
       </main>
-    </>
+    </Suspense>
   );
 };
 

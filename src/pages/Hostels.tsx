@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, CheckCircle2, ArrowRight, X, Image } from "lucide-react";
@@ -15,6 +15,20 @@ const Hostels = () => {
   const [selectedHostel, setSelectedHostel] = useState<any | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+
+  // Add useEffect to handle body scroll
+  useEffect(() => {
+    if (selectedHostel || selectedImage) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedHostel, selectedImage]);
 
   // Hostel data
   const hostels = [
@@ -261,7 +275,15 @@ const Hostels = () => {
 
         {/* Hostel Modal */}
         {selectedHostel && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div 
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={(e) => {
+              // Only close if clicking the background overlay
+              if (e.target === e.currentTarget) {
+                setSelectedHostel(null);
+              }
+            }}
+          >
             <div className="bg-white rounded-xl max-w-4xl w-full my-8 max-h-[85vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">

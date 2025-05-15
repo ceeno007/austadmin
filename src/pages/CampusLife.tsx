@@ -15,12 +15,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SEO from "@/components/SEO";
-import campusLife from "@/assets/images/campusLife.jpg";
-import research from "@/assets/images/research.jpg";
-import housing from "@/assets/images/housing.jpg";
-import cafeteria from "@/assets/images/Cafeteria.jpg";
-// import gym from "@/assets/images/gym.jpg";
-import library from "@/assets/images/library.jpg";
 
 const CampusLife = () => {
   return (
@@ -49,9 +43,10 @@ const CampusLife = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img 
-                    src={campusLife}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/_dsc9428_51379905094_o.jpg?updatedAt=1747307174844"
                     alt="AUST Campus Life"
                     className="w-full h-80 object-cover"
+                 
                   />
                 </div>
               </div>
@@ -67,7 +62,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                     src={library}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/library.jpg"
                     alt="AUST Library"
                     className="w-full h-full object-cover"
                   />
@@ -88,7 +83,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://www.aust.edu.ng/sites/default/files/2023-10/computer-lab-education-technology.jpg"
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/computer-lab-education-technology.jpg?updatedAt=1747333577322"
                     alt="Computer Labs"
                     className="w-full h-full object-cover"
                   />
@@ -105,11 +100,11 @@ const CampusLife = () => {
                   </p>
                 </CardContent>
               </Card>
-              
+            
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src={research}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/51379926499_24295c4ce0_o.jpg?updatedAt=1747332863644"
                     alt="Research Facilities"
                     className="w-full h-full object-cover"
                   />
@@ -131,7 +126,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src={housing}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/housing.jpg"
                     alt="Student Housing"
                     className="w-full h-full object-cover"
                   />
@@ -157,7 +152,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src={cafeteria}
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/cafeteria.jpg"
                     alt="Cafeteria"
                     className="w-full h-full object-cover"
                   />
