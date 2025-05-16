@@ -1,35 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, CheckCircle2, ArrowRight, X, Image } from "lucide-react";
+import { Home, CheckCircle2, Image } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-import { Pagination, Navigation } from 'swiper/modules';
-import ImageViewer from "@/components/ImageViewer";
 import SEO from "@/components/SEO";
 
+// Hostel interface
+interface Hostel {
+  name: string;
+  type: string;
+  duration: string;
+  feePerSemester: string;
+  totalFee: string;
+  images: string[];
+  description: string;
+  features: string[];
+}
+
+interface HostelCardProps {
+  hostel: Hostel;
+  index: number;
+  onViewImages: (hostel: Hostel) => void;
+}
+
 const Hostels = () => {
-  const [selectedHostel, setSelectedHostel] = useState<any | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
-
-  // Add useEffect to handle body scroll
-  useEffect(() => {
-    if (selectedHostel || selectedImage) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    // Cleanup function
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [selectedHostel, selectedImage]);
-
+  const navigate = useNavigate();
+  
   // Hostel data
   const hostels = [
     {
@@ -141,6 +137,64 @@ const Hostels = () => {
     }
   ];
 
+  const handleViewImages = (hostel: Hostel) => {
+    // Navigate to the hostel-images page with the selected hostel data
+    navigate('/hostel-images', { state: { hostel } });
+  };
+
+  const HostelCard: React.FC<HostelCardProps> = ({ hostel, index, onViewImages }) => {
+    return (
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+        <div className="h-48 overflow-hidden">
+          <img 
+            src={hostel.images[0]}
+            alt={`${hostel.name} - ${hostel.type}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <CardContent className="p-6">
+          <div className="flex items-center mb-4">
+            <div className="h-10 w-10 rounded-full bg-[#FF5500]/10 flex items-center justify-center mr-3">
+              <Home className="h-5 w-5 text-[#FF5500]" />
+            </div>
+            <h3 className="text-xl font-bold">{hostel.name}</h3>
+          </div>
+          <div className="mb-4">
+            <p className="text-gray-600 mb-2">{hostel.description}</p>
+            <div className="flex justify-between text-sm font-medium">
+              <span>Type: {hostel.type}</span>
+              <span>Duration: {hostel.duration}</span>
+            </div>
+            <div className="flex justify-between text-sm font-medium mt-2">
+              <span>Per Semester: {hostel.feePerSemester}</span>
+              <span className="text-[#FF5500]">Total: {hostel.totalFee}</span>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">Features:</h4>
+            <ul className="space-y-1">
+              {hostel.features.map((feature, idx) => (
+                <li key={idx} className="flex items-start text-sm text-gray-600">
+                  <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="mt-6 flex justify-start">
+            <Button
+              className="bg-[#FF5500] hover:bg-[#e64d00] text-white"
+              onClick={() => onViewImages(hostel)}
+            >
+              <Image className="h-4 w-4 mr-2" />
+              View Images
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <>
       <SEO 
@@ -150,32 +204,6 @@ const Hostels = () => {
         url={`${window.location.origin}/hostels`}
         type="website"
       />
-      
-      {/* Custom styles for Swiper navigation and pagination */}
-      <style>{`
-        .swiper-button-next,
-        .swiper-button-prev {
-          color: #FF5500 !important;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        
-        .swiper-container:hover .swiper-button-next,
-        .swiper-container:hover .swiper-button-prev,
-        .swiper:hover .swiper-button-next,
-        .swiper:hover .swiper-button-prev {
-          opacity: 1;
-        }
-        
-        .swiper-pagination-bullet-active {
-          background: #FF5500 !important;
-        }
-        
-        .swiper-button-next::after,
-        .swiper-button-prev::after {
-          display: none;
-        }
-      `}</style>
       
       <main className="flex-grow">
         <section className="py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
@@ -211,180 +239,16 @@ const Hostels = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {hostels.map((hostel, index) => (
-                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src={hostel.images[0]}
-                      alt={`${hostel.name} - ${hostel.type}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="h-10 w-10 rounded-full bg-[#FF5500]/10 flex items-center justify-center mr-3">
-                        <Home className="h-5 w-5 text-[#FF5500]" />
-                      </div>
-                      <h3 className="text-xl font-bold">{hostel.name}</h3>
-                    </div>
-                    <div className="mb-4">
-                      <p className="text-gray-600 mb-2">{hostel.description}</p>
-                      <div className="flex justify-between text-sm font-medium">
-                        <span>Type: {hostel.type}</span>
-                        <span>Duration: {hostel.duration}</span>
-                      </div>
-                      <div className="flex justify-between text-sm font-medium mt-2">
-                        <span>Per Semester: {hostel.feePerSemester}</span>
-                        <span className="text-[#FF5500]">Total: {hostel.totalFee}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">Features:</h4>
-                      <ul className="space-y-1">
-                        {hostel.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start text-sm text-gray-600">
-                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="mt-6 flex justify-between items-center">
-                      <Button
-                        variant="outline"
-                        className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                        onClick={() => setSelectedHostel(hostel)}
-                      >
-                        <Image className="h-4 w-4 mr-2" />
-                        View Images
-                      </Button>
-                      {/* <Button
-                        asChild
-                        className="bg-[#FF5500] hover:bg-[#e64d00]"
-                      >
-                        <Link to="/signup" className="flex items-center">
-                          Apply Now <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button> */}
-                    </div>
-                  </CardContent>
-                </Card>
+                <HostelCard 
+                  key={index}
+                  hostel={hostel}
+                  index={index}
+                  onViewImages={handleViewImages}
+                />
               ))}
             </div>
           </div>
         </section>
-
-        {/* Hostel Modal */}
-        {selectedHostel && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
-            onClick={(e) => {
-              // Only close if clicking the background overlay
-              if (e.target === e.currentTarget) {
-                setSelectedHostel(null);
-              }
-            }}
-          >
-            <div className="bg-white rounded-xl max-w-4xl w-full my-8 max-h-[85vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">{selectedHostel.name}</h2>
-                  <button 
-                    onClick={() => setSelectedHostel(null)}
-                    className="bg-[#FF5500] text-white p-2 rounded-full flex items-center justify-center shadow-md hover:bg-[#e64d00] transition-colors"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-                
-                <div className="mb-6 relative">
-                  <Swiper
-                    modules={[Pagination, Navigation]}
-                    spaceBetween={20}
-                    navigation={{
-                      nextEl: '.swiper-button-next',
-                      prevEl: '.swiper-button-prev',
-                    }}
-                    pagination={{ 
-                      clickable: true,
-                      bulletActiveClass: 'swiper-pagination-bullet-active !bg-[#FF5500]'
-                    }}
-                    className="rounded-lg overflow-hidden swiper-custom"
-                  >
-                    {selectedHostel.images.map((image: string, index: number) => (
-                      <SwiperSlide key={index}>
-                        <div 
-                          className="cursor-pointer"
-                          onClick={() => {
-                            setSelectedImage(image);
-                            setSelectedImageIndex(index);
-                          }}
-                        >
-                          <img
-                            src={image}
-                            alt={`${selectedHostel.name} - Image ${index + 1}`}
-                            className="w-full h-96 object-cover rounded-lg"
-                          />
-                        </div>
-                      </SwiperSlide>
-                    ))}
-                    <div className="swiper-button-prev absolute left-2 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md cursor-pointer">
-                      <ArrowRight className="h-5 w-5 text-[#FF5500] transform rotate-180" />
-                    </div>
-                    <div className="swiper-button-next absolute right-2 top-1/2 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center shadow-md cursor-pointer">
-                      <ArrowRight className="h-5 w-5 text-[#FF5500]" />
-                    </div>
-                  </Swiper>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Details</h3>
-                    <div className="space-y-2">
-                      <p><span className="font-medium">Type:</span> {selectedHostel.type}</p>
-                      <p><span className="font-medium">Duration:</span> {selectedHostel.duration}</p>
-                      <p><span className="font-medium">Fee per Semester:</span> {selectedHostel.feePerSemester}</p>
-                      <p><span className="font-medium">Total Fee:</span> {selectedHostel.totalFee}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4">Features</h3>
-                    <ul className="space-y-2">
-                      {selectedHostel.features.map((feature: string, index: number) => (
-                        <li key={index} className="flex items-start">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Image Viewer */}
-        {selectedImage && selectedHostel && (
-          <ImageViewer 
-            imageUrl={selectedImage} 
-            onClose={() => setSelectedImage(null)} 
-            onNext={() => {
-              const currentIndex = selectedImageIndex;
-              const nextIndex = (currentIndex + 1) % selectedHostel.images.length;
-              setSelectedImage(selectedHostel.images[nextIndex]);
-              setSelectedImageIndex(nextIndex);
-            }}
-            onPrevious={() => {
-              const currentIndex = selectedImageIndex;
-              const prevIndex = (currentIndex - 1 + selectedHostel.images.length) % selectedHostel.images.length;
-              setSelectedImage(selectedHostel.images[prevIndex]);
-              setSelectedImageIndex(prevIndex);
-            }}
-            hasNext={selectedHostel.images.length > 1}
-            hasPrevious={selectedHostel.images.length > 1}
-          />
-        )}
       </main>
     </>
   );
