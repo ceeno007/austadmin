@@ -167,7 +167,7 @@ const HostelImages = () => {
               </div>
               {/* Zoom out icon */}
               <button
-                className="absolute top-10 right-4 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors z-30 flex items-center justify-center"
+                className="absolute top-4 right-4 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors z-30 flex items-center justify-center"
                 onClick={toggleFullscreen}
                 aria-label="Exit fullscreen"
               >
@@ -251,21 +251,9 @@ const HostelImages = () => {
                             display: 'block'
                           }}
                         />
-                        {/* Top overlay for hall name: only show in fullscreen, or on desktop/tablet in non-fullscreen */}
-                        {(fullscreen || (!fullscreen && typeof window !== 'undefined' && window.innerWidth >= 640)) && (
-                          <div className="absolute top-4 left-4 bg-black/60 text-white px-4 py-2 rounded-md text-lg font-semibold z-20 max-w-[90vw] md:max-w-[60vw] truncate shadow-lg">
-                            {hostel.name} - {hostel.type}
-                          </div>
-                        )}
-                        {/* Overlay name for mobile: only show in non-fullscreen */}
-                        {!fullscreen && (
-                          <div className="absolute left-2 right-2 bottom-20 bg-black/60 text-white px-3 py-2 rounded-md text-base font-semibold z-20 text-center truncate shadow">
-                            {hostel.name} - {hostel.type}
-                          </div>
-                        )}
                         {/* Zoom icon button: show Maximize2 when not fullscreen, Minimize2 when fullscreen */}
                         <button
-                          className={`absolute top-20 right-6 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors z-40 flex items-center justify-center`}
+                          className={`absolute top-10 right-6 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors z-40 flex items-center justify-center`}
                           onClick={toggleFullscreen}
                           aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                         >
