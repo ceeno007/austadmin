@@ -37,6 +37,11 @@ const Sitemap = () => {
                     </Link>
                   </li>
                   <li>
+                    <Link to="/hostels" className="text-blue-600 hover:text-blue-800">
+                      Hostel
+                    </Link>
+                  </li>
+                  <li>
                     <Link to="/contact" className="text-blue-600 hover:text-blue-800">
                       Contact
                     </Link>
