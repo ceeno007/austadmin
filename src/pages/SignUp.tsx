@@ -42,46 +42,21 @@ const SignUp = () => {
 
   const handleSendVerification = async () => {
     if (!isEmailValid) {
-      toast.error("Invalid email address", {
-        description: "Please enter a valid email address to continue.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Please enter a valid email address");
       return;
     }
 
     // Temporarily bypass verification for testing
     setIsEmailVerified(true);
-    toast.success("Email verification bypassed", {
-      description: "Email verification has been temporarily disabled for testing.",
-      style: {
-        background: '#10B981',
-        color: 'white',
-      }
-    });
+    toast.success("Email verification bypassed");
     
     /* Commented out for testing
     setIsVerifying(true);
     try {
       await apiService.sendVerificationCode(email);
-      toast.success("Verification code sent", {
-        description: "Please check your email for the verification code.",
-        style: {
-          background: '#10B981',
-          color: 'white',
-        }
-      });
+      toast.success("Verification code sent to your email");
     } catch (error) {
-      console.error("Error sending verification code:", error);
-      toast.error("Failed to send verification code", {
-        description: error instanceof Error ? error.message : "Please try again later.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to send code");
     } finally {
       setIsVerifying(false);
     }
@@ -91,23 +66,11 @@ const SignUp = () => {
   const handleVerifyOtp = async () => {
     // Temporarily bypass OTP verification for testing
     setIsEmailVerified(true);
-    toast.success("OTP verification bypassed", {
-      description: "OTP verification has been temporarily disabled for testing.",
-      style: {
-        background: '#10B981',
-        color: 'white',
-      }
-    });
+    toast.success("OTP verification bypassed");
     
     /* Commented out for testing
     if (!verificationCode) {
-      toast.error("Verification code required", {
-        description: "Please enter the verification code sent to your email.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Please enter verification code");
       return;
     }
 
@@ -115,22 +78,9 @@ const SignUp = () => {
     try {
       await apiService.verifyEmail({ email, code: verificationCode });
       setIsEmailVerified(true);
-      toast.success("Email verified", {
-        description: "Your email has been successfully verified.",
-        style: {
-          background: '#10B981',
-          color: 'white',
-        }
-      });
+      toast.success("Email verified successfully");
     } catch (error) {
-      console.error("Error verifying email:", error);
-      toast.error("Verification failed", {
-        description: error instanceof Error ? error.message : "Please check the code and try again.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error(error instanceof Error ? error.message : "Invalid verification code");
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -141,49 +91,22 @@ const SignUp = () => {
     e.preventDefault();
     
     if (!programType) {
-      toast.error("Program type required", {
-        description: "Please select a program type to continue.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Please select a program type");
       return;
     }
     
     if (!passwordsMatch) {
-      toast.error("Passwords don't match", {
-        description: "Please make sure your passwords match.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Passwords don't match");
       return;
     }
     
     if (!(hasMinLength && hasUpperCase && hasNumber)) {
-      toast.error("Password requirements not met", {
-        description: "Password must be at least 8 characters with uppercase, number, and special character.",
-        style: {
-          background: '#EF4444',
-          color: 'white',
-        }
-      });
+      toast.error("Password requirements not met");
       return;
     }
     
     setIsLoading(true);
-    console.log("Starting signup process with email:", email);
-    
-    // Force display a loading toast to ensure toast functionality works
-    toast.loading("Creating account...", {
-      id: "signup-status",
-      duration: 5000
-    });
-    
-    // Use the API service for signup
-    console.log("Making fastApiSignup request to:", API_ENDPOINTS.FASTAPI_SIGNUP);
+    const loadingToast = toast.loading("Creating account...");
     
     apiService.fastApiSignup({
       email,
@@ -192,43 +115,16 @@ const SignUp = () => {
       password
     })
       .then((data) => {
-        console.log("Signup successful, received data:", data);
-        // Store user's name and program type
         localStorage.setItem("userName", fullName);
         localStorage.setItem("programType", programType);
         
-        // Update the loading toast to success
-        toast.success("Account created", {
-          id: "signup-status",
-          description: "Your account has been created successfully. Please log in to continue.",
-          style: {
-            background: '#10B981',
-            color: 'white',
-          }
-        });
+        toast.dismiss(loadingToast);
+        toast.success("Account created successfully");
         navigate("/login");
       })
       .catch((error) => {
-        console.error("Error during signup:", error);
-        // Check for Axios error structure
-        if (error.response) {
-          console.error("Error response data:", error.response.data);
-          console.error("Error response status:", error.response.status);
-          console.error("Error response headers:", error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("Error request - no response received:", error.request);
-        }
-        
-        // Update the loading toast to error
-        toast.error("Signup failed", {
-          id: "signup-status",
-          description: error.message || "Failed to create account. Please try again.",
-          style: {
-            background: '#EF4444',
-            color: 'white',
-          }
-        });
+        toast.dismiss(loadingToast);
+        toast.error(error.message || "Failed to create account");
       })
       .finally(() => {
         setIsLoading(false);

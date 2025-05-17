@@ -10,6 +10,16 @@ import austLogo from "@/assets/images/austlogo.webp";
 import apiService, { API_ENDPOINTS } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user?: {
+    email: string;
+    program?: string;
+    full_name: string;
+  };
+}
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,26 +33,14 @@ const Login = () => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please enter both email and password", {
-        description: "All fields are required to log in",
-        duration: 5000,
-        style: {
-          background: '#FEE2E2',
-          color: '#991B1B',
-          border: '1px solid #FCA5A5',
-        }
-      });
+      toast.error("Please enter both email and password");
       return;
     }
     
     setIsLoading(true);
     console.log("Attempting login with email:", email);
     
-    // Force display a loading toast to ensure toast functionality works
-    toast.loading("Logging in...", {
-      id: "login-status",
-      duration: 5000
-    });
+    const loadingToast = toast.loading("Logging in...");
     
     try {
       // Test mode - bypass authentication for testing
@@ -58,15 +56,8 @@ const Login = () => {
         };
         
         login(testData.access_token, testData);
-        toast.success("Test login successful!", {
-          description: "Welcome back! Redirecting to your dashboard...",
-          duration: 3000,
-          style: {
-            background: '#DCFCE7',
-            color: '#166534',
-            border: '1px solid #86EFAC',
-          }
-        });
+        toast.dismiss(loadingToast);
+        toast.success("Login successful!");
         
         const programType = testData.user.program;
         const destination = `/document-upload?type=${programType}`;
@@ -76,11 +67,10 @@ const Login = () => {
       
       console.log("Making fastApiSignin request to:", API_ENDPOINTS.FASTAPI_TOKEN);
       
-      // Use FastAPI signin method instead of regular login
       const data = await apiService.fastApiSignin({
         username: email,
         password
-      });
+      }) as TokenResponse;
       
       console.log("Login response received:", data);
       
@@ -88,39 +78,16 @@ const Login = () => {
         throw new Error("No access token received from server");
       }
       
-      // Use the user data directly from the response instead of creating a placeholder
-      // The response format looks like: 
-      // {
-      //   access_token: "token",
-      //   token_type: "bearer",
-      //   user: { email, uuid, program, full_name }
-      //   postgraduate_applications: []
-      // }
-      
       console.log("Logging in user with data:", data);
       login(data.access_token, data);
       
-      // Update the loading toast to success
-      toast.success("Login successful!", {
-        id: "login-status",
-        description: "Welcome back! Redirecting to your dashboard...",
-        duration: 3000,
-        style: {
-          background: '#DCFCE7',
-          color: '#166534',
-          border: '1px solid #86EFAC',
-        }
-      });
+      toast.dismiss(loadingToast);
+      toast.success("Login successful!");
       
-      // Get the program type from the response data
       let programType = data.user?.program?.toLowerCase() || "undergraduate";
-      
-      // Store user's program type in localStorage for future reference
       localStorage.setItem("programType", programType);
       
-      // Determine the destination
       let destination = location.state?.from?.pathname;
-      
       if (!destination) {
         destination = `/document-upload?type=${programType}`;
       }
@@ -130,27 +97,16 @@ const Login = () => {
       
     } catch (error) {
       console.error("Login error details:", error); 
-      // Check for Axios error structure
       if (error.response) {
         console.error("Error response data:", error.response.data);
         console.error("Error response status:", error.response.status);
         console.error("Error response headers:", error.response.headers);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error("Error request - no response received:", error.request);
       }
       
-      // Update the loading toast to error
-      toast.error("Login failed", {
-        id: "login-status",
-        description: error instanceof Error ? error.message : "Invalid email or password",
-        duration: 5000,
-        style: {
-          background: '#FEE2E2',
-          color: '#991B1B',
-          border: '1px solid #FCA5A5',
-        }
-      });
+      toast.dismiss(loadingToast);
+      toast.error(error instanceof Error ? error.message : "Invalid email or password");
     } finally {
       setIsLoading(false);
     }

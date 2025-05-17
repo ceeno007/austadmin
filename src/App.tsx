@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from 'sonner';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { HelmetProvider } from 'react-helmet-async';
 import ConditionalNavbar from './components/ConditionalNavbar';
@@ -148,7 +148,16 @@ const App: React.FC = () => {
                 <Suspense fallback={<LoadingSpinner />}>
                   <AppLayout />
                 </Suspense>
-                <Toaster />
+                <Toaster 
+                  position="top-right" 
+                  toastOptions={{
+                    style: {
+                      maxWidth: '320px',
+                    },
+                    className: 'toast-compact',
+                  }} 
+                  richColors
+                />
               </PerformanceOptimizer>
             </AuthProvider>
           </BrowserRouter>
@@ -158,4 +167,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App; 
+export default App;

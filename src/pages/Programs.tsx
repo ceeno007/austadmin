@@ -58,7 +58,7 @@ const imageMap: Record<string, string> = {
   "civil-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/civil-engineering.jpg",
   "aerospace": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/aerospace.jpg",
   "gis": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/gis.jpg",
-  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg",
+  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/math.jpg",
   "public-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/public-admin.jpg",
   "space-physics": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/space-physics.jpg",
   "policy": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/policy.jpg",
@@ -915,14 +915,12 @@ const Programs: React.FC = () => {
     const dialogRef = useRef<HTMLDivElement>(null);
 
     const handleOpenChange = useCallback((open: boolean) => {
-      setIsOpen(open);
-    }, []);
-
-    const handleButtonClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsOpen(true);
-    };
+      if (!open && isOpen) {
+        setIsOpen(false);
+      } else if (open && !isOpen) {
+        setIsOpen(true);
+      }
+    }, [isOpen]);
 
     return (
       <div 
@@ -964,26 +962,26 @@ const Programs: React.FC = () => {
           <Dialog 
             open={isOpen}
             onOpenChange={handleOpenChange}
-            modal={true}
           >
             <DialogTrigger asChild>
               <Button 
                 variant="outline" 
                 className="text-[#FF5500] border-[#FF5500] hover:bg-[#FF5500] hover:text-white"
-                onClick={handleButtonClick}
+                onClick={() => setIsOpen(true)}
               >
                 View More <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent 
               ref={dialogRef}
-              className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border-gray-200/50 shadow-xl"
-              onPointerDownOutside={(e) => {
-                e.preventDefault();
-              }}
+              className="max-w-2xl max-h-[80vh] overflow-y-auto"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              onEscapeKeyDown={(e) => e.preventDefault()}
+              onPointerDownOutside={(e) => e.preventDefault()}
+              onInteractOutside={(e) => e.preventDefault()}
             >
               <DialogHeader>
-                <DialogTitle className="text-xl font-semibold text-center">{program.title}</DialogTitle>
+                <DialogTitle>{program.title}</DialogTitle>
               </DialogHeader>
               
               <div className="mt-4 space-y-4">
@@ -1120,7 +1118,7 @@ const Programs: React.FC = () => {
               Explore Our <span className="text-[#FF5500]">Programs</span>
             </h1>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our wide range of undergraduate, postgraduate, and foundation programs designed to prepare you for success in your chosen field.
+              Discover our wide range of undergraduate, postgraduate, and JUPEB programs designed to prepare you for success in your chosen field.
             </p>
           </div>
         </section>
@@ -1129,15 +1127,15 @@ const Programs: React.FC = () => {
         <section className="py-8 sm:py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
             {/* Simple Tab Navigation */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-8 sm:mb-12">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
               {Object.entries(TABS).map(([key, value]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(value)}
-                  className={`px-6 py-3 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 transform hover:scale-105 ${
+                  className={`px-4 py-2 rounded text-sm sm:text-base ${
                     activeTab === value
-                      ? "bg-[#FF5500] text-white shadow-lg shadow-[#FF5500]/20"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm hover:shadow-md"
+                      ? "bg-[#FF5500] text-white"
+                      : "bg-gray-200 text-gray-700"
                   }`}
                 >
                   {key === 'FOUNDATION' ? (
