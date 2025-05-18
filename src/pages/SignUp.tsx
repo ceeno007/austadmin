@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2, Skeleton } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import austLogo from "@/assets/images/austlogo.webp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import apiService, { API_ENDPOINTS } from "@/services/api";
