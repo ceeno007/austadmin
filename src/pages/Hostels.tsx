@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, CheckCircle2, Image } from "lucide-react";
@@ -26,8 +26,8 @@ interface HostelCardProps {
 const Hostels = () => {
   const navigate = useNavigate();
   
-  // Hostel data
-  const hostels = [
+  // Memoize hostels data to prevent unnecessary re-renders
+  const hostels = useMemo(() => [
     {
       name: "Nnamdi Azikiwe Hall",
       type: "Shared Room",
@@ -135,39 +135,42 @@ const Hostels = () => {
         "24/7 security"
       ]
     }
-  ];
+  ], []);
 
-  const handleViewImages = (hostel: Hostel) => {
-    // Navigate to the hostel-images page with the selected hostel data
+  const handleViewImages = React.useCallback((hostel: Hostel) => {
     navigate('/hostel-images', { state: { hostel } });
-  };
+  }, [navigate]);
 
+  // Memoize the HostelCard component
   const HostelCard: React.FC<HostelCardProps> = ({ hostel, index, onViewImages }) => {
     return (
       <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-        <div className="h-48 overflow-hidden">
+        <div className="relative h-48 overflow-hidden">
           <img 
             src={hostel.images[0]}
-            alt={`${hostel.name} - ${hostel.type}`}
+            alt={hostel.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+            fetchPriority={index < 3 ? "high" : "low"}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+            <div className="p-4 w-full">
+              <h3 className="text-xl font-bold text-white">{hostel.name}</h3>
+              <p className="text-sm text-white/90">{hostel.type}</p>
+            </div>
+          </div>
         </div>
         <CardContent className="p-6">
-          <div className="flex items-center mb-4">
-            <div className="h-10 w-10 rounded-full bg-[#FF5500]/10 flex items-center justify-center mr-3">
-              <Home className="h-5 w-5 text-[#FF5500]" />
+          <p className="text-gray-600 mb-4">{hostel.description}</p>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <h4 className="font-semibold mb-2">Price:</h4>
+              <p className="text-gray-600">{hostel.feePerSemester} - {hostel.totalFee}</p>
             </div>
-            <h3 className="text-xl font-bold">{hostel.name}</h3>
-          </div>
-          <div className="mb-4">
-            <p className="text-gray-600 mb-2">{hostel.description}</p>
-            <div className="flex justify-between text-sm font-medium">
-              <span>Type: {hostel.type}</span>
-              <span>Duration: {hostel.duration}</span>
-            </div>
-            <div className="flex justify-between text-sm font-medium mt-2">
-              <span>Per Semester: {hostel.feePerSemester}</span>
-              <span className="text-[#FF5500]">Total: {hostel.totalFee}</span>
+            <div>
+              <h4 className="font-semibold mb-2">Capacity:</h4>
+              <p className="text-gray-600">{hostel.type === "Shared Room" ? "Shared" : "Single"} Room</p>
             </div>
           </div>
           <div>
@@ -183,7 +186,8 @@ const Hostels = () => {
           </div>
           <div className="mt-6 flex justify-start">
             <Button
-              className="bg-[#FF5500] hover:bg-[#e64d00] text-white"
+              variant="outline"
+              className="border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white transition-all duration-200 ease-in-out"
               onClick={() => onViewImages(hostel)}
             >
               <Image className="h-4 w-4 mr-2" />
@@ -194,6 +198,18 @@ const Hostels = () => {
       </Card>
     );
   };
+
+  // Memoize the hero image
+  const heroImage = useMemo(() => (
+    <img 
+      src="https://ik.imagekit.io/nsq6yvxg1/Upload/_dsc9455_51379157351_o.jpg?updatedAt=1747307126141"
+      alt="AUST Student Housing"
+      className="w-full h-80 object-cover"
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
+    />
+  ), []);
 
   return (
     <>
@@ -219,11 +235,7 @@ const Hostels = () => {
               </div>
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
-                  <img 
-                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/_dsc9455_51379157351_o.jpg?updatedAt=1747307126141"
-                    alt="AUST Student Housing"
-                    className="w-full h-80 object-cover"
-                  />
+                  {heroImage}
                 </div>
               </div>
             </div>
@@ -238,14 +250,16 @@ const Hostels = () => {
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {hostels.map((hostel, index) => (
-                <HostelCard 
-                  key={index}
-                  hostel={hostel}
-                  index={index}
-                  onViewImages={handleViewImages}
-                />
-              ))}
+              <Suspense fallback={<div>Loading hostels...</div>}>
+                {hostels.map((hostel, index) => (
+                  <HostelCard 
+                    key={`${hostel.name}-${index}`}
+                    hostel={hostel}
+                    index={index}
+                    onViewImages={handleViewImages}
+                  />
+                ))}
+              </Suspense>
             </div>
           </div>
         </section>
@@ -254,4 +268,4 @@ const Hostels = () => {
   );
 };
 
-export default Hostels;
+export default React.memo(Hostels);

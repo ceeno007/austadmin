@@ -10,6 +10,7 @@ import ConditionalNavbar from './components/ConditionalNavbar';
 import ConditionalFooter from './components/ConditionalFooter';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { addResourceHints, registerServiceWorker } from './utils/performance';
+import ProgramDetails from "./pages/ProgramDetails";
 
 // Lazy load all page components for better performance
 const Index = lazy(() => import('./pages/Index'));
@@ -100,6 +101,9 @@ const AppLayout: React.FC = () => {
             </ProtectedRoute>
           } />
           <Route path="/view-pdf" element={<ViewPDF />} />
+
+          {/* Program Details Route */}
+          <Route path="/programs/:programId" element={<ProgramDetails />} />
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />

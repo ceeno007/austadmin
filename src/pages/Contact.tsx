@@ -6,6 +6,7 @@ import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import apiService from "@/services/api";
 import SEO from "@/components/SEO";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -146,9 +147,10 @@ const Contact = () => {
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
-                        </>
+                        <div className="flex items-center justify-center">
+                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
                       ) : (
                         <>
                           <Send className="mr-2 h-4 w-4" /> Send Message

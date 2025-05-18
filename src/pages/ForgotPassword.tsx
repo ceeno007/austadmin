@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Mail, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import apiService from "@/services/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -217,10 +218,10 @@ const ForgotPassword = () => {
                   disabled={isLoading || !isEmailValid}
                 >
                   {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
+                    <div className="flex items-center justify-center">
+                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
                   ) : (
                     <>
                       <Mail className="h-4 w-4 mr-2" />
@@ -252,10 +253,10 @@ const ForgotPassword = () => {
                   disabled={isVerifyingOtp || !otpCode}
                 >
                   {isVerifyingOtp ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Verifying...
-                    </>
+                    <div className="flex items-center justify-center">
+                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
                   ) : (
                     "Verify Code"
                   )}
@@ -373,10 +374,10 @@ const ForgotPassword = () => {
                   disabled={isResetting || !passwordsMatch || !hasMinLength || !hasUpperCase || !hasNumber}
                 >
                   {isResetting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Resetting Password...
-                    </>
+                    <div className="flex items-center justify-center">
+                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
                   ) : (
                     "Reset Password"
                   )}

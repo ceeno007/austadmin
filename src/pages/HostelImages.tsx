@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ChevronLeft, Home, XCircle, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Define the structure of our hostel data
 interface Hostel {
@@ -22,19 +23,15 @@ const HostelImages = () => {
   const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
-    // Get the hostel data from location state
     if (location.state?.hostel) {
       setHostel(location.state.hostel);
       setLoading(false);
-      // Scroll to top when component mounts
       window.scrollTo(0, 0);
     } else {
-      // If there's no hostel data, redirect back to hostels page
       navigate('/hostels', { replace: true });
     }
   }, [location, navigate]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!hostel) return;
@@ -81,21 +78,22 @@ const HostelImages = () => {
     setFullscreen(!fullscreen);
   };
 
-  // Swipe handlers for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
+
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.touches[0].clientX;
   };
+
   const handleTouchEnd = () => {
     if (touchStartX.current !== null && touchEndX.current !== null) {
       const diff = touchStartX.current - touchEndX.current;
       if (Math.abs(diff) > 50) {
         if (diff > 0) {
-          handleNextImage(); // swipe left
+          handleNextImage();
         } else {
-          handlePrevImage(); // swipe right
+          handlePrevImage();
         }
       }
     }
@@ -103,7 +101,6 @@ const HostelImages = () => {
     touchEndX.current = null;
   };
 
-  // Add/remove fullscreen-active class to <body> when fullscreen changes
   useEffect(() => {
     if (fullscreen) {
       document.body.classList.add('fullscreen-active');
@@ -117,8 +114,21 @@ const HostelImages = () => {
 
   if (loading || !hostel) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5500]"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <Skeleton className="h-8 w-48 mb-8" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Skeleton className="aspect-[4/3] w-full rounded-lg" />
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -133,7 +143,6 @@ const HostelImages = () => {
         type="website"
       />
 
-      {/* Hide Navbar and Footer in fullscreen mode using a global class */}
       <style>{`
         body.fullscreen-active .navbar,
         body.fullscreen-active .footer,
@@ -144,184 +153,122 @@ const HostelImages = () => {
       `}</style>
 
       {fullscreen ? (
-        // Fullscreen: only render the fullscreen image gallery, no parent wrappers
         <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center">
-            <div className="max-w-full max-h-full flex items-center justify-center">
-              <img 
-                src={hostel.images[currentIndex]} 
-                alt={`${hostel.name} ${currentIndex + 1}`}
-                className="shadow-lg rounded-sm w-full h-full object-contain"
-                style={{ 
-                  objectFit: 'contain',
-                  width: '100vw',
-                  height: '100vh',
-                  maxWidth: '100vw',
-                  maxHeight: '100vh',
-                  display: 'block'
-                }}
-              />
-              {/* Top overlay for hall name */}
-              <div className="absolute top-4 left-4 bg-black/60 text-white px-4 py-2 rounded-md text-lg font-semibold z-20 max-w-[90vw] md:max-w-[60vw] truncate shadow-lg">
-                {hostel.name} - {hostel.type}
-              </div>
-              {/* Zoom out icon */}
-              <button
-                className="absolute top-4 right-4 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full transition-colors z-30 flex items-center justify-center"
-                onClick={toggleFullscreen}
-                aria-label="Exit fullscreen"
-              >
-                <Minimize2 className="h-7 w-7" />
-              </button>
+            <img 
+              src={hostel.images[currentIndex]} 
+              alt={`${hostel.name} ${currentIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
+              {hostel.name} - {hostel.type}
             </div>
-            {/* Navigation arrows */}
-            {hostel.images.length > 1 && (
-              <>
-                <button
-                  className="absolute left-2 md:left-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-100"
-                  onClick={handlePrevImage}
-                  tabIndex={0}
-                >
-                  <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-                </button>
-                <button
-                  className="absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-100"
-                  onClick={handleNextImage}
-                  tabIndex={0}
-                >
-                  <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-                </button>
-              </>
-            )}
-            {/* Fullscreen mode image counter */}
-            <div className="absolute bottom-28 left-0 right-0 text-center text-white z-10 text-sm md:text-base">
+            <button
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors z-30"
+              onClick={toggleFullscreen}
+              aria-label="Exit fullscreen"
+            >
+              <Minimize2 className="h-5 w-5 sm:h-7 sm:w-7" />
+            </button>
+            <button
+              className="absolute left-1 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-8 h-8 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10"
+              onClick={handlePrevImage}
+            >
+              <ArrowLeft className="h-4 w-4 sm:h-8 sm:w-8" />
+            </button>
+            <button
+              className="absolute right-1 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-8 h-8 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10"
+              onClick={handleNextImage}
+            >
+              <ArrowRight className="h-4 w-4 sm:h-8 sm:w-8" />
+            </button>
+            <div className="absolute bottom-4 sm:bottom-8 left-0 right-0 text-center text-white z-10 text-sm sm:text-lg">
               {currentIndex + 1} / {hostel.images.length}
             </div>
           </div>
         </div>
       ) : (
-        // Not fullscreen: render the normal layout
-        <div className="flex flex-col min-h-screen">
-          <>
-            <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10 h-[50px] sm:h-[60px] flex items-center">
-              <div className="container mx-auto h-full px-2 flex items-center justify-between">
-                {/* Removed home icon section */}
-              </div>
-            </header>
-            {/* Back button below header, always visible */}
-            <div className="relative z-20 bg-white pt-[50px] sm:pt-[60px] pb-2">
-              <div className="container mx-auto px-2 flex items-center">
+        <div className="min-h-screen bg-gray-50">
+          <div className="container mx-auto px-1 sm:px-4 py-2 sm:py-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center mb-4">
                 <Button 
                   variant="ghost" 
-                  className="flex items-center text-[#FF5500] hover:bg-[#FF5500]/10 h-8 px-2 py-0"
+                  className="flex items-center text-[#FF5500] hover:bg-[#FF5500]/10 -ml-2 h-10"
                   onClick={() => navigate('/hostels')}
                 >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  <span className="text-sm">Back</span>
+                  <ChevronLeft className="h-6 w-6 mr-2" />
+                  <span className="text-base">Back to Hostels</span>
                 </Button>
-                <h1 className="text-lg font-bold sm:hidden text-center flex-1">
-                  {hostel.name} - {hostel.type}
-                </h1>
               </div>
-            </div>
-          </>
-          {/* Main content */}
-          <main className="flex-grow">
-            <div className="w-full h-full">
-              {/* Image gallery - Optimized for landscape view */}
-              <div 
-                className="w-full flex flex-col items-center justify-center bg-gray-100 md:max-w-5xl md:mx-auto"
-              >
-                {hostel.images.length > 0 ? (
-                  <>
-                    <div className="w-full aspect-[16/9] relative flex items-center justify-center group"
-                      onTouchStart={handleTouchStart}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                    >
-                      <div className="max-w-full max-h-full flex items-center justify-center w-full h-full">
-                        <img 
-                          src={hostel.images[currentIndex]} 
-                          alt={`${hostel.name} ${currentIndex + 1}`}
-                          className={`shadow-lg rounded-sm w-full h-full object-contain`}
-                          style={{ 
-                            objectFit: 'contain',
-                            width: '100%',
-                            height: '100%',
-                            display: 'block'
-                          }}
-                        />
-                        {/* Zoom icon button: show Maximize2 when not fullscreen, Minimize2 when fullscreen */}
-                        <button
-                          className={`absolute top-10 right-6 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full transition-colors z-40 flex items-center justify-center`}
-                          onClick={toggleFullscreen}
-                          aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                        >
-                          {fullscreen ? (
-                            <Minimize2 className="h-7 w-7" />
-                          ) : (
-                            <Maximize2 className="h-7 w-7" />
-                          )}
-                        </button>
-                      </div>
-                      {/* Navigation arrows */}
-                      {hostel.images.length > 1 && (
-                        <>
-                          <button
-                            className="absolute left-2 md:left-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-0 group-hover:opacity-100 group-focus:opacity-100"
-                            onClick={handlePrevImage}
-                            tabIndex={0}
-                          >
-                            <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-                          </button>
-                          <button
-                            className="absolute right-2 md:right-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-0 group-hover:opacity-100 group-focus:opacity-100"
-                            onClick={handleNextImage}
-                            tabIndex={0}
-                          >
-                            <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-500">No images available</p>
+              {/* Main Image Gallery */}
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-2 sm:mb-8">
+                <div 
+                  className="relative aspect-[3/4] sm:aspect-[16/9] group"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <img 
+                    src={hostel.images[currentIndex]} 
+                    alt={`${hostel.name} ${currentIndex + 1}`}
+                    className="w-full h-full object-contain bg-gray-100"
+                  />
+                  <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
+                    {hostel.name} - {hostel.type}
                   </div>
-                )}
+                  <button
+                    className="absolute top-1 right-1 sm:top-4 sm:right-4 bg-black/70 hover:bg-black/90 text-white p-1.5 sm:p-3 rounded-full transition-colors z-30"
+                    onClick={toggleFullscreen}
+                    aria-label="Enter fullscreen"
+                  >
+                    <Maximize2 className="h-4 w-4 sm:h-7 sm:w-7" />
+                  </button>
+                  {hostel.images.length > 1 && (
+                    <>
+                      <button
+                        className="absolute left-1 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-8 h-8 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        onClick={handlePrevImage}
+                      >
+                        <ArrowLeft className="h-4 w-4 sm:h-8 sm:w-8" />
+                      </button>
+                      <button
+                        className="absolute right-1 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-[#FF5500] rounded-full w-8 h-8 sm:w-16 sm:h-16 flex items-center justify-center shadow-lg transition-all hover:scale-105 z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                        onClick={handleNextImage}
+                      >
+                        <ArrowRight className="h-4 w-4 sm:h-8 sm:w-8" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
-                {/* Thumbnails for quick selection - always visible below the main image */}
-                {!fullscreen && (
-                  <div className="w-full px-2 bg-white pt-2 pb-4 flex flex-col items-center">
-                    {/* Image counter */}
-                    <div className="text-center text-gray-600 py-1 text-sm md:text-base mb-2">
-                      {currentIndex + 1} / {hostel.images.length}
-                    </div>
-                    <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-1 sm:gap-2 max-w-5xl w-full mt-2">
-                      {hostel.images.map((image, idx) => (
-                        <button
-                          key={idx}
-                          className={`relative overflow-hidden rounded-md hover:opacity-90 transition-opacity ${
-                            idx === currentIndex ? 'ring-2 ring-[#FF5500]' : ''
-                          }`}
-                          style={{ aspectRatio: '16/9' }} 
-                          onClick={() => handleGoToIndex(idx)}
-                        >
-                          <img
-                            src={image}
-                            alt={`Thumbnail ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              {/* Thumbnails Grid */}
+              <div className="bg-white rounded-lg shadow-lg p-2 sm:p-6">
+                <div className="text-center text-gray-600 mb-1 sm:mb-4 text-xs sm:text-lg">
+                  {currentIndex + 1} / {hostel.images.length}
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-4">
+                  {hostel.images.map((image, idx) => (
+                    <button
+                      key={idx}
+                      className={`relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-all ${
+                        idx === currentIndex ? 'ring-2 ring-[#FF5500] scale-105' : ''
+                      }`}
+                      onClick={() => handleGoToIndex(idx)}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </main>
+          </div>
         </div>
       )}
     </>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2 } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, CheckCircle, XCircle, Mail, Loader2, Skeleton } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import apiService, { API_ENDPOINTS } from "@/services/api";
@@ -193,10 +193,10 @@ const SignUp = () => {
                       className="whitespace-nowrap bg-primary"
                     >
                       {isVerifying ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
+                        <div className="flex items-center">
+                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
                       ) : (
                         <>
                           <Mail className="mr-2 h-4 w-4" />
@@ -247,10 +247,10 @@ const SignUp = () => {
                         className="whitespace-nowrap bg-primary"
                       >
                         {isVerifyingOtp ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Verifying...
-                          </>
+                          <div className="flex items-center">
+                            <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                            <Skeleton className="h-4 w-16" />
+                          </div>
                         ) : (
                           <>
                             <CheckCircle className="mr-2 h-4 w-4" />

@@ -244,15 +244,25 @@ const ProgramTabs = () => {
                       )}
                       onClick={() => setSelectedProgram(program)}
                     >
-                      <img src={program.image} alt={program.title} className="w-full h-40 object-cover" />
-                      <CardHeader>
-                        <CardTitle className="text-lg">{program.title}</CardTitle>
+                      <img src={program.image} alt={program.title} className="w-full h-48 object-cover" />
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg font-semibold">{program.title}</CardTitle>
+                        <CardDescription className="text-sm text-gray-500">
+                          {program.category === "undergraduate"
+                            ? "Bachelor's Degree"
+                            : program.category === "postgraduate"
+                            ? "Master's/PhD Program"
+                            : "Foundation and Remedial Studies Program"}
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">{program.description}</p>
+                      <CardContent className="pb-2">
+                        <p className="text-sm text-gray-600 line-clamp-3">{program.description}</p>
                       </CardContent>
-                      <CardFooter>
-                        <Button variant="ghost" className="flex items-center text-primary">
+                      <CardFooter className="pt-0">
+                        <Button 
+                          variant="ghost" 
+                          className="flex items-center text-primary hover:text-primary/80 hover:bg-primary/5 -ml-2"
+                        >
                           View Details <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
                       </CardFooter>
