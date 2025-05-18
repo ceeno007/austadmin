@@ -162,27 +162,26 @@ const ForgotPassword = () => {
             ) : (
               // Step 2: OTP and New Password
               <form onSubmit={handleResetPassword} className="space-y-4">
-                {showEmailField ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your email"
-                        required
-                        className={isEmailValid ? "border-green-500" : ""}
-                      />
-                      {isEmailValid && (
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
-                          <CheckCircle className="h-4 w-4" />
-                        </div>
-                      )}
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                      className={isEmailValid ? "border-green-500" : ""}
+                      readOnly={!showEmailField}
+                    />
+                    {isEmailValid && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
+                        <CheckCircle className="h-4 w-4" />
+                      </div>
+                    )}
                   </div>
-                ) : null}
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="otp">Verification Code</Label>
