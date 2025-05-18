@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -67,7 +67,7 @@ const Contact = () => {
   };
 
   return (
-    <>
+    <Suspense fallback={<div className="p-8"><Skeleton className="h-96 w-full rounded-xl" /></div>}>
       <SEO 
         title="Contact Us | AUST"
         description="Get in touch with AUST. Contact our admissions office, academic affairs, or student support team. Find our location, phone numbers, and email addresses."
@@ -255,7 +255,7 @@ const Contact = () => {
           </div>
         </section>
       </main>
-    </>
+    </Suspense>
   );
 };
 

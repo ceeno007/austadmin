@@ -13,6 +13,7 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import apiService from "@/services/api";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface DocumentField {
   id: string;
@@ -429,6 +430,16 @@ interface UndergraduateFormProps {
   isProcessingPayment: boolean;
 }
 
+// Utility to generate years from current year to 1960
+function getYearOptions() {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = currentYear; y >= 1960; y--) {
+    years.push(y);
+  }
+  return years;
+}
+
 const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -439,8 +450,8 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   const nextYear = currentYear + 1;
   const academicYear = `${currentYear}/${nextYear}`;
 
-  // Generate years from current year to 5 years back
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  // Generate years from current year down to 1960 for year dropdowns
+  const years = Array.from({ length: currentYear - 1960 + 1 }, (_, i) => currentYear - i);
 
   // Add state for showing payment selection modal
   const [showPaymentSelection, setShowPaymentSelection] = useState(false);
@@ -695,43 +706,37 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   };
 
   const isFormValid = () => {
-    const { personalDetails, academicQualifications, passportPhoto, selectedCourse, declaration } = undergraduateData;
-    
-    // Check declaration
+    const { personalDetails, academicQualifications, declaration } = undergraduateData;
     if (declaration !== "true") {
       toast.error("Please agree to the declaration before proceeding");
       return false;
     }
-    
-    // Check required personal details
     if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
         !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
         !personalDetails.streetAddress || !personalDetails.city || !personalDetails.stateOfOrigin ||
         !personalDetails.phoneNumber || !personalDetails.email) {
+      toast.error("Please fill in all required personal details fields");
       return false;
     }
-
-    // Check if at least one O'Level result is provided
-    const hasOLevelResult = academicQualifications.waecResults.subjects.length > 0 ||
-                           academicQualifications.necoResults.subjects.length > 0 ||
-                           academicQualifications.nabtebResults.subjects.length > 0;
-
-    if (!hasOLevelResult) {
+    if (!selectedExams.length) {
+      toast.error("Please select at least one O'Level exam result (WAEC, NECO, or NABTEB)");
       return false;
     }
-
-    // Check JAMB results
+    // Only require at least one subject for the first selected exam
+    const firstExamType = selectedExams[0];
+    const firstExam = academicQualifications[`${firstExamType}Results`];
+    console.log('Selected Exams:', selectedExams);
+    console.log('First Exam Subjects:', firstExam ? firstExam.subjects : []);
+    if (!firstExam || !firstExam.subjects || firstExam.subjects.length === 0) {
+      toast.error(`Please enter at least one subject for your selected ${firstExamType.toUpperCase()} result`);
+      return false;
+    }
     if (!academicQualifications.jambResults.regNumber || 
         !academicQualifications.jambResults.examYear || 
         !academicQualifications.jambResults.score) {
+      toast.error("Please fill in all required JAMB fields");
       return false;
     }
-
-    // Check required documents
-    if (!passportPhoto || !selectedCourse) {
-      return false;
-    }
-
     return true;
   };
 
@@ -934,14 +939,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!isFormValid()) {
       toast.error("Please fill in all required fields");
       return;
     }
-
-    // Show payment selection screen instead of directly processing payment
-    setShowPaymentSelection(true);
+    // Submit logic here (e.g., call API or show success message)
+    toast.success("Application submitted successfully!");
   };
 
     return (
@@ -1347,7 +1350,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             ...prev.academicQualifications,
                             waecResults: {
                               ...prev.academicQualifications.waecResults,
-                              examNumber: e.target.value
+                              examNumber: e.target.value.toUpperCase()
                             }
                           }
                         }))}
@@ -1359,21 +1362,29 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         Exam Year
                         <span className="text-red-500 text-xs italic">Required</span>
                       </Label>
-                      <Input
-                        placeholder="Enter exam year"
+                      <Select
                         value={undergraduateData.academicQualifications.waecResults.examYear}
-                        onChange={(e) => setUndergraduateData(prev => ({
+                        onValueChange={(value) => setUndergraduateData(prev => ({
                           ...prev,
                           academicQualifications: {
                             ...prev.academicQualifications,
                             waecResults: {
                               ...prev.academicQualifications.waecResults,
-                              examYear: e.target.value
+                              examYear: value
                             }
                           }
                         }))}
                         required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getYearOptions().map(year => (
+                            <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1540,7 +1551,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             ...prev.academicQualifications,
                             necoResults: {
                               ...prev.academicQualifications.necoResults,
-                              examNumber: e.target.value
+                              examNumber: e.target.value.toUpperCase()
                             }
                           }
                         }))}
@@ -1552,21 +1563,29 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         Exam Year
                         <span className="text-red-500 text-xs italic">Required</span>
                       </Label>
-                      <Input
-                        placeholder="Enter exam year"
+                      <Select
                         value={undergraduateData.academicQualifications.necoResults.examYear}
-                        onChange={(e) => setUndergraduateData(prev => ({
+                        onValueChange={(value) => setUndergraduateData(prev => ({
                           ...prev,
                           academicQualifications: {
                             ...prev.academicQualifications,
                             necoResults: {
                               ...prev.academicQualifications.necoResults,
-                              examYear: e.target.value
+                              examYear: value
                             }
                           }
                         }))}
                         required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getYearOptions().map(year => (
+                            <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1728,7 +1747,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             ...prev.academicQualifications,
                             nabtebResults: {
                               ...prev.academicQualifications.nabtebResults,
-                              examNumber: e.target.value
+                              examNumber: e.target.value.toUpperCase()
                             }
                           }
                         }))}
@@ -1740,21 +1759,29 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         Exam Year
                         <span className="text-red-500 text-xs italic">Required</span>
                       </Label>
-                      <Input
-                        placeholder="Enter exam year"
+                      <Select
                         value={undergraduateData.academicQualifications.nabtebResults.examYear}
-                        onChange={(e) => setUndergraduateData(prev => ({
+                        onValueChange={(value) => setUndergraduateData(prev => ({
                           ...prev,
                           academicQualifications: {
                             ...prev.academicQualifications,
                             nabtebResults: {
                               ...prev.academicQualifications.nabtebResults,
-                              examYear: e.target.value
+                              examYear: value
                             }
                           }
                         }))}
                         required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getYearOptions().map(year => (
+                            <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -1908,7 +1935,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                       ...prev.academicQualifications,
                       jambResults: {
                         ...prev.academicQualifications.jambResults,
-                        regNumber: e.target.value
+                        regNumber: e.target.value.toUpperCase()
                       }
                     }
                   }))}
@@ -1942,21 +1969,29 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   Exam Year
                   <span className="text-red-500 text-xs italic">Required</span>
                 </Label>
-                <Input
-                  placeholder="Enter exam year"
+                <Select
                   value={undergraduateData.academicQualifications.jambResults.examYear}
-                  onChange={(e) => setUndergraduateData(prev => ({
+                  onValueChange={(value) => setUndergraduateData(prev => ({
                     ...prev,
                     academicQualifications: {
                       ...prev.academicQualifications,
                       jambResults: {
                         ...prev.academicQualifications.jambResults,
-                        examYear: e.target.value
+                        examYear: value
                       }
                     }
                   }))}
                   required
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getYearOptions().map(year => (
+                      <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <FileUploadField
@@ -2024,80 +2059,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           </div>
         </div>
       </div>
-
-      {/* Application Fee Payment Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Application Fee Payment</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800 space-y-2">
-              <strong>Application Fees (Non-refundable):</strong>
-              <br />
-              <span className="block mt-2">
-                <strong>Nigerian Applicants:</strong> ₦20,000
-              </span>
-              <span className="block mt-2">
-                <strong>International Applicants:</strong> $50
-              </span>
-              <div className="mt-4">
-                <p className="font-medium">Payment Process:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Payment will be processed through Paystack</li>
-                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
-                  <li>International applicants will be redirected to Paystack USD payment gateway</li>
-                  <li>The Paystack payment popup will appear automatically when you click "Proceed to Payment"</li>
-                  <li>A payment receipt will be automatically generated after successful payment</li>
-                </ul>
-              </div>
-            </p>
-          </div>
-        </div>
-      </div>
       
-      {showPaymentSelection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-6 text-center">Select Payment Option</h2>
-            <p className="text-gray-600 mb-6 text-center">
-              Please select your payment option based on your residence status.
-            </p>
-            
-            <div className="space-y-4">
-              <button 
-                onClick={handlePaymentAsNigerian}
-                className="w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center justify-center"
-                disabled={isProcessingPayment}
-              >
-                <span className="mr-2">🇳🇬</span>
-                Pay as Nigerian Resident (₦20,000)
-              </button>
-              
-              <button 
-                onClick={handlePaymentAsInternational}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center justify-center"
-                disabled={isProcessingPayment}
-              >
-                <span className="mr-2">🌍</span>
-                Pay as International Resident ($50)
-              </button>
-              
-              <button 
-                onClick={() => setShowPaymentSelection(false)}
-                className="w-full py-2 px-4 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition mt-4"
-              >
-                Cancel
-              </button>
-            </div>
-            
-            {isProcessingPayment && (
-              <div className="text-center mt-4 text-sm text-gray-600">
-                Processing payment, please wait...
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Form Buttons */}
       <div className="flex justify-end space-x-4">
         <Button
@@ -2108,11 +2070,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         >
           Save as Draft
         </Button>
-        <Button
-          type="submit"
-          disabled={isProcessingPayment}
-        >
-          {isProcessingPayment ? "Processing Payment..." : "Proceed to Payment"}
+        <Button type="submit" className="w-full bg-primary" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Submitting...</span>
+          ) : (
+            "Submit"
+          )}
         </Button>
       </div>
     </form>

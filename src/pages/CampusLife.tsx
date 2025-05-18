@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
@@ -15,10 +15,11 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SEO from "@/components/SEO";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CampusLife = () => {
   return (
-    <>
+    <Suspense fallback={<div className="p-8"><Skeleton className="h-96 w-full rounded-xl" /></div>}>
       <SEO 
         title="Campus Life | AUST"
         description="Experience vibrant campus life at AUST with modern facilities, student organizations, and enriching activities. Discover our library, computer labs, research facilities, and more."
@@ -240,7 +241,7 @@ const CampusLife = () => {
           </div>
         </section>
       </main>
-    </>
+    </Suspense>
   );
 };
 

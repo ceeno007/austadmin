@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import apiService, { API_ENDPOINTS } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface TokenResponse {
   access_token: string;
@@ -28,6 +29,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+
+  // Prefill email and password from location.state if present
+  useEffect(() => {
+    if (location.state?.email) setEmail(location.state.email);
+    if (location.state?.password) setPassword(location.state.password);
+  }, [location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,7 +186,11 @@ const Login = () => {
               </div>
               
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Log in"}
+                {isLoading ? (
+                  <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Logging in...</span>
+                ) : (
+                  "Log in"
+                )}
               </Button>
             </form>
             

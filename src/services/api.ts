@@ -6,24 +6,24 @@ const FASTAPI_BASE_URL = 'https://admissions-jcvy.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  SIGNUP: `${API_BASE_URL}/auth/signup`,
-  LOGIN: `${API_BASE_URL}/token`,
-  DOCUMENT_UPLOAD: `${API_BASE_URL}/documents/upload`,
-  FORGOT_PASSWORD: `${API_BASE_URL}/auth/forgot-password`,
-  CONTACT: `${API_BASE_URL}/contact`,
-  SEND_VERIFICATION: `${API_BASE_URL}/auth/send-verification`,
-  VERIFY_EMAIL: `${API_BASE_URL}/auth/verify-email`,
-  SEND_PASSWORD_RESET_OTP: `${API_BASE_URL}/auth/send-password-reset-otp`,
-  VERIFY_PASSWORD_RESET_OTP: `${API_BASE_URL}/auth/verify-password-reset-otp`,
-  RESET_PASSWORD: `${API_BASE_URL}/auth/reset-password`,
-  APPLICATION_UPLOAD: `${API_BASE_URL}/applications/upload`,
-  APPLICATION_DRAFT: `${API_BASE_URL}/applications/draft`,
-  INITIALIZE_PAYMENT: `${API_BASE_URL}/payments/initialize`,
-  VERIFY_PAYMENT: `${API_BASE_URL}/payments/verify`,
-  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/token`,
+  SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
+  LOGIN: `${FASTAPI_BASE_URL}/auth/token`,
+  DOCUMENT_UPLOAD: `${FASTAPI_BASE_URL}/documents/upload`,
+  FORGOT_PASSWORD: `${FASTAPI_BASE_URL}/auth/forgot-password`,
+  CONTACT: `${FASTAPI_BASE_URL}/contact`,
+  SEND_VERIFICATION: `${FASTAPI_BASE_URL}/auth/send-verification`,
+  VERIFY_EMAIL: `${FASTAPI_BASE_URL}/auth/verify-email`,
+  SEND_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/send-password-reset-otp`,
+  VERIFY_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/verify-password-reset-otp`,
+  RESET_PASSWORD: `${FASTAPI_BASE_URL}/auth/reset-password`,
+  APPLICATION_UPLOAD: `${FASTAPI_BASE_URL}/applications/upload`,
+  APPLICATION_DRAFT: `${FASTAPI_BASE_URL}/applications/draft`,
+  INITIALIZE_PAYMENT: `${FASTAPI_BASE_URL}/payments/initialize`,
+  VERIFY_PAYMENT: `${FASTAPI_BASE_URL}/payments/verify`,
+  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/auth/token`,
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   FASTAPI_POSTGRADUATE_SAVED: `${FASTAPI_BASE_URL}/postgraduate/saved`,
-  FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/signup`,
+  FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
 };
 
 // Default Headers for JSON requests
@@ -252,21 +252,24 @@ const apiService = {
    */
   forgotPassword: async (data: { email: string }) => {
     try {
-      const response = await fetch(API_ENDPOINTS.FORGOT_PASSWORD, {
-        method: "POST",
-        headers: defaultHeaders,
-        body: JSON.stringify(data),
+      const response = await fetch(`${FASTAPI_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Password reset request failed");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to send password reset email');
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Password reset request error:", error);
-      throw error;
+      throw new Error(error.message || 'Failed to send password reset email');
     }
   },
 
@@ -405,23 +408,34 @@ const apiService = {
    * @param data - Object containing email, OTP code, and new password
    * @returns Promise with the API response
    */
-  resetPassword: async (data: { email: string; code: string; password: string }) => {
+  resetPassword: async (data: { 
+    email: string; 
+    otp_code: string; 
+    new_password: string 
+  }) => {
     try {
-      const response = await fetch(API_ENDPOINTS.RESET_PASSWORD, {
-        method: "POST",
-        headers: defaultHeaders,
-        body: JSON.stringify(data),
+      const response = await fetch(`${FASTAPI_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          otp_code: data.otp_code,
+          new_password: data.new_password
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to reset password");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to reset password');
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Password reset error:", error);
-      throw error;
+      throw new Error(error.message || 'Failed to reset password');
     }
   },
 
@@ -465,7 +479,7 @@ const apiService = {
    * @returns Promise with the API response
    */
   submitApplication: async (formData: FormData) => {
-    const response = await axios.post(`${API_BASE_URL}/applications`, formData, {
+    const response = await axios.post(`${FASTAPI_BASE_URL}/applications`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -479,7 +493,7 @@ const apiService = {
    * @returns Promise with the API response
    */
   submitDraftApplication: async (formData: FormData) => {
-    const response = await axios.post(`${API_BASE_URL}/applications/draft`, formData, {
+    const response = await axios.post(`${FASTAPI_BASE_URL}/applications/draft`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -489,7 +503,7 @@ const apiService = {
 
   // Update existing draft
   updateDraftApplication: async (draftId: string, formData: FormData) => {
-    const response = await axios.put(`${API_BASE_URL}/applications/draft/${draftId}`, formData, {
+    const response = await axios.put(`${FASTAPI_BASE_URL}/applications/draft/${draftId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -499,13 +513,13 @@ const apiService = {
 
   // Get draft application
   getDraftApplication: async () => {
-    const response = await axios.get(`${API_BASE_URL}/applications/draft`);
+    const response = await axios.get(`${FASTAPI_BASE_URL}/applications/draft`);
     return response.data;
   },
 
   // Delete draft application
   deleteDraftApplication: async (draftId: string) => {
-    const response = await axios.delete(`${API_BASE_URL}/applications/draft/${draftId}`);
+    const response = await axios.delete(`${FASTAPI_BASE_URL}/applications/draft/${draftId}`);
     return response.data;
   },
 
@@ -800,6 +814,52 @@ const apiService = {
         throw new Error(error.response.data.detail);
       }
       throw new Error("An error occurred while retrieving the saved application");
+    }
+  },
+
+  /**
+   * Request OTP for email verification
+   */
+  requestEmailOtp: async (email: string) => {
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/auth/verify-email/request`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Failed to send code');
+      }
+      return true;
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to send code');
+    }
+  },
+
+  /**
+   * Verify OTP for email verification
+   */
+  verifyEmailOtp: async (email: string, otp_code: string) => {
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/auth/verify-email/verify`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, otp_code })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || 'Invalid verification code');
+      }
+      return true;
+    } catch (error: any) {
+      throw new Error(error.message || 'Invalid verification code');
     }
   },
 };

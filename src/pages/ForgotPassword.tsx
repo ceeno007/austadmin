@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, Mail, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Mail, CheckCircle, Eye, EyeOff } from "lucide-react";
 import austLogo from "@/assets/images/austlogo.webp";
 import apiService from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [showEmailField, setShowEmailField] = useState(true);
   const navigate = useNavigate();
 
   // Validate email format
@@ -40,73 +40,22 @@ const ForgotPassword = () => {
     e.preventDefault();
     
     if (!isEmailValid) {
-      toast.error("Please enter a valid email address", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error("Please enter a valid email address");
       return;
     }
     
     setIsLoading(true);
     
     try {
-      await apiService.sendPasswordResetOtp(email);
+      await apiService.forgotPassword({ email });
       setIsOtpSent(true);
-      toast.success("Verification code sent to your email", {
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
-      });
+      setShowEmailField(false);
+      toast.success("Password reset instructions sent to your email");
     } catch (error) {
-      console.error("Error sending password reset OTP:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send verification code", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      console.error("Error sending password reset:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to send password reset email");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!otpCode) {
-      toast.error("Please enter the verification code", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
-      return;
-    }
-    
-    setIsVerifyingOtp(true);
-    
-    try {
-      await apiService.verifyPasswordResetOtp({ email, code: otpCode });
-      setIsOtpVerified(true);
-      toast.success("Email verified successfully", {
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
-      });
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to verify code", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
-    } finally {
-      setIsVerifyingOtp(false);
     }
   };
 
@@ -114,22 +63,17 @@ const ForgotPassword = () => {
     e.preventDefault();
     
     if (!passwordsMatch) {
-      toast.error("Passwords don't match", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error("Passwords don't match");
       return;
     }
     
     if (!(hasMinLength && hasUpperCase && hasNumber)) {
-      toast.error("Password doesn't meet requirements", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error("Password doesn't meet requirements");
+      return;
+    }
+    
+    if (!otpCode) {
+      toast.error("Please enter the verification code");
       return;
     }
     
@@ -137,26 +81,16 @@ const ForgotPassword = () => {
     
     try {
       await apiService.resetPassword({ 
-        email, 
-        code: otpCode,
-        password: newPassword
+        email,
+        otp_code: otpCode,
+        new_password: newPassword
       });
       
-      toast.success("Password reset successful", {
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
-      });
+      toast.success("Password reset successful");
       navigate("/login");
     } catch (error) {
       console.error("Error resetting password:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to reset password", {
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to reset password");
     } finally {
       setIsResetting(false);
     }
@@ -182,9 +116,7 @@ const ForgotPassword = () => {
             <CardDescription>
               {!isOtpSent 
                 ? "Enter your email address and we'll send you a verification code"
-                : !isOtpVerified
-                  ? "Enter the verification code sent to your email"
-                  : "Create a new password for your account"
+                : "Enter the verification code and your new password"
               }
             </CardDescription>
           </CardHeader>
@@ -218,10 +150,7 @@ const ForgotPassword = () => {
                   disabled={isLoading || !isEmailValid}
                 >
                   {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
+                    <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Sending...</span>
                   ) : (
                     <>
                       <Mail className="h-4 w-4 mr-2" />
@@ -230,9 +159,31 @@ const ForgotPassword = () => {
                   )}
                 </Button>
               </form>
-            ) : !isOtpVerified ? (
-              // Step 2: OTP verification
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
+            ) : (
+              // Step 2: OTP and New Password
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                {showEmailField ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        className={isEmailValid ? "border-green-500" : ""}
+                      />
+                      {isEmailValid && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500">
+                          <CheckCircle className="h-4 w-4" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="space-y-2">
                   <Label htmlFor="otp">Verification Code</Label>
                   <Input
@@ -246,38 +197,7 @@ const ForgotPassword = () => {
                     We've sent a verification code to <strong>{email}</strong>
                   </p>
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary" 
-                  disabled={isVerifyingOtp || !otpCode}
-                >
-                  {isVerifyingOtp ? (
-                    <div className="flex items-center justify-center">
-                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  ) : (
-                    "Verify Code"
-                  )}
-                </Button>
-                
-                <div className="text-center">
-                  <button 
-                    type="button" 
-                    className="text-sm text-primary hover:underline"
-                    onClick={() => {
-                      setOtpCode("");
-                      setIsOtpSent(false);
-                    }}
-                  >
-                    Use a different email
-                  </button>
-                </div>
-              </form>
-            ) : (
-              // Step 3: New password
-              <form onSubmit={handleResetPassword} className="space-y-4">
+
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New Password</Label>
                   <div className="relative">
@@ -371,17 +291,30 @@ const ForgotPassword = () => {
                 <Button 
                   type="submit" 
                   className="w-full bg-primary" 
-                  disabled={isResetting || !passwordsMatch || !hasMinLength || !hasUpperCase || !hasNumber}
+                  disabled={isResetting || !passwordsMatch || !hasMinLength || !hasUpperCase || !hasNumber || !otpCode}
                 >
                   {isResetting ? (
-                    <div className="flex items-center justify-center">
-                      <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
+                    <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Resetting...</span>
                   ) : (
                     "Reset Password"
                   )}
                 </Button>
+
+                <div className="text-center">
+                  <button 
+                    type="button" 
+                    className="text-sm text-primary hover:underline"
+                    onClick={() => {
+                      setOtpCode("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                      setIsOtpSent(false);
+                      setShowEmailField(true);
+                    }}
+                  >
+                    Use a different email
+                  </button>
+                </div>
               </form>
             )}
           </CardContent>

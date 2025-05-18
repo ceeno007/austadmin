@@ -1,9 +1,10 @@
-import React, { useState, useEffect, Suspense, useCallback } from "react";
+import React, { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import SEO from "@/components/SEO";
 import { programs, type Program } from "@/data/programs";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 
 // Constants
 const TABS = {
@@ -19,11 +20,68 @@ type TabType = typeof TABS[keyof typeof TABS];
 // Create loading fallback component
 const ProgramsSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    {[1,2,3].map(i => (
+    {[1,2,3,4,5,6].map(i => (
       <Skeleton key={i} className="h-[400px] w-full" />
     ))}
   </div>
 );
+
+// Debounce utility
+function debounce(fn: (...args: any[]) => void, delay: number) {
+  let timer: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// SkeletonCard for loading state
+const SkeletonCard = () => (
+  <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+    <Skeleton className="w-full aspect-[16/9]" />
+    <div className="p-4">
+      <Skeleton className="h-6 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+  </div>
+);
+
+// Memoized ProgramCard
+const ProgramCard = React.memo<{ program: Program }>(({ program }) => {
+  const navigate = useNavigate();
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/programs/${program.id}`);
+  };
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="relative aspect-[16/9]">
+        <ImageWithSkeleton
+          src={program.image}
+          alt={program.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <h3 className="text-xl font-semibold mb-1">{program.title}</h3>
+          <p className="text-sm opacity-90">{program.duration}</p>
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="text-gray-600 mb-4 line-clamp-2">{program.description}</p>
+        <div className="flex justify-between items-center">
+          <Button
+            variant="outline"
+            className="border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white transition-all duration-200 ease-in-out"
+            onClick={handleViewDetails}
+          >
+            Learn More
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const Programs: React.FC = () => {
   const location = useLocation();
@@ -31,6 +89,9 @@ const Programs: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Prefetch threshold
+  const PREFETCH_THRESHOLD = 3;
 
   // Effect for URL params
   useEffect(() => {
@@ -60,28 +121,32 @@ const Programs: React.FC = () => {
     }
   };
 
-  // Handle scroll event
-  const handleScroll = useCallback(() => {
+  // Optimized scroll handler with debounce
+  const handleScroll = useMemo(() => debounce(() => {
     if (isLoading) return;
-
     const scrollPosition = window.innerHeight + window.scrollY;
     const documentHeight = document.documentElement.scrollHeight;
-    const threshold = 100; // pixels from bottom
-
-    if (scrollPosition >= documentHeight - threshold) {
-      const currentPrograms = getCurrentPrograms();
-      if (visibleItems < currentPrograms.length) {
-        setIsLoading(true);
-        // Simulate loading delay
-        setTimeout(() => {
-          setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, currentPrograms.length));
-          setIsLoading(false);
-        }, 500);
-      }
+    const currentPrograms = getCurrentPrograms();
+    // Prefetch when within PREFETCH_THRESHOLD of the end
+    if (visibleItems >= currentPrograms.length) return;
+    const bufferIndex = visibleItems - PREFETCH_THRESHOLD;
+    const bufferElement = document.querySelectorAll('.program-card')[bufferIndex];
+    let bufferOffset = 0;
+    if (bufferElement) {
+      bufferOffset = (bufferElement as HTMLElement).getBoundingClientRect().bottom;
     }
-  }, [visibleItems, isLoading, activeTab]);
+    if (
+      scrollPosition >= documentHeight - 100 ||
+      (bufferOffset && bufferOffset < window.innerHeight + 200)
+    ) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, currentPrograms.length));
+        setIsLoading(false);
+      }, 400);
+    }
+  }, 100), [isLoading, visibleItems, activeTab]);
 
-  // Add scroll event listener
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -104,44 +169,6 @@ const Programs: React.FC = () => {
       "position": index + 1
     }))
   });
-
-  const ProgramCard: React.FC<{ program: Program }> = ({ program }) => {
-    const navigate = useNavigate();
-
-    const handleViewDetails = (e: React.MouseEvent) => {
-      e.preventDefault();
-      navigate(`/programs/${program.id}`);
-    };
-
-    return (
-      <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-        <div className="relative aspect-[16/9]">
-          <img
-            src={program.image}
-            alt={program.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h3 className="text-xl font-semibold mb-1">{program.title}</h3>
-            <p className="text-sm opacity-90">{program.duration}</p>
-          </div>
-        </div>
-        <div className="p-4">
-          <p className="text-gray-600 mb-4 line-clamp-2">{program.description}</p>
-          <div className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              className="border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white transition-all duration-200 ease-in-out"
-              onClick={handleViewDetails}
-            >
-              Learn More
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const currentPrograms = getCurrentPrograms();
   const displayedPrograms = currentPrograms.slice(0, visibleItems);
@@ -198,41 +225,33 @@ const Programs: React.FC = () => {
             </div>
 
             {/* Program Cards */}
-            <div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-              style={{
-                willChange: 'transform',
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden'
-              }}
-            >
-              {displayedPrograms.map((program) => (
-                <ProgramCard 
-                  key={program.id}
-                  program={program}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedPrograms.map(program => (
+                <div className="program-card" key={program.id}>
+                  <ProgramCard program={program} />
+                </div>
               ))}
+              {/* Always fill the grid with skeletons up to ITEMS_PER_PAGE */}
+              {(() => {
+                const skeletonCount = Math.max(
+                  0,
+                  ITEMS_PER_PAGE - (displayedPrograms.length % ITEMS_PER_PAGE || ITEMS_PER_PAGE)
+                );
+                // If there are more items to load, show a full batch of skeletons
+                if (visibleItems < currentPrograms.length) {
+                  return Array.from({ length: skeletonCount }).map((_, i) => (
+                    <SkeletonCard key={`skeleton-${i}`} />
+                  ));
+                }
+                // If all items are loaded but the last row is not full, fill the row with invisible divs for visual consistency
+                if (displayedPrograms.length % ITEMS_PER_PAGE !== 0) {
+                  return Array.from({ length: skeletonCount }).map((_, i) => (
+                    <div key={`empty-${i}`} className="invisible" />
+                  ));
+                }
+                return null;
+              })()}
             </div>
-
-            {/* Loading Indicator */}
-            {isLoading && (
-              <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <Skeleton className="aspect-[16/9] w-full" />
-                    <div className="p-4 space-y-3">
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <div className="pt-2">
-                        <Skeleton className="h-10 w-24" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </section>
       </main>

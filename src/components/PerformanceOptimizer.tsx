@@ -4,9 +4,11 @@ import { debounce, throttle } from '@/utils/performance';
 
 interface PerformanceOptimizerProps {
   children: React.ReactNode;
+  loading?: boolean;
+  fallback?: React.ReactNode;
 }
 
-const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ children }) => {
+const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ children, loading, fallback }) => {
   const location = useLocation();
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const isScrollingRef = useRef(false);
@@ -111,6 +113,10 @@ const PerformanceOptimizer: React.FC<PerformanceOptimizerProps> = ({ children })
 
     preloadNextRoute();
   }, [location.pathname]);
+
+  if (loading && fallback) {
+    return <>{fallback}</>;
+  }
 
   return <>{children}</>;
 };

@@ -184,30 +184,6 @@ export const programs: Program[] = [
     ]
   },
   {
-    id: 'beng-electrical-electronics',
-    title: 'B.Eng. Electrical/Electronics Engineering',
-    duration: '5 years',
-    level: 'Undergraduate',
-    category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
-    image: imageMap["default"],
-    description: 'Focus on electrical systems, electronics, telecommunications, and power generation.',
-    requirements: [
-      'Five O Level credits including English, Mathematics, Physics, Chemistry',
-      'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
-      'Direct Entry: A Level passes in Mathematics, Physics, and Chemistry',
-      'Direct Entry: ND/HND in Electrical/Electronics Engineering or related field',
-      'Direct Entry: Minimum of 10 points in IJMB'
-    ],
-    pdf: '/pdfs/Departmental Handbook - Electrical Engineering [Undergraduate].pdf',
-    faqs: [
-      { question: 'What are the main areas of study?', answer: 'Power systems, electronics, telecommunications, and control systems.' },
-      { question: 'Are there industry partnerships?', answer: 'Yes, students benefit from partnerships with leading tech and power companies.' },
-      { question: 'Is there a final year project?', answer: 'Yes, all students complete a capstone project.' }
-    ]
-  },
-  {
     id: 'beng-materials-metallurgical',
     title: 'B.Eng. Materials & Metallurgical Engineering',
     duration: '5 years',
@@ -229,54 +205,6 @@ export const programs: Program[] = [
       { question: 'What industries hire graduates?', answer: 'Manufacturing, automotive, aerospace, and materials research sectors.' },
       { question: 'Are there research opportunities?', answer: 'Yes, students can participate in faculty-led research projects.' },
       { question: 'Is there a focus on nanotechnology?', answer: 'Yes, advanced materials and nanotechnology are covered.' }
-    ]
-  },
-  {
-    id: 'beng-aerospace',
-    title: 'B.Eng. Aerospace Engineering',
-    duration: '5 years',
-    level: 'Undergraduate',
-    category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
-    image: imageMap["aerospace"],
-    description: 'Learn about the design, development, and testing of aircraft and spacecraft.',
-    requirements: [
-      'Five O Level credits including English, Mathematics, Physics, Chemistry',
-      'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
-      'Direct Entry: A Level passes in Mathematics, Physics, and Chemistry',
-      'Direct Entry: ND/HND in Aerospace/Mechanical Engineering or related field',
-      'Direct Entry: Minimum of 10 points in IJMB'
-    ],
-    pdf: '/pdfs/Departmental Handbook - Aerospace Engineering [Undergraduate].pdf',
-    faqs: [
-      { question: 'What is unique about this program?', answer: 'It is one of the few aerospace programs in the region, with a focus on both aircraft and spacecraft.' },
-      { question: 'Are there flight simulation labs?', answer: 'Yes, students have access to flight simulation and wind tunnel labs.' },
-      { question: 'What are the career options?', answer: 'Aerospace engineer, aircraft designer, space research, and more.' }
-    ]
-  },
-  {
-    id: 'bsc-applied-math',
-    title: 'B.Sc. Applied Mathematics',
-    duration: '4 years',
-    level: 'Undergraduate',
-    category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
-    image: imageMap["math"],
-    description: 'Focus on mathematical modeling, statistics, and computational methods for real-world problems.',
-    requirements: [
-      'Five O Level credits including English, Mathematics, Physics, Chemistry',
-      'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
-      'Direct Entry: A Level passes in Mathematics and Physics',
-      'Direct Entry: ND/HND in Mathematics or related field',
-      'Direct Entry: Minimum of 10 points in IJMB'
-    ],
-    pdf: '/pdfs/Departmental Handbook - Applied Mathematics [Undergraduate].pdf',
-    faqs: [
-      { question: 'What careers are available?', answer: 'Data analyst, statistician, operations researcher, and more.' },
-      { question: 'Is programming taught?', answer: 'Yes, programming and computational methods are core parts of the curriculum.' },
-      { question: 'Are there research opportunities?', answer: 'Yes, students can join research groups in applied mathematics.' }
     ]
   },
   {
