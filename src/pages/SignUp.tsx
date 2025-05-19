@@ -218,7 +218,7 @@ const SignUp = () => {
                         className="whitespace-nowrap bg-primary"
                       >
                         {isVerifying ? (
-                          <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Sending...</span>
+                          <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>Sending...</span>
                         ) : (
                           <>
                             <Mail className="mr-2 h-4 w-4" />
@@ -400,7 +400,7 @@ const SignUp = () => {
                 
                 <Button type="submit" className="w-full bg-primary" disabled={isLoading || !fullName || !email || !programType || !password || !confirmPassword}>
                   {isLoading ? (
-                    <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#FF5500] mr-2"></span>Creating...</span>
+                    <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>Creating...</span>
                   ) : (
                     "Create account"
                   )}

@@ -55,6 +55,7 @@ interface ApplicationData {
   passport_photo_path?: string;
   payment_receipt_path?: string;
   waec_result_path?: string;
+  has_paid?: boolean;
 }
 
 interface FoundationRemedialFormData {
@@ -335,6 +336,8 @@ const grades = [
   "A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"
 ];
 
+const FOUNDATION_ENDPOINT = 'https://admissions-jcvy.onrender.com/foundation/applications';
+
 const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -433,7 +436,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
 
   // Generate years from current year to 30 years back
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 31 }, (_, i) => currentYear - i);
+  const examYears = Array.from({ length: 31 }, (_, i) => (currentYear - i).toString());
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -443,55 +446,102 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   // Fill form data from application data when it's available
   useEffect(() => {
     if (Object.keys(applicationData).length > 0) {
-      console.log("Populating Foundation and Remedial Studies form with application data:", applicationData);
-      
       // Extract data from the application
       const {
         academic_session,
-        selected_program,
-        nationality,
+        program_type,
+        surname,
+        first_name,
+        other_names,
         gender,
         date_of_birth,
         street_address,
         city,
         country,
         state_of_origin,
+        nationality,
         phone_number,
         email,
         has_disability,
         disability_description,
-        // File paths
+        exam_type,
+        exam_number,
+        exam_year,
+        subjects,
+        program_choice,
         passport_photo_path,
-        payment_receipt_path,
-        waec_result_path,
-        // JAMB specific
-        // jamb_reg_number,
-        // jamb_score,
-        // jamb_year
+        exam_result_path,
       } = applicationData;
-      
-      // Create placeholder files
-      const passportPhoto = createPlaceholderFile(passport_photo_path);
-      const paymentReceipt = createPlaceholderFile(payment_receipt_path);
-      const waecResults = createPlaceholderFile(waec_result_path);
-      
+
+      // Convert date_of_birth to { day, month, year }
+      let dob = { day: '', month: '', year: '' };
+      if (date_of_birth) {
+        const date = new Date(date_of_birth);
+        dob = {
+          day: date.getDate().toString().padStart(2, '0'),
+          month: (date.getMonth() + 1).toString().padStart(2, '0'),
+          year: date.getFullYear().toString(),
+        };
+      }
+
+      // Map subjects array to expected structure
+      let mappedSubjects = [];
+      if (Array.isArray(subjects)) {
+        mappedSubjects = subjects.map((s: any) => {
+          // Try to find a subject/grade pair, fallback to additionalProp1/2
+          if (s.subject && s.grade) {
+            return { subject: s.subject, grade: s.grade };
+          }
+          // If backend sends as additionalProp1/2, use those
+          const keys = Object.keys(s);
+          return {
+            subject: s[keys[0]] || '',
+            grade: s[keys[1]] || '',
+          };
+        });
+      }
+
+      // Map program_choice and nested fields
+      let programChoice = {
+        program: '',
+        subjectCombination: '',
+        firstChoice: { university: '', department: '', faculty: '' },
+        secondChoice: { university: '', department: '', faculty: '' },
+      };
+      if (program_choice) {
+        programChoice.program = program_choice.program || '';
+        programChoice.subjectCombination = program_choice.subjectCombination || '';
+        // Map firstChoice and secondChoice
+        if (program_choice.firstChoice) {
+          const fc = program_choice.firstChoice;
+          programChoice.firstChoice = {
+            university: fc.university || fc.additionalProp1 || '',
+            department: fc.department || fc.additionalProp2 || '',
+            faculty: fc.faculty || fc.additionalProp3 || '',
+          };
+        }
+        if (program_choice.secondChoice) {
+          const sc = program_choice.secondChoice;
+          programChoice.secondChoice = {
+            university: sc.university || sc.additionalProp1 || '',
+            department: sc.department || sc.additionalProp2 || '',
+            faculty: sc.faculty || sc.additionalProp3 || '',
+          };
+        }
+      }
+
       setFoundationRemedialData(prev => ({
         ...prev,
-        passportPhoto: passportPhoto,
-        paymentReceipt: paymentReceipt,
+        passportPhoto: createPlaceholderFile(passport_photo_path),
         academicSession: academic_session || prev.academicSession,
-        program: selected_program || prev.program,
+        program: program_type || prev.program,
         personalDetails: {
           ...prev.personalDetails,
-          surname: applicationData.surname || prev.personalDetails.surname,
-          firstName: applicationData.first_name || prev.personalDetails.firstName,
-          otherNames: applicationData.other_names || prev.personalDetails.otherNames,
+          surname: surname || prev.personalDetails.surname,
+          firstName: first_name || prev.personalDetails.firstName,
+          otherNames: other_names || prev.personalDetails.otherNames,
           gender: gender || prev.personalDetails.gender,
-          dateOfBirth: date_of_birth ? {
-            day: new Date(date_of_birth).getDate().toString().padStart(2, '0'),
-            month: (new Date(date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
-            year: new Date(date_of_birth).getFullYear().toString()
-          } : prev.personalDetails.dateOfBirth,
+          dateOfBirth: dob,
           streetAddress: street_address || prev.personalDetails.streetAddress,
           city: city || prev.personalDetails.city,
           country: country || prev.personalDetails.country,
@@ -499,18 +549,19 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
           nationality: nationality || prev.personalDetails.nationality,
           phoneNumber: phone_number || prev.personalDetails.phoneNumber,
           email: email || prev.personalDetails.email,
-          hasDisabilities: has_disability ? "yes" : "no",
-          disabilityDescription: disability_description || prev.personalDetails.disabilityDescription
+          hasDisabilities: has_disability ? 'yes' : 'no',
+          disabilityDescription: disability_description || prev.personalDetails.disabilityDescription,
         },
+        programChoice: programChoice,
         academicQualifications: {
-          ...prev.academicQualifications,
           examResults: {
-            ...prev.academicQualifications.examResults,
-            examNumber: applicationData.exam_number || prev.academicQualifications.examResults.examNumber,
-            examYear: applicationData.exam_year || prev.academicQualifications.examResults.examYear,
-            documents: waecResults ? waecResults : prev.academicQualifications.examResults.documents
+            examType: exam_type || prev.academicQualifications.examResults.examType,
+            examNumber: exam_number || prev.academicQualifications.examResults.examNumber,
+            examYear: exam_year?.toString() || prev.academicQualifications.examResults.examYear,
+            subjects: mappedSubjects.length > 0 ? mappedSubjects : prev.academicQualifications.examResults.subjects,
+            documents: createPlaceholderFile(exam_result_path) || prev.academicQualifications.examResults.documents,
           }
-        }
+        },
       }));
     }
   }, [applicationData]);
@@ -593,74 +644,103 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   const handleSaveAsDraft = async () => {
     try {
       const formData = new FormData();
-      
-      // Add all form fields to FormData
-      Object.entries(formData).forEach(([key, value]) => {
+      const appendIfFilled = (key: string, value: any) => {
         if (value !== undefined && value !== null && value !== "") {
           formData.append(key, value);
         }
-      });
-
-      // Add files if they exist
+      };
+      // Personal details
+      appendIfFilled("surname", foundationRemedialData.personalDetails.surname);
+      appendIfFilled("first_name", foundationRemedialData.personalDetails.firstName);
+      appendIfFilled("other_names", foundationRemedialData.personalDetails.otherNames);
+      appendIfFilled("gender", foundationRemedialData.personalDetails.gender);
+      if (
+        foundationRemedialData.personalDetails.dateOfBirth.year &&
+        foundationRemedialData.personalDetails.dateOfBirth.month &&
+        foundationRemedialData.personalDetails.dateOfBirth.day
+      ) {
+        appendIfFilled(
+          "date_of_birth",
+          `${foundationRemedialData.personalDetails.dateOfBirth.year}-${foundationRemedialData.personalDetails.dateOfBirth.month}-${foundationRemedialData.personalDetails.dateOfBirth.day}`
+        );
+      }
+      appendIfFilled("street_address", foundationRemedialData.personalDetails.streetAddress);
+      appendIfFilled("city", foundationRemedialData.personalDetails.city);
+      appendIfFilled("country", foundationRemedialData.personalDetails.country);
+      appendIfFilled("state_of_origin", foundationRemedialData.personalDetails.stateOfOrigin);
+      appendIfFilled("nationality", foundationRemedialData.personalDetails.nationality);
+      appendIfFilled("phone_number", foundationRemedialData.personalDetails.phoneNumber);
+      appendIfFilled("email", foundationRemedialData.personalDetails.email);
+      if (foundationRemedialData.personalDetails.hasDisabilities && foundationRemedialData.personalDetails.hasDisabilities !== 'no') {
+        appendIfFilled("has_disability", foundationRemedialData.personalDetails.hasDisabilities === 'Yes' ? 'true' : 'false');
+      }
+      appendIfFilled("disability_description", foundationRemedialData.personalDetails.disabilityDescription);
+      // Academic session and program
+      appendIfFilled("academic_session", foundationRemedialData.academicSession);
+      appendIfFilled("program_type", "foundation_remedial");
+      appendIfFilled("program_choice", foundationRemedialData.programChoice.program);
+      // Exam details
+      appendIfFilled("exam_type", foundationRemedialData.academicQualifications.examResults.examType);
+      appendIfFilled("exam_number", foundationRemedialData.academicQualifications.examResults.examNumber);
+      appendIfFilled("exam_year", foundationRemedialData.academicQualifications.examResults.examYear);
+      if (foundationRemedialData.academicQualifications.examResults.subjects && foundationRemedialData.academicQualifications.examResults.subjects.length > 0) {
+        appendIfFilled(
+          "subjects",
+          foundationRemedialData.academicQualifications.examResults.subjects.map(s => `${s.subject}:${s.grade}`).join(",")
+        );
+      }
+      // Files
       if (foundationRemedialData.passportPhoto) {
         formData.append("passport_photo", foundationRemedialData.passportPhoto);
       }
       if (foundationRemedialData.academicQualifications.examResults.documents) {
-        formData.append("waec_result", foundationRemedialData.academicQualifications.examResults.documents);
+        formData.append("exam_result", foundationRemedialData.academicQualifications.examResults.documents);
       }
-
-      // Add is_draft flag
-      formData.append("is_draft", "true");
-      formData.append("program_type", "foundation_remedial");
-
-      // Submit the draft application to /applications/upload
-      await apiService.submitUndergraduateApplication(formData);
-
-      // Save to localStorage
-      const applicationData = {
-        ...formData,
-        is_draft: true,
-        program_type: "foundation_remedial",
-      };
-      localStorage.setItem("foundationRemedialApplicationData", JSON.stringify(applicationData));
-
+      // Draft flag
+      formData.append("submitted", "false");
+      // POST to foundation endpoint with Authorization header
+      await fetch(FOUNDATION_ENDPOINT, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
       toast.success("Application saved as draft successfully");
     } catch (error) {
       toast.error("Failed to save draft application");
     }
   };
 
-  const handlePayment = async () => {
-    const amount = 25000; // ₦25,000 in kobo
+  // Detect if user has paid
+  const hasPaid = applicationData && applicationData.has_paid;
+
+  // Payment handler with reference
+  const handleProceedToPayment = async () => {
+    const amount = 20000; // Example amount
     const email = foundationRemedialData.personalDetails.email;
+    const reference = `foundations_${foundationRemedialData.programChoice.program}_${Date.now()}`;
     const metadata = {
       program_type: "foundation",
       academic_session: foundationRemedialData.academicSession,
-      selected_program: foundationRemedialData.program,
+      selected_program: foundationRemedialData.programChoice.program,
+      reference: reference
     };
-
     await onPayment(amount, email, metadata);
+    // Optionally, navigate to payment page if you have a dedicated route
+    // navigate('/payment', { state: { application: applicationData, reference } });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!isFormValid()) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    try {
-      // Initialize payment first
-      await handlePayment();
-      
-      // The rest of the form submission will be handled after successful payment
-      // This will be triggered by the payment verification callback
-    } catch (error) {
-      console.error('Form submission error:', error);
-      toast.error("Failed to submit form");
-    }
-  };
+  if (hasPaid) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded shadow text-center">
+          <h2 className="text-2xl font-bold mb-4 text-green-700">Payment Successful!</h2>
+          <p className="mb-4 text-lg">Thank you for your payment. Your application is complete.</p>
+        </div>
+      </div>
+    );
+  }
 
   const [firstChoiceSearch, setFirstChoiceSearch] = useState("");
   const [secondChoiceSearch, setSecondChoiceSearch] = useState("");
@@ -875,7 +955,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSaveAsDraft} className="space-y-8">
     
 
       {/* Personal Details Section */}
@@ -972,8 +1052,8 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {years.map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
+                    {examYears.map((year) => (
+                      <SelectItem key={year} value={year}>
                         {year}
                       </SelectItem>
                     ))}
@@ -1441,20 +1521,28 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
                 <div className="space-y-2">
                   <Label>Exam Year</Label>
                   <p className="text-red-500 text-xs italic">Required</p>
-                  <Input
+                  <Select
                     value={foundationRemedialData.academicQualifications.examResults.examYear}
-                    onChange={(e) => setFoundationRemedialData(prev => ({
+                    onValueChange={(value) => setFoundationRemedialData(prev => ({
                       ...prev,
                       academicQualifications: {
                         ...prev.academicQualifications,
                         examResults: {
                           ...prev.academicQualifications.examResults,
-                          examYear: e.target.value
+                          examYear: value
                         }
                       }
                     }))}
-                    placeholder="Enter exam year"
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select exam year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {examYears.map((year) => (
+                        <SelectItem key={year} value={year}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -1698,8 +1786,9 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
             Save as Draft
           </Button>
           <Button
-            type="submit"
+            type="button"
             disabled={isProcessingPayment}
+            onClick={handleProceedToPayment}
           >
             {isProcessingPayment ? "Processing Payment..." : "Proceed to Payment"}
           </Button>

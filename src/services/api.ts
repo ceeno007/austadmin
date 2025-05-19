@@ -16,10 +16,10 @@ export const API_ENDPOINTS = {
   SEND_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/send-password-reset-otp`,
   VERIFY_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/verify-password-reset-otp`,
   RESET_PASSWORD: `${FASTAPI_BASE_URL}/auth/reset-password`,
-  APPLICATION_UPLOAD: `${FASTAPI_BASE_URL}/applications/upload`,
+  APPLICATION_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   INITIALIZE_PAYMENT: `${FASTAPI_BASE_URL}/payments/initialize`,
   VERIFY_PAYMENT: `${FASTAPI_BASE_URL}/payments/verify`,
-  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/auth/token`,
+  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/token`,
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   FASTAPI_POSTGRADUATE_SAVED: `${FASTAPI_BASE_URL}/postgraduate/saved`,
   FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
@@ -831,8 +831,15 @@ const apiService = {
    * Submit undergraduate application (or draft) as multipart/form-data
    */
   submitUndergraduateApplication: async (formData: FormData) => {
+    // Get the token from localStorage
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('fastApiAccessToken');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications', {
       method: 'POST',
+      headers,
       body: formData,
     });
     if (!response.ok) {
@@ -845,6 +852,46 @@ const apiService = {
       throw new Error(error.detail || 'Failed to submit application');
     }
     return await response.json();
+  },
+
+  /**
+   * Fetch the current user's undergraduate application
+   */
+  getUndergraduateApplication: async () => {
+    // Get the token from localStorage
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('fastApiAccessToken');
+    const headers = {
+      'Accept': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications/me', {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch undergraduate application');
+    }
+    return await response.json();
+  },
+
+  async submitReferenceForm(uuid: string, formData: FormData) {
+    try {
+      const response = await fetch(`${FASTAPI_BASE_URL}/postgraduate/references/${uuid}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit reference form');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error submitting reference form:', error);
+      throw error;
+    }
   },
 };
 

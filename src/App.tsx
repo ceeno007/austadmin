@@ -11,6 +11,10 @@ import ConditionalFooter from './components/ConditionalFooter';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
 import { addResourceHints, registerServiceWorker } from './utils/performance';
 import ProgramDetails from "./pages/ProgramDetails";
+import ApplicationSuccess from '@/pages/ApplicationSuccess';
+import ReferenceForm from "@/pages/ReferenceForm";
+import ApplicationProgress from "@/pages/ApplicationProgress";
+import PaymentPage from "@/pages/PaymentPage";
 
 // Lazy load all page components for better performance
 const Index = lazy(() => import('./pages/Index'));
@@ -57,6 +61,7 @@ const AppLayout: React.FC = () => {
                     location.pathname === '/signup' || 
                     location.pathname === '/forgot-password';
   const isDocumentUpload = location.pathname === '/document-upload';
+  const isPaymentPage = location.pathname === '/payment';
 
   // Add hardware acceleration to main content
   useEffect(() => {
@@ -71,7 +76,7 @@ const AppLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {!isAuthPage && <ConditionalNavbar />}
+      {!isAuthPage && !isPaymentPage && <ConditionalNavbar />}
       <main className={`flex-grow ${!isAuthPage && !isDocumentUpload ? 'pt-[72px]' : ''} bg-white`}>
         <Routes>
           {/* Public Routes */}
@@ -88,6 +93,7 @@ const AppLayout: React.FC = () => {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/sitemap" element={<Sitemap />} />
+          <Route path="/application-success" element={<ApplicationSuccess />} />
 
           {/* Protected Routes */}
           <Route path="/application" element={
@@ -105,11 +111,20 @@ const AppLayout: React.FC = () => {
           {/* Program Details Route */}
           <Route path="/programs/:programId" element={<ProgramDetails />} />
 
+          {/* Reference Form Route */}
+          <Route path="/references/:uuid" element={<ReferenceForm />} />
+
+          {/* Application Progress Route */}
+          <Route path="/application-progress" element={<ApplicationProgress />} />
+
+          {/* Payment Route */}
+          <Route path="/payment" element={<PaymentPage />} />
+
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAuthPage && <ConditionalFooter />}
+      {!isAuthPage && !isPaymentPage && <ConditionalFooter />}
     </div>
   );
 };

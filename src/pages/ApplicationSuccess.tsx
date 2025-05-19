@@ -111,9 +111,9 @@ const ApplicationSuccess = () => {
               <Mail className="h-8 w-8 mr-2" />
               <h3 className="text-xl font-semibold">Check Your Email</h3>
             </div>
-            <p className="text-center text-gray-600">
-              We have sent a confirmation email with your application details and next steps.
-              Please check your email for updates on your application status.
+            <p className="text-center text-gray-600 font-semibold">
+              Please check your email regularly for updates on your application status.<br />
+              All important information and next steps will be sent to your email address.
             </p>
           </div>
         );
