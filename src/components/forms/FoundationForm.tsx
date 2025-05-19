@@ -279,57 +279,57 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
 
 // Add these predefined subject combinations
 const subjectCombinations = {
-  "Science": [
-    "Physics, Chemistry, Biology",
-    "Physics, Chemistry, Mathematics",
-    "Biology, Chemistry, Mathematics"
-  ],
+  "Arts": [
+    "Literature, Government, Christian Religious Studies",
+    "Literature, Government, History",
+    "Literature, Government, Islamic Religious Studies"
+  ].sort(),
   "Engineering": [
     "Physics, Chemistry, Mathematics",
     "Physics, Further Mathematics, Mathematics"
-  ],
+  ].sort(),
   "Medicine": [
-    "Biology, Chemistry, Physics",
-    "Biology, Chemistry, Mathematics"
-  ],
+    "Biology, Chemistry, Mathematics",
+    "Biology, Chemistry, Physics"
+  ].sort(),
+  "Science": [
+    "Biology, Chemistry, Mathematics",
+    "Physics, Chemistry, Biology",
+    "Physics, Chemistry, Mathematics"
+  ].sort(),
   "Social Sciences": [
-    "Economics, Government, Mathematics",
+    "Economics, Government, Geography",
     "Economics, Government, Literature",
-    "Economics, Government, Geography"
-  ],
-  "Arts": [
-    "Literature, Government, History",
-    "Literature, Government, Christian Religious Studies",
-    "Literature, Government, Islamic Religious Studies"
-  ]
+    "Economics, Government, Mathematics"
+  ].sort()
 };
 
 // Add these constants at the top of the file with other constants
 const commonSubjects = [
-  "Mathematics",
-  "English Language",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Agricultural Science",
-  "Economics",
-  "Government",
-  "Literature in English",
-  "Christian Religious Studies",
-  "Islamic Religious Studies",
-  "Geography",
-  "History",
-  "Further Mathematics",
-  "Technical Drawing",
-  "Food and Nutrition",
-  "Commerce",
   "Accounting",
+  "Agricultural Science",
+  "Biology",
+  "Chemistry",
+  "Christian Religious Studies",
+  "Commerce",
   "Computer Studies",
+  "Economics",
+  "English Language",
+  "Food and Nutrition",
   "French",
-  "Yoruba",
+  "Further Mathematics",
+  "Geography",
+  "Government",
+  "Hausa",
+  "History",
   "Igbo",
-  "Hausa"
-];
+  "Islamic Religious Studies",
+  "Literature in English",
+  "Mathematics",
+  "Physics",
+  "Technical Drawing",
+  "Yoruba"
+].sort();
 
 const grades = [
   "A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"
@@ -613,8 +613,8 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       formData.append("is_draft", "true");
       formData.append("program_type", "foundation_remedial");
 
-      // Submit the draft application
-      await apiService.submitDraftApplication(formData);
+      // Submit the draft application to /applications/upload
+      await apiService.submitUndergraduateApplication(formData);
 
       // Save to localStorage
       const applicationData = {
@@ -668,6 +668,9 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   const [openUniversityPopover2, setOpenUniversityPopover2] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Add state for university search country
+  const [universityCountry, setUniversityCountry] = useState<string>("Nigeria");
+
   const handleUniversitySelect = (universityName: string, choice: "firstChoice" | "secondChoice") => {
     setFoundationRemedialData(prev => ({
       ...prev,
@@ -687,8 +690,28 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     }
   };
 
+  const renderUniversityCountrySelect = () => (
+    <div className="mb-2">
+      <Label>University Country</Label>
+      <Select
+        value={universityCountry}
+        onValueChange={setUniversityCountry}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select country" />
+        </SelectTrigger>
+        <SelectContent>
+          {countries.map((country) => (
+            <SelectItem key={country} value={country}>{country}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   const renderCommandInput = () => (
     <div className="space-y-2">
+      {renderUniversityCountrySelect()}
       <CommandInput
         placeholder="Search universities... (minimum 3 characters)"
         value={searchQuery}
@@ -707,31 +730,25 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   const [isLoadingUniversities, setIsLoadingUniversities] = useState(false);
   const [universityCache, setUniversityCache] = useState<Record<string, University[]>>({});
 
-  // Function to fetch universities with caching and optimization
+  // Update fetchUniversities to use the new API and country
   const fetchUniversities = async (query: string) => {
     if (query.length < 3) {
       setUniversities([]);
       return;
     }
-    
     // Check cache first
-    if (universityCache[query]) {
-      setUniversities(universityCache[query]);
+    const cacheKey = `${query}|${universityCountry}`;
+    if (universityCache[cacheKey]) {
+      setUniversities(universityCache[cacheKey]);
       return;
     }
-    
     setIsLoadingUniversities(true);
     try {
-      const response = await fetch(`https://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://admissions-jcvy.onrender.com/universities?search=${encodeURIComponent(query)}&country=${encodeURIComponent(universityCountry)}`);
       const data = await response.json();
-      // Limit results to 20 universities for better performance
       const limitedData = data.slice(0, 20);
       setUniversities(limitedData);
-      // Cache the results
-      setUniversityCache(prev => ({
-        ...prev,
-        [query]: limitedData
-      }));
+      setUniversityCache(prev => ({ ...prev, [cacheKey]: limitedData }));
     } catch (error) {
       toast.error("Failed to fetch universities");
       console.error("Error fetching universities:", error);

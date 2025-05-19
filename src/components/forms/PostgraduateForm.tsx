@@ -333,6 +333,57 @@ interface PostgraduateFormProps {
   isProcessingPayment: boolean;
 }
 
+// Helper to build FormData for postgraduate application with exact backend field names
+function buildPostgraduateFormData(data) {
+  const formData = new FormData();
+  formData.append('state_of_origin', data.personalDetails.stateOfOrigin || '');
+  formData.append('selected_program', data.program || '');
+  formData.append('gender', data.personalDetails.gender || '');
+  formData.append('has_disability', data.personalDetails.hasDisabilities === 'yes' ? 'true' : 'false');
+  formData.append('qualification_end_date', data.academicQualifications.qualification1.endDate ? `${data.academicQualifications.qualification1.endDate.year}-${data.academicQualifications.qualification1.endDate.month}-${data.academicQualifications.qualification1.endDate.day}` : '');
+  formData.append('second_class_of_degree', data.academicQualifications.qualification2?.grade || '');
+  formData.append('qualification_cgpa', data.academicQualifications.qualification1.cgpa || '');
+  if (data.passportPhoto) formData.append('passport_photo', data.passportPhoto);
+  formData.append('second_qualification_start_date', data.academicQualifications.qualification2?.startDate ? `${data.academicQualifications.qualification2.startDate.year}-${data.academicQualifications.qualification2.startDate.month}-${data.academicQualifications.qualification2.startDate.day}` : '');
+  if (data.statementOfPurpose && data.statementOfPurpose[0]) formData.append('statement_of_purpose', data.statementOfPurpose[0]);
+  if (data.references && data.references.recommendationLetters) formData.append('recommendation_letters', data.references.recommendationLetters);
+  formData.append('second_year', data.academicQualifications.qualification2?.endDate?.year || '');
+  formData.append('date_of_birth', data.personalDetails.dateOfBirth ? `${data.personalDetails.dateOfBirth.year}-${data.personalDetails.dateOfBirth.month}-${data.personalDetails.dateOfBirth.day}` : '');
+  formData.append('city', data.personalDetails.city || '');
+  formData.append('degree', data.academicQualifications.qualification1.type || '');
+  formData.append('class_of_degree', data.academicQualifications.qualification1.grade || '');
+  formData.append('second_qualification_end_date', data.academicQualifications.qualification2?.endDate ? `${data.academicQualifications.qualification2.endDate.year}-${data.academicQualifications.qualification2.endDate.month}-${data.academicQualifications.qualification2.endDate.day}` : '');
+  formData.append('second_institution', data.academicQualifications.qualification2?.institution || '');
+  formData.append('first_referee_email', data.references.referee1.email || '');
+  if (data.academicQualifications.qualification2?.documents && data.academicQualifications.qualification2.documents[0]) formData.append('second_degree_certificate', data.academicQualifications.qualification2.documents[0]);
+  formData.append('second_qualification_cgpa', data.academicQualifications.qualification2?.cgpa || '');
+  formData.append('second_qualification_subject', data.academicQualifications.qualification2?.subject || '');
+  formData.append('second_referee_email', data.references.referee2.email || '');
+  if (data.academicQualifications.qualification1.documents && data.academicQualifications.qualification1.documents[0]) formData.append('first_degree_certificate', data.academicQualifications.qualification1.documents[0]);
+  formData.append('program_type', data.programType || '');
+  formData.append('second_referee_name', data.references.referee2.name || '');
+  formData.append('country', data.personalDetails.country || '');
+  formData.append('second_degree', data.academicQualifications.qualification2?.type || '');
+  formData.append('applicant_type', data.applicantType || '');
+  formData.append('institution', data.academicQualifications.qualification1.institution || '');
+  formData.append('street_address', data.personalDetails.streetAddress || '');
+  formData.append('disability_description', data.personalDetails.disabilityDescription || '');
+  formData.append('other_names', data.personalDetails.otherNames || '');
+  formData.append('first_referee_name', data.references.referee1.name || '');
+  formData.append('first_name', data.personalDetails.firstName || '');
+  formData.append('phone_number', data.personalDetails.phoneNumber || '');
+  if (data.academicQualifications.qualification1.documents && data.academicQualifications.qualification1.documents[1]) formData.append('first_degree_transcript', data.academicQualifications.qualification1.documents[1]);
+  formData.append('surname', data.personalDetails.surname || '');
+  formData.append('qualification_start_date', data.academicQualifications.qualification1.startDate ? `${data.academicQualifications.qualification1.startDate.year}-${data.academicQualifications.qualification1.startDate.month}-${data.academicQualifications.qualification1.startDate.day}` : '');
+  formData.append('nationality', data.personalDetails.nationality || '');
+  formData.append('qualification_subject', data.academicQualifications.qualification1.subject || '');
+  formData.append('email', data.personalDetails.email || '');
+  formData.append('year', data.academicQualifications.qualification1.endDate?.year || '');
+  formData.append('academic_session', data.academicSession || '');
+  if (data.academicQualifications.qualification2?.documents && data.academicQualifications.qualification2.documents[1]) formData.append('second_degree_transcript', data.academicQualifications.qualification2.documents[1]);
+  return formData;
+}
+
 const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormProps) => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
@@ -349,6 +400,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   // Add these state variables after the other state declarations
   const [referee1EmailError, setReferee1EmailError] = useState<string | null>(null);
   const [referee2EmailError, setReferee2EmailError] = useState<string | null>(null);
+
+  // Add state for university search country
+  const [universityCountry, setUniversityCountry] = useState<string>("Nigeria");
 
   useEffect(() => {
     try {
@@ -1032,16 +1086,26 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     await onPayment(amount, email, metadata);
   };
 
+  // In handleSubmit, use the helper to build FormData and submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!isFormValid()) {
       toast.error("Please fill in all required fields");
       return;
     }
-
-    // Show payment selection screen instead of directly processing payment
-    setShowPaymentSelection(true);
+    setIsSubmitting(true);
+    try {
+      const formData = buildPostgraduateFormData(postgraduateData);
+      const response = await apiService.uploadPostgraduateFormData(formData);
+      toast.success("Application submitted successfully!");
+      if (response.is_paid) {
+        navigate("/reference-status");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to submit application");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Function to fetch universities with caching and optimization
@@ -1050,25 +1114,19 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
       setUniversities([]);
       return;
     }
-    
     // Check cache first
-    if (universityCache[query]) {
-      setUniversities(universityCache[query]);
+    const cacheKey = `${query}|${universityCountry}`;
+    if (universityCache[cacheKey]) {
+      setUniversities(universityCache[cacheKey]);
       return;
     }
-    
     setIsLoadingUniversities(true);
     try {
-      const response = await fetch(`https://universities.hipolabs.com/search?name=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://admissions-jcvy.onrender.com/universities?search=${encodeURIComponent(query)}&country=${encodeURIComponent(universityCountry)}`);
       const data = await response.json();
-      // Limit results to 20 universities for better performance
       const limitedData = data.slice(0, 20);
       setUniversities(limitedData);
-      // Cache the results
-      setUniversityCache(prev => ({
-        ...prev,
-        [query]: limitedData
-      }));
+      setUniversityCache(prev => ({ ...prev, [cacheKey]: limitedData }));
     } catch (error) {
       toast.error("Failed to fetch universities");
       console.error("Error fetching universities:", error);
@@ -1113,6 +1171,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   // Update the CommandInput to show minimum character message and loading state
   const renderCommandInput = () => (
     <div className="space-y-2">
+      {renderUniversityCountrySelect()}
       <CommandInput
         placeholder="Search universities... (minimum 3 characters)"
         value={searchQuery}
@@ -1230,6 +1289,26 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
       <p className="text-xs text-gray-500">
         Start typing to search for your institution. If your institution is not listed, you can type it manually.
       </p>
+    </div>
+  );
+
+  // Add a country select field above the university search input
+  const renderUniversityCountrySelect = () => (
+    <div className="mb-2">
+      <Label>University Country</Label>
+      <Select
+        value={universityCountry}
+        onValueChange={setUniversityCountry}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select country" />
+        </SelectTrigger>
+        <SelectContent>
+          {countries.map((country) => (
+            <SelectItem key={country} value={country}>{country}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 

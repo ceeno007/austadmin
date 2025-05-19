@@ -17,7 +17,6 @@ export const API_ENDPOINTS = {
   VERIFY_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/verify-password-reset-otp`,
   RESET_PASSWORD: `${FASTAPI_BASE_URL}/auth/reset-password`,
   APPLICATION_UPLOAD: `${FASTAPI_BASE_URL}/applications/upload`,
-  APPLICATION_DRAFT: `${FASTAPI_BASE_URL}/applications/draft`,
   INITIALIZE_PAYMENT: `${FASTAPI_BASE_URL}/payments/initialize`,
   VERIFY_PAYMENT: `${FASTAPI_BASE_URL}/payments/verify`,
   FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/auth/token`,
@@ -488,42 +487,6 @@ const apiService = {
   },
 
   /**
-   * Submit a draft application
-   * @param formData - Application form data with is_draft flag
-   * @returns Promise with the API response
-   */
-  submitDraftApplication: async (formData: FormData) => {
-    const response = await axios.post(`${FASTAPI_BASE_URL}/applications/draft`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  // Update existing draft
-  updateDraftApplication: async (draftId: string, formData: FormData) => {
-    const response = await axios.put(`${FASTAPI_BASE_URL}/applications/draft/${draftId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  // Get draft application
-  getDraftApplication: async () => {
-    const response = await axios.get(`${FASTAPI_BASE_URL}/applications/draft`);
-    return response.data;
-  },
-
-  // Delete draft application
-  deleteDraftApplication: async (draftId: string) => {
-    const response = await axios.delete(`${FASTAPI_BASE_URL}/applications/draft/${draftId}`);
-    return response.data;
-  },
-
-  /**
    * Sign in using FastAPI token endpoint (OAuth2 password flow)
    * @param credentials - User login credentials
    * @returns Promise with the token response
@@ -704,10 +667,8 @@ const apiService = {
     try {
       // Get the token from localStorage
       const token = localStorage.getItem('fastApiAccessToken');
-      
       // Create a FormData object
       const formData = new FormData();
-      
       // Add all text fields
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined) {
@@ -719,7 +680,6 @@ const apiService = {
           }
         }
       });
-      
       // Add files if provided
       if (files) {
         Object.entries(files).forEach(([key, file]) => {
@@ -728,10 +688,13 @@ const apiService = {
           }
         });
       }
-      
-      // Make the request
+      // Ensure is_draft=true is set
+      if (!formData.has('is_draft')) {
+        formData.append('is_draft', 'true');
+      }
+      // Make the request to the correct endpoint
       const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
         formData,
         {
           headers: {
@@ -740,7 +703,6 @@ const apiService = {
           }
         }
       );
-      
       return response.data;
     } catch (error: any) {
       console.error("Save postgraduate application as draft error:", error);
@@ -760,10 +722,13 @@ const apiService = {
     try {
       // Get the token from localStorage
       const token = localStorage.getItem('fastApiAccessToken');
-      
-      // Make the request
+      // Ensure is_draft=true is set
+      if (!formData.has('is_draft')) {
+        formData.append('is_draft', 'true');
+      }
+      // Make the request to the same endpoint as submit
       const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
         formData,
         {
           headers: {
@@ -772,7 +737,6 @@ const apiService = {
           }
         }
       );
-      
       return response.data;
     } catch (error: any) {
       console.error("Save postgraduate application as draft error:", error);
@@ -861,6 +825,26 @@ const apiService = {
     } catch (error: any) {
       throw new Error(error.message || 'Invalid verification code');
     }
+  },
+
+  /**
+   * Submit undergraduate application (or draft) as multipart/form-data
+   */
+  submitUndergraduateApplication: async (formData: FormData) => {
+    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      let error;
+      try {
+        error = await response.json();
+      } catch {
+        error = { detail: 'Unknown error' };
+      }
+      throw new Error(error.detail || 'Failed to submit application');
+    }
+    return await response.json();
   },
 };
 
