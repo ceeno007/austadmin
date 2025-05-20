@@ -19,6 +19,10 @@ import FoundationForm from "@/components/forms/FoundationForm";
 import { useAuth } from "@/contexts/AuthContext";
 import paymentService from "@/services/payment";
 import ApplicationStatusCheck from '@/components/ApplicationStatusCheck';
+import { PaystackConsumer } from "react-paystack";
+import apiService from "@/services/api";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DocumentUpload = () => {
   const { toast } = useToast();
@@ -81,6 +85,9 @@ const DocumentUpload = () => {
     
     return "User";
   });
+
+  // Add residency state
+  const [residency, setResidency] = useState<'nigeria' | 'international'>('nigeria');
 
   // Update program type when URL parameter changes
   useEffect(() => {
@@ -205,6 +212,180 @@ const DocumentUpload = () => {
       verifyPayment(reference);
     }
   }, [searchParams]);
+
+  // Update the handlePaystackSuccess function
+  const handlePaystackSuccess = async (reference: any) => {
+    try {
+      // Get the current timestamp
+      const timestamp = new Date().toISOString();
+      
+      // Get the program type from localStorage or URL params
+      const programType = localStorage.getItem("programType") || "undergraduate";
+      
+      // Get the application data from localStorage
+      const applicationData = JSON.parse(localStorage.getItem("applicationData") || "{}");
+      
+      // Update local storage to mark payment as completed
+      localStorage.setItem("paymentCompleted", "true");
+      localStorage.setItem("paymentReference", reference.reference);
+      
+      // Show success message
+      toast({
+        title: "Payment Successful!",
+        description: "Your application has been submitted successfully.",
+        duration: 5000,
+        style: {
+          background: '#10B981',
+          color: 'white',
+          border: 'none',
+          padding: '16px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }
+      });
+
+      // Navigate to success page
+      navigate("/payment-success");
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast({
+        title: "Payment Error",
+        description: "Please contact support if this persists.",
+        variant: "destructive",
+        duration: 5000
+      });
+    }
+  };
+
+  // Update the PaystackButton component
+  const PaystackButton = () => {
+    // Get program type from localStorage
+    const programType = localStorage.getItem("programType") || "undergraduate";
+    const applicationData = JSON.parse(localStorage.getItem("applicationData") || "{}");
+    
+    // Set amount based on program type and residency
+    const getAmount = () => {
+      switch(programType.toLowerCase()) {
+        case 'postgraduate':
+        case 'msc':
+        case 'phd':
+          return residency === 'nigeria' ? 2000000 : 5000; // ₦20,000 for Nigerians, $50 for international
+        case 'foundation':
+        case 'jupeb':
+          return residency === 'nigeria' ? 1000000 : 0; // ₦10,000 for Nigerians, no international
+        default:
+          return 0; // Free for undergraduate
+      }
+    };
+
+    // Get currency based on residency
+    const getCurrency = () => {
+      if (programType.toLowerCase() === 'postgraduate' && residency === 'international') {
+        return "USD";
+      }
+      return "NGN";
+    };
+
+    // Create reference with program type - only for paid programs
+    const createReference = () => {
+      const timestamp = new Date().getTime();
+      // Only generate reference for paid programs
+      if (programType.toLowerCase() === 'postgraduate' || programType.toLowerCase() === 'foundation') {
+        const programPrefix = programType.toLowerCase().substring(0, 3); // e.g., "pos" for postgraduate
+        return `${programPrefix}_${timestamp}`;
+      }
+      return timestamp.toString(); // For undergraduate, just use timestamp
+    };
+
+    const config = {
+      reference: createReference(),
+      email: applicationData.user?.email || "",
+      amount: getAmount(),
+      publicKey: 'pk_test_7fcc7a1fe3005ff3f99b088e7999c4add0d37bbd',
+      currency: getCurrency(),
+      metadata: {
+        program_type: programType,
+        timestamp: new Date().toISOString(),
+        custom_fields: [
+          {
+            display_name: "Program Type",
+            variable_name: "program_type",
+            value: programType
+          },
+          {
+            display_name: "Residency",
+            variable_name: "residency",
+            value: residency === 'nigeria' ? "Nigerian" : "International"
+          }
+        ]
+      }
+    };
+
+    const handleSuccess = (reference: any) => {
+      handlePaystackSuccess(reference);
+    };
+
+    const handleClose = () => {
+      toast({
+        title: "Payment cancelled",
+        description: "You can try again when you're ready.",
+        variant: "destructive",
+        duration: 5000
+      });
+    };
+
+    // Get display amount based on program and residency
+    const getDisplayAmount = () => {
+      switch(programType.toLowerCase()) {
+        case 'postgraduate':
+        case 'msc':
+        case 'phd':
+          return residency === 'nigeria' ? "₦20,000" : "$50";
+        case 'foundation':
+        case 'jupeb':
+          return residency === 'nigeria' ? "₦10,000" : "Not Available";
+        default:
+          return "Free";
+      }
+    };
+
+    // Don't show payment button for undergraduate or international foundation
+    if (programType.toLowerCase() === 'undergraduate' || 
+        (programType.toLowerCase() === 'foundation' && residency === 'international')) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Select Your Residency</Label>
+          <Select
+            value={residency}
+            onValueChange={(value: 'nigeria' | 'international') => setResidency(value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select your residency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="nigeria">Nigeria</SelectItem>
+              <SelectItem value="international">International</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <PaystackConsumer {...config}>
+          {({initializePayment}) => (
+            <Button
+              onClick={() => initializePayment(handleSuccess, handleClose)}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              Pay {getDisplayAmount()} Application Fee
+            </Button>
+          )}
+        </PaystackConsumer>
+      </div>
+    );
+  };
 
   return (
     <ApplicationStatusCheck>

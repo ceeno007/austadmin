@@ -59,19 +59,49 @@ const ReferenceForm = () => {
     setIsSubmitting(true);
 
     try {
-      const formDataToSend = new FormData();
+      const formData = new FormData();
       
       // Append all form fields to FormData
       Object.entries(formData).forEach(([key, value]) => {
-        formDataToSend.append(key, value.toString());
+        formData.append(key, value.toString());
       });
 
-      await apiService.submitReferenceForm(uuid!, formDataToSend);
-      toast.success("Reference submitted successfully!");
-      navigate("/reference-submitted");
+      await apiService.submitReference(formData);
+      
+      // Show success toast with nice styling
+      toast.success("Reference Submitted Successfully!", {
+        description: "Thank you for providing the reference. The applicant will be notified.",
+        duration: 5000,
+        style: {
+          background: '#10B981',
+          color: 'white',
+          border: 'none',
+          padding: '16px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        },
+        icon: '🎉',
+        position: 'top-center'
+      });
+
+      // Wait for 2 seconds to show the toast before redirecting
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (error) {
-      toast.error("Failed to submit reference. Please try again.");
-      console.error("Error submitting reference:", error);
+      toast.error("Failed to submit reference", {
+        description: error.message || "Please try again later",
+        duration: 5000,
+        style: {
+          background: '#EF4444',
+          color: 'white',
+          border: 'none',
+          padding: '16px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }
+      });
     } finally {
       setIsSubmitting(false);
     }
