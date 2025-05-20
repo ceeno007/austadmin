@@ -448,6 +448,17 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         if (application) {
           // Use the application data as our source
           setApplicationData(application);
+          
+          // Check if user has already paid
+          if (application.has_paid) {
+            // Redirect to reference status page
+            navigate("/reference-status", { 
+              state: { application },
+              replace: true 
+            });
+            return;
+          }
+
           // Check for program_type in the application
           const programType = application.program_type?.toLowerCase();
           // Get stored program type from localStorage for comparison
@@ -476,9 +487,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         }
       }
     } catch (error) {
-      // Error handling without console.log
+      console.error("Error loading application data:", error);
     }
-  }, []);
+  }, [navigate]);
 
   const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>({
     academicSession: getCurrentAcademicSession(),
@@ -1045,20 +1056,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
       
       toast.success("Application submitted successfully!");
       
-      // Navigate to payment page with application data
+      // Always navigate to payment page
       navigate("/payment", { 
-        state: { 
-          application: response,
-          amount: postgraduateData.applicantType === "Nigerian" ? 50000 : 100,
-          currency: postgraduateData.applicantType === "Nigerian" ? "NGN" : "USD",
-          email: postgraduateData.personalDetails.email,
-          metadata: {
-            applicationId: response.id,
-            programType: response.program_type,
-            program: response.selected_program,
-            applicantType: postgraduateData.applicantType
-          }
-        },
+        state: { application: response },
         replace: true 
       });
     } catch (err) {
@@ -1810,18 +1810,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 <Label>Qualification Type <span className="text-red-500">Required</span></Label>
                 <Select
                   value={postgraduateData.academicQualifications.qualification1.type}
-                  onValueChange={(value) => {
-                    setPostgraduateData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        qualification1: {
-                          ...prev.academicQualifications.qualification1,
-                          type: value
-                        }
-                      }
-                    }));
-                  }}
+                  onValueChange={(value) => handleAcademicQualificationChange("qualification1", "type", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select qualification type" />
@@ -1841,18 +1830,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   <Input
                     placeholder="Enter other qualification"
                     value={postgraduateData.academicQualifications.qualification1.otherType || ""}
-                    onChange={(e) => {
-                      setPostgraduateData(prev => ({
-                        ...prev,
-                        academicQualifications: {
-                          ...prev.academicQualifications,
-                          qualification1: {
-                            ...prev.academicQualifications.qualification1,
-                            otherType: e.target.value
-                          }
-                        }
-                      }));
-                    }}
+                    onChange={(e) => handleAcademicQualificationChange("qualification1", "otherType", e.target.value)}
                   />
                 </div>
               )}
@@ -2080,18 +2058,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   <Label>Qualification Type <span className="text-red-500">Required</span></Label>
                   <Select
                     value={postgraduateData.academicQualifications.qualification2?.type || ""}
-                    onValueChange={(value) => {
-                      setPostgraduateData(prev => ({
-                        ...prev,
-                        academicQualifications: {
-                          ...prev.academicQualifications,
-                          qualification2: {
-                            ...prev.academicQualifications.qualification2,
-                            type: value
-                          }
-                        }
-                      }));
-                    }}
+                    onValueChange={(value) => handleAcademicQualificationChange("qualification2", "type", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select qualification type" />
@@ -2110,18 +2077,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     <Input
                       placeholder="Enter other qualification"
                       value={postgraduateData.academicQualifications.qualification2?.otherType || ""}
-                      onChange={(e) => {
-                        setPostgraduateData(prev => ({
-                          ...prev,
-                          academicQualifications: {
-                            ...prev.academicQualifications,
-                            qualification2: {
-                              ...prev.academicQualifications.qualification2,
-                              otherType: e.target.value
-                            }
-                          }
-                        }));
-                      }}
+                      onChange={(e) => handleAcademicQualificationChange("qualification2", "otherType", e.target.value)}
                     />
                   </div>
                 )}

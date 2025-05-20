@@ -61,9 +61,15 @@ const PaymentPage: React.FC = () => {
   };
 
   const redirectToSuccessPage = () => {
-    if (programType === "phd") return navigate("/reference-status");
-    if (programType === "foundation" || programType === "jupeb")
+    // For PhD students, go to payment success first
+    if (programType === "phd") {
+      return navigate("/payment-success");
+    }
+    // For foundation or JUPEB students
+    if (programType === "foundation" || programType === "jupeb") {
       return navigate("/foundation-success");
+    }
+    // For all other programs
     return navigate("/payment-success");
   };
 
@@ -85,15 +91,13 @@ const PaymentPage: React.FC = () => {
       })
     );
 
-    // Show success popup
-    setShowSuccessPopup(true);
+    // Redirect to appropriate success page
+    redirectToSuccessPage();
   };
 
   const handleSuccessPopupClose = () => {
     setShowSuccessPopup(false);
-    // Clear auth data and redirect to login
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Redirect to login without clearing auth data
     navigate('/login');
   };
 

@@ -65,6 +65,7 @@ const AppLayout: React.FC = () => {
                     location.pathname === '/forgot-password';
   const isDocumentUpload = location.pathname === '/document-upload';
   const isPaymentPage = location.pathname === '/payment';
+  const isReferenceStatus = location.pathname === '/reference-status';
 
   // Add hardware acceleration to main content
   useEffect(() => {
@@ -79,8 +80,8 @@ const AppLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {!isAuthPage && !isPaymentPage && <ConditionalNavbar />}
-      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload ? 'pt-[72px]' : ''} bg-white`}>
+      {!isAuthPage && !isPaymentPage && !isReferenceStatus && <ConditionalNavbar />}
+      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus ? 'pt-[72px]' : ''} bg-white`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
@@ -97,7 +98,11 @@ const AppLayout: React.FC = () => {
           <Route path="/terms" element={<Terms />} />
           <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/application-success" element={<ApplicationSuccess />} />
-          <Route path="/reference-status" element={<ReferenceStatus />} />
+          <Route path="/reference-status" element={
+            <ProtectedRoute>
+              <ReferenceStatus />
+            </ProtectedRoute>
+          } />
 
           {/* Protected Routes */}
           <Route path="/application" element={
@@ -130,7 +135,7 @@ const AppLayout: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAuthPage && !isPaymentPage && <ConditionalFooter />}
+      {!isAuthPage && !isPaymentPage && !isReferenceStatus && <ConditionalFooter />}
     </div>
   );
 };

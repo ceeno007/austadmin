@@ -22,8 +22,8 @@ interface Application {
 const PostgraduateForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
   const [application, setApplication] = useState<Application | null>(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     first_referee_name: "",
     first_referee_email: "",
@@ -36,12 +36,10 @@ const PostgraduateForm: React.FC = () => {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
-          console.log("No token found, redirecting to login");
           navigate("/login");
           return;
         }
 
-        console.log("Fetching application data...");
         const response = await fetch("http://localhost:8000/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -53,7 +51,7 @@ const PostgraduateForm: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log("Received data:", data);
+        console.log("Application data:", data);
 
         if (data.applications && data.applications.length > 0) {
           const app = data.applications[0];
@@ -61,16 +59,8 @@ const PostgraduateForm: React.FC = () => {
           console.log("Has paid status:", app.has_paid);
 
           if (app.has_paid === true) {
-            console.log("User has paid, initiating redirect...");
-            // Try multiple redirection methods
-            try {
-              // Method 1: Using window.location
-              window.location.replace("/reference-status");
-            } catch (e) {
-              console.log("Window location redirect failed, trying navigate...");
-              // Method 2: Using React Router navigate
-              navigate("/reference-status", { replace: true });
-            }
+            console.log("User has paid, redirecting to reference status...");
+            navigate("/reference-status", { replace: true });
             return;
           }
 
@@ -111,7 +101,8 @@ const PostgraduateForm: React.FC = () => {
 
   // Don't render the form if application is paid
   if (application?.has_paid === true) {
-    console.log("Application is paid, returning null");
+    console.log("Application is paid, redirecting to reference status...");
+    navigate("/reference-status", { replace: true });
     return null;
   }
 
@@ -166,11 +157,9 @@ const PostgraduateForm: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" className="bg-[#FF5500] hover:bg-[#FF5500]/90">
-                Submit
-              </Button>
-            </div>
+            <Button type="submit" className="w-full bg-[#FF5500] hover:bg-[#FF5500]/90">
+              Submit
+            </Button>
           </form>
         </Card>
       </div>
