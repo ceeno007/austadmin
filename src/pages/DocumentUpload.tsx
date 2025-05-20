@@ -84,27 +84,17 @@ const DocumentUpload = () => {
 
   // Update program type when URL parameter changes
   useEffect(() => {
+    const typeFromUrl = new URLSearchParams(window.location.search).get('type');
     if (typeFromUrl) {
-      setActiveTab(typeFromUrl);
       setProgramType(typeFromUrl);
-      localStorage.setItem("programType", typeFromUrl);
-      console.log(`Program type set to ${typeFromUrl} from URL parameter`);
+      localStorage.setItem('programType', typeFromUrl);
     } else {
-      // If URL has no type, get from localStorage to maintain persistence  
-      const savedType = localStorage.getItem("programType");
+      const savedType = localStorage.getItem('programType');
       if (savedType) {
-        setActiveTab(savedType);
         setProgramType(savedType);
-        // Update URL to match the saved program type without full page reload
-        window.history.replaceState(
-          null, 
-          '', 
-          `${window.location.pathname}?type=${savedType}`
-        );
-        console.log(`Program type set to ${savedType} from localStorage`);
       }
     }
-  }, [typeFromUrl]);
+  }, []);
 
   // Handler for tab changes
   const handleTabChange = (value: string) => {
@@ -124,7 +114,6 @@ const DocumentUpload = () => {
       const accessToken = localStorage.getItem("accessToken");
       
       if (!accessToken) {
-        console.log("No access token found");
         // Clear any existing data
         localStorage.removeItem("accessToken");
         localStorage.removeItem("applicationData");

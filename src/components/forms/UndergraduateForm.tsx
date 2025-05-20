@@ -110,6 +110,20 @@ interface UndergraduateFormData {
     };
   };
   declaration: string;
+  programChoice?: {
+    program: string;
+    subjectCombination: string;
+    firstChoice: {
+      university: string;
+      department: string;
+      faculty: string;
+    };
+    secondChoice: {
+      university: string;
+      department: string;
+      faculty: string;
+    };
+  };
 }
 
 const FileUploadField = ({ 
@@ -507,114 +521,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       if (storedData) {
         const parsedData = JSON.parse(storedData);
         if (parsedData.applications && parsedData.applications.length > 0) {
-          const applicationData = parsedData.applications[0];
-          console.log("Using application data from localStorage:", applicationData);
-          
-          // Create placeholder files for documents
-          const passportPhoto = createPlaceholderFile(applicationData.passport_photo_path);
-          const examType1Result = createPlaceholderFile(applicationData.exam_type_1_result_path);
-          const examType2Result = createPlaceholderFile(applicationData.exam_type_2_result_path);
-          const jambResults = createPlaceholderFile(applicationData.jamb_result_path);
-          
-          // Parse subjects if they exist
-          let waecSubjects = [];
-          let necoSubjects = [];
-          try {
-            if (applicationData.subjects_1) {
-              waecSubjects = Array.isArray(applicationData.subjects_1) 
-                ? applicationData.subjects_1 
-                : JSON.parse(applicationData.subjects_1);
-            }
-            if (applicationData.subjects_2) {
-              necoSubjects = Array.isArray(applicationData.subjects_2)
-                ? applicationData.subjects_2
-                : JSON.parse(applicationData.subjects_2);
-            }
-          } catch (error) {
-            console.error("Error parsing subjects:", error);
-          }
-
-          // Set selected exams based on available data (only allow waec, neco, nabteb)
-          const allowedExams = ['waec', 'neco', 'nabteb'];
-          const selectedExams = [];
-          if (applicationData.exam_type_1 && allowedExams.includes(applicationData.exam_type_1.toLowerCase())) selectedExams.push(applicationData.exam_type_1.toLowerCase());
-          if (applicationData.exam_type_2 && allowedExams.includes(applicationData.exam_type_2.toLowerCase())) selectedExams.push(applicationData.exam_type_2.toLowerCase());
-          setSelectedExams(selectedExams);
-
-          // Parse date of birth
-          let dateOfBirth = {
-            day: "",
-            month: "",
-            year: ""
-          };
-          if (applicationData.date_of_birth) {
-            const dob = new Date(applicationData.date_of_birth);
-            dateOfBirth = {
-              day: dob.getDate().toString().padStart(2, '0'),
-              month: (dob.getMonth() + 1).toString().padStart(2, '0'),
-              year: dob.getFullYear().toString()
-            };
-          }
-
-          setUndergraduateData(prev => ({
-            ...prev,
-            passportPhoto: passportPhoto,
-            academicSession: applicationData.academic_session || "",
-            selectedCourse: applicationData.selected_program || "",
-            personalDetails: {
-              ...prev.personalDetails,
-              surname: applicationData.surname || "",
-              firstName: applicationData.first_name || "",
-              otherNames: applicationData.other_names || "",
-              gender: applicationData.gender || "",
-              dateOfBirth: dateOfBirth,
-              streetAddress: applicationData.street_address || "",
-              city: applicationData.city || "",
-              country: applicationData.country || "",
-              stateOfOrigin: applicationData.state_of_origin || "",
-              nationality: applicationData.nationality || "",
-              phoneNumber: applicationData.phone_number || "",
-              email: applicationData.email || "",
-              hasDisabilities: applicationData.has_disability ? "Yes" : "No",
-              disabilityDescription: applicationData.disability_description || "",
-              bloodGroup: applicationData.blood_group || "",
-            },
-            academicQualifications: {
-              ...prev.academicQualifications,
-              waecResults: {
-                ...prev.academicQualifications.waecResults,
-                examNumber: applicationData.exam_number_1 || "",
-                examYear: applicationData.exam_year_1 ? String(applicationData.exam_year_1) : "",
-                subjects: waecSubjects,
-                documents: examType1Result
-              },
-              necoResults: {
-                ...prev.academicQualifications.necoResults,
-                examNumber: applicationData.exam_number_2 || "",
-                examYear: applicationData.exam_year_2 ? String(applicationData.exam_year_2) : "",
-                subjects: necoSubjects,
-                documents: examType2Result
-              },
-              jambResults: {
-                ...prev.academicQualifications.jambResults,
-                regNumber: applicationData.jamb_reg_number || "",
-                examYear: applicationData.jamb_year ? String(applicationData.jamb_year) : "",
-                score: applicationData.jamb_score ? String(applicationData.jamb_score) : "",
-                documents: jambResults
-              }
-            },
-            declaration: applicationData.declaration || ""
-          }));
-
-          // If there's a draft ID, set it
-          if (applicationData.id) {
-            setDraftId(applicationData.id);
-            setIsDraft(true);
-          }
+          const application = parsedData.applications[0];
+          setApplicationData(application);
+          setUndergraduateData(prev => autofillFromApplication(application, prev));
         }
       }
     } catch (error) {
-      console.error("Error parsing application data:", error);
+      // Handle error silently
     }
   }, []);
 
@@ -688,7 +601,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         setCopyStatus({ ...copyStatus, [field]: false });
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      // Handle error silently
     }
   };
 
@@ -872,7 +785,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     const allowedExams = ['waec', 'neco', 'nabteb'];
     if (!allowedExams.includes(examType)) return; // Only allow O'Level exams
     setSelectedExams(prev => {
-      console.log('selectedExams before:', prev, 'trying to add:', examType);
       if (prev.includes(examType)) {
         return prev.filter(type => type !== examType);
       }
@@ -925,6 +837,25 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           formData.append(key, value);
         }
       };
+
+      // Add program choice in the exact format required
+      if (undergraduateData.programChoice) {
+        formData.append('program_choice', JSON.stringify({
+          program: undergraduateData.programChoice.program,
+          subjectCombination: undergraduateData.programChoice.subjectCombination,
+          firstChoice: {
+            additionalProp1: "AUST",
+            additionalProp2: undergraduateData.programChoice.program,
+            additionalProp3: undergraduateData.programChoice.program.split('.')[0]
+          },
+          secondChoice: {
+            additionalProp1: "AUST",
+            additionalProp2: undergraduateData.programChoice.program,
+            additionalProp3: undergraduateData.programChoice.program.split('.')[0]
+          }
+        }));
+      }
+
       // Add personal details
       appendIfFilled("surname", undergraduateData.personalDetails.surname);
       appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
@@ -1106,7 +1037,21 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           value={undergraduateData.selectedCourse} 
           onValueChange={(value) => setUndergraduateData(prev => ({
             ...prev,
-            selectedCourse: value
+            selectedCourse: value,
+            programChoice: {
+              program: value,
+              subjectCombination: value,
+              firstChoice: {
+                additionalProp1: "AUST",
+                additionalProp2: value,
+                additionalProp3: value.split('.')[0]
+              },
+              secondChoice: {
+                additionalProp1: "AUST",
+                additionalProp2: value,
+                additionalProp3: value.split('.')[0]
+              }
+            }
           }))}
           required
         >

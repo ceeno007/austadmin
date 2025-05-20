@@ -344,6 +344,66 @@ const grades = [
   "A1", "B2", "B3", "C4", "C5", "C6", "D7", "E8", "F9"
 ];
 
+// Add autofillFromApplication function
+const autofillFromApplication = (application: any, prev: any) => {
+  // Map nationality to match dropdown values
+  const mapNationality = (nationality: string) => {
+    if (nationality === "Nigerian") return "Nigeria";
+    return nationality;
+  };
+
+  return {
+    ...prev,
+    passportPhoto: application.passport_photo_path ? createPlaceholderFile(application.passport_photo_path) : prev.passportPhoto,
+    academicSession: application.academic_session || prev.academicSession,
+    program: application.program_type || prev.program,
+    personalDetails: {
+      ...prev.personalDetails,
+      surname: application.surname || prev.personalDetails.surname,
+      firstName: application.first_name || prev.personalDetails.firstName,
+      otherNames: application.other_names || prev.personalDetails.otherNames,
+      gender: application.gender || prev.personalDetails.gender,
+      dateOfBirth: application.date_of_birth ? {
+        day: new Date(application.date_of_birth).getDate().toString().padStart(2, '0'),
+        month: (new Date(application.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
+        year: new Date(application.date_of_birth).getFullYear().toString(),
+      } : prev.personalDetails.dateOfBirth,
+      streetAddress: application.street_address || prev.personalDetails.streetAddress,
+      city: application.city || prev.personalDetails.city,
+      country: application.country || prev.personalDetails.country,
+      stateOfOrigin: application.state_of_origin || prev.personalDetails.stateOfOrigin,
+      nationality: mapNationality(application.nationality || prev.personalDetails.nationality),
+      phoneNumber: application.phone_number || prev.personalDetails.phoneNumber,
+      email: application.email || prev.personalDetails.email,
+      hasDisabilities: application.has_disability === true ? 'yes' : (application.has_disability === false ? 'no' : prev.personalDetails.hasDisabilities),
+      disabilityDescription: application.disability_description || prev.personalDetails.disabilityDescription,
+    },
+    programChoice: {
+      program: application.program_choice?.program || prev.programChoice.program,
+      subjectCombination: application.program_choice?.subjectCombination || prev.programChoice.subjectCombination,
+      firstChoice: {
+        university: application.program_choice?.firstChoice?.university || prev.programChoice.firstChoice.university,
+        department: application.program_choice?.firstChoice?.department || prev.programChoice.firstChoice.department,
+        faculty: application.program_choice?.firstChoice?.faculty || prev.programChoice.firstChoice.faculty,
+      },
+      secondChoice: {
+        university: application.program_choice?.secondChoice?.university || prev.programChoice.secondChoice.university,
+        department: application.program_choice?.secondChoice?.department || prev.programChoice.secondChoice.department,
+        faculty: application.program_choice?.secondChoice?.faculty || prev.programChoice.secondChoice.faculty,
+      },
+    },
+    academicQualifications: {
+      examResults: {
+        examType: application.exam_type || prev.academicQualifications.examResults.examType,
+        examNumber: application.exam_number || prev.academicQualifications.examResults.examNumber,
+        examYear: application.exam_year ? application.exam_year.toString() : prev.academicQualifications.examResults.examYear,
+        subjects: application.subjects || prev.academicQualifications.examResults.subjects,
+        documents: application.exam_result_path ? createPlaceholderFile(application.exam_result_path) : prev.academicQualifications.examResults.documents,
+      }
+    },
+  };
+};
+
 const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -354,61 +414,10 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       const storedData = localStorage.getItem('applicationData');
       if (storedData) {
         const parsedData = JSON.parse(storedData);
-        // Check if we have applications array
         if (parsedData.applications && parsedData.applications.length > 0) {
           const application = parsedData.applications[0];
           setApplicationData(application);
-          
-          setFoundationRemedialData(prev => ({
-            ...prev,
-            passportPhoto: createPlaceholderFile(application.passport_photo_path),
-            academicSession: application.academic_session || prev.academicSession,
-            program: application.program_type || prev.program,
-            personalDetails: {
-              ...prev.personalDetails,
-              surname: application.surname || prev.personalDetails.surname,
-              firstName: application.first_name || prev.personalDetails.firstName,
-              otherNames: application.other_names || prev.personalDetails.otherNames,
-              gender: application.gender || prev.personalDetails.gender,
-              dateOfBirth: application.date_of_birth ? {
-                day: new Date(application.date_of_birth).getDate().toString().padStart(2, '0'),
-                month: (new Date(application.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
-                year: new Date(application.date_of_birth).getFullYear().toString(),
-              } : prev.personalDetails.dateOfBirth,
-              streetAddress: application.street_address || prev.personalDetails.streetAddress,
-              city: application.city || prev.personalDetails.city,
-              country: application.country || prev.personalDetails.country,
-              stateOfOrigin: application.state_of_origin || prev.personalDetails.stateOfOrigin,
-              nationality: application.nationality || prev.personalDetails.nationality,
-              phoneNumber: application.phone_number || prev.personalDetails.phoneNumber,
-              email: application.email || prev.personalDetails.email,
-              hasDisabilities: application.has_disability ? 'yes' : 'no',
-              disabilityDescription: application.disability_description || prev.personalDetails.disabilityDescription,
-            },
-            programChoice: {
-              program: application.program_choice?.program || prev.programChoice.program,
-              subjectCombination: application.program_choice?.subjectCombination || prev.programChoice.subjectCombination,
-              firstChoice: {
-                university: application.program_choice?.firstChoice?.university || prev.programChoice.firstChoice.university,
-                department: application.program_choice?.firstChoice?.department || prev.programChoice.firstChoice.department,
-                faculty: application.program_choice?.firstChoice?.faculty || prev.programChoice.firstChoice.faculty,
-              },
-              secondChoice: {
-                university: application.program_choice?.secondChoice?.university || prev.programChoice.secondChoice.university,
-                department: application.program_choice?.secondChoice?.department || prev.programChoice.secondChoice.department,
-                faculty: application.program_choice?.secondChoice?.faculty || prev.programChoice.secondChoice.faculty,
-              },
-            },
-            academicQualifications: {
-              examResults: {
-                examType: application.exam_type || prev.academicQualifications.examResults.examType,
-                examNumber: application.exam_number || prev.academicQualifications.examResults.examNumber,
-                examYear: application.exam_year?.toString() || prev.academicQualifications.examResults.examYear,
-                subjects: application.subjects || prev.academicQualifications.examResults.subjects,
-                documents: createPlaceholderFile(application.exam_result_path) || prev.academicQualifications.examResults.documents,
-              }
-            },
-          }));
+          setFoundationRemedialData(prev => autofillFromApplication(application, prev));
         }
       }
     } catch (error) {
@@ -534,7 +543,6 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   };
 
   const handlePersonalDetailsChange = (field: string, value: string) => {
-    console.log('Changing field:', field, 'to value:', value); // Debug log
     setFoundationRemedialData((prev) => ({
       ...prev,
       personalDetails: {
@@ -573,15 +581,11 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       const pd = foundationRemedialData.personalDetails;
       const aq = foundationRemedialData.academicQualifications.examResults;
       const pc = foundationRemedialData.programChoice;
-
-      // Helper function to only append if value exists
-      const appendIfValue = (key: string, value: any) => {
+      const appendIfValue = (key, value) => {
         if (value !== null && value !== undefined && value !== '') {
           formData.append(key, value);
         }
       };
-
-      // Personal details - only append if value exists
       appendIfValue("surname", pd.surname);
       appendIfValue("first_name", pd.firstName);
       appendIfValue("other_names", pd.otherNames);
@@ -602,8 +606,6 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       if (pd.hasDisabilities === "yes") {
         appendIfValue("disability_description", pd.disabilityDescription);
       }
-
-      // Academic details - only append if value exists
       appendIfValue("academic_session", foundationRemedialData.academicSession);
       appendIfValue("program_type", "foundation_remedial");
       appendIfValue("program_choice", pc.program);
@@ -613,19 +615,18 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       if (aq.subjects && aq.subjects.length > 0) {
         appendIfValue("subjects", aq.subjects.map(s => `${s.subject}:${s.grade}`).join(","));
       }
-
-      // Files - only append if they exist
       if (foundationRemedialData.passportPhoto) {
         formData.append("passport_photo", foundationRemedialData.passportPhoto);
       }
       if (aq.documents) {
         formData.append("exam_result", aq.documents);
       }
-
-      // Set submitted to false for draft
       formData.append("submitted", "false");
-
-      await apiService.createFoundationApplication(formData);
+      const response = await apiService.createFoundationApplication(formData);
+      // If response has applications, autofill
+      if (response && response.applications && response.applications.length > 0) {
+        setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
+      }
       toast.success('Application saved as draft successfully');
     } catch (error) {
       console.error('Error saving draft:', error);
@@ -735,9 +736,12 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       // Set submitted to true for payment
       formData.append("submitted", "true");
 
-      const data = await apiService.createFoundationApplication(formData);
-      localStorage.setItem('applicationData', JSON.stringify(data));
-      navigate('/payment', { state: { application: data } });
+      const response = await apiService.createFoundationApplication(formData);
+      if (response && response.applications && response.applications.length > 0) {
+        setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
+      }
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      navigate('/payment', { state: { application: response } });
     } catch (error) {
       toast.error("Failed to submit application and proceed to payment");
     } finally {
@@ -1548,7 +1552,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
             
             {/* WAEC Results */}
             <div className="space-y-4 p-4 border border-gray-200 rounded-md">
-              <h5 className="font-medium">WAEC Results</h5>
+              {/* <h5 className="font-medium">O,level Results</h5> */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Exam Type</Label>

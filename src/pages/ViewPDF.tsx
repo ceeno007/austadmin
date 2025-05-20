@@ -1,17 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 const ViewPDF = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const pdfSrc = queryParams.get("src");
   const title = queryParams.get("title") || "Program Handbook";
+  const { pdfUrl, setPdfUrl } = useParams<{ pdfSrc: string }>();
 
-  // Log the PDF source for debugging
   useEffect(() => {
-    console.log("PDF Source:", pdfSrc);
+    if (pdfSrc) {
+      const fullPdfUrl = `${API_ENDPOINTS.BASE_URL}/uploads/${pdfSrc}`;
+      setPdfUrl(fullPdfUrl);
+    }
   }, [pdfSrc]);
 
   if (!pdfSrc) {
@@ -30,10 +34,6 @@ const ViewPDF = () => {
     );
   }
 
-  // Construct the full PDF URL
-  const fullPdfUrl = pdfSrc.startsWith("/") ? pdfSrc : `/${pdfSrc}`;
-  console.log("Full PDF URL:", fullPdfUrl);
-
   return (
     <main className="flex-grow bg-gray-100 p-4">
       <div className="container mx-auto">
@@ -50,19 +50,19 @@ const ViewPDF = () => {
         <div className="bg-white rounded-lg p-4">
           {/* Object wrapper for the PDF; reduced height on mobile */}
           <object
-            data={fullPdfUrl}
+            data={pdfUrl}
             type="application/pdf"
             className="w-full h-[60vh] sm:h-[80vh] border-0 rounded-lg"
           >
             <iframe 
-              src={fullPdfUrl} 
+              src={pdfUrl} 
               className="w-full h-[60vh] sm:h-[80vh] border-0 rounded-lg"
               title={title}
             >
               <div className="text-center p-4">
                 <p className="mb-4">It appears you don't have a PDF plugin for this browser.</p>
                 <Button asChild>
-                  <a href={fullPdfUrl} download className="flex items-center">
+                  <a href={pdfUrl} download className="flex items-center">
                     Download PDF
                   </a>
                 </Button>

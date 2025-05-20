@@ -111,17 +111,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check first in the user object from the FastAPI response
     if (userData.user && userData.user.program) {
       programType = userData.user.program;
-      console.log("Found program in user object:", programType);
     }
     // Then check for program type in applications array (this is where it's located in the response)
     else if (userData.applications && userData.applications.length > 0) {
       programType = userData.applications[0].program_type;
-      console.log("Found program_type in applications:", programType);
     } 
     // Check for postgraduate applications specifically
     else if (userData.postgraduate_applications && userData.postgraduate_applications.length > 0) {
       programType = 'postgraduate';
-      console.log("Found postgraduate applications, setting type to postgraduate");
     }
     // Fallback to other locations if not found above
     else {
