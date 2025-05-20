@@ -44,7 +44,7 @@ const PaymentPage = () => {
     if (type && type.includes("postgraduate")) {
       navigate("/document-upload?type=postgraduate", { state: { application } });
     } else if (type && type.includes("foundation")) {
-      navigate("/document-upload?type=foundation_remedial", { state: { application } });
+      navigate("/document-upload?type=foundation", { state: { application } });
     } else {
       navigate("/document-upload", { state: { application } });
     }

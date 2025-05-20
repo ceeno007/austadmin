@@ -19,10 +19,11 @@ export const API_ENDPOINTS = {
   APPLICATION_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   INITIALIZE_PAYMENT: `${FASTAPI_BASE_URL}/payments/initialize`,
   VERIFY_PAYMENT: `${FASTAPI_BASE_URL}/payments/verify`,
-  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/token`,
+  FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/auth/token`,
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
-  FASTAPI_POSTGRADUATE_SAVED: `${FASTAPI_BASE_URL}/postgraduate/saved`,
   FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
+  APPLICATIONS: `${FASTAPI_BASE_URL}/applications`,
+  FOUNDATION: `${FASTAPI_BASE_URL}/foundation/applications`,
 };
 
 // Default Headers for JSON requests
@@ -893,6 +894,33 @@ const apiService = {
       throw error;
     }
   },
+
+  createFoundationApplication: async (formData: FormData) => {
+    const token = localStorage.getItem('accessToken');
+    const headers = {
+      'Accept': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const response = await fetch(API_ENDPOINTS.FOUNDATION, {
+      method: 'POST',
+      body: formData,
+      headers,
+    });
+    if (!response.ok) {
+      let error;
+      try {
+        error = await response.json();
+      } catch {
+        error = { detail: 'Unknown error' };
+      }
+      throw new Error(error.detail || 'Failed to submit foundation application');
+    }
+    return await response.json();
+  },
 };
+
+
 
 export default apiService;
