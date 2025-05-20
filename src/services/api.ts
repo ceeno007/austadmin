@@ -22,7 +22,6 @@ export const API_ENDPOINTS = {
   FASTAPI_TOKEN: `${FASTAPI_BASE_URL}/auth/token`,
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
-  APPLICATIONS: `${FASTAPI_BASE_URL}/applications`,
   FOUNDATION: `${FASTAPI_BASE_URL}/foundation/applications`,
 };
 
@@ -114,6 +113,14 @@ interface PostgraduateDocumentData {
   
   // Supervisor (if applicable)
   supervisor_name?: string;
+}
+
+// Add this interface near the top with other interfaces
+interface PaymentMetadata {
+  applicationType: string;
+  programType: string;
+  program: string;
+  academicSession: string;
 }
 
 // API Service
@@ -918,6 +925,45 @@ const apiService = {
       throw new Error(error.detail || 'Failed to submit foundation application');
     }
     return await response.json();
+  },
+
+  /**
+   * Initialize payment
+   * @param amount - Payment amount
+   * @param email - User's email
+   * @param metadata - Payment metadata
+   * @returns Promise with the API response
+   */
+  initializePayment: async (amount: number, email: string, metadata: PaymentMetadata) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.post(
+        API_ENDPOINTS.INITIALIZE_PAYMENT,
+        {
+          amount,
+          email,
+          metadata
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Payment initialization error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("Failed to initialize payment");
+    }
   },
 };
 

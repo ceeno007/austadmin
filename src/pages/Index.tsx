@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
   return (
@@ -12,7 +13,7 @@ const Index = () => {
         <HeroSection />
 
         {/* Programs Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-amber-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Our Programs</h2>
@@ -21,45 +22,50 @@ const Index = () => {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
-                <h3 className="text-xl font-bold mb-3">Undergraduate Programs</h3>
-                <p className="text-gray-600 mb-4">
-                  Bachelor's degrees in Computer Science, Engineering, and more.
-                </p>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-                >
-                  <Link to="/programs?tab=undergraduate">Learn More</Link>
-                </Button>
-              </div>
-              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
-                <h3 className="text-xl font-bold mb-3">Postgraduate Programs</h3>
-                <p className="text-gray-600 mb-4">
-                  Master's and Ph.D. programs for advanced research and specialization.
-                </p>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-                >
-                  <Link to="/programs?tab=postgraduate">Learn More</Link>
-                </Button>
-              </div>
-              <div className="bg-white p-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
-                <h3 className="text-xl font-bold mb-3">Foundation and Remedial Studies Program</h3>
-                <p className="text-gray-600 mb-4">
-                  One-year pre-university program for direct entry admission.
-                </p>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
-                >
-                  <Link to="/programs?tab=foundation">Learn More</Link>
-                </Button>
-              </div>
+              <Link 
+                to="/programs?tab=undergraduate"
+                className="block bg-white p-6 rounded-xl border border-gray-200 hover:border-[#FF5500] transition-all duration-300 hover:shadow-lg group cursor-pointer"
+              >
+                <div className="relative">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-[#FF5500] transition-colors">Undergraduate Programs</h3>
+                  <p className="text-gray-600 mb-4">
+                    Bachelor's degrees in Computer Science, Engineering, and more.
+                  </p>
+                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="h-6 w-6 text-[#FF5500]" />
+                  </div>
+                </div>
+              </Link>
+
+              <Link 
+                to="/programs?tab=postgraduate"
+                className="block bg-white p-6 rounded-xl border border-gray-200 hover:border-[#FF5500] transition-all duration-300 hover:shadow-lg group cursor-pointer"
+              >
+                <div className="relative">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-[#FF5500] transition-colors">Postgraduate Programs</h3>
+                  <p className="text-gray-600 mb-4">
+                    Master's and Ph.D. programs for advanced research and specialization.
+                  </p>
+                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="h-6 w-6 text-[#FF5500]" />
+                  </div>
+                </div>
+              </Link>
+
+              <Link 
+                to="/programs?tab=foundation"
+                className="block bg-white p-6 rounded-xl border border-gray-200 hover:border-[#FF5500] transition-all duration-300 hover:shadow-lg group cursor-pointer"
+              >
+                <div className="relative">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-[#FF5500] transition-colors">Foundation Programs</h3>
+                  <p className="text-gray-600 mb-4">
+                    Foundation and remedial studies to prepare for university education.
+                  </p>
+                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ArrowRight className="h-6 w-6 text-[#FF5500]" />
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </section>

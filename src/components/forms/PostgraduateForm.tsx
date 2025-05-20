@@ -906,10 +906,13 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   const handleSaveAsDraft = async () => {
     try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
       const formData = buildPostgraduateFormData(postgraduateData);
-      await apiService.uploadPostgraduateFormData(formData);
+      await apiService.uploadPostgraduateFormData(formData, token);
       toast.success("Draft saved successfully!");
-      // Do NOT redirect
     } catch (err) {
       toast.error(err.message || "Failed to save draft");
     } finally {
@@ -1009,47 +1012,22 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     }
   };
 
-  const handlePaymentAsNigerian = async () => {
-    const amount = 50000; // ₦50,000 in kobo
-    const email = postgraduateData.personalDetails.email;
-    const reference = `postgraduate_${postgraduateData.programType.toLowerCase()}_${postgraduateData.program.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
-    const metadata = {
-      program_type: "postgraduate",
-      academic_session: postgraduateData.academicSession,
-      selected_course: postgraduateData.program,
-      residence: "nigerian",
-      reference: reference
-    };
-
-    await onPayment(amount, email, metadata);
-  };
-
-  const handlePaymentAsInternational = async () => {
-    const amount = 100 * 100; // $100 in cents
-    const email = postgraduateData.personalDetails.email;
-    const reference = `postgraduate_${postgraduateData.programType.toLowerCase()}_${postgraduateData.program.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
-    const metadata = {
-      program_type: "postgraduate",
-      academic_session: postgraduateData.academicSession,
-      selected_course: postgraduateData.program,
-      residence: "international",
-      reference: reference
-    };
-
-    await onPayment(amount, email, metadata);
-  };
-
-  // In handleSubmit, use the helper to build FormData and submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid()) {
-      // Do not show a generic error here; isFormValid already shows specific errors
       return;
     }
     setIsSubmitting(true);
     try {
+      // Get the token from localStorage
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast.error("Please log in to continue");
+        navigate("/login", { state: { from: "/postgraduate" } });
+        return;
+      }
+
       let passportPhotoToSend = postgraduateData.passportPhoto;
-      // Always try to fetch and send the passport photo if a URL exists and no file is selected
       if (!passportPhotoToSend && passportPhotoUrl) {
         const response = await fetch(passportPhotoUrl);
         const blob = await response.blob();
@@ -1058,15 +1036,33 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         passportPhotoToSend = new File([blob], filename, { type: blob.type });
       }
       const formData = buildPostgraduateFormData({ ...postgraduateData, passportPhoto: passportPhotoToSend });
+      
+      // Add auth token to headers
       const response = await apiService.uploadPostgraduateFormData(formData) as ApplicationData;
+      
+      // Store the application data in localStorage
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      
       toast.success("Application submitted successfully!");
-      if (response.has_paid) {
-        navigate("/application-progress", { state: { application: response } });
-      } else {
-        navigate("/payment", { state: { application: response } });
-      }
+      
+      // Navigate to payment page with application data
+      navigate("/payment", { 
+        state: { 
+          application: response,
+          amount: postgraduateData.applicantType === "Nigerian" ? 50000 : 100,
+          currency: postgraduateData.applicantType === "Nigerian" ? "NGN" : "USD",
+          email: postgraduateData.personalDetails.email,
+          metadata: {
+            applicationId: response.id,
+            programType: response.program_type,
+            program: response.selected_program,
+            applicantType: postgraduateData.applicantType
+          }
+        },
+        replace: true 
+      });
     } catch (err) {
-      // Show the actual backend error
+      console.error("Submission error:", err);
       toast.error(err.message || "Failed to submit application");
     } finally {
       setIsSubmitting(false);
@@ -1814,16 +1810,52 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 <Label>Qualification Type <span className="text-red-500">Required</span></Label>
                 <Select
                   value={postgraduateData.academicQualifications.qualification1.type}
-                  onValueChange={(value) => handleAcademicQualificationChange("qualification1", "type", value)}
+                  onValueChange={(value) => {
+                    setPostgraduateData(prev => ({
+                      ...prev,
+                      academicQualifications: {
+                        ...prev.academicQualifications,
+                        qualification1: {
+                          ...prev.academicQualifications.qualification1,
+                          type: value
+                        }
+                      }
+                    }));
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select qualification type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="undergraduate">Undergraduate Degree</SelectItem>
+                    <SelectItem value="masters">Master's Degree</SelectItem>
+                    <SelectItem value="phd">PhD</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {postgraduateData.academicQualifications.qualification1.type === "other" && (
+                <div className="space-y-2">
+                  <Label>Specify Other Qualification <span className="text-red-500">Required</span></Label>
+                  <Input
+                    placeholder="Enter other qualification"
+                    value={postgraduateData.academicQualifications.qualification1.otherType || ""}
+                    onChange={(e) => {
+                      setPostgraduateData(prev => ({
+                        ...prev,
+                        academicQualifications: {
+                          ...prev.academicQualifications,
+                          qualification1: {
+                            ...prev.academicQualifications.qualification1,
+                            otherType: e.target.value
+                          }
+                        }
+                      }));
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Grade <span className="text-red-500">Required</span></Label>
@@ -2048,7 +2080,18 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   <Label>Qualification Type <span className="text-red-500">Required</span></Label>
                   <Select
                     value={postgraduateData.academicQualifications.qualification2?.type || ""}
-                    onValueChange={(value) => handleAcademicQualificationChange("qualification2", "type", value)}
+                    onValueChange={(value) => {
+                      setPostgraduateData(prev => ({
+                        ...prev,
+                        academicQualifications: {
+                          ...prev.academicQualifications,
+                          qualification2: {
+                            ...prev.academicQualifications.qualification2,
+                            type: value
+                          }
+                        }
+                      }));
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select qualification type" />
@@ -2067,7 +2110,18 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     <Input
                       placeholder="Enter other qualification"
                       value={postgraduateData.academicQualifications.qualification2?.otherType || ""}
-                      onChange={(e) => handleAcademicQualificationChange("qualification2", "otherType", e.target.value)}
+                      onChange={(e) => {
+                        setPostgraduateData(prev => ({
+                          ...prev,
+                          academicQualifications: {
+                            ...prev.academicQualifications,
+                            qualification2: {
+                              ...prev.academicQualifications.qualification2,
+                              otherType: e.target.value
+                            }
+                          }
+                        }));
+                      }}
                     />
                   </div>
                 )}

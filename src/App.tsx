@@ -15,6 +15,9 @@ import ApplicationSuccess from '@/pages/ApplicationSuccess';
 import ReferenceForm from "@/pages/ReferenceForm";
 import ApplicationProgress from "@/pages/ApplicationProgress";
 import PaymentPage from "@/pages/PaymentPage";
+import ReferenceStatus from "@/pages/ReferenceStatus";
+import PaymentSuccess from "@/pages/PaymentSuccess";
+import FoundationSuccess from "@/pages/FoundationSuccess";
 
 // Lazy load all page components for better performance
 const Index = lazy(() => import('./pages/Index'));
@@ -94,6 +97,7 @@ const AppLayout: React.FC = () => {
           <Route path="/terms" element={<Terms />} />
           <Route path="/sitemap" element={<Sitemap />} />
           <Route path="/application-success" element={<ApplicationSuccess />} />
+          <Route path="/reference-status" element={<ReferenceStatus />} />
 
           {/* Protected Routes */}
           <Route path="/application" element={
@@ -117,8 +121,10 @@ const AppLayout: React.FC = () => {
           {/* Application Progress Route */}
           <Route path="/application-progress" element={<ApplicationProgress />} />
 
-          {/* Payment Route */}
+          {/* Payment Routes */}
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/foundation-success" element={<FoundationSuccess />} />
 
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
