@@ -12,6 +12,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import apiService from '@/services/api';
+import axios from 'axios';
+
+// Import API endpoints
+const API_ENDPOINTS = {
+  INITIALIZE_PAYMENT: 'https://admissions-jcvy.onrender.com/payments/initialize'
+};
+
+interface PaymentMetadata {
+  applicationType: string;
+  programType: string;
+  program: string;
+  academicSession: string;
+  application_id: string;
+  user_id: string;
+}
+
+interface PaymentResponse {
+  reference: string;
+  status: string;
+  data: any;
+}
 
 type Residency = "nigeria" | "international";
 
@@ -21,7 +43,7 @@ const PaymentPage: React.FC = () => {
   const { toast } = useToast();
   const application = location.state?.application;
   const [residency, setResidency] = useState<Residency>("nigeria");
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   if (!application) {
     return (
@@ -61,77 +83,168 @@ const PaymentPage: React.FC = () => {
   };
 
   const redirectToSuccessPage = () => {
-    // For PhD students, go to payment success first
-    if (programType === "phd") {
-      return navigate("/payment-success");
-    }
-    // For foundation or JUPEB students
-    if (programType === "foundation" || programType === "jupeb") {
+    if (programType === "phd") return navigate("/reference-status");
+    if (programType === "foundation" || programType === "jupeb")
       return navigate("/foundation-success");
-    }
-    // For all other programs
     return navigate("/payment-success");
   };
 
-  const handlePaymentSuccess = (referenceObj: any) => {
-    console.log("Handling payment success with:", referenceObj);
-    const paymentRef = referenceObj.reference || referenceObj.trxref || referenceObj;
-    
-    // Save payment data
-    localStorage.setItem("paymentCompleted", "true");
-    localStorage.setItem("paymentReference", paymentRef);
-    localStorage.setItem(
-      "paymentData",
-      JSON.stringify({
-        reference: paymentRef,
-        programType,
-        amount: getAmount(),
-        currency: getCurrency(),
-        timestamp: new Date().toISOString(),
-      })
-    );
-
-    // Redirect to appropriate success page
-    redirectToSuccessPage();
-  };
-
-  const handleSuccessPopupClose = () => {
-    setShowSuccessPopup(false);
-    // Redirect to login without clearing auth data
-    navigate('/login');
-  };
-
-  const handleClose = () => {
-    // Get the saved application data from localStorage
-    const savedApplicationData = localStorage.getItem("applicationData");
-    const applicationData = savedApplicationData ? JSON.parse(savedApplicationData) : application;
-    
-    // Navigate back to payment page with the application data
-    navigate('/payment', { 
-      state: { 
-        application: applicationData
-      }
-    });
-
+  const handlePaymentSuccess = (reference: string) => {
+    // Show success message
     toast({
-      title: "Payment Cancelled",
-      description: "You can try again when you're ready.",
-      variant: "destructive",
-      duration: 5000,
+      title: "Success",
+      description: "Payment successful!",
+      variant: "default",
+    });
+    
+    // Navigate to application success page
+    navigate('/application-success', { 
+      state: { 
+        application: application,
+        paymentReference: reference
+      },
+      replace: true 
     });
   };
 
-  // Handle Paystack redirect callback
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const reference = params.get("reference") || params.get("trxref");
-    const status = params.get("status");
-    
-    if (reference && status === "success") {
-      console.log("Payment successful with reference:", reference);
-      handlePaymentSuccess({ reference });
+  const handlePaymentAsNigerian = async () => {
+    try {
+      setIsProcessingPayment(true);
+      
+      // Get the token from localStorage
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const amount = 50000; // ₦50,000 in kobo
+      const email = application.email;
+      const metadata: PaymentMetadata = {
+        applicationType: application.application_type,
+        programType: application.program_type,
+        program: application.program,
+        academicSession: application.academic_session,
+        application_id: application.id,
+        user_id: application.user_id
+      };
+
+      // Initialize payment
+      const response = await axios.post<PaymentResponse>(
+        API_ENDPOINTS.INITIALIZE_PAYMENT,
+        {
+          amount,
+          email,
+          metadata
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Open Paystack payment window
+      const handler = window.PaystackPop.setup({
+        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+        email,
+        amount: amount * 100, // Convert to kobo
+        currency: 'NGN',
+        ref: response.data.reference,
+        callback: (response: any) => {
+          handlePaymentSuccess(response.reference);
+        },
+        onClose: () => {
+          setIsProcessingPayment(false);
+          toast({
+            title: "Payment Cancelled",
+            description: "Payment window closed",
+            variant: "default",
+          });
+        }
+      });
+      
+      handler.openIframe();
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
     }
-  }, []);
+  };
+
+  const handlePaymentAsInternational = async () => {
+    try {
+      setIsProcessingPayment(true);
+      
+      // Get the token from localStorage
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const amount = 100; // $100
+      const email = application.email;
+      const metadata: PaymentMetadata = {
+        applicationType: application.application_type,
+        programType: application.program_type,
+        program: application.program,
+        academicSession: application.academic_session,
+        application_id: application.id,
+        user_id: application.user_id
+      };
+
+      // Initialize payment
+      const response = await axios.post<PaymentResponse>(
+        API_ENDPOINTS.INITIALIZE_PAYMENT,
+        {
+          amount,
+          email,
+          metadata
+        },
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Open Paystack payment window
+      const handler = window.PaystackPop.setup({
+        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+        email,
+        amount: amount * 100, // Convert to cents
+        currency: 'USD',
+        ref: response.data.reference,
+        reference: response.data.reference,
+        callback: (response: any) => {
+          handlePaymentSuccess(response.reference);
+        },
+        onClose: () => {
+          setIsProcessingPayment(false);
+          toast({
+            title: "Payment Cancelled",
+            description: "Payment window closed",
+            variant: "default",
+          });
+        }
+      });
+      
+      handler.openIframe();
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize payment. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+    }
+  };
 
   // No payment needed for undergrads or intl foundation
   if (
@@ -209,9 +322,16 @@ const PaymentPage: React.FC = () => {
       ]
     },
     onSuccess: () => {
-      handlePaymentSuccess({ reference: config.reference });
+      handlePaymentSuccess(createReference());
     },
-    onClose: handleClose,
+    onClose: () => {
+      toast({
+        title: "Payment Cancelled",
+        description: "You can try again when you're ready.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    },
   };
 
   const payButtonText = (() => {
@@ -225,102 +345,92 @@ const PaymentPage: React.FC = () => {
   })();
 
   return (
-    <>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Complete Your Application
-          </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          Complete Your Application
+        </h1>
 
-          {/* Application Summary */}
-          <div className="mb-6 p-4 bg-blue-50 rounded">
-            <div className="mb-2 text-gray-700 font-medium">
-              Application Summary
-            </div>
-            <div className="text-sm text-gray-600 mb-2">
-              Name:{" "}
-              <span className="font-semibold">
-                {application.surname} {application.first_name}
-              </span>
-            </div>
-            <div className="text-sm text-gray-600 mb-2">
-              Program:{" "}
-              <span className="font-semibold">{application.program_type}</span>
-            </div>
-            <div className="text-sm text-gray-600 mb-2">
-              Email:{" "}
-              <span className="font-semibold">{application.email}</span>
-            </div>
-            {/* <Button
-              variant="outline"
-              className="mt-2"
-              onClick={() => {
-                // Get the saved application data from localStorage
-                const savedApplicationData = localStorage.getItem("applicationData");
-                const applicationData = savedApplicationData ? JSON.parse(savedApplicationData) : application;
-                
-                navigate(
-                  `/document-upload?type=${
-                    programType === "foundation" || programType === "jupeb"
-                      ? "foundation"
-                      : programType === "phd" || programType === "msc"
-                      ? "postgraduate"
-                      : "undergraduate"
-                  }`,
-                  { 
-                    state: { 
-                      application: applicationData,
-                      savedFormData: applicationData
-                    }
+        {/* Application Summary */}
+        <div className="mb-6 p-4 bg-blue-50 rounded">
+          <div className="mb-2 text-gray-700 font-medium">
+            Application Summary
+          </div>
+          <div className="text-sm text-gray-600 mb-2">
+            Name:{" "}
+            <span className="font-semibold">
+              {application.surname} {application.first_name}
+            </span>
+          </div>
+          <div className="text-sm text-gray-600 mb-2">
+            Program:{" "}
+            <span className="font-semibold">{application.program_type}</span>
+          </div>
+          <div className="text-sm text-gray-600 mb-2">
+            Email:{" "}
+            <span className="font-semibold">{application.email}</span>
+          </div>
+          {/* <Button
+            variant="outline"
+            className="mt-2"
+            onClick={() =>
+              navigate(
+                `/document-upload?type=${
+                  programType === "foundation" || programType === "jupeb"
+                    ? "foundation"
+                    : programType === "phd" || programType === "msc"
+                    ? "postgraduate"
+                    : "undergraduate"
+                }`,
+                { 
+                  state: { 
+                    application: applicationData,
+                    savedFormData: applicationData
                   }
-                );
-              }}
+                }
+              );
+            }}
+          >
+            Edit Application
+          </Button> */}
+        </div>
+
+        {/* Residency Selector */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Select Your Residency</Label>
+            <Select
+              value={residency}
+              onValueChange={(v: Residency) => setResidency(v)}
             >
-              Edit Application
-            </Button> */}
+              <SelectTrigger>
+                <SelectValue placeholder="Select Residency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="nigeria">Nigeria</SelectItem>
+                <SelectItem value="international">International</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Residency Selector */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Select Your Residency</Label>
-              <Select
-                value={residency}
-                onValueChange={(v: Residency) => setResidency(v)}
+          <h2 className="text-lg font-semibold text-center">Payment Required</h2>
+          <p className="text-gray-700 text-center">
+            You must complete payment to continue your application.
+          </p>
+
+          <PaystackConsumer {...config}>
+            {({ initializePayment }) => (
+              <Button
+                onClick={() => initializePayment()}
+                className="w-full bg-green-600 hover:bg-green-700"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Residency" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nigeria">Nigeria</SelectItem>
-                  <SelectItem value="international">International</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <h2 className="text-lg font-semibold text-center">Payment Required</h2>
-            <p className="text-gray-700 text-center">
-              You must complete payment to continue your application.
-            </p>
-
-            <PaystackConsumer {...config}>
-              {({ initializePayment }) => (
-                <Button
-                  onClick={() => initializePayment()}
-                  className="w-full bg-green-600 hover:bg-green-700"
-                >
-                  Pay {payButtonText} Application Fee
-                </Button>
-              )}
-            </PaystackConsumer>
-          </div>
+                Pay {payButtonText} Application Fee
+              </Button>
+            )}
+          </PaystackConsumer>
         </div>
       </div>
-      <PaymentSuccessPopup 
-        isOpen={showSuccessPopup} 
-        onClose={handleSuccessPopupClose} 
-      />
-    </>
+    </div>
   );
 };
 

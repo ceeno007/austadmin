@@ -60,12 +60,11 @@ const queryClient = new QueryClient({
 // App Layout component that uses the location hook
 const AppLayout: React.FC = () => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || 
-                    location.pathname === '/signup' || 
-                    location.pathname === '/forgot-password';
-  const isDocumentUpload = location.pathname === '/document-upload';
-  const isPaymentPage = location.pathname === '/payment';
+  const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname);
+  const isPaymentPage = ['/payment', '/payment-success', '/foundation-success'].includes(location.pathname);
   const isReferenceStatus = location.pathname === '/reference-status';
+  const isDocumentUpload = location.pathname === '/document-upload';
+  const isApplicationSuccess = location.pathname === '/application-success';
 
   // Add hardware acceleration to main content
   useEffect(() => {
@@ -80,8 +79,8 @@ const AppLayout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {!isAuthPage && !isPaymentPage && !isReferenceStatus && <ConditionalNavbar />}
-      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus ? 'pt-[72px]' : ''} bg-white`}>
+      {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalNavbar />}
+      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus && !isApplicationSuccess ? 'pt-[72px]' : ''} bg-white`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
@@ -135,7 +134,7 @@ const AppLayout: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isAuthPage && !isPaymentPage && !isReferenceStatus && <ConditionalFooter />}
+      {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalFooter />}
     </div>
   );
 };

@@ -352,9 +352,16 @@ const autofillFromApplication = (application: any, prev: any) => {
     return nationality;
   };
 
+  // Helper function to add endpoint to file path
+  const addEndpointToPath = (path: string | undefined) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `https://admissions-jcvy.onrender.com/${path}`;
+  };
+
   return {
     ...prev,
-    passportPhoto: application.passport_photo_path ? createPlaceholderFile(application.passport_photo_path) : prev.passportPhoto,
+    // Don't set passportPhoto from URL
     academicSession: application.academic_session || prev.academicSession,
     program: application.program_type || prev.program,
     personalDetails: {
@@ -398,7 +405,7 @@ const autofillFromApplication = (application: any, prev: any) => {
         examNumber: application.exam_number || prev.academicQualifications.examResults.examNumber,
         examYear: application.exam_year ? application.exam_year.toString() : prev.academicQualifications.examResults.examYear,
         subjects: application.subjects || prev.academicQualifications.examResults.subjects,
-        documents: application.exam_result_path ? createPlaceholderFile(application.exam_result_path) : prev.academicQualifications.examResults.documents,
+        documents: application.exam_result_path ? addEndpointToPath(application.exam_result_path) : prev.academicQualifications.examResults.documents,
       }
     },
   };
@@ -417,19 +424,25 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
         if (parsedData.applications && parsedData.applications.length > 0) {
           const application = parsedData.applications[0];
           setApplicationData(application);
+          
+          // Check if user has already paid
+          if (application.has_paid) {
+            navigate('/application-success', { 
+              state: { 
+                application: application,
+                programType: 'foundation'
+              }
+            });
+            return;
+          }
+          
           setFoundationRemedialData(prev => autofillFromApplication(application, prev));
         }
       }
     } catch (error) {
       console.error("Error parsing application data:", error);
     }
-  }, []);
-
-  useEffect(() => {
-    if (applicationData && applicationData.submitted && !applicationData.has_paid) {
-      navigate('/payment', { state: { application: applicationData } });
-    }
-  }, [applicationData, navigate]);
+  }, [navigate]);
 
   const [foundationRemedialData, setFoundationRemedialData] = useState<FoundationRemedialFormData>({
     passportPhoto: null,
@@ -489,7 +502,7 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
   const [isSavingDraft, setIsSavingDraft] = useState(false);
-  const [isProcessingPaymentBtn, setIsProcessingPaymentBtn] = useState(false);
+  const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
 
   // Generate years from current year to 30 years back
   const currentYear = new Date().getFullYear();
@@ -575,190 +588,354 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     return true;
   };
 
+  // Helper function to convert File to base64
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64Data = base64String.split(',')[1];
+        resolve(base64Data);
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSaveDraft = async () => {
     try {
-      const formData = new FormData();
+      setIsSavingDraft(true);
       const pd = foundationRemedialData.personalDetails;
       const aq = foundationRemedialData.academicQualifications.examResults;
       const pc = foundationRemedialData.programChoice;
-      const appendIfValue = (key, value) => {
-        if (value !== null && value !== undefined && value !== '') {
-          formData.append(key, value);
-        }
-      };
-      appendIfValue("surname", pd.surname);
-      appendIfValue("first_name", pd.firstName);
-      appendIfValue("other_names", pd.otherNames);
-      appendIfValue("gender", pd.gender);
-      if (pd.dateOfBirth.year && pd.dateOfBirth.month && pd.dateOfBirth.day) {
-        appendIfValue("date_of_birth", `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
-      }
-      appendIfValue("street_address", pd.streetAddress);
-      appendIfValue("city", pd.city);
-      appendIfValue("country", pd.country);
-      if (pd.nationality === "Nigeria") {
-        appendIfValue("state_of_origin", pd.stateOfOrigin);
-      }
-      appendIfValue("nationality", pd.nationality);
-      appendIfValue("phone_number", pd.phoneNumber);
-      appendIfValue("email", pd.email);
-      appendIfValue("has_disability", pd.hasDisabilities === "yes" ? "true" : "false");
-      if (pd.hasDisabilities === "yes") {
-        appendIfValue("disability_description", pd.disabilityDescription);
-      }
-      appendIfValue("academic_session", foundationRemedialData.academicSession);
-      appendIfValue("program_type", "foundation_remedial");
-      appendIfValue("program_choice", pc.program);
-      appendIfValue("exam_type", aq.examType);
-      appendIfValue("exam_number", aq.examNumber);
-      appendIfValue("exam_year", aq.examYear);
-      if (aq.subjects && aq.subjects.length > 0) {
-        appendIfValue("subjects", aq.subjects.map(s => `${s.subject}:${s.grade}`).join(","));
-      }
+
+      // Create FormData object
+      const formData = new FormData();
+
+      // Add text fields
+      formData.append('academic_session', foundationRemedialData.academicSession);
+      formData.append('program', foundationRemedialData.program);
+      formData.append('surname', pd.surname);
+      formData.append('first_name', pd.firstName);
+      formData.append('other_names', pd.otherNames || "");
+      formData.append('gender', pd.gender);
+      formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      formData.append('street_address', pd.streetAddress);
+      formData.append('city', pd.city);
+      formData.append('country', pd.country);
+      formData.append('state_of_origin', pd.nationality === "Nigeria" ? pd.stateOfOrigin : "");
+      formData.append('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      formData.append('phone_number', pd.phoneNumber);
+      formData.append('email', pd.email);
+      formData.append('has_disability', pd.hasDisabilities === "yes" ? "true" : "false");
+      formData.append('disability_description', pd.hasDisabilities === "yes" ? pd.disabilityDescription : "");
+      formData.append('examType', aq.examType);
+      formData.append('examNumber', aq.examNumber);
+      formData.append('examYear', aq.examYear);
+      formData.append('subjects', JSON.stringify(aq.subjects));
+      formData.append('programChoice', JSON.stringify({
+        program: pc.program,
+        subjectCombination: pc.subjectCombination,
+        firstChoice: pc.firstChoice,
+        secondChoice: pc.secondChoice
+      }));
+      formData.append('declaration', foundationRemedialData.declaration);
+      formData.append('is_draft', "true");
+      formData.append('program_type', 'foundation');
+
+      // Add files
       if (foundationRemedialData.passportPhoto) {
-        formData.append("passport_photo", foundationRemedialData.passportPhoto);
+        formData.append('passport_photo', foundationRemedialData.passportPhoto);
       }
       if (aq.documents) {
-        formData.append("exam_result", aq.documents);
+        formData.append('waec_result', aq.documents);
       }
-      formData.append("submitted", "false");
+
       const response = await apiService.createFoundationApplication(formData);
-      // If response has applications, autofill
       if (response && response.applications && response.applications.length > 0) {
         setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
       }
       toast.success('Application saved as draft successfully');
     } catch (error) {
       console.error('Error saving draft:', error);
-      toast.error('Failed to save draft');
+      toast.error('Failed to save draft. Please try again.');
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid()) return;
-
     try {
+      setIsSubmitting(true);
+      if (!isFormValid()) return;
+
+      const pd = foundationRemedialData.personalDetails;
+      const aq = foundationRemedialData.academicQualifications.examResults;
+      const pc = foundationRemedialData.programChoice;
+
+      // Create FormData object
       const formData = new FormData();
-      // Append all form fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, value);
+
+      // Add text fields
+      formData.append('academic_session', foundationRemedialData.academicSession);
+      formData.append('program', foundationRemedialData.program);
+      formData.append('surname', pd.surname);
+      formData.append('first_name', pd.firstName);
+      formData.append('other_names', pd.otherNames || "");
+      formData.append('gender', pd.gender);
+      formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      formData.append('street_address', pd.streetAddress);
+      formData.append('city', pd.city);
+      formData.append('country', pd.country);
+      formData.append('state_of_origin', pd.nationality === "Nigeria" ? pd.stateOfOrigin : "");
+      formData.append('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      formData.append('phone_number', pd.phoneNumber);
+      formData.append('email', pd.email);
+      formData.append('has_disability', pd.hasDisabilities === "yes" ? "true" : "false");
+      formData.append('disability_description', pd.hasDisabilities === "yes" ? pd.disabilityDescription : "");
+      formData.append('examType', aq.examType);
+      formData.append('examNumber', aq.examNumber);
+      formData.append('examYear', aq.examYear);
+      formData.append('subjects', JSON.stringify(aq.subjects));
+      formData.append('programChoice', JSON.stringify({
+        program: pc.program,
+        subjectCombination: pc.subjectCombination,
+        firstChoice: pc.firstChoice,
+        secondChoice: pc.secondChoice
+      }));
+      formData.append('declaration', foundationRemedialData.declaration);
+      formData.append('is_draft', "false");
+      formData.append('program_type', 'foundation');
+
+      // Add files
+      if (foundationRemedialData.passportPhoto) {
+        if (typeof foundationRemedialData.passportPhoto === 'string') {
+          // If it's a string URL, check if it needs the endpoint
+          const photoUrl = foundationRemedialData.passportPhoto.startsWith('http') 
+            ? foundationRemedialData.passportPhoto 
+            : `https://admissions-jcvy.onrender.com/${foundationRemedialData.passportPhoto}`;
+          formData.append('passport_photo', photoUrl);
+        } else {
+          // If it's a File object, send it directly
+          formData.append('passport_photo', foundationRemedialData.passportPhoto);
         }
-      });
-      // Mark as submitted
-      formData.append('submitted', 'true');
-      await apiService.createFoundationApplication(formData);
+      }
+      if (aq.documents) {
+        if (typeof aq.documents === 'string') {
+          // If it's a string URL, check if it needs the endpoint
+          const docUrl = aq.documents.startsWith('http') 
+            ? aq.documents 
+            : `https://admissions-jcvy.onrender.com/${aq.documents}`;
+          formData.append('waec_result', docUrl);
+        } else {
+          // If it's a File object, send it directly
+          formData.append('waec_result', aq.documents);
+        }
+      }
+
+      const response = await apiService.createFoundationApplication(formData);
+      if (response && response.applications && response.applications.length > 0) {
+        setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
+      }
       toast.success('Application submitted successfully');
     } catch (error) {
-      console.error('Error submitting application:', error);
-      toast.error('Failed to submit application');
+      console.error('Error submitting form:', error);
+      toast.error('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Detect if user has paid
   const hasPaid = applicationData && applicationData.has_paid;
 
-  // Payment handler with reference
-  const handleProceedToPayment = async () => {
-    // Validate required fields with specific error messages
-    const pd = foundationRemedialData.personalDetails;
-    const aq = foundationRemedialData.academicQualifications.examResults;
-    const pc = foundationRemedialData.programChoice;
-    if (!pd.surname) { toast.error("Surname is required"); return; }
-    if (!pd.firstName) { toast.error("First name is required"); return; }
-    if (!pd.gender) { toast.error("Gender is required"); return; }
-    if (!pd.dateOfBirth.day || !pd.dateOfBirth.month || !pd.dateOfBirth.year) { toast.error("Date of birth is required"); return; }
-    if (!pd.streetAddress) { toast.error("Street address is required"); return; }
-    if (!pd.city) { toast.error("City is required"); return; }
-    if (!pd.country) { toast.error("Country is required"); return; }
-    if (pd.nationality === "Nigeria" && !pd.stateOfOrigin) { toast.error("State of origin is required for Nigerian applicants"); return; }
-    if (!pd.nationality) { toast.error("Nationality is required"); return; }
-    if (!pd.phoneNumber) { toast.error("Phone number is required"); return; }
-    if (!pd.email) { toast.error("Email is required"); return; }
-    if (!aq.examType) { toast.error("Exam type is required"); return; }
-    if (!aq.examNumber) { toast.error("Exam number is required"); return; }
-    if (!aq.examYear) { toast.error("Exam year is required"); return; }
-    if (!aq.subjects.length) { toast.error("At least one subject is required"); return; }
-    if (!aq.documents) { toast.error("Exam result document is required"); return; }
-    if (!foundationRemedialData.academicSession) { toast.error("Academic session is required"); return; }
-    if (!pc.program) { toast.error("Programme of choice is required"); return; }
-    if (!pc.subjectCombination) { toast.error("Subject combination is required"); return; }
-    if (!pc.firstChoice.university) { toast.error("First choice university is required"); return; }
-    if (!pc.firstChoice.department) { toast.error("First choice department is required"); return; }
-    if (!pc.firstChoice.faculty) { toast.error("First choice faculty is required"); return; }
-    if (!pc.secondChoice.university) { toast.error("Second choice university is required"); return; }
-    if (!pc.secondChoice.department) { toast.error("Second choice department is required"); return; }
-    if (!pc.secondChoice.faculty) { toast.error("Second choice faculty is required"); return; }
-    if (foundationRemedialData.declaration !== "true") { toast.error("You must agree to the declaration"); return; }
-    setIsProcessingPaymentBtn(true);
-    try {
-      const formData = new FormData();
-      // Personal details - only append if value exists
-      formData.append("surname", pd.surname);
-      formData.append("first_name", pd.firstName);
-      if (pd.otherNames?.trim()) formData.append("other_names", pd.otherNames.trim());
-      formData.append("gender", pd.gender);
-      formData.append("date_of_birth", `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
-      formData.append("street_address", pd.streetAddress);
-      formData.append("city", pd.city);
-      formData.append("country", pd.country);
-      if (pd.nationality === "Nigeria" && pd.stateOfOrigin?.trim()) {
-        formData.append("state_of_origin", pd.stateOfOrigin.trim());
-      }
-      formData.append("nationality", pd.nationality);
-      formData.append("phone_number", pd.phoneNumber);
-      formData.append("email", pd.email);
-      formData.append("has_disability", pd.hasDisabilities === "yes" ? "true" : "false");
-      if (pd.hasDisabilities === "yes" && pd.disabilityDescription?.trim()) {
-        formData.append("disability_description", pd.disabilityDescription.trim());
-      }
-
-      // Academic details - only append if value exists
-      formData.append("academic_session", foundationRemedialData.academicSession);
-      formData.append("program_type", "foundation_remedial");
-      formData.append("program_choice", pc.program);
-      formData.append("exam_type", aq.examType);
-      formData.append("exam_number", aq.examNumber);
-      formData.append("exam_year", aq.examYear);
-      if (aq.subjects.length > 0) {
-        formData.append("subjects", aq.subjects.map(s => `${s.subject}:${s.grade}`).join(","));
-      }
-
-      // Files - only append if they exist
-      if (foundationRemedialData.passportPhoto) {
-        formData.append("passport_photo", foundationRemedialData.passportPhoto);
-      }
-      if (aq.documents) {
-        formData.append("exam_result", aq.documents);
-      }
-
-      // Set submitted to true for payment
-      formData.append("submitted", "true");
-
-      const response = await apiService.createFoundationApplication(formData);
-      if (response && response.applications && response.applications.length > 0) {
-        setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
-      }
-      localStorage.setItem('applicationData', JSON.stringify(response));
-      navigate('/payment', { state: { application: response } });
-    } catch (error) {
-      toast.error("Failed to submit application and proceed to payment");
-    } finally {
-      setIsProcessingPaymentBtn(false);
-    }
+  // Helper function to fetch file from URL
+  const fetchFileFromUrl = async (url: string): Promise<File> => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const filename = url.split('/').pop() || 'image.jpg';
+    return new File([blob], filename, { type: blob.type });
   };
 
-  if (hasPaid) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded shadow text-center">
-          <h2 className="text-2xl font-bold mb-4 text-green-700">Payment Successful!</h2>
-          <p className="mb-4 text-lg">Thank you for your payment. Your application is complete.</p>
-        </div>
-      </div>
-    );
-  }
+  // Payment handler with reference
+  const handleProceedToPayment = async () => {
+    try {
+      setIsProceedingToPayment(true);
+      
+      // Create FormData object
+      const formData = new FormData();
+
+      const pd = foundationRemedialData.personalDetails;
+      const aq = foundationRemedialData.academicQualifications.examResults;
+      const pc = foundationRemedialData.programChoice;
+
+      // Helper function to check if a value is actually filled
+      const isFilled = (value: any): boolean => {
+        if (!value) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        return true;
+      };
+
+      // Helper function to append only if filled
+      const appendIfFilled = (key: string, value: any) => {
+        if (isFilled(value)) {
+          formData.append(key, value);
+        }
+      };
+
+      // Only append fields that are actually filled
+      if (isFilled(foundationRemedialData.academicSession)) {
+        formData.append('academic_session', foundationRemedialData.academicSession);
+      }
+
+      if (isFilled(foundationRemedialData.program)) {
+        formData.append('program', foundationRemedialData.program);
+      }
+
+      if (isFilled(pd.surname)) {
+        formData.append('surname', pd.surname);
+      }
+
+      if (isFilled(pd.firstName)) {
+        formData.append('first_name', pd.firstName);
+      }
+
+      if (isFilled(pd.otherNames)) {
+        formData.append('other_names', pd.otherNames);
+      }
+
+      if (isFilled(pd.gender)) {
+        formData.append('gender', pd.gender);
+      }
+
+      // Only append date if ALL parts are filled
+      if (isFilled(pd.dateOfBirth.day) && 
+          isFilled(pd.dateOfBirth.month) && 
+          isFilled(pd.dateOfBirth.year)) {
+        formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      }
+
+      if (isFilled(pd.streetAddress)) {
+        formData.append('street_address', pd.streetAddress);
+      }
+
+      if (isFilled(pd.city)) {
+        formData.append('city', pd.city);
+      }
+
+      if (isFilled(pd.country)) {
+        formData.append('country', pd.country);
+      }
+
+      if (pd.nationality === "Nigeria" && isFilled(pd.stateOfOrigin)) {
+        formData.append('state_of_origin', pd.stateOfOrigin);
+      }
+
+      if (isFilled(pd.nationality)) {
+        formData.append('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      }
+
+      if (isFilled(pd.phoneNumber)) {
+        formData.append('phone_number', pd.phoneNumber);
+      }
+
+      if (isFilled(pd.email)) {
+        formData.append('email', pd.email);
+      }
+
+      if (pd.hasDisabilities === "yes") {
+        formData.append('has_disability', "true");
+        if (isFilled(pd.disabilityDescription)) {
+          formData.append('disability_description', pd.disabilityDescription);
+        }
+      } else if (pd.hasDisabilities === "no") {
+        formData.append('has_disability', "false");
+      }
+
+      if (isFilled(aq.examType)) {
+        formData.append('examType', aq.examType);
+      }
+
+      if (isFilled(aq.examNumber)) {
+        formData.append('examNumber', aq.examNumber);
+      }
+
+      if (isFilled(aq.examYear)) {
+        formData.append('examYear', aq.examYear);
+      }
+
+      if (isFilled(aq.subjects) && aq.subjects.length > 0) {
+        formData.append('subjects', JSON.stringify(aq.subjects));
+      }
+
+      // Only append programChoice if ALL required fields are filled
+      if (isFilled(pc.program) && 
+          isFilled(pc.subjectCombination) && 
+          isFilled(pc.firstChoice.university) && 
+          isFilled(pc.firstChoice.department) && 
+          isFilled(pc.firstChoice.faculty)) {
+        formData.append('programChoice', JSON.stringify({
+          program: pc.program,
+          subjectCombination: pc.subjectCombination,
+          firstChoice: pc.firstChoice,
+          secondChoice: pc.secondChoice
+        }));
+      }
+
+      // Only add files if they are new File uploads
+      if (foundationRemedialData.passportPhoto instanceof File) {
+        formData.append('passport_photo', foundationRemedialData.passportPhoto);
+      }
+
+      if (aq.documents instanceof File) {
+        formData.append('waec_result', aq.documents);
+      }
+
+      // Submit the application
+      const response = await apiService.createFoundationApplication(formData);
+      
+      // Log the response for debugging
+      console.log('Server response:', response);
+      
+      if (response && response.id) {
+        // Store the application data in localStorage
+        localStorage.setItem('applicationData', JSON.stringify(response));
+        
+        // Navigate to the payment page with the application data
+        navigate('/payment', { 
+          state: { 
+            application: response,
+            amount: 50000, // ₦500 in kobo
+            email: pd.email,
+            metadata: {
+              applicationType: 'foundation',
+              programType: 'foundation',
+              program: foundationRemedialData.program,
+              academicSession: foundationRemedialData.academicSession
+            }
+          } 
+        });
+      } else {
+        console.error('Invalid response format:', response);
+        toast.error('Failed to submit application: Invalid response from server');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+      }
+      toast.error(error instanceof Error ? error.message : 'Failed to submit application');
+    } finally {
+      setIsProceedingToPayment(false);
+    }
+  };
 
   const [firstChoiceSearch, setFirstChoiceSearch] = useState("");
   const [secondChoiceSearch, setSecondChoiceSearch] = useState("");
@@ -982,7 +1159,9 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
             {foundationRemedialData.passportPhoto ? (
               <div className="relative w-full h-full">
                 <img
-                  src={URL.createObjectURL(foundationRemedialData.passportPhoto)}
+                  src={foundationRemedialData.passportPhoto instanceof File 
+                    ? URL.createObjectURL(foundationRemedialData.passportPhoto)
+                    : foundationRemedialData.passportPhoto}
                   alt="Passport"
                   className="w-full h-full object-cover rounded-lg"
                 />
@@ -1863,27 +2042,27 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
             type="button"
             variant="outline"
             onClick={handleSaveDraft}
-            disabled={isProcessingPayment || isSavingDraft}
+            disabled={isSavingDraft || isSubmitting || isProceedingToPayment}
           >
             {isSavingDraft ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-                Saving...
-              </div>
+              <>
+                <span className="animate-spin mr-2">⏳</span>
+                Saving Draft...
+              </>
             ) : (
               "Save as Draft"
             )}
           </Button>
           <Button
             type="button"
-            disabled={isProcessingPayment || isProcessingPaymentBtn}
             onClick={handleProceedToPayment}
+            disabled={isSavingDraft || isSubmitting || isProceedingToPayment}
           >
-            {isProcessingPaymentBtn ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+            {isProceedingToPayment ? (
+              <>
+                <span className="animate-spin mr-2">⏳</span>
                 Processing...
-              </div>
+              </>
             ) : (
               "Proceed to Payment"
             )}

@@ -903,28 +903,31 @@ const apiService = {
   },
 
   createFoundationApplication: async (formData: FormData) => {
-    const token = localStorage.getItem('accessToken');
-    const headers = {
-      'Accept': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    const response = await fetch(API_ENDPOINTS.FOUNDATION, {
-      method: 'POST',
-      body: formData,
-      headers,
-    });
-    if (!response.ok) {
-      let error;
-      try {
-        error = await response.json();
-      } catch {
-        error = { detail: 'Unknown error' };
+    try {
+      const token = localStorage.getItem('accessToken');
+      const headers: HeadersInit = {
+        'Accept': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
-      throw new Error(error.detail || 'Failed to submit foundation application');
+
+      const response = await fetch(API_ENDPOINTS.FOUNDATION, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+        throw new Error(errorData.detail || 'Failed to submit foundation application');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error submitting foundation application:', error);
+      throw error;
     }
-    return await response.json();
   },
 
   /**
