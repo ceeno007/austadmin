@@ -348,6 +348,7 @@ const grades = [
 const autofillFromApplication = (application: any, prev: any) => {
   // Map nationality to match dropdown values
   const mapNationality = (nationality: string) => {
+    if (!nationality) return "Nigeria"; // Default to Nigeria if empty
     if (nationality === "Nigerian") return "Nigeria";
     return nationality;
   };
@@ -359,34 +360,48 @@ const autofillFromApplication = (application: any, prev: any) => {
     return `https://admissions-jcvy.onrender.com/${path}`;
   };
 
+  // Parse date string to get day, month, year
+  const parseDate = (dateString: string) => {
+    if (!dateString) return { day: "", month: "", year: "" };
+    const date = new Date(dateString);
+    return {
+      day: date.getDate().toString().padStart(2, '0'),
+      month: (date.getMonth() + 1).toString().padStart(2, '0'),
+      year: date.getFullYear().toString()
+    };
+  };
+
+  // Create a placeholder file for the exam result
+  const createExamResultFile = (path: string | undefined) => {
+    if (!path) return null;
+    const filename = path.split('/').pop() || 'exam_result.pdf';
+    return new File([], filename, { type: 'application/pdf' });
+  };
+
   return {
     ...prev,
-    // Don't set passportPhoto from URL
     academicSession: application.academic_session || prev.academicSession,
     program: application.program_type || prev.program,
+    passportPhoto: application.passport_photo_path ? addEndpointToPath(application.passport_photo_path) : prev.passportPhoto,
     personalDetails: {
       ...prev.personalDetails,
       surname: application.surname || prev.personalDetails.surname,
       firstName: application.first_name || prev.personalDetails.firstName,
       otherNames: application.other_names || prev.personalDetails.otherNames,
       gender: application.gender || prev.personalDetails.gender,
-      dateOfBirth: application.date_of_birth ? {
-        day: new Date(application.date_of_birth).getDate().toString().padStart(2, '0'),
-        month: (new Date(application.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
-        year: new Date(application.date_of_birth).getFullYear().toString(),
-      } : prev.personalDetails.dateOfBirth,
+      dateOfBirth: parseDate(application.date_of_birth),
       streetAddress: application.street_address || prev.personalDetails.streetAddress,
       city: application.city || prev.personalDetails.city,
       country: application.country || prev.personalDetails.country,
       stateOfOrigin: application.state_of_origin || prev.personalDetails.stateOfOrigin,
-      nationality: mapNationality(application.nationality || prev.personalDetails.nationality),
+      nationality: mapNationality(application.nationality),
       phoneNumber: application.phone_number || prev.personalDetails.phoneNumber,
       email: application.email || prev.personalDetails.email,
       hasDisabilities: application.has_disability === true ? 'yes' : (application.has_disability === false ? 'no' : prev.personalDetails.hasDisabilities),
       disabilityDescription: application.disability_description || prev.personalDetails.disabilityDescription,
     },
     programChoice: {
-      program: application.program_choice?.program || prev.programChoice.program,
+      program: application.program_type || prev.programChoice.program,
       subjectCombination: application.program_choice?.subjectCombination || prev.programChoice.subjectCombination,
       firstChoice: {
         university: application.program_choice?.firstChoice?.university || prev.programChoice.firstChoice.university,
@@ -405,7 +420,7 @@ const autofillFromApplication = (application: any, prev: any) => {
         examNumber: application.exam_number || prev.academicQualifications.examResults.examNumber,
         examYear: application.exam_year ? application.exam_year.toString() : prev.academicQualifications.examResults.examYear,
         subjects: application.subjects || prev.academicQualifications.examResults.subjects,
-        documents: application.exam_result_path ? addEndpointToPath(application.exam_result_path) : prev.academicQualifications.examResults.documents,
+        documents: application.exam_result_path ? createExamResultFile(application.exam_result_path) : prev.academicQualifications.examResults.documents,
       }
     },
   };
@@ -613,45 +628,78 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
       // Create FormData object
       const formData = new FormData();
 
-      // Add text fields
-      formData.append('academic_session', foundationRemedialData.academicSession);
-      formData.append('program', foundationRemedialData.program);
-      formData.append('surname', pd.surname);
-      formData.append('first_name', pd.firstName);
-      formData.append('other_names', pd.otherNames || "");
-      formData.append('gender', pd.gender);
-      formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
-      formData.append('street_address', pd.streetAddress);
-      formData.append('city', pd.city);
-      formData.append('country', pd.country);
-      formData.append('state_of_origin', pd.nationality === "Nigeria" ? pd.stateOfOrigin : "");
-      formData.append('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
-      formData.append('phone_number', pd.phoneNumber);
-      formData.append('email', pd.email);
-      formData.append('has_disability', pd.hasDisabilities === "yes" ? "true" : "false");
-      formData.append('disability_description', pd.hasDisabilities === "yes" ? pd.disabilityDescription : "");
-      formData.append('examType', aq.examType);
-      formData.append('examNumber', aq.examNumber);
-      formData.append('examYear', aq.examYear);
-      formData.append('subjects', JSON.stringify(aq.subjects));
-      formData.append('programChoice', JSON.stringify({
-        program: pc.program,
-        subjectCombination: pc.subjectCombination,
-        firstChoice: pc.firstChoice,
-        secondChoice: pc.secondChoice
-      }));
-      formData.append('declaration', foundationRemedialData.declaration);
+      // Helper function to check if a value is actually filled
+      const isFilled = (value: any): boolean => {
+        if (!value) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        return true;
+      };
+      // Helper function to append only if filled
+      const appendIfFilled = (key: string, value: any) => {
+        if (isFilled(value)) {
+          formData.append(key, value);
+        }
+      };
+
+      appendIfFilled('academic_session', foundationRemedialData.academicSession);
+      appendIfFilled('program_type', foundationRemedialData.program);
+      appendIfFilled('surname', pd.surname);
+      appendIfFilled('first_name', pd.firstName);
+      appendIfFilled('other_names', pd.otherNames);
+      appendIfFilled('gender', pd.gender);
+      if (isFilled(pd.dateOfBirth.day) && isFilled(pd.dateOfBirth.month) && isFilled(pd.dateOfBirth.year)) {
+        formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      }
+      appendIfFilled('street_address', pd.streetAddress);
+      appendIfFilled('city', pd.city);
+      appendIfFilled('country', pd.country);
+      if (pd.nationality === "Nigeria" && isFilled(pd.stateOfOrigin)) {
+        formData.append('state_of_origin', pd.stateOfOrigin);
+      }
+      appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      appendIfFilled('phone_number', pd.phoneNumber);
+      appendIfFilled('email', pd.email);
+      if (pd.hasDisabilities === "yes") {
+        formData.append('has_disability', "true");
+        if (isFilled(pd.disabilityDescription)) {
+          formData.append('disability_description', pd.disabilityDescription);
+        }
+      } else if (pd.hasDisabilities === "no") {
+        formData.append('has_disability', "false");
+      }
+      appendIfFilled('exam_type', aq.examType);
+      appendIfFilled('exam_number', aq.examNumber);
+      appendIfFilled('exam_year', aq.examYear);
+      if (isFilled(aq.subjects) && aq.subjects.length > 0) {
+        formData.append('subjects', JSON.stringify(aq.subjects));
+      }
+      if (isFilled(pc.program) && isFilled(pc.subjectCombination) && isFilled(pc.firstChoice.university) && isFilled(pc.firstChoice.department) && isFilled(pc.firstChoice.faculty)) {
+        formData.append('program_choice', JSON.stringify({
+          program: pc.program,
+          subjectCombination: pc.subjectCombination,
+          firstChoice: {
+            university: pc.firstChoice.university,
+            department: pc.firstChoice.department,
+            faculty: pc.firstChoice.faculty
+          },
+          secondChoice: {
+            university: pc.secondChoice.university,
+            department: pc.secondChoice.department,
+            faculty: pc.secondChoice.faculty
+          }
+        }));
+      }
       formData.append('is_draft', "true");
-      formData.append('program_type', 'foundation');
 
       // Add files
-      if (foundationRemedialData.passportPhoto) {
+      if (foundationRemedialData.passportPhoto instanceof File) {
         formData.append('passport_photo', foundationRemedialData.passportPhoto);
       }
-      if (aq.documents) {
-        formData.append('waec_result', aq.documents);
+      if (aq.documents instanceof File) {
+        formData.append('exam_result', aq.documents);
       }
-
       const response = await apiService.createFoundationApplication(formData);
       if (response && response.applications && response.applications.length > 0) {
         setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
@@ -670,71 +718,82 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
     try {
       setIsSubmitting(true);
       if (!isFormValid()) return;
-
       const pd = foundationRemedialData.personalDetails;
       const aq = foundationRemedialData.academicQualifications.examResults;
       const pc = foundationRemedialData.programChoice;
-
       // Create FormData object
       const formData = new FormData();
-
-      // Add text fields
-      formData.append('academic_session', foundationRemedialData.academicSession);
-      formData.append('program', foundationRemedialData.program);
-      formData.append('surname', pd.surname);
-      formData.append('first_name', pd.firstName);
-      formData.append('other_names', pd.otherNames || "");
-      formData.append('gender', pd.gender);
-      formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
-      formData.append('street_address', pd.streetAddress);
-      formData.append('city', pd.city);
-      formData.append('country', pd.country);
-      formData.append('state_of_origin', pd.nationality === "Nigeria" ? pd.stateOfOrigin : "");
-      formData.append('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
-      formData.append('phone_number', pd.phoneNumber);
-      formData.append('email', pd.email);
-      formData.append('has_disability', pd.hasDisabilities === "yes" ? "true" : "false");
-      formData.append('disability_description', pd.hasDisabilities === "yes" ? pd.disabilityDescription : "");
-      formData.append('examType', aq.examType);
-      formData.append('examNumber', aq.examNumber);
-      formData.append('examYear', aq.examYear);
-      formData.append('subjects', JSON.stringify(aq.subjects));
-      formData.append('programChoice', JSON.stringify({
-        program: pc.program,
-        subjectCombination: pc.subjectCombination,
-        firstChoice: pc.firstChoice,
-        secondChoice: pc.secondChoice
-      }));
-      formData.append('declaration', foundationRemedialData.declaration);
+      // Helper function to check if a value is actually filled
+      const isFilled = (value: any): boolean => {
+        if (!value) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        return true;
+      };
+      // Helper function to append only if filled
+      const appendIfFilled = (key: string, value: any) => {
+        if (isFilled(value)) {
+          formData.append(key, value);
+        }
+      };
+      appendIfFilled('academic_session', foundationRemedialData.academicSession);
+      appendIfFilled('program_type', foundationRemedialData.program);
+      appendIfFilled('surname', pd.surname);
+      appendIfFilled('first_name', pd.firstName);
+      appendIfFilled('other_names', pd.otherNames);
+      appendIfFilled('gender', pd.gender);
+      if (isFilled(pd.dateOfBirth.day) && isFilled(pd.dateOfBirth.month) && isFilled(pd.dateOfBirth.year)) {
+        formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      }
+      appendIfFilled('street_address', pd.streetAddress);
+      appendIfFilled('city', pd.city);
+      appendIfFilled('country', pd.country);
+      if (pd.nationality === "Nigeria" && isFilled(pd.stateOfOrigin)) {
+        formData.append('state_of_origin', pd.stateOfOrigin);
+      }
+      appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      appendIfFilled('phone_number', pd.phoneNumber);
+      appendIfFilled('email', pd.email);
+      if (pd.hasDisabilities === "yes") {
+        formData.append('has_disability', "true");
+        if (isFilled(pd.disabilityDescription)) {
+          formData.append('disability_description', pd.disabilityDescription);
+        }
+      } else if (pd.hasDisabilities === "no") {
+        formData.append('has_disability', "false");
+      }
+      appendIfFilled('exam_type', aq.examType);
+      appendIfFilled('exam_number', aq.examNumber);
+      appendIfFilled('exam_year', aq.examYear);
+      if (isFilled(aq.subjects) && aq.subjects.length > 0) {
+        formData.append('subjects', JSON.stringify(aq.subjects));
+      }
+      if (isFilled(pc.program) && isFilled(pc.subjectCombination) && isFilled(pc.firstChoice.university) && isFilled(pc.firstChoice.department) && isFilled(pc.firstChoice.faculty)) {
+        formData.append('program_choice', JSON.stringify({
+          program: pc.program,
+          subjectCombination: pc.subjectCombination,
+          firstChoice: {
+            university: pc.firstChoice.university,
+            department: pc.firstChoice.department,
+            faculty: pc.firstChoice.faculty
+          },
+          secondChoice: {
+            university: pc.secondChoice.university,
+            department: pc.secondChoice.department,
+            faculty: pc.secondChoice.faculty
+          }
+        }));
+      }
       formData.append('is_draft', "false");
-      formData.append('program_type', 'foundation');
 
       // Add files
-      if (foundationRemedialData.passportPhoto) {
-        if (typeof foundationRemedialData.passportPhoto === 'string') {
-          // If it's a string URL, check if it needs the endpoint
-          const photoUrl = foundationRemedialData.passportPhoto.startsWith('http') 
-            ? foundationRemedialData.passportPhoto 
-            : `https://admissions-jcvy.onrender.com/${foundationRemedialData.passportPhoto}`;
-          formData.append('passport_photo', photoUrl);
-        } else {
-          // If it's a File object, send it directly
-          formData.append('passport_photo', foundationRemedialData.passportPhoto);
-        }
+      if (foundationRemedialData.passportPhoto instanceof File) {
+        formData.append('passport_photo', foundationRemedialData.passportPhoto);
       }
-      if (aq.documents) {
-        if (typeof aq.documents === 'string') {
-          // If it's a string URL, check if it needs the endpoint
-          const docUrl = aq.documents.startsWith('http') 
-            ? aq.documents 
-            : `https://admissions-jcvy.onrender.com/${aq.documents}`;
-          formData.append('waec_result', docUrl);
-        } else {
-          // If it's a File object, send it directly
-          formData.append('waec_result', aq.documents);
-        }
+      if (aq.documents instanceof File) {
+        formData.append('exam_result', aq.documents);
       }
-
       const response = await apiService.createFoundationApplication(formData);
       if (response && response.applications && response.applications.length > 0) {
         setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
@@ -881,8 +940,16 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
         formData.append('programChoice', JSON.stringify({
           program: pc.program,
           subjectCombination: pc.subjectCombination,
-          firstChoice: pc.firstChoice,
-          secondChoice: pc.secondChoice
+          firstChoice: {
+            university: pc.firstChoice.university,
+            department: pc.firstChoice.department,
+            faculty: pc.firstChoice.faculty
+          },
+          secondChoice: {
+            university: pc.secondChoice.university,
+            department: pc.secondChoice.department,
+            faculty: pc.secondChoice.faculty
+          }
         }));
       }
 
@@ -1161,7 +1228,9 @@ const FoundationForm = ({ onPayment, isProcessingPayment }: FoundationFormProps)
                 <img
                   src={foundationRemedialData.passportPhoto instanceof File 
                     ? URL.createObjectURL(foundationRemedialData.passportPhoto)
-                    : foundationRemedialData.passportPhoto}
+                    : foundationRemedialData.passportPhoto.startsWith('http')
+                      ? foundationRemedialData.passportPhoto
+                      : `https://admissions-jcvy.onrender.com/${foundationRemedialData.passportPhoto}`}
                   alt="Passport"
                   className="w-full h-full object-cover rounded-lg"
                 />
