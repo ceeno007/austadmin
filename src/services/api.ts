@@ -195,25 +195,32 @@ const apiService = {
    */
   login: async (credentials: { username: string; password: string }) => {
     try {
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'password');
+      formData.append('username', credentials.username);
+      formData.append('password', credentials.password);
+      formData.append('scope', '');
+      formData.append('client_id', 'string');
+      formData.append('client_secret', 'string');
+
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
-        headers: defaultHeaders,
-        body: JSON.stringify(credentials),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: formData.toString()
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Login failed with status ${response.status}`);
+        throw new Error(errorData.detail || "Login failed");
       }
-  
-      const data = await response.json();
-      return data;
+
+      return await response.json();
     } catch (error) {
       console.error("Login error:", error);
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error("An unexpected error occurred during login");
+      throw error;
     }
   },
   
