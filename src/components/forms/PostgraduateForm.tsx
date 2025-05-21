@@ -1026,13 +1026,25 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form data
     if (!isFormValid()) {
+      toast.error("Please fill in all required fields correctly");
       return;
     }
 
-    // Show payment modal instead of redirecting
-    setShowPaymentModal(true);
+    try {
+      const formData = new FormData();
+      // Add form data...
+      
+      const response = await apiService.submitPostgraduateApplication(formData);
+      if (response.success) {
+        toast.success("Application submitted successfully!");
+        navigate('/application-success');
+      } else {
+        toast.error(response.message || "Failed to submit application");
+      }
+    } catch (err) {
+      toast.error("An error occurred while submitting the application");
+    }
   };
 
   // Add these functions to handle payment options

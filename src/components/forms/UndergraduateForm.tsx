@@ -499,6 +499,84 @@ function buildUndergraduateFormData(data) {
   return formData;
 }
 
+// Add this function before the UndergraduateForm component
+const autofillFromApplication = (application: any, prev: UndergraduateFormData): UndergraduateFormData => {
+  // Set selected exams based on exam types
+  const selectedExams = [];
+  if (application.exam_type_1) selectedExams.push(application.exam_type_1);
+  if (application.exam_type_2) selectedExams.push(application.exam_type_2);
+
+  return {
+    ...prev,
+    academicSession: application.academic_session || prev.academicSession,
+    selectedCourse: application.selected_program || prev.selectedCourse,
+    programChoice: application.selected_program ? {
+      program: application.selected_program,
+      subjectCombination: application.selected_program,
+      firstChoice: {
+        university: "AUST",
+        department: application.selected_program,
+        faculty: application.selected_program.split('.')[0]
+      },
+      secondChoice: {
+        university: "AUST",
+        department: application.selected_program,
+        faculty: application.selected_program.split('.')[0]
+      }
+    } : prev.programChoice,
+    personalDetails: {
+      ...prev.personalDetails,
+      surname: application.surname || prev.personalDetails.surname,
+      firstName: application.first_name || prev.personalDetails.firstName,
+      otherNames: application.other_names || prev.personalDetails.otherNames,
+      gender: application.gender || prev.personalDetails.gender,
+      dateOfBirth: application.date_of_birth ? {
+        year: new Date(application.date_of_birth).getFullYear().toString(),
+        month: (new Date(application.date_of_birth).getMonth() + 1).toString().padStart(2, '0'),
+        day: new Date(application.date_of_birth).getDate().toString().padStart(2, '0')
+      } : prev.personalDetails.dateOfBirth,
+      streetAddress: application.street_address || prev.personalDetails.streetAddress,
+      city: application.city || prev.personalDetails.city,
+      country: application.country || prev.personalDetails.country,
+      stateOfOrigin: application.state_of_origin || prev.personalDetails.stateOfOrigin,
+      nationality: application.nationality || prev.personalDetails.nationality,
+      phoneNumber: application.phone_number || prev.personalDetails.phoneNumber,
+      email: application.email || prev.personalDetails.email,
+      hasDisabilities: application.has_disability ? "Yes" : "No",
+      disabilityDescription: application.disability_description || prev.personalDetails.disabilityDescription
+    },
+    academicQualifications: {
+      ...prev.academicQualifications,
+      waecResults: application.exam_type_1 === 'waec' ? {
+        examNumber: application.exam_number_1 || '',
+        examYear: application.exam_year_1?.toString() || '',
+        subjects: application.subjects_1 || [],
+        documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
+      } : prev.academicQualifications.waecResults,
+      necoResults: application.exam_type_1 === 'neco' ? {
+        examNumber: application.exam_number_1 || '',
+        examYear: application.exam_year_1?.toString() || '',
+        subjects: application.subjects_1 || [],
+        documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
+      } : prev.academicQualifications.necoResults,
+      nabtebResults: application.exam_type_1 === 'nabteb' ? {
+        examNumber: application.exam_number_1 || '',
+        examYear: application.exam_year_1?.toString() || '',
+        subjects: application.subjects_1 || [],
+        documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
+      } : prev.academicQualifications.nabtebResults,
+      jambResults: {
+        regNumber: application.jamb_reg_number || '',
+        examYear: application.jamb_year?.toString() || '',
+        score: application.jamb_score?.toString() || '',
+        documents: application.jamb_result_path ? createPlaceholderFile(application.jamb_result_path) : null
+      }
+    },
+    passportPhoto: application.passport_photo_path ? createPlaceholderFile(application.passport_photo_path) : null,
+    declaration: application.submitted ? "true" : prev.declaration
+  };
+};
+
 const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -824,109 +902,91 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!isFormValid()) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fill in all required fields correctly");
       return;
     }
-    setIsSubmitting(true);
+
     try {
       const formData = new FormData();
-      // Helper to append only if value is filled
-      const appendIfFilled = (key, value) => {
-        if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, value);
+      
+      // Program choice
+      formData.append('program_type', 'undergraduate');
+      formData.append('selected_program', undergraduateData.selectedCourse);
+      formData.append('academic_session', undergraduateData.academicSession);
+      
+      // Personal details
+      formData.append('surname', undergraduateData.personalDetails.surname);
+      formData.append('first_name', undergraduateData.personalDetails.firstName);
+      formData.append('other_names', undergraduateData.personalDetails.otherNames || '');
+      formData.append('gender', undergraduateData.personalDetails.gender);
+      formData.append('date_of_birth', `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`);
+      formData.append('street_address', undergraduateData.personalDetails.streetAddress);
+      formData.append('city', undergraduateData.personalDetails.city);
+      formData.append('country', undergraduateData.personalDetails.country);
+      formData.append('state_of_origin', undergraduateData.personalDetails.stateOfOrigin);
+      formData.append('nationality', undergraduateData.personalDetails.nationality);
+      formData.append('phone_number', undergraduateData.personalDetails.phoneNumber);
+      formData.append('email', undergraduateData.personalDetails.email);
+      formData.append('has_disability', undergraduateData.personalDetails.hasDisabilities === 'Yes' ? 'true' : 'false');
+      formData.append('disability_description', undergraduateData.personalDetails.disabilityDescription || '');
+      
+      // Academic qualifications
+      if (undergraduateData.academicQualifications.waecResults) {
+        formData.append('exam_type_1', 'waec');
+        formData.append('exam_number_1', undergraduateData.academicQualifications.waecResults.examNumber);
+        formData.append('exam_year_1', undergraduateData.academicQualifications.waecResults.examYear);
+        formData.append('subjects_1', JSON.stringify(undergraduateData.academicQualifications.waecResults.subjects));
+        if (undergraduateData.academicQualifications.waecResults.documents) {
+          formData.append('exam_type_1_result', undergraduateData.academicQualifications.waecResults.documents);
         }
-      };
-
-      // Add program choice in the exact format required
-      if (undergraduateData.programChoice) {
-        formData.append('program_choice', JSON.stringify({
-          program: undergraduateData.programChoice.program,
-          subjectCombination: undergraduateData.programChoice.subjectCombination,
-          firstChoice: {
-            additionalProp1: "AUST",
-            additionalProp2: undergraduateData.programChoice.program,
-            additionalProp3: undergraduateData.programChoice.program.split('.')[0]
-          },
-          secondChoice: {
-            additionalProp1: "AUST",
-            additionalProp2: undergraduateData.programChoice.program,
-            additionalProp3: undergraduateData.programChoice.program.split('.')[0]
-          }
-        }));
       }
-
-      // Add personal details
-      appendIfFilled("surname", undergraduateData.personalDetails.surname);
-      appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
-      appendIfFilled("other_names", undergraduateData.personalDetails.otherNames);
-      appendIfFilled("gender", undergraduateData.personalDetails.gender);
-      if (
-        undergraduateData.personalDetails.dateOfBirth.year &&
-        undergraduateData.personalDetails.dateOfBirth.month &&
-        undergraduateData.personalDetails.dateOfBirth.day
-      ) {
-        appendIfFilled(
-          "date_of_birth",
-          `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`
-        );
+      
+      if (undergraduateData.academicQualifications.necoResults) {
+        formData.append('exam_type_2', 'neco');
+        formData.append('exam_number_2', undergraduateData.academicQualifications.necoResults.examNumber);
+        formData.append('exam_year_2', undergraduateData.academicQualifications.necoResults.examYear);
+        formData.append('subjects_2', JSON.stringify(undergraduateData.academicQualifications.necoResults.subjects));
+        if (undergraduateData.academicQualifications.necoResults.documents) {
+          formData.append('exam_type_2_result', undergraduateData.academicQualifications.necoResults.documents);
+        }
       }
-      appendIfFilled("street_address", undergraduateData.personalDetails.streetAddress);
-      appendIfFilled("city", undergraduateData.personalDetails.city);
-      appendIfFilled("country", undergraduateData.personalDetails.country);
-      appendIfFilled("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
-      appendIfFilled("nationality", undergraduateData.personalDetails.nationality);
-      appendIfFilled("phone_number", undergraduateData.personalDetails.phoneNumber);
-      appendIfFilled("email", undergraduateData.personalDetails.email);
-      appendIfFilled("has_disability", undergraduateData.personalDetails.hasDisabilities);
-      appendIfFilled("disability_description", undergraduateData.personalDetails.disabilityDescription);
-      // Add academic session and program details
-      appendIfFilled("academic_session", undergraduateData.academicSession);
-      appendIfFilled("program_type", "undergraduate");
-      appendIfFilled("selected_course", undergraduateData.selectedCourse);
-      // Add O'Level results
-      const examResults = undergraduateData.academicQualifications[`${selectedExamType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
-      appendIfFilled("exam_type", selectedExamType);
-      appendIfFilled("exam_number", examResults?.examNumber);
-      appendIfFilled("exam_year", examResults?.examYear);
-      if (examResults?.subjects && examResults.subjects.length > 0) {
-        appendIfFilled("subjects", JSON.stringify(examResults.subjects));
+      
+      if (undergraduateData.academicQualifications.nabtebResults) {
+        formData.append('exam_type_2', 'nabteb');
+        formData.append('exam_number_2', undergraduateData.academicQualifications.nabtebResults.examNumber);
+        formData.append('exam_year_2', undergraduateData.academicQualifications.nabtebResults.examYear);
+        formData.append('subjects_2', JSON.stringify(undergraduateData.academicQualifications.nabtebResults.subjects));
+        if (undergraduateData.academicQualifications.nabtebResults.documents) {
+          formData.append('exam_type_2_result', undergraduateData.academicQualifications.nabtebResults.documents);
+        }
       }
-      if (examResults?.documents) {
-        formData.append("result_document", examResults.documents);
-      }
-      // Add JAMB results
-      appendIfFilled("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
-      appendIfFilled("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
-      appendIfFilled("jamb_score", undergraduateData.academicQualifications.jambResults.score);
+      
+      formData.append('jamb_reg_number', undergraduateData.academicQualifications.jambResults.regNumber);
+      formData.append('jamb_year', undergraduateData.academicQualifications.jambResults.examYear);
+      formData.append('jamb_score', undergraduateData.academicQualifications.jambResults.score);
       if (undergraduateData.academicQualifications.jambResults.documents) {
-        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
+        formData.append('jamb_result', undergraduateData.academicQualifications.jambResults.documents);
       }
-      // Add documents
+      
+      // Passport photo
       if (undergraduateData.passportPhoto) {
-        formData.append("passport_photo", undergraduateData.passportPhoto);
+        formData.append('passport_photo', undergraduateData.passportPhoto);
       }
-      // Add declaration
-      appendIfFilled("declaration", undergraduateData.declaration);
-      // Mark as submitted
-      formData.append("submitted", "true");
-      // Save the application
-      await apiService.submitUndergraduateApplication(formData);
-      toast.success("Application submitted successfully!");
-      // Update localStorage to mark as submitted
-      const storedData = localStorage.getItem('applicationData');
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        if (parsedData.applications && parsedData.applications.length > 0) {
-          parsedData.applications[0].submitted = true;
-          localStorage.setItem('applicationData', JSON.stringify(parsedData));
-        }
+      
+      // Declaration
+      formData.append('declaration', undergraduateData.declaration);
+      
+      const response = await apiService.submitUndergraduateApplication(formData);
+      if (response.success) {
+        toast.success("Application submitted successfully!");
+        navigate('/application-success');
+      } else {
+        toast.error(response.message || "Failed to submit application");
       }
-      navigate("/application-success");
     } catch (err) {
-      toast.error(err.message || "Failed to submit application");
-    } finally {
-      setIsSubmitting(false);
+      toast.error("An error occurred while submitting the application");
     }
   };
 
@@ -1042,14 +1102,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               program: value,
               subjectCombination: value,
               firstChoice: {
-                additionalProp1: "AUST",
-                additionalProp2: value,
-                additionalProp3: value.split('.')[0]
+                university: "AUST",
+                department: value,
+                faculty: value.split('.')[0]
               },
               secondChoice: {
-                additionalProp1: "AUST",
-                additionalProp2: value,
-                additionalProp3: value.split('.')[0]
+                university: "AUST",
+                department: value,
+                faculty: value.split('.')[0]
               }
             }
           }))}

@@ -25,6 +25,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -43,82 +44,17 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      toast.error("Please enter both email and password");
-      return;
-    }
-    
     setIsLoading(true);
-    console.log("Attempting login with email:", email);
-    
-    const loadingToast = toast.loading("Logging in...");
-    
+    setError(null);
+
     try {
-      // Test mode - bypass authentication for testing
-      if (email === "test1@test.com" || email === "test2@test.com" || email === "test3@test.com") {
-        const testData = {
-          access_token: "test_token",
-          user: {
-            email: email,
-            full_name: "Test User",
-            program: email === "test1@test.com" ? "undergraduate" : 
-                    email === "test2@test.com" ? "postgraduate" : "foundation"
-          }
-        };
-        
-        login(testData.access_token, testData);
-        toast.dismiss(loadingToast);
-        toast.success("Login successful!");
-        
-        const programType = testData.user.program;
-        const destination = `/document-upload?type=${programType}`;
-        navigate(destination, { replace: true });
-        return;
-      }
+      const data = await apiService.login(email, password);
+      const destination = data.redirect_to || '/';
+      const programType = data.program_type || 'undergraduate';
       
-      console.log("Making fastApiSignin request to:", API_ENDPOINTS.FASTAPI_TOKEN);
-      
-      const data = await apiService.fastApiSignin({
-        username: email,
-        password
-      }) as TokenResponse;
-      
-      console.log("Login response received:", data);
-      
-      if (!data.access_token) {
-        throw new Error("No access token received from server");
-      }
-      
-      console.log("Logging in user with data:", data);
-      login(data.access_token, data);
-      
-      toast.dismiss(loadingToast);
-      toast.success("Login successful!");
-      
-      let programType = data.user?.program?.toLowerCase() || "undergraduate";
-      localStorage.setItem("programType", programType);
-      
-      let destination = location.state?.from?.pathname;
-      if (!destination) {
-        destination = `/document-upload?type=${programType}`;
-      }
-      
-      console.log("Navigating to:", destination, "with program type:", programType);
-      navigate(destination, { replace: true });
-      
-    } catch (error) {
-      console.error("Login error details:", error); 
-      if (error.response) {
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-        console.error("Error response headers:", error.response.headers);
-      } else if (error.request) {
-        console.error("Error request - no response received:", error.request);
-      }
-      
-      toast.dismiss(loadingToast);
-      toast.error(error instanceof Error ? error.message : "Invalid email or password");
+      navigate(destination, { state: { programType } });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setIsLoading(false);
     }

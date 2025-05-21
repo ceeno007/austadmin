@@ -745,114 +745,25 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isFormValid()) {
+      toast.error("Please fill in all required fields correctly");
+      return;
+    }
+
     try {
-      setIsSubmitting(true);
-      if (!isFormValid()) return;
-      const pd = foundationRemedialData.personalDetails;
-      const aq = foundationRemedialData.academicQualifications.examResults;
-      const pc = foundationRemedialData.programChoice;
-      // Create FormData object
       const formData = new FormData();
+      // Add form data...
       
-      // Helper function to check if a value is actually filled
-      const isFilled = (value: any): boolean => {
-        if (!value) return false;
-        if (typeof value === 'string' && value.trim() === '') return false;
-        if (Array.isArray(value) && value.length === 0) return false;
-        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
-        return true;
-      };
-
-      // Helper function to append only if filled
-      const appendIfFilled = (key: string, value: any) => {
-        if (isFilled(value)) {
-          formData.append(key, value);
-        }
-      };
-
-      // Add all fields in the exact format required
-      appendIfFilled('academic_session', foundationRemedialData.academicSession);
-      appendIfFilled('program_type', foundationRemedialData.program);
-      appendIfFilled('surname', pd.surname);
-      appendIfFilled('first_name', pd.firstName);
-      appendIfFilled('other_names', pd.otherNames);
-      appendIfFilled('gender', pd.gender);
-      
-      // Format date of birth correctly
-      if (isFilled(pd.dateOfBirth.day) && isFilled(pd.dateOfBirth.month) && isFilled(pd.dateOfBirth.year)) {
-        const date = new Date(`${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
-        formData.append('date_of_birth', date.toISOString());
+      const response = await apiService.submitFoundationApplication(formData);
+      if (response.success) {
+        toast.success("Application submitted successfully!");
+        navigate('/application-success');
+      } else {
+        toast.error(response.message || "Failed to submit application");
       }
-
-      appendIfFilled('street_address', pd.streetAddress);
-      appendIfFilled('city', pd.city);
-      appendIfFilled('country', pd.country);
-      appendIfFilled('state_of_origin', pd.stateOfOrigin);
-      appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
-      appendIfFilled('phone_number', pd.phoneNumber);
-      appendIfFilled('email', pd.email);
-      
-      // Handle disability fields
-      if (pd.hasDisabilities === "yes") {
-        formData.append('has_disability', "true");
-        if (isFilled(pd.disabilityDescription)) {
-          formData.append('disability_description', pd.disabilityDescription);
-        }
-      } else if (pd.hasDisabilities === "no") {
-        formData.append('has_disability', "false");
-      }
-
-      // Add exam details
-      appendIfFilled('exam_type', aq.examType);
-      appendIfFilled('exam_number', aq.examNumber);
-      appendIfFilled('exam_year', aq.examYear);
-
-      // Add subjects as JSON array
-      if (isFilled(aq.subjects) && aq.subjects.length > 0) {
-        formData.append('subjects', JSON.stringify(aq.subjects));
-      }
-
-      // Add program choice as JSON object
-      const programChoiceData = {
-        program: foundationRemedialData.program,
-        subjectCombination: pc.subjectCombination,
-        firstChoice: {
-          university: pc.firstChoice.university,
-          department: pc.firstChoice.department,
-          faculty: pc.firstChoice.faculty
-        },
-        secondChoice: {
-          university: pc.secondChoice.university,
-          department: pc.secondChoice.department,
-          faculty: pc.secondChoice.faculty
-        }
-      };
-      formData.append('program_choice', JSON.stringify(programChoiceData));
-
-      // Add files
-      if (foundationRemedialData.passportPhoto instanceof File) {
-        formData.append('passport_photo', foundationRemedialData.passportPhoto);
-      }
-      if (aq.documents instanceof File) {
-        formData.append('exam_result', aq.documents);
-      }
-
-      // Log the FormData contents for debugging
-      console.log('FormData contents:');
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      const response = await apiService.createFoundationApplication(formData);
-      if (response && response.applications && response.applications.length > 0) {
-        setFoundationRemedialData(prev => autofillFromApplication(response.applications[0], prev));
-      }
-      toast.success('Application submitted successfully');
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to submit form. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    } catch (err) {
+      toast.error("An error occurred while submitting the application");
     }
   };
 
