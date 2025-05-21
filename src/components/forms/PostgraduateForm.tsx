@@ -353,8 +353,13 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
       formData.append(key, value);
     }
   };
+
+  // Add these fields first
+  appendIfFilled('academic_session', data.academicSession || '');
+  appendIfFilled('selected_program', data.program || '');
+  appendIfFilled('program_type', data.programType || '');
+
   appendIfFilled('state_of_origin', data.personalDetails.stateOfOrigin);
-  appendIfFilled('selected_program', data.program);
   appendIfFilled('gender', data.personalDetails.gender);
   appendIfFilled('has_disability', data.personalDetails.hasDisabilities === 'yes' ? 'true' : 'false');
   if (data.academicQualifications.qualification1.endDate && data.academicQualifications.qualification1.endDate.year && data.academicQualifications.qualification1.endDate.month && data.academicQualifications.qualification1.endDate.day) {
@@ -362,7 +367,9 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   }
   appendIfFilled('second_class_of_degree', data.academicQualifications.qualification2?.grade);
   appendIfFilled('qualification_cgpa', data.academicQualifications.qualification1.cgpa);
-  if (data.passportPhoto) formData.append('passport_photo', data.passportPhoto);
+  if (data.passportPhoto && !data.passportPhoto.name.includes('http')) {
+    formData.append('passport_photo', data.passportPhoto);
+  }
   if (data.academicQualifications.qualification2?.startDate && data.academicQualifications.qualification2.startDate.year && data.academicQualifications.qualification2.startDate.month && data.academicQualifications.qualification2.startDate.day) {
     appendIfFilled('second_qualification_start_date', `${data.academicQualifications.qualification2.startDate.year}-${data.academicQualifications.qualification2.startDate.month}-${data.academicQualifications.qualification2.startDate.day}`);
   }
@@ -385,11 +392,10 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   appendIfFilled('second_qualification_subject', data.academicQualifications.qualification2?.subject);
   appendIfFilled('second_referee_email', data.references.referee2.email);
   if (data.academicQualifications.qualification1.degreeCertificate) formData.append('first_degree_certificate', data.academicQualifications.qualification1.degreeCertificate);
-  appendIfFilled('program_type', data.programType);
+  appendIfFilled('applicant_type', data.applicantType);
   appendIfFilled('second_referee_name', data.references.referee2.name);
   appendIfFilled('country', data.personalDetails.country);
   appendIfFilled('second_degree', data.academicQualifications.qualification2?.type);
-  appendIfFilled('applicant_type', data.applicantType);
   appendIfFilled('institution', data.academicQualifications.qualification1.institution);
   appendIfFilled('street_address', data.personalDetails.streetAddress);
   appendIfFilled('disability_description', data.personalDetails.disabilityDescription);
@@ -423,6 +429,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isProcessingPaymentState, setIsProcessingPaymentState] = useState(false);
 
   // Add these state variables after the other state declarations
   const [referee1EmailError, setReferee1EmailError] = useState<string | null>(null);
@@ -556,20 +563,21 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         };
       };
 
-      // Set programType first, then program
-      let newProgramType = (applicationData.program_type as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD") || postgraduateData.programType;
+      // Set programType and program from backend response
+      let newProgramType = applicationData.program_type || postgraduateData.programType;
       let newProgram = applicationData.selected_program || postgraduateData.program;
+      
       // If the loaded program is not in the list, add it temporarily
       let programList = programs[newProgramType] || [];
       if (newProgram && !programList.includes(newProgram)) {
         programList = [newProgram, ...programList];
         programs[newProgramType] = programList;
       }
-
+      
       setPostgraduateData(prev => ({
         ...prev,
         academicSession: applicationData.academic_session || prev.academicSession,
-        programType: newProgramType,
+        programType: newProgramType as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD",
         program: newProgram,
         personalDetails: {
           ...prev.personalDetails,
@@ -599,8 +607,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
             institution: applicationData.institution || "",
             startDate: parseDate(applicationData.qualification_start_date),
             endDate: parseDate(applicationData.qualification_end_date),
-            degreeCertificate: createPlaceholderFile(applicationData.first_degree_certificate_path),
-            transcript: createPlaceholderFile(applicationData.first_degree_transcript_path),
+            degreeCertificate: applicationData.first_degree_certificate_path ? createPlaceholderFile(applicationData.first_degree_certificate_path) : prev.academicQualifications.qualification1.degreeCertificate,
+            transcript: applicationData.first_degree_transcript_path ? createPlaceholderFile(applicationData.first_degree_transcript_path) : prev.academicQualifications.qualification1.transcript,
           },
           qualification2: {
             ...prev.academicQualifications.qualification2,
@@ -611,10 +619,10 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
             institution: applicationData.second_institution || "",
             startDate: parseDate(applicationData.second_qualification_start_date),
             endDate: parseDate(applicationData.second_qualification_end_date),
-            degreeCertificate: createPlaceholderFile(applicationData.second_degree_certificate_path),
-            transcript: createPlaceholderFile(applicationData.second_degree_transcript_path),
+            degreeCertificate: applicationData.second_degree_certificate_path ? createPlaceholderFile(applicationData.second_degree_certificate_path) : prev.academicQualifications.qualification2.degreeCertificate,
+            transcript: applicationData.second_degree_transcript_path ? createPlaceholderFile(applicationData.second_degree_transcript_path) : prev.academicQualifications.qualification2.transcript,
           },
-          otherQualifications: createPlaceholderFile(applicationData.recommendation_letters_paths) || prev.academicQualifications.otherQualifications,
+          otherQualifications: applicationData.recommendation_letters_paths ? createPlaceholderFile(applicationData.recommendation_letters_paths) : prev.academicQualifications.otherQualifications,
         },
         statementOfPurpose: applicationData.statement_of_purpose_path ? [createPlaceholderFile(applicationData.statement_of_purpose_path)] : prev.statementOfPurpose,
         references: {
@@ -631,7 +639,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
       }));
 
       if (applicationData.passport_photo_path) {
-        setPassportPhotoUrl(applicationData.passport_photo_path);
+        // Add the API URL prefix to the passport photo path with a forward slash
+        const fullUrl = `https://admissions-jcvy.onrender.com/${applicationData.passport_photo_path}`;
+        setPassportPhotoUrl(fullUrl);
       }
     }
   }, [applicationData]);
@@ -897,8 +907,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
       toast.error("You must agree to the declaration");
       return false;
     }
-    // Validate required files
-    if (!postgraduateData.passportPhoto) {
+    // Validate passport photo - check for either file or URL
+    if (!postgraduateData.passportPhoto && !passportPhotoUrl) {
       toast.error("Passport photo is required");
       return false;
     }
@@ -912,7 +922,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         throw new Error("No authentication token found");
       }
       const formData = buildPostgraduateFormData(postgraduateData);
-      await apiService.uploadPostgraduateFormData(formData, token);
+      await apiService.uploadPostgraduateFormData(formData);
       toast.success("Draft saved successfully!");
     } catch (err) {
       toast.error(err.message || "Failed to save draft");
@@ -1028,7 +1038,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   // Add these functions to handle payment options
   const handlePaymentAsNigerian = async () => {
     try {
-      setIsProcessingPayment(true);
+      setIsProcessingPaymentState(true);
       await onPayment(20000, postgraduateData.personalDetails.email, {
         program_type: postgraduateData.programType,
         applicant_type: "Nigerian",
@@ -1038,13 +1048,13 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     } catch (error) {
       toast.error("Failed to process payment");
     } finally {
-      setIsProcessingPayment(false);
+      setIsProcessingPaymentState(false);
     }
   };
 
   const handlePaymentAsInternational = async () => {
     try {
-      setIsProcessingPayment(true);
+      setIsProcessingPaymentState(true);
       await onPayment(50, postgraduateData.personalDetails.email, {
         program_type: postgraduateData.programType,
         applicant_type: "International",
@@ -1054,7 +1064,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     } catch (error) {
       toast.error("Failed to process payment");
     } finally {
-      setIsProcessingPayment(false);
+      setIsProcessingPaymentState(false);
     }
   };
 
@@ -2504,15 +2514,15 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
               type="button"
               variant="outline"
               onClick={handleSaveAsDraft}
-              disabled={isProcessingPayment}
+              disabled={isProcessingPaymentState}
             >
               Save Draft
             </Button>
             <Button
               type="submit"
-              disabled={isProcessingPayment}
+              disabled={isProcessingPaymentState}
             >
-              {isProcessingPayment ? "Processing..." : "Proceed to Payment"}
+              {isProcessingPaymentState ? "Processing..." : "Proceed to Payment"}
             </Button>
           </div>
         </div>
