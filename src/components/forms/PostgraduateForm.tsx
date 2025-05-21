@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from 'react-router-dom';
+import PaymentModal from "@/components/PaymentModal";
 
 interface DateField {
   day: string;
@@ -421,7 +422,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   const [universityCache, setUniversityCache] = useState<Record<string, University[]>>({});
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [showPaymentSelection, setShowPaymentSelection] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Add these state variables after the other state declarations
   const [referee1EmailError, setReferee1EmailError] = useState<string | null>(null);
@@ -448,17 +449,6 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         if (application) {
           // Use the application data as our source
           setApplicationData(application);
-          
-          // Check if user has already paid
-          if (application.has_paid) {
-            // Redirect to reference status page
-            navigate("/reference-status", { 
-              state: { application },
-              replace: true 
-            });
-            return;
-          }
-
           // Check for program_type in the application
           const programType = application.program_type?.toLowerCase();
           // Get stored program type from localStorage for comparison
@@ -487,9 +477,9 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         }
       }
     } catch (error) {
-      console.error("Error loading application data:", error);
+      // Error handling without console.log
     }
-  }, [navigate]);
+  }, []);
 
   const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>({
     academicSession: getCurrentAcademicSession(),
@@ -1025,47 +1015,46 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
     if (!isFormValid()) {
       return;
     }
-    setIsSubmitting(true);
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        toast.error("Please log in to continue");
-        navigate("/login", { state: { from: "/postgraduate" } });
-        return;
-      }
 
-      let passportPhotoToSend = postgraduateData.passportPhoto;
-      if (!passportPhotoToSend && passportPhotoUrl) {
-        const response = await fetch(passportPhotoUrl);
-        const blob = await response.blob();
-        const urlParts = passportPhotoUrl.split('/');
-        const filename = urlParts[urlParts.length - 1] || 'passport-photo.jpg';
-        passportPhotoToSend = new File([blob], filename, { type: blob.type });
-      }
-      const formData = buildPostgraduateFormData({ ...postgraduateData, passportPhoto: passportPhotoToSend });
-      
-      // Add auth token to headers
-      const response = await apiService.uploadPostgraduateFormData(formData) as ApplicationData;
-      
-      // Store the application data in localStorage
-      localStorage.setItem('applicationData', JSON.stringify(response));
-      
-      toast.success("Application submitted successfully!");
-      
-      // Always navigate to payment page
-      navigate("/payment", { 
-        state: { application: response },
-        replace: true 
+    // Show payment modal instead of redirecting
+    setShowPaymentModal(true);
+  };
+
+  // Add these functions to handle payment options
+  const handlePaymentAsNigerian = async () => {
+    try {
+      setIsProcessingPayment(true);
+      await onPayment(20000, postgraduateData.personalDetails.email, {
+        program_type: postgraduateData.programType,
+        applicant_type: "Nigerian",
+        application_data: postgraduateData
       });
-    } catch (err) {
-      console.error("Submission error:", err);
-      toast.error(err.message || "Failed to submit application");
+      setShowPaymentModal(false);
+    } catch (error) {
+      toast.error("Failed to process payment");
     } finally {
-      setIsSubmitting(false);
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const handlePaymentAsInternational = async () => {
+    try {
+      setIsProcessingPayment(true);
+      await onPayment(50, postgraduateData.personalDetails.email, {
+        program_type: postgraduateData.programType,
+        applicant_type: "International",
+        application_data: postgraduateData
+      });
+      setShowPaymentModal(false);
+    } catch (error) {
+      toast.error("Failed to process payment");
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -1275,51 +1264,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   return (
     <>
-      {showPaymentSelection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-6 text-center">Select Payment Option</h2>
-            <p className="text-gray-600 mb-6 text-center">
-              Please select your payment option based on your residence status.
-            </p>
-            
-            <div className="space-y-4">
-              <button 
-                onClick={handlePaymentAsNigerian}
-                className="w-full py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center justify-center"
-                disabled={isProcessingPayment}
-              >
-                <span className="mr-2">🇳🇬</span>
-                Pay as Nigerian Resident (₦50,000)
-              </button>
-              
-              <button 
-                onClick={handlePaymentAsInternational}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center justify-center"
-                disabled={isProcessingPayment}
-              >
-                <span className="mr-2">🌍</span>
-                Pay as International Resident ($100)
-              </button>
-              
-              <button 
-                onClick={() => setShowPaymentSelection(false)}
-                className="w-full py-2 px-4 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 transition mt-4"
-              >
-                Cancel
-              </button>
-            </div>
-            
-            {isProcessingPayment && (
-              <div className="text-center mt-4 text-sm text-gray-600">
-                Processing payment, please wait...
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    
-            <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Applicant Type Section */}
         <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
           <h3 className="text-lg font-semibold">Applicant Type</h3>
@@ -2532,7 +2477,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           <h3 className="text-lg font-semibold mb-2">Payment Information</h3>
           <div className="space-y-2 text-yellow-800">
             <p className="text-sm">
-              <span className="font-medium">Application Fee:</span> ₦50,000 (Nigerian Applicants) / $100 (International Applicants)
+              <span className="font-medium">Application Fee:</span> ₦20,000 (Nigerian Applicants) / $50 (International Applicants)
             </p>
             <p className="text-sm">
               <span className="font-medium">Payment Method:</span> Paystack
@@ -2540,8 +2485,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
             <div className="mt-2 space-y-1">
               <p className="text-sm font-medium">Important Notes:</p>
               <ul className="list-disc list-inside text-sm space-y-1">
-                <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
-                <li>International applicants will be redirected to Paystack USD payment gateway</li>
+                <li>Nigerian applicants will use Paystack NGN payment gateway</li>
+                <li>International applicants will use Paystack USD payment gateway</li>
                 <li>Payment must be completed to submit your application</li>
                 <li>A payment receipt will be automatically generated after successful payment</li>
               </ul>
@@ -2553,49 +2498,38 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         </div>
 
         {/* Form Buttons */}
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={async () => {
-              setIsSaving(true);
-              await handleSaveAsDraft();
-              setIsSaving(false);
-            }}
-            disabled={isSaving}
-            className="w-32"
-          >
-            {isSaving ? (
-              <div className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </div>
-            ) : (
-              "Save as Draft"
-            )}
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-40"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Submitting...
-              </div>
-            ) : (
-              "Proceed to Payment"
-            )}
-          </Button>
+        <div className="space-y-4">
+          <div className="flex justify-end space-x-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSaveAsDraft}
+              disabled={isProcessingPayment}
+            >
+              Save Draft
+            </Button>
+            <Button
+              type="submit"
+              disabled={isProcessingPayment}
+            >
+              {isProcessingPayment ? "Processing..." : "Proceed to Payment"}
+            </Button>
+          </div>
         </div>
       </form>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        application={postgraduateData}
+        onPaymentSuccess={(reference) => {
+          // Handle successful payment
+          localStorage.setItem("paymentCompleted", "true");
+          localStorage.setItem("paymentReference", reference);
+          setShowPaymentModal(false);
+          navigate("/payment-success");
+        }}
+      />
     </>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,18 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+
+  // Auto-fill form if coming from signup
+  useEffect(() => {
+    if (location.state?.fromSignup) {
+      setEmail(location.state.email || "");
+      setPassword(location.state.password || "");
+      // Auto-submit the form if we have both email and password
+      if (location.state.email && location.state.password) {
+        handleSubmit(new Event('submit') as any);
+      }
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

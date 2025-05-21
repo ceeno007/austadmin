@@ -58,20 +58,42 @@ const SignUp = () => {
       } catch {}
     }
     setHasLoaded(true);
+
+    // Cleanup function to remove data when component unmounts
+    return () => {
+      localStorage.removeItem('signupForm');
+    };
   }, []);
 
   // Only save to localStorage after initial load
   useEffect(() => {
     if (!hasLoaded) return;
-    localStorage.setItem('signupForm', JSON.stringify({
+    
+    // Add a timestamp to track when the data was last updated
+    const formData = {
       fullName,
       email,
       programType,
       password,
       confirmPassword,
-      isEmailVerified
-    }));
+      isEmailVerified,
+      lastUpdated: Date.now()
+    };
+    
+    localStorage.setItem('signupForm', JSON.stringify(formData));
   }, [fullName, email, programType, password, confirmPassword, isEmailVerified, hasLoaded]);
+
+  // Add cleanup on page unload
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('signupForm');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const handleSendVerification = async () => {
     if (!isEmailValid) {
@@ -144,7 +166,15 @@ const SignUp = () => {
         
         toast.dismiss(loadingToast);
         toast.success("Account created successfully");
-        navigate("/login", { state: { email, password } });
+        
+        // Pass email and password to login page
+        navigate("/login", { 
+          state: { 
+            email, 
+            password,
+            fromSignup: true 
+          } 
+        });
       })
       .catch((error) => {
         toast.dismiss(loadingToast);

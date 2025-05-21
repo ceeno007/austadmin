@@ -57,10 +57,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     try {
       setIsProcessingPayment(true);
       const amount = 2000000; // ₦20,000 in kobo
-      const email = application.personalDetails.email;
-      const phone = application.personalDetails.phoneNumber;
-      const name = `${application.personalDetails.firstName} ${application.personalDetails.lastName}`;
-      const reference = `FOUND_${Date.now()}`;
+      const email = application.personalDetails?.email || application.user?.email || '';
+      const phone = application.personalDetails?.phoneNumber || '';
+      const name = `${application.personalDetails?.firstName || ''} ${application.personalDetails?.lastName || application.personalDetails?.surname || ''}`;
+      const reference = `PG_${Date.now()}`;
+      const programType = localStorage.getItem("programType") || "postgraduate";
 
       const config = {
         key: 'pk_test_7fcc7a1fe3005ff3f99b088e7999c4add0d37bbd', // Your Paystack public key
@@ -73,12 +74,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             {
               display_name: "Program",
               variable_name: "program",
-              value: application.program
+              value: application.program || programType
             },
             {
               display_name: "Academic Session",
               variable_name: "academic_session",
-              value: application.academicSession
+              value: application.academicSession || ''
             }
           ]
         },
@@ -95,6 +96,79 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           setShowPaystack(false);
           onClose();
           navigate("/application-success");
+        },
+        onClose: () => {
+          setIsProcessingPayment(false);
+          setShowPaystack(false);
+          toast({
+            title: "Payment Cancelled",
+            description: "You can try again when you're ready",
+            variant: "default",
+          });
+        }
+      };
+
+      if (window.PaystackPop) {
+        setShowPaystack(true);
+        const handler = window.PaystackPop.setup(config);
+        handler.openIframe();
+      } else {
+        throw new Error('Paystack script not loaded');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({
+        title: "Payment Error",
+        description: "An error occurred while processing your payment",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+      setShowPaystack(false);
+    }
+  };
+
+  const handlePaymentAsInternational = async () => {
+    try {
+      setIsProcessingPayment(true);
+      const amount = 5000; // $50 in cents
+      const email = application.personalDetails?.email || application.user?.email || '';
+      const phone = application.personalDetails?.phoneNumber || '';
+      const name = `${application.personalDetails?.firstName || ''} ${application.personalDetails?.lastName || application.personalDetails?.surname || ''}`;
+      const reference = `PG_INT_${Date.now()}`;
+      const programType = localStorage.getItem("programType") || "postgraduate";
+
+      const config = {
+        key: 'pk_test_7fcc7a1fe3005ff3f99b088e7999c4add0d37bbd', // Your Paystack public key
+        email,
+        amount,
+        currency: 'USD',
+        ref: reference,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Program",
+              variable_name: "program",
+              value: application.program || programType
+            },
+            {
+              display_name: "Academic Session",
+              variable_name: "academic_session",
+              value: application.academicSession || ''
+            }
+          ]
+        },
+        customer: {
+          email,
+          phone,
+          name
+        },
+        callback: (response: any) => {
+          // Handle successful payment
+          localStorage.setItem("paymentCompleted", "true");
+          localStorage.setItem("paymentReference", response.reference);
+          onPaymentSuccess(response.reference);
+          setShowPaystack(false);
+          onClose();
         },
         onClose: () => {
           setIsProcessingPayment(false);
@@ -160,11 +234,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <span className="block mt-2">
                   <strong>Nigerian Applicants:</strong> ₦20,000
                 </span>
+                <span className="block mt-1">
+                  <strong>International Applicants:</strong> $50
+                </span>
                 <div className="mt-4">
                   <p className="font-medium">Payment Process:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                     <li>Payment will be processed through Paystack</li>
-                    <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
+                    <li>Nigerian applicants will use Paystack NGN payment gateway</li>
+                    <li>International applicants will use Paystack USD payment gateway</li>
                     <li>The Paystack payment window will open when you click "Pay Now"</li>
                     <li>A payment receipt will be automatically generated after successful payment</li>
                   </ul>
@@ -188,9 +266,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 )}
               </Button>
             ) : (
-              <div className="text-center text-gray-500 p-4 bg-gray-50 rounded-md">
-                International applications are currently not available.
-              </div>
+              <Button
+                onClick={handlePaymentAsInternational}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
+                disabled={isProcessingPayment}
+              >
+                {isProcessingPayment ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </div>
+                ) : (
+                  "Pay $50"
+                )}
+              </Button>
             )}
           </div>
         </DialogContent>
