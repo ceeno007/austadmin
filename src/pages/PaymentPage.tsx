@@ -45,6 +45,13 @@ const PaymentPage: React.FC = () => {
   const [residency, setResidency] = useState<Residency>("nigeria");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  useEffect(() => {
+    // Store the application data in localStorage when component mounts
+    if (application) {
+      localStorage.setItem('applicationData', JSON.stringify(application));
+    }
+  }, [application]);
+
   if (!application) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -345,89 +352,104 @@ const PaymentPage: React.FC = () => {
   })();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Complete Your Application
-        </h1>
-
-        {/* Application Summary */}
-        <div className="mb-6 p-4 bg-blue-50 rounded">
-          <div className="mb-2 text-gray-700 font-medium">
-            Application Summary
-          </div>
-          <div className="text-sm text-gray-600 mb-2">
-            Name:{" "}
-            <span className="font-semibold">
-              {application.surname} {application.first_name}
-            </span>
-          </div>
-          <div className="text-sm text-gray-600 mb-2">
-            Program:{" "}
-            <span className="font-semibold">{application.program_type}</span>
-          </div>
-          <div className="text-sm text-gray-600 mb-2">
-            Email:{" "}
-            <span className="font-semibold">{application.email}</span>
-          </div>
-          {/* <Button
-            variant="outline"
-            className="mt-2"
-            onClick={() =>
-              navigate(
-                `/document-upload?type=${
-                  programType === "foundation" || programType === "jupeb"
-                    ? "foundation"
-                    : programType === "phd" || programType === "msc"
-                    ? "postgraduate"
-                    : "undergraduate"
-                }`,
-                { 
-                  state: { 
-                    application: applicationData,
-                    savedFormData: applicationData
-                  }
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Application Fee Payment</h1>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const formType = programType === "foundation" || programType === "jupeb"
+                  ? "foundation"
+                  : programType === "phd" || programType === "msc"
+                  ? "postgraduate"
+                  : "undergraduate";
+                
+                // Get the stored application data
+                const storedData = localStorage.getItem('applicationData');
+                const applicationData = storedData ? JSON.parse(storedData) : application;
+                
+                // For foundation form, navigate to the foundation form directly
+                if (formType === "foundation") {
+                  navigate("/foundation-form", {
+                    state: {
+                      application: applicationData,
+                      savedFormData: applicationData,
+                      isEdit: true
+                    }
+                  });
+                } else {
+                  navigate(`/document-upload?type=${formType}`, {
+                    state: {
+                      application: applicationData,
+                      savedFormData: applicationData
+                    }
+                  });
                 }
-              );
-            }}
-          >
-            Edit Application
-          </Button> */}
-        </div>
-
-        {/* Residency Selector */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Select Your Residency</Label>
-            <Select
-              value={residency}
-              onValueChange={(v: Residency) => setResidency(v)}
+              }}
+              className="flex items-center gap-2"
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Residency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="nigeria">Nigeria</SelectItem>
-                <SelectItem value="international">International</SelectItem>
-              </SelectContent>
-            </Select>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="m15 18-6-6 6-6"/></svg>
+              Back
+            </Button>
           </div>
 
-          <h2 className="text-lg font-semibold text-center">Payment Required</h2>
-          <p className="text-gray-700 text-center">
-            You must complete payment to continue your application.
-          </p>
+          {/* Application Summary */}
+          <div className="mb-6 p-4 bg-blue-50 rounded">
+            <div className="mb-2 text-gray-700 font-medium">
+              Application Summary
+            </div>
+            <div className="text-sm text-gray-600 mb-2">
+              Name:{" "}
+              <span className="font-semibold">
+                {application.surname} {application.first_name}
+              </span>
+            </div>
+            <div className="text-sm text-gray-600 mb-2">
+              Program:{" "}
+              <span className="font-semibold">{application.program_type}</span>
+            </div>
+            <div className="text-sm text-gray-600 mb-2">
+              Email:{" "}
+              <span className="font-semibold">{application.email}</span>
+            </div>
+          </div>
 
-          <PaystackConsumer {...config}>
-            {({ initializePayment }) => (
-              <Button
-                onClick={() => initializePayment()}
-                className="w-full bg-green-600 hover:bg-green-700"
+          {/* Residency Selector */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Your Residency</Label>
+              <Select
+                value={residency}
+                onValueChange={(v: Residency) => setResidency(v)}
               >
-                Pay {payButtonText} Application Fee
-              </Button>
-            )}
-          </PaystackConsumer>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Residency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nigeria">Nigeria</SelectItem>
+                  <SelectItem value="international">International</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <h2 className="text-lg font-semibold text-center">Payment Required</h2>
+            <p className="text-gray-700 text-center">
+              You must complete payment to continue your application.
+            </p>
+
+            <PaystackConsumer {...config}>
+              {({ initializePayment }) => (
+                <Button
+                  onClick={() => initializePayment()}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Pay {payButtonText} Application Fee
+                </Button>
+              )}
+            </PaystackConsumer>
+          </div>
         </div>
       </div>
     </div>

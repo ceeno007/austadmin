@@ -23,6 +23,7 @@ import { PaystackConsumer } from "react-paystack";
 import apiService from "@/services/api";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PaymentModal from "@/components/PaymentModal";
 
 const DocumentUpload = () => {
   const { toast } = useToast();
@@ -32,6 +33,23 @@ const DocumentUpload = () => {
   const typeFromUrl = searchParams.get("type");
   const { checkAuth, logout, isAuthenticated } = useAuth();
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [applicationData, setApplicationData] = useState<any>(null);
+
+  // Get application data from localStorage if available
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.applications && parsedData.applications.length > 0) {
+          setApplicationData(parsedData.applications[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing application data:", error);
+    }
+  }, []);
 
   const [activeTab, setActiveTab] = useState(() => {
     // Use URL parameter first, then localStorage, then default to "undergraduate"
@@ -387,6 +405,39 @@ const DocumentUpload = () => {
     );
   };
 
+  const handlePaymentSuccess = (reference: string) => {
+    // Get the current timestamp
+    const timestamp = new Date().toISOString();
+    
+    // Get the program type from localStorage or URL params
+    const programType = localStorage.getItem("programType") || "undergraduate";
+    
+    // Get the application data from localStorage
+    const applicationData = JSON.parse(localStorage.getItem("applicationData") || "{}");
+    
+    // Update local storage to mark payment as completed
+    localStorage.setItem("paymentCompleted", "true");
+    localStorage.setItem("paymentReference", reference);
+    
+    // Show success message
+    toast({
+      title: "Payment Successful!",
+      description: "Your application has been submitted successfully.",
+      duration: 5000,
+      style: {
+        background: '#10B981',
+        color: 'white',
+        border: 'none',
+        padding: '16px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+      }
+    });
+
+    // Navigate to success page
+    navigate("/payment-success");
+  };
+
   return (
     <ApplicationStatusCheck>
       <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
@@ -414,16 +465,35 @@ const DocumentUpload = () => {
             
             <div className="space-y-6">
               {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
-                <PostgraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+                <PostgraduateForm 
+                  onPayment={handlePayment} 
+                  isProcessingPayment={isProcessingPayment}
+                  application={applicationData}
+                />
               ) : programType === "foundation" ? (
-                <FoundationForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+                <FoundationForm 
+                  onPayment={handlePayment} 
+                  isProcessingPayment={isProcessingPayment}
+                  application={applicationData}
+                />
               ) : (
-                <UndergraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+                <UndergraduateForm 
+                  onPayment={handlePayment} 
+                  isProcessingPayment={isProcessingPayment}
+                  application={applicationData}
+                />
               )}
             </div>
           </div>
         </main>
         <Toaster />
+        
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          application={applicationData}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       </div>
     </ApplicationStatusCheck>
   );
