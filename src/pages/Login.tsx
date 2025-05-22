@@ -38,7 +38,7 @@ const Login = () => {
     }
     
     setIsLoading(true);
-    console.log("Attempting login with email:", email);
+    // console.log("Attempting login with email:", email);
     
     const loadingToast = toast.loading("Logging in...");
     
@@ -65,14 +65,14 @@ const Login = () => {
         return;
       }
       
-      console.log("Making login request to:", API_ENDPOINTS.LOGIN);
+      // console.log("Making login request to:", API_ENDPOINTS.LOGIN);
       
       const data = await apiService.login({
         username: email,
         password
       }) as TokenResponse;
       
-      console.log("Login response received:", data);
+      // console.log("Login response received:", data);
       
       if (!data.access_token) {
         console.error("No access token in response:", data);
@@ -84,7 +84,7 @@ const Login = () => {
         throw new Error("No user data received from server");
       }
       
-      console.log("Logging in user with data:", data);
+      // console.log("Logging in user with data:", data);
       login(data.access_token, data);
       
       toast.dismiss(loadingToast);
@@ -98,7 +98,7 @@ const Login = () => {
         destination = `/document-upload?type=${programType}`;
       }
       
-      console.log("Navigating to:", destination, "with program type:", programType);
+      // console.log("Navigating to:", destination, "with program type:", programType);
       navigate(destination, { replace: true });
       
     } catch (error) {

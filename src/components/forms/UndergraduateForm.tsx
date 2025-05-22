@@ -491,8 +491,8 @@ interface UndergraduateRequestBody {
 
 // Helper function to create a request body for the API
 function buildUndergraduateFormData(data) {
-  console.log('Building form data with raw data:', data);
-  console.log('Selected exams:', data.selectedExams);
+  // console.log('Building form data with raw data:', data);
+  // console.log('Selected exams:', data.selectedExams);
   
   // Create a FormData object directly
   const formData = new FormData();
@@ -591,22 +591,22 @@ function buildUndergraduateFormData(data) {
     );
     
     if (hasData) {
-      console.log(`Found ${examType} data:`, examData);
+      // console.log(`Found ${examType} data:`, examData);
       
       // Add exam type
       formData.append(`exam_type_${examNumber}`, examType);
-      console.log(`Added exam_type_${examNumber}: ${examType}`);
+      // console.log(`Added exam_type_${examNumber}: ${examType}`);
       
       // Add exam number
       if (examData.examNumber) {
         formData.append(`exam_number_${examNumber}`, examData.examNumber);
-        console.log(`Added exam_number_${examNumber}: ${examData.examNumber}`);
+        // console.log(`Added exam_number_${examNumber}: ${examData.examNumber}`);
       }
       
       // Add exam year
       if (examData.examYear) {
         formData.append(`exam_year_${examNumber}`, examData.examYear);
-        console.log(`Added exam_year_${examNumber}: ${examData.examYear}`);
+        // console.log(`Added exam_year_${examNumber}: ${examData.examYear}`);
       }
       
       // Add subjects
@@ -614,13 +614,13 @@ function buildUndergraduateFormData(data) {
         const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
         const subjectsJson = JSON.stringify(validSubjects);
         formData.append(`subjects_${examNumber}`, subjectsJson);
-        console.log(`Added subjects_${examNumber}: ${subjectsJson}`);
+        // console.log(`Added subjects_${examNumber}: ${subjectsJson}`);
       }
       
       // Add document
       if (examData.documents) {
         formData.append(`exam_type_${examNumber}_result`, examData.documents);
-        console.log(`Added exam_type_${examNumber}_result: ${examData.documents.name}`);
+        // console.log(`Added exam_type_${examNumber}_result: ${examData.documents.name}`);
       }
       
       // Only process max 2 exams
@@ -660,38 +660,38 @@ function buildUndergraduateFormData(data) {
   // Add JAMB results document
   if (jambResults?.documents) {
     formData.append('jamb_result', jambResults.documents);
-    console.log('Added JAMB result document:', jambResults.documents.name);
+    // console.log('Added JAMB result document:', jambResults.documents.name);
   }
   
   // Add passport photo
   if (data.passportPhoto) {
     formData.append('passport_photo', data.passportPhoto);
-    console.log('Added passport photo:', data.passportPhoto.name);
+    // console.log('Added passport photo:', data.passportPhoto.name);
   }
   
   // Log all form data entries
-  console.log('Final form data entries:');
-  for (let [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      console.log(`${key}: [File: ${value.name}]`);
-    } else {
-      console.log(`${key}: ${value}`);
-    }
-  }
+  // console.log('Final form data entries:');
+  // for (let [key, value] of formData.entries()) {
+  //   if (value instanceof File) {
+  //     console.log(`${key}: [File: ${value.name}]`);
+  //   } else {
+  //     console.log(`${key}: ${value}`);
+  //   }
+  // }
   
   return formData;
 }
 
 // Update the autofillFromApplication function to correctly set selected exams
 const autofillFromApplication = (application: any, prev: UndergraduateFormData): UndergraduateFormData => {
-  console.log('Autofilling from application:', application);
+  // console.log('Autofilling from application:', application);
   
   // Set selected exams based on exam types
   const selectedExams = [];
   if (application.exam_type_1) selectedExams.push(application.exam_type_1);
   if (application.exam_type_2) selectedExams.push(application.exam_type_2);
   
-  console.log('Selected exams for autofill:', selectedExams);
+  // console.log('Selected exams for autofill:', selectedExams);
 
   // Safely parse subjects
   let subjects1 = [];
@@ -1170,13 +1170,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     if (!allowedExams.includes(examTypeLower)) return;
     
     setSelectedExams(prev => {
-      console.log('Current selected exams:', prev);
-      console.log('Toggling exam:', examTypeLower);
+      // console.log('Current selected exams:', prev);
+      // console.log('Toggling exam:', examTypeLower);
       
       if (prev.includes(examTypeLower)) {
         // Remove the exam
         const newSelectedExams = prev.filter(type => type !== examTypeLower);
-        console.log('New selected exams after removal:', newSelectedExams);
+        // console.log('New selected exams after removal:', newSelectedExams);
         return newSelectedExams;
       }
       
@@ -1187,7 +1187,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       
       // Add the exam
       const newSelectedExams = [...prev, examTypeLower];
-      console.log('New selected exams after addition:', newSelectedExams);
+      // console.log('New selected exams after addition:', newSelectedExams);
       return newSelectedExams;
     });
   };
@@ -1232,14 +1232,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       formData.append('is_draft', 'false');
       formData.append('submitted', 'true');
       
-      console.log('Final form data before submission:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value instanceof File ? '[File: ' + value.name + ']' : value}`);
-      }
+      // console.log('Final form data before submission:');
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(`${key}: ${value instanceof File ? '[File: ' + value.name + ']' : value}`);
+      // }
       
-      console.log('Making API call to submit application...');
+      // console.log('Making API call to submit application...');
       const response = await apiService.submitUndergraduateApplication(formData);
-      console.log('API Response:', response);
+      // console.log('API Response:', response);
       
       // Store the response in localStorage
       localStorage.setItem('applicationData', JSON.stringify(response));
@@ -1266,6 +1266,37 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
   const [isProcessingPaymentState, setIsProcessingPaymentState] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Check for submitted application and redirect if needed
+  useEffect(() => {
+    if (applicationData?.submitted) {
+      // console.log('Found submitted application, redirecting to success page');
+      navigate('/application-success');
+    }
+  }, [applicationData, navigate]);
+
+  useEffect(() => {
+    // Load real application data if available
+    if (applicationData) {
+      // console.log('Loading application data:', applicationData);
+      
+      if (applicationData.submitted) {
+        // console.log('Application is already submitted, redirecting to success page');
+        navigate('/application-success');
+        return;
+      }
+      
+      // Set selected exams from application data
+      const updatedSelectedExams: string[] = [];
+      if (applicationData.exam_type_1) updatedSelectedExams.push(applicationData.exam_type_1);
+      if (applicationData.exam_type_2) updatedSelectedExams.push(applicationData.exam_type_2);
+      
+      // console.log('Setting selected exams to:', updatedSelectedExams);
+      setSelectedExams(updatedSelectedExams);
+      
+      // More initialization logic...
+    }
+  }, [applicationData, navigate]);
 
   return (
     <>

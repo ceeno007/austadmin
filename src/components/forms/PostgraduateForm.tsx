@@ -517,11 +517,11 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       const storedData = localStorage.getItem('applicationData');
       if (storedData) {
         const parsedData = JSON.parse(storedData);
-        console.log("Loaded data:", parsedData); // Debug log
+        // console.log("Loaded data:", parsedData); // Debug log
         
         if (parsedData.applications && parsedData.applications.length > 0) {
           const application = parsedData.applications[0];
-          console.log("Setting application data:", application); // Debug log
+          // console.log("Setting application data:", application); // Debug log
           setApplicationData(application);
         }
       }
@@ -534,7 +534,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
   useEffect(() => {
     if (Object.keys(applicationData).length > 0) {
       try {
-        console.log("Updating form with application data:", applicationData); // Debug log
+        // console.log("Updating form with application data:", applicationData); // Debug log
         
         // Parse date fields
         const parseDate = (dateStr: string | undefined) => {

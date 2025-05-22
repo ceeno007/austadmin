@@ -105,58 +105,112 @@ export const addResourceHints = () => {
   });
 };
 
-// Service Worker registration
-export const registerServiceWorker = async () => {
+// Register service worker
+export const registerServiceWorker = () => {
   if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registered with scope:', registration.scope);
-    } catch (error) {
-      console.error('Service Worker registration failed:', error);
-    }
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          // console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    });
   }
 };
 
-// Performance monitoring
-export const measurePerformance = (label: string, callback: () => void) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.time(label);
-    callback();
-    console.timeEnd(label);
-  } else {
-    callback();
+// Track memory usage
+export const trackMemoryUsage = () => {
+  if ('memory' in performance) {
+    setInterval(() => {
+      const memory = (performance as any).memory;
+      // console.log('Memory usage:', {
+      //   usedJSHeapSize: formatBytes(memory.usedJSHeapSize),
+      //   totalJSHeapSize: formatBytes(memory.totalJSHeapSize),
+      //   jsHeapSizeLimit: formatBytes(memory.jsHeapSizeLimit)
+      // });
+    }, 10000);
   }
 };
-
-// Memory usage monitoring (for development)
-export const logMemoryUsage = () => {
-  if (process.env.NODE_ENV === 'development' && 'performance' in window) {
-    const memory = (performance as any).memory;
-    if (memory) {
-      console.log('Memory usage:', {
-        totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1048576) + 'MB',
-        usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1048576) + 'MB',
-        jsHeapSizeLimit: Math.round(memory.jsHeapSizeLimit / 1048576) + 'MB',
-      });
-    }
-  }
-};
-
-// Performance monitoring utilities
 
 // Track page load performance
 export const trackPageLoad = () => {
-  if (window.performance) {
-    const timing = window.performance.timing;
-    const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
-    console.log(`Page load time: ${pageLoadTime}ms`);
-    
-    // Log other performance metrics
-    console.log(`DOM Content Loaded: ${timing.domContentLoadedEventEnd - timing.navigationStart}ms`);
-    console.log(`First Paint: ${performance.getEntriesByType('paint')[0]?.startTime}ms`);
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const timing = performance.timing;
+      const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
+      
+      // console.log(`Page load time: ${pageLoadTime}ms`);
+      
+      // Log key metrics
+      // console.log(`DOM Content Loaded: ${timing.domContentLoadedEventEnd - timing.navigationStart}ms`);
+      // console.log(`First Paint: ${performance.getEntriesByType('paint')[0]?.startTime}ms`);
+    }, 0);
+  });
+};
+
+// Track resource loading
+export const trackResourceLoading = () => {
+  const observer = new PerformanceObserver((list) => {
+    list.getEntries().forEach(entry => {
+      const resource = entry.name.split('/').pop();
+      let type = 'Other';
+      
+      if (entry.name.endsWith('.js')) type = 'JavaScript';
+      else if (entry.name.endsWith('.css')) type = 'CSS';
+      else if (entry.name.endsWith('.png') || entry.name.endsWith('.jpg') || 
+               entry.name.endsWith('.gif') || entry.name.endsWith('.webp')) type = 'Image';
+      else if (entry.name.endsWith('.woff') || entry.name.endsWith('.woff2')) type = 'Font';
+      else if (entry.name.includes('api')) type = 'API';
+      
+      const duration = entry.duration;
+      if (duration > 1000) {
+        // console.log(`Resource loaded: ${type} - ${resource} (${duration.toFixed(2)}ms)`);
+      }
+    });
+  });
+  
+  observer.observe({entryTypes: ['resource']});
+};
+
+// Track component render time
+export const trackComponentRender = (componentName: string, callback: () => void) => {
+  const startTime = performance.now();
+  callback();
+  const endTime = performance.now();
+  const renderTime = endTime - startTime;
+  
+  if (renderTime > 50) {
+    // console.log(`Component ${componentName} rendered in ${renderTime}ms`);
   }
 };
 
+// Track API request time
+export const trackApiRequest = (url: string, callback: () => Promise<any>) => {
+  const startTime = performance.now();
+  return callback().then(result => {
+    const endTime = performance.now();
+    const requestTime = endTime - startTime;
+    
+    // console.log(`API request to ${url} took ${requestTime}ms`);
+    return result;
+  });
+};
+
+// Track route changes
+export let lastRouteChange = 0;
+export const trackRouteChange = () => {
+  const now = performance.now();
+  const routeChangeTime = lastRouteChange > 0 ? now - lastRouteChange : 0;
+  lastRouteChange = now;
+  
+  if (routeChangeTime > 0) {
+    // console.log(`Route change took ${routeChangeTime}ms`);
+  }
+};
+
+// Track resource loading performance metrics
 interface PerformanceMetric {
   type: string;
   resource: string;
@@ -164,50 +218,20 @@ interface PerformanceMetric {
   timestamp: number;
 }
 
+// Store performance metrics in memory
 const performanceMetrics: PerformanceMetric[] = [];
 
 /**
- * Tracks the loading time of a resource
- * @param type The type of resource (image, script, style, etc.)
- * @param resource The resource URL or identifier
+ * Track resource loading performance
+ * @param type The type of resource (JS, CSS, Image, etc.)
+ * @param resource The resource name or identifier
  * @param duration The loading duration in milliseconds
  */
-export const trackResourceLoading = (type: string, resource: string, duration: number): void => {
-  performanceMetrics.push({
-    type,
-    resource,
-    duration,
-    timestamp: Date.now()
-  });
+// Function removed to avoid duplicate declaration
 
-  // Log to console in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`Resource loaded: ${type} - ${resource} (${duration.toFixed(2)}ms)`);
-  }
-};
-
-/**
- * Gets all performance metrics
- * @returns Array of performance metrics
- */
+// Get all performance metrics
 export const getPerformanceMetrics = (): PerformanceMetric[] => {
   return [...performanceMetrics];
-};
-
-/**
- * Gets performance metrics filtered by type
- * @param type The type of resource to filter by
- * @returns Array of performance metrics for the specified type
- */
-export const getPerformanceMetricsByType = (type: string): PerformanceMetric[] => {
-  return performanceMetrics.filter(metric => metric.type === type);
-};
-
-/**
- * Clears all performance metrics
- */
-export const clearPerformanceMetrics = (): void => {
-  performanceMetrics.length = 0;
 };
 
 /**
@@ -222,13 +246,24 @@ export const measureExecutionTime = async <T>(fn: () => Promise<T>, name?: strin
     const result = await fn();
     const endTime = performance.now();
     const duration = endTime - startTime;
-
-    trackResourceLoading('function', name || fn.name, duration);
+    
+    // Log execution time
+    if (name) {
+      // Comment out the logging
+      // trackResourceLoading('Function', name, duration);
+    }
+    
     return result;
   } catch (error) {
     const endTime = performance.now();
     const duration = endTime - startTime;
-    trackResourceLoading('function-error', name || fn.name, duration);
+    
+    // Log execution error
+    if (name) {
+      // Comment out the logging
+      // trackResourceLoading('Function Error', name, duration);
+    }
+    
     throw error;
   }
 };
@@ -251,42 +286,11 @@ export const reportPerformanceMetrics = async (endpoint: string): Promise<void> 
   }
 };
 
-// Track React component render performance
-export const trackComponentRender = (componentName: string, startTime: number) => {
-  const endTime = performance.now();
-  const renderTime = endTime - startTime;
-  console.log(`Component ${componentName} rendered in ${renderTime}ms`);
-};
-
-// Track API request performance
-export const trackApiRequest = (url: string, startTime: number) => {
-  const endTime = performance.now();
-  const requestTime = endTime - startTime;
-  console.log(`API request to ${url} took ${requestTime}ms`);
-};
-
-// Initialize performance tracking
-export const initPerformanceTracking = () => {
-  // Track initial page load
-  window.addEventListener('load', () => {
-    trackPageLoad();
-    trackResourceLoading();
-  });
-
-  // Track route changes
-  let lastRouteChange = performance.now();
-  window.addEventListener('popstate', () => {
-    const routeChangeTime = performance.now() - lastRouteChange;
-    console.log(`Route change took ${routeChangeTime}ms`);
-    lastRouteChange = performance.now();
-  });
-};
-
 // Export a performance monitoring hook for React components
 export const usePerformanceMonitoring = (componentName: string) => {
   const startTime = performance.now();
   
   return () => {
-    trackComponentRender(componentName, startTime);
+    trackComponentRender(componentName, () => {});
   };
 }; 

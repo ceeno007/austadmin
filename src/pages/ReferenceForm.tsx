@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import apiService from "@/services/api";
+import { Upload, X } from "lucide-react";
 
 interface ReferenceFormData {
   known_duration_context: string;
@@ -29,6 +30,7 @@ const ReferenceForm = () => {
   const { uuid } = useParams();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<ReferenceFormData>({
     known_duration_context: "",
     place_of_work: "",
@@ -54,24 +56,36 @@ const ReferenceForm = () => {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setUploadedFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const formData = new FormData();
+      // Create a new FormData instance
+      const formSubmitData = new FormData();
       
       // Append all form fields to FormData
       Object.entries(formData).forEach(([key, value]) => {
-        formData.append(key, value.toString());
+        formSubmitData.append(key, value.toString());
       });
 
-      await apiService.submitReference(formData);
+      // Append file if uploaded
+      if (uploadedFile) {
+        formSubmitData.append('uploaded_file', uploadedFile);
+      }
+      
+      // Use the new function that handles UUID extraction and redirect
+      await apiService.submitReferenceFormAndRedirect(formSubmitData);
       
       // Show success toast with nice styling
       toast.success("Reference Submitted Successfully!", {
-        description: "Thank you for providing the reference. The applicant will be notified.",
-        duration: 5000,
+        description: "Thank you for providing the reference. Redirecting to confirmation page...",
+        duration: 3000,
         style: {
           background: '#10B981',
           color: 'white',
@@ -79,17 +93,12 @@ const ReferenceForm = () => {
           padding: '16px',
           borderRadius: '8px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-        },
-        icon: '🎉',
-        position: 'top-center'
+        }
       });
 
-      // Wait for 2 seconds to show the toast before redirecting
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      // The redirect will be handled by the submitReferenceFormAndRedirect function
 
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Failed to submit reference", {
         description: error.message || "Please try again later",
         duration: 5000,
@@ -102,7 +111,6 @@ const ReferenceForm = () => {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
         }
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -271,6 +279,52 @@ const ReferenceForm = () => {
                     placeholder="Any additional comments or observations"
                     rows={4}
                   />
+                </div>
+                
+                {/* File Upload */}
+                <div className="space-y-2">
+                  <Label>Upload Supporting Document (Optional)</Label>
+                  <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
+                    uploadedFile ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                  }`}>
+                    <input
+                      type="file"
+                      id="referenceDocument"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept=".pdf,.doc,.docx"
+                    />
+                    <label
+                      htmlFor="referenceDocument"
+                      className="flex flex-col items-center justify-center w-full cursor-pointer"
+                    >
+                      {uploadedFile ? (
+                        <div className="flex items-center justify-center w-full gap-2">
+                          <span className="text-sm text-green-800 text-center">{uploadedFile.name}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setUploadedFile(null);
+                            }}
+                            className="p-1 hover:bg-green-100 rounded-full ml-2"
+                          >
+                            <X className="h-4 w-4 text-green-600" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center w-full">
+                          <Upload className="h-8 w-8 text-gray-400" />
+                          <span className="mt-2 text-sm text-gray-600 text-center">
+                            Click to upload supporting document
+                          </span>
+                          <span className="mt-1 text-xs text-gray-500 text-center">
+                            Accepted formats: PDF, DOC, DOCX (Max: 5MB)
+                          </span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

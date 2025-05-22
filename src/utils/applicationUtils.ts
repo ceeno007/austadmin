@@ -14,7 +14,7 @@ export const checkSignInApplicationStatus = (signInResponse: any): boolean => {
       
       // If the application is already submitted, redirect to success page
       if (application.submitted === true) {
-        console.log('Found submitted application after sign-in, redirecting to success page');
+        // console.log('Found submitted application after sign-in, redirecting to success page');
         
         // Store the application data for reference on the success page
         localStorage.setItem('applicationData', JSON.stringify(signInResponse));
@@ -61,7 +61,7 @@ export const checkExistingApplicationStatus = (): boolean => {
         
         // If the application is already submitted, redirect to success page
         if (application.submitted === true) {
-          console.log('Found existing submitted application, redirecting to success page');
+          // console.log('Found existing submitted application, redirecting to success page');
           
           // Show success notification
           toast.success("Application found!", {
@@ -88,6 +88,54 @@ export const checkExistingApplicationStatus = (): boolean => {
     return false;
   } catch (error) {
     console.error('Error checking existing application status:', error);
+    return false;
+  }
+};
+
+// Handle application redirection after sign-in
+export const handleApplicationRedirect = (authResponse: any, navigate: any): boolean => {
+  if (!authResponse || !authResponse.applications || authResponse.applications.length === 0) {
+    return false;
+  }
+  
+  const application = authResponse.applications[0];
+  if (application.submitted) {
+    // console.log('Found submitted application after sign-in, redirecting to success page');
+    navigate('/application-success');
+    return true;
+  }
+  
+  return false;
+};
+
+// Check if user has an existing application and redirect if needed
+export const checkApplicationStatusAndRedirect = (navigate: any): boolean => {
+  try {
+    // Check if there's application data in localStorage
+    const applicationData = localStorage.getItem('applicationData');
+    if (!applicationData) {
+      return false;
+    }
+    
+    const data = JSON.parse(applicationData);
+    
+    // Check if it's a valid application object
+    if (!data || !data.applications || data.applications.length === 0) {
+      return false;
+    }
+    
+    const application = data.applications[0];
+    
+    // If the application is marked as submitted, redirect to success page
+    if (application.submitted) {
+      // console.log('Found existing submitted application, redirecting to success page');
+      navigate('/application-success');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking application status:', error);
     return false;
   }
 }; 

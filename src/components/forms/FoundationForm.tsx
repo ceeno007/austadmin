@@ -725,9 +725,9 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       }
 
       // Log the FormData contents for debugging
-      console.log('FormData contents:');
+      // console.log('FormData contents:');
       for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
+        // console.log(pair[0], pair[1]);
       }
 
       const response = await apiService.createFoundationApplication(formData);
@@ -755,7 +755,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       const formData = new FormData();
       // Add form data...
       
-      const response = await apiService.submitFoundationApplication(formData);
+      const response = await apiService.createFoundationApplication(formData);
       if (response.success) {
         toast.success("Application submitted successfully!");
         navigate('/application-success');
