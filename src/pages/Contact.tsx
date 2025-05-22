@@ -211,9 +211,6 @@ const Contact = () => {
                         <a href="mailto:academics@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
                           Academic Affairs: academics@aust.edu.ng
                         </a><br />
-                        <a href="mailto:support@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
-                          Student Support: support@aust.edu.ng
-                        </a>
                       </p>
                     </div>
                   </div>
