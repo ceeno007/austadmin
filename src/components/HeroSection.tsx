@@ -19,7 +19,7 @@ const HeroSection = () => {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="https://ik.imagekit.io/nsq6yvxg1/Upload/austinspirevid.mp4?updatedAt=1747333355681" type="video/mp4" />
+          <source src="https://ik.imagekit.io/nsq6yvxg1/Upload/aust5.mov/ik-video.mp4?updatedAt=1747930834297" type="video/mp4" />
         </video>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/60" />
