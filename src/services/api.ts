@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
   FOUNDATION: `${FASTAPI_BASE_URL}/foundation/applications`,
+  UNDERGRADUATE: `${FASTAPI_BASE_URL}/undergraduate/applications`,
 };
 
 // Default Headers for JSON requests
@@ -203,24 +204,42 @@ const apiService = {
       formData.append('client_id', 'string');
       formData.append('client_secret', 'string');
 
+      console.log('Sending login request with form data:', formData.toString());
+
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
+          'accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: formData.toString()
       });
-
+      
+      console.log('Login response status:', response.status);
+      console.log('Login response headers:', Object.fromEntries(response.headers.entries()));
+      
+      const data = await response.json();
+      console.log('Login response data:', data);
+      
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Login failed");
+        throw new Error(data.detail || "Login failed");
       }
-
-      return await response.json();
+      
+      // Store the access token in localStorage
+      if (data.access_token) {
+        localStorage.setItem('accessToken', data.access_token);
+        localStorage.setItem('fastApiAccessToken', data.access_token);
+      } else {
+        console.warn('No access token in response:', data);
+      }
+      
+      return data;
     } catch (error) {
       console.error("Login error:", error);
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("An unexpected error occurred during login");
     }
   },
   
@@ -488,122 +507,17 @@ const apiService = {
   },
 
   /**
-   * Submit a postgraduate application
-   * @param formData - Application form data
+   * Submit postgraduate application
+   * @param formData - FormData object containing all form fields and files
    * @returns Promise with the API response
    */
-  submitApplication: async (formData: FormData) => {
-    const response = await axios.post(`${FASTAPI_BASE_URL}/applications`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  /**
-   * Sign in using FastAPI token endpoint (OAuth2 password flow)
-   * @param credentials - User login credentials
-   * @returns Promise with the token response
-   */
-  fastApiSignin: async (credentials: { 
-    username: string; 
-    password: string;
-    client_id?: string;
-    client_secret?: string;
-    scope?: string;
-  }): Promise<TokenResponse> => {
-    try {
-      // Create form data for x-www-form-urlencoded format
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'password');
-      formData.append('username', credentials.username);
-      formData.append('password', credentials.password);
-      formData.append('scope', credentials.scope || '');
-      formData.append('client_id', credentials.client_id || '');
-      formData.append('client_secret', credentials.client_secret || '');
-      
-      const response = await axios.post<TokenResponse>(API_ENDPOINTS.FASTAPI_TOKEN, formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
-        }
-      });
-      
-      // Store the token in localStorage
-      if (response.data.access_token) {
-        localStorage.setItem('fastApiAccessToken', response.data.access_token);
-        
-        // If there's a refresh token, store it too
-        if (response.data.refresh_token) {
-          localStorage.setItem('fastApiRefreshToken', response.data.refresh_token);
-        }
-      }
-      
-      return response.data;
-    } catch (error: any) {
-      console.error("FastAPI Signin error:", error);
-      // Check if error has a response property (typical for Axios errors)
-      if (error.response && error.response.data && error.response.data.detail) {
-        // The FastAPI error format is { "detail": "Incorrect email or password" }
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("An unexpected error occurred during authentication");
-    }
-  },
-
-  /**
-   * Upload postgraduate documents to FastAPI endpoint
-   * @param data - Object containing all postgraduate document fields and files
-   * @returns Promise with the API response
-   */
-  uploadPostgraduateDocuments: async (
-    data: PostgraduateDocumentData,
-    files: {
-      passport_photo: File;
-      o_level_result: File;
-      birth_certificate: File;
-      state_of_origin_certificate: File;
-      first_degree_certificate: File;
-      first_degree_transcript: File;
-      second_degree_certificate?: File;
-      second_degree_transcript?: File;
-      jamb_result?: File;
-      cv: File;
-      research_proposal?: File;
-      recommendation_letters: File;
-      payment_receipt: File;
-    }
-  ) => {
+  submitPostgraduateApplication: async (formData: FormData) => {
     try {
       // Get the token from localStorage
       const token = localStorage.getItem('fastApiAccessToken');
-      
-      // Create a FormData object
-      const formData = new FormData();
-      
-      // Add all text fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined) {
-          // Convert boolean to string
-          if (typeof value === 'boolean') {
-            formData.append(key, value.toString());
-          } else {
-            formData.append(key, value);
-          }
-        }
-      });
-      
-      // Add all files
-      Object.entries(files).forEach(([key, file]) => {
-        if (file) {
-          formData.append(key, file);
-        }
-      });
-      
-      // Make the request
+      // Make the request to the endpoint
       const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
+        'https://admissions-jcvy.onrender.com/postgraduate/upload',
         formData,
         {
           headers: {
@@ -612,124 +526,18 @@ const apiService = {
           }
         }
       );
-      
       return response.data;
     } catch (error: any) {
-      console.error("Postgraduate document upload error:", error);
+      console.error("Submit postgraduate application error:", error);
       if (error.response && error.response.data && error.response.data.detail) {
         throw new Error(error.response.data.detail);
       }
-      throw new Error("An error occurred during document upload");
-    }
-  },
-
-  /**
-   * Upload postgraduate documents using a pre-built FormData object
-   * This allows for more flexibility when building the form data
-   * @param formData - FormData object containing all fields and files
-   * @returns Promise with the API response
-   */
-  uploadPostgraduateFormData: async (formData: FormData) => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('fastApiAccessToken');
-      
-      // Make the request
-      const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
-        formData,
-        {
-          headers: {
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          }
-        }
-      );
-      
-      return response.data;
-    } catch (error: any) {
-      console.error("Postgraduate document upload error:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("An error occurred during document upload");
+      throw new Error("An error occurred while submitting the application");
     }
   },
 
   /**
    * Save postgraduate application as draft
-   * @param data - Object containing all postgraduate document fields and files
-   * @returns Promise with the API response
-   */
-  savePostgraduateAsDraft: async (
-    data: Partial<PostgraduateDocumentData>,
-    files?: Partial<{
-      passport_photo: File;
-      o_level_result: File;
-      birth_certificate: File;
-      state_of_origin_certificate: File;
-      first_degree_certificate: File;
-      first_degree_transcript: File;
-      second_degree_certificate: File;
-      second_degree_transcript: File;
-      jamb_result: File;
-      cv: File;
-      research_proposal: File;
-      recommendation_letters: File;
-      payment_receipt: File;
-    }>
-  ) => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('fastApiAccessToken');
-      // Create a FormData object
-      const formData = new FormData();
-      // Add all text fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined) {
-          // Convert boolean to string
-          if (typeof value === 'boolean') {
-            formData.append(key, value.toString());
-          } else {
-            formData.append(key, value as string);
-          }
-        }
-      });
-      // Add files if provided
-      if (files) {
-        Object.entries(files).forEach(([key, file]) => {
-          if (file) {
-            formData.append(key, file);
-          }
-        });
-      }
-      // Ensure is_draft=true is set
-      if (!formData.has('is_draft')) {
-        formData.append('is_draft', 'true');
-      }
-      // Make the request to the correct endpoint
-      const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
-        formData,
-        {
-          headers: {
-            'Accept': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          }
-        }
-      );
-      return response.data;
-    } catch (error: any) {
-      console.error("Save postgraduate application as draft error:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("An error occurred while saving the application as draft");
-    }
-  },
-
-  /**
-   * Save postgraduate application as draft using a pre-built FormData object
    * @param formData - FormData object containing fields and files to save
    * @returns Promise with the API response
    */
@@ -743,7 +551,7 @@ const apiService = {
       }
       // Make the request to the same endpoint as submit
       const response = await axios.post(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
+        'https://admissions-jcvy.onrender.com/postgraduate/upload',
         formData,
         {
           headers: {
@@ -762,39 +570,6 @@ const apiService = {
     }
   },
 
-  /**
-   * Get saved postgraduate application draft
-   * @returns Promise with the saved draft data
-   */
-  getPostgraduateDraft: async () => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('fastApiAccessToken');
-      
-      if (!token) {
-        throw new Error("Authentication required to retrieve draft");
-      }
-      
-      // Make the request
-      const response = await axios.get(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      return response.data;
-    } catch (error: any) {
-      console.error("Get postgraduate draft error:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("An error occurred while retrieving the saved application");
-    }
-  },
 
   /**
    * Request OTP for email verification
@@ -843,68 +618,28 @@ const apiService = {
   },
 
   /**
-   * Submit undergraduate application (or draft) as multipart/form-data
+   * Submit undergraduate application
+   * @param formData - FormData containing the application details
+   * @returns Promise with the API response
    */
   submitUndergraduateApplication: async (formData: FormData) => {
-    // Get the token from localStorage
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('fastApiAccessToken');
-    const headers = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications', {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-    if (!response.ok) {
-      let error;
-      try {
-        error = await response.json();
-      } catch {
-        error = { detail: 'Unknown error' };
-      }
-      throw new Error(error.detail || 'Failed to submit application');
-    }
-    return await response.json();
-  },
-
-  /**
-   * Fetch the current user's undergraduate application
-   */
-  getUndergraduateApplication: async () => {
-    // Get the token from localStorage
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('fastApiAccessToken');
-    const headers = {
-      'Accept': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications/me', {
-      method: 'GET',
-      headers,
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch undergraduate application');
-    }
-    return await response.json();
-  },
-
-  async submitReferenceForm(uuid: string, formData: FormData) {
     try {
-      const response = await fetch(`${FASTAPI_BASE_URL}/postgraduate/references/${uuid}`, {
-        method: 'POST',
-        body: formData,
+      const response = await fetch(API_ENDPOINTS.UNDERGRADUATE, {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: formData
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit reference form');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Failed to submit application");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Error submitting reference form:', error);
+      console.error("Undergraduate application submission error:", error);
       throw error;
     }
   },
@@ -937,44 +672,6 @@ const apiService = {
     }
   },
 
-  /**
-   * Initialize payment
-   * @param amount - Payment amount
-   * @param email - User's email
-   * @param metadata - Payment metadata
-   * @returns Promise with the API response
-   */
-  initializePayment: async (amount: number, email: string, metadata: PaymentMetadata) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      const response = await axios.post(
-        API_ENDPOINTS.INITIALIZE_PAYMENT,
-        {
-          amount,
-          email,
-          metadata
-        },
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      return response.data;
-    } catch (error: any) {
-      console.error("Payment initialization error:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("Failed to initialize payment");
-    }
-  },
 };
 
 

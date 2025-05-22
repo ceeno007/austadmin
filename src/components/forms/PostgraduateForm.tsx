@@ -20,6 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from "@/components/PaymentModal";
+import { PaystackConsumer } from "react-paystack";
 
 interface DateField {
   day: string;
@@ -88,6 +89,7 @@ interface ApplicationData {
   academic_session?: string;
   selected_program?: string;
   program_type?: string;
+  applicant_type?: string;
   surname?: string;
   first_name?: string;
   other_names?: string;
@@ -139,7 +141,16 @@ interface ApplicationData {
   };
 }
 
-const programs = {
+// Add formatDate function before the PostgraduateForm component
+const formatDate = (dateField: DateField): string => {
+  if (!dateField || !dateField.year || !dateField.month || !dateField.day) {
+    return '';
+  }
+  return `${dateField.year}-${dateField.month}-${dateField.day}`;
+};
+
+// Initialize programs object with default values
+const programs: Record<string, string[]> = {
   "MSc": [
     "Aerospace Engineering",
     "Applied Statistics",
@@ -343,6 +354,7 @@ interface University {
 interface PostgraduateFormProps {
   onPayment: (amount: number, email: string, metadata: Record<string, any>) => Promise<void>;
   isProcessingPayment: boolean;
+  application?: any;
 }
 
 // Helper to build FormData for postgraduate application with exact backend field names
@@ -417,7 +429,7 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   return formData;
 }
 
-const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormProps) => {
+const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProcessingPayment, application }) => {
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
   const [universities, setUniversities] = useState<University[]>([]);
@@ -430,64 +442,14 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   const navigate = useNavigate();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isProcessingPaymentState, setIsProcessingPaymentState] = useState(false);
-
-  // Add these state variables after the other state declarations
   const [referee1EmailError, setReferee1EmailError] = useState<string | null>(null);
   const [referee2EmailError, setReferee2EmailError] = useState<string | null>(null);
-
-  // Add state for university search country
   const [universityCountry, setUniversityCountry] = useState<string>("Nigeria");
-
-  // Add state for passport photo URL
   const [passportPhotoUrl, setPassportPhotoUrl] = useState<string | null>(null);
-  // Add ref for file input
   const passportPhotoInputRef = useRef<HTMLInputElement | null>(null);
+  const [residency, setResidency] = useState<'nigeria' | 'international'>('nigeria');
 
-  useEffect(() => {
-    try {
-      // Fallback: Check application data from localStorage
-      const storedData = localStorage.getItem('applicationData');
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        // Check if there are applications in the response
-        const application = parsedData.applications && parsedData.applications.length > 0 
-          ? parsedData.applications[0] 
-          : null;
-        if (application) {
-          // Use the application data as our source
-          setApplicationData(application);
-          // Check for program_type in the application
-          const programType = application.program_type?.toLowerCase();
-          // Get stored program type from localStorage for comparison
-          const savedProgramType = localStorage.getItem("programType");
-          // Only redirect if program type exists and is different from 'postgraduate'
-          if (programType && 
-              programType !== 'postgraduate' && 
-              programType !== 'msc' && 
-              programType !== 'phd' && 
-              savedProgramType && 
-              savedProgramType !== 'postgraduate') {
-            window.location.href = `/document-upload?type=${programType}`;
-          } else {
-            // If program type matches, update localStorage to be consistent
-            localStorage.setItem("programType", "postgraduate");
-          }
-        } else {
-          // No applications found, check if user object has program
-          const userProgram = parsedData.user?.program?.toLowerCase();
-          if (userProgram && 
-              userProgram !== 'postgraduate' && 
-              userProgram !== 'msc' && 
-              userProgram !== 'phd') {
-            window.location.href = `/document-upload?type=${userProgram}`;
-          }
-        }
-      }
-    } catch (error) {
-      // Error handling without console.log
-    }
-  }, []);
-
+  // Initialize form data with default values
   const [postgraduateData, setPostgraduateData] = useState<PostgraduateFormData>({
     academicSession: getCurrentAcademicSession(),
     programType: "MSc",
@@ -549,99 +511,118 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     declaration: "",
   });
 
-  // Fill form data from application data when it's available
+  // Load application data from localStorage
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        console.log("Loaded data:", parsedData); // Debug log
+        
+        if (parsedData.applications && parsedData.applications.length > 0) {
+          const application = parsedData.applications[0];
+          console.log("Setting application data:", application); // Debug log
+          setApplicationData(application);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading application data:", error);
+    }
+  }, []);
+
+  // Update form data when application data changes
   useEffect(() => {
     if (Object.keys(applicationData).length > 0) {
-      // Parse date fields
-      const parseDate = (dateStr) => {
-        if (!dateStr) return { day: "", month: "", year: "" };
-        const date = new Date(dateStr);
-        return {
-          day: date.getDate().toString().padStart(2, '0'),
-          month: (date.getMonth() + 1).toString().padStart(2, '0'),
-          year: date.getFullYear().toString()
+      try {
+        console.log("Updating form with application data:", applicationData); // Debug log
+        
+        // Parse date fields
+        const parseDate = (dateStr: string | undefined) => {
+          if (!dateStr) return { day: "", month: "", year: "" };
+          try {
+            const date = new Date(dateStr);
+            return {
+              day: date.getDate().toString().padStart(2, '0'),
+              month: (date.getMonth() + 1).toString().padStart(2, '0'),
+              year: date.getFullYear().toString()
+            };
+          } catch (error) {
+            console.error("Error parsing date:", error);
+            return { day: "", month: "", year: "" };
+          }
         };
-      };
 
-      // Set programType and program from backend response
-      let newProgramType = applicationData.program_type || postgraduateData.programType;
-      let newProgram = applicationData.selected_program || postgraduateData.program;
-      
-      // If the loaded program is not in the list, add it temporarily
-      let programList = programs[newProgramType] || [];
-      if (newProgram && !programList.includes(newProgram)) {
-        programList = [newProgram, ...programList];
-        programs[newProgramType] = programList;
-      }
-      
-      setPostgraduateData(prev => ({
-        ...prev,
-        academicSession: applicationData.academic_session || prev.academicSession,
-        programType: newProgramType as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD",
-        program: newProgram,
-        personalDetails: {
-          ...prev.personalDetails,
-          surname: applicationData.surname || prev.personalDetails.surname,
-          firstName: applicationData.first_name || prev.personalDetails.firstName,
-          otherNames: applicationData.other_names || prev.personalDetails.otherNames,
-          gender: applicationData.gender || prev.personalDetails.gender,
-          dateOfBirth: parseDate(applicationData.date_of_birth),
-          streetAddress: applicationData.street_address || prev.personalDetails.streetAddress,
-          city: applicationData.city || prev.personalDetails.city,
-          country: applicationData.country || prev.personalDetails.country,
-          stateOfOrigin: applicationData.state_of_origin || prev.personalDetails.stateOfOrigin,
-          nationality: applicationData.nationality || prev.personalDetails.nationality,
-          phoneNumber: applicationData.phone_number || prev.personalDetails.phoneNumber,
-          email: applicationData.email || prev.personalDetails.email,
-          hasDisabilities: applicationData.has_disability ? "Yes" : "No",
-          disabilityDescription: applicationData.disability_description || prev.personalDetails.disabilityDescription,
-        },
-        academicQualifications: {
-          ...prev.academicQualifications,
-          qualification1: {
-            ...prev.academicQualifications.qualification1,
-            type: applicationData.degree || "",
-            grade: applicationData.class_of_degree || "",
-            cgpa: applicationData.qualification_cgpa?.toString() || "",
-            subject: applicationData.qualification_subject || "",
-            institution: applicationData.institution || "",
-            startDate: parseDate(applicationData.qualification_start_date),
-            endDate: parseDate(applicationData.qualification_end_date),
-            degreeCertificate: applicationData.first_degree_certificate_path ? createPlaceholderFile(applicationData.first_degree_certificate_path) : prev.academicQualifications.qualification1.degreeCertificate,
-            transcript: applicationData.first_degree_transcript_path ? createPlaceholderFile(applicationData.first_degree_transcript_path) : prev.academicQualifications.qualification1.transcript,
+        setPostgraduateData(prev => ({
+          ...prev,
+          academicSession: applicationData.academic_session || prev.academicSession,
+          programType: (applicationData.program_type as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD") || prev.programType,
+          program: applicationData.selected_program || prev.program,
+          applicantType: (applicationData.applicant_type as "Nigerian" | "International") || prev.applicantType,
+          personalDetails: {
+            ...prev.personalDetails,
+            surname: applicationData.surname || prev.personalDetails.surname,
+            firstName: applicationData.first_name || prev.personalDetails.firstName,
+            otherNames: applicationData.other_names || prev.personalDetails.otherNames,
+            gender: applicationData.gender || prev.personalDetails.gender,
+            dateOfBirth: parseDate(applicationData.date_of_birth),
+            streetAddress: applicationData.street_address || prev.personalDetails.streetAddress,
+            city: applicationData.city || prev.personalDetails.city,
+            country: applicationData.country || prev.personalDetails.country,
+            stateOfOrigin: applicationData.state_of_origin || prev.personalDetails.stateOfOrigin,
+            nationality: applicationData.nationality || prev.personalDetails.nationality,
+            phoneNumber: applicationData.phone_number || prev.personalDetails.phoneNumber,
+            email: applicationData.email || prev.personalDetails.email,
+            hasDisabilities: applicationData.has_disability ? "Yes" : "No",
+            disabilityDescription: applicationData.disability_description || prev.personalDetails.disabilityDescription,
           },
-          qualification2: {
-            ...prev.academicQualifications.qualification2,
-            type: applicationData.second_degree || "",
-            grade: applicationData.second_class_of_degree || "",
-            cgpa: applicationData.second_qualification_cgpa?.toString() || "",
-            subject: applicationData.second_qualification_subject || "",
-            institution: applicationData.second_institution || "",
-            startDate: parseDate(applicationData.second_qualification_start_date),
-            endDate: parseDate(applicationData.second_qualification_end_date),
-            degreeCertificate: applicationData.second_degree_certificate_path ? createPlaceholderFile(applicationData.second_degree_certificate_path) : prev.academicQualifications.qualification2.degreeCertificate,
-            transcript: applicationData.second_degree_transcript_path ? createPlaceholderFile(applicationData.second_degree_transcript_path) : prev.academicQualifications.qualification2.transcript,
+          academicQualifications: {
+            ...prev.academicQualifications,
+            qualification1: {
+              ...prev.academicQualifications.qualification1,
+              type: applicationData.degree || "",
+              grade: applicationData.class_of_degree || "",
+              cgpa: applicationData.qualification_cgpa?.toString() || "",
+              subject: applicationData.qualification_subject || "",
+              institution: applicationData.institution || "",
+              startDate: parseDate(applicationData.qualification_start_date),
+              endDate: parseDate(applicationData.qualification_end_date),
+              degreeCertificate: applicationData.first_degree_certificate_path ? createPlaceholderFile(applicationData.first_degree_certificate_path) : prev.academicQualifications.qualification1.degreeCertificate,
+              transcript: applicationData.first_degree_transcript_path ? createPlaceholderFile(applicationData.first_degree_transcript_path) : prev.academicQualifications.qualification1.transcript,
+            },
+            qualification2: {
+              ...prev.academicQualifications.qualification2,
+              type: applicationData.second_degree || "",
+              grade: applicationData.second_class_of_degree || "",
+              cgpa: applicationData.second_qualification_cgpa?.toString() || "",
+              subject: applicationData.second_qualification_subject || "",
+              institution: applicationData.second_institution || "",
+              startDate: parseDate(applicationData.second_qualification_start_date),
+              endDate: parseDate(applicationData.second_qualification_end_date),
+              degreeCertificate: applicationData.second_degree_certificate_path ? createPlaceholderFile(applicationData.second_degree_certificate_path) : prev.academicQualifications.qualification2.degreeCertificate,
+              transcript: applicationData.second_degree_transcript_path ? createPlaceholderFile(applicationData.second_degree_transcript_path) : prev.academicQualifications.qualification2.transcript,
+            },
+            otherQualifications: applicationData.recommendation_letters_paths ? createPlaceholderFile(applicationData.recommendation_letters_paths) : prev.academicQualifications.otherQualifications,
           },
-          otherQualifications: applicationData.recommendation_letters_paths ? createPlaceholderFile(applicationData.recommendation_letters_paths) : prev.academicQualifications.otherQualifications,
-        },
-        statementOfPurpose: applicationData.statement_of_purpose_path ? [createPlaceholderFile(applicationData.statement_of_purpose_path)] : prev.statementOfPurpose,
-        references: {
-          referee1: {
-            name: applicationData.first_referee_name || prev.references.referee1.name,
-            email: applicationData.first_referee_email || prev.references.referee1.email,
+          statementOfPurpose: applicationData.statement_of_purpose_path ? [createPlaceholderFile(applicationData.statement_of_purpose_path)] : prev.statementOfPurpose,
+          references: {
+            referee1: {
+              name: applicationData.first_referee_name || prev.references.referee1.name,
+              email: applicationData.first_referee_email || prev.references.referee1.email,
+            },
+            referee2: {
+              name: applicationData.second_referee_name || prev.references.referee2.name,
+              email: applicationData.second_referee_email || prev.references.referee2.email,
+            },
           },
-          referee2: {
-            name: applicationData.second_referee_name || prev.references.referee2.name,
-            email: applicationData.second_referee_email || prev.references.referee2.email,
-          },
-        },
-        nationality: applicationData.nationality || prev.nationality,
-      }));
+          nationality: applicationData.nationality || prev.nationality,
+        }));
 
-      if (applicationData.passport_photo_path) {
-        // Add the API URL prefix to the passport photo path with a forward slash
-        const fullUrl = `https://admissions-jcvy.onrender.com/${applicationData.passport_photo_path}`;
-        setPassportPhotoUrl(fullUrl);
+        if (applicationData.passport_photo_path) {
+          const fullUrl = `https://admissions-jcvy.onrender.com/${applicationData.passport_photo_path}`;
+          setPassportPhotoUrl(fullUrl);
+        }
+      } catch (error) {
+        console.error("Error setting form data:", error);
       }
     }
   }, [applicationData]);
@@ -916,15 +897,13 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
   };
 
   const handleSaveAsDraft = async () => {
+    setIsSaving(true);
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
       const formData = buildPostgraduateFormData(postgraduateData);
-      await apiService.uploadPostgraduateFormData(formData);
+      formData.append('is_draft', 'true');
+      await apiService.submitPostgraduateApplication(formData);
       toast.success("Draft saved successfully!");
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err.message || "Failed to save draft");
     } finally {
       setIsSaving(false);
@@ -1025,25 +1004,28 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!isFormValid()) {
-      toast.error("Please fill in all required fields correctly");
-      return;
-    }
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      const formData = new FormData();
-      // Add form data...
-      
+      const formData = buildPostgraduateFormData(postgraduateData);
+      formData.append('is_draft', 'false');
       const response = await apiService.submitPostgraduateApplication(formData);
-      if (response.success) {
-        toast.success("Application submitted successfully!");
-        navigate('/application-success');
-      } else {
-        toast.error(response.message || "Failed to submit application");
-      }
-    } catch (err) {
-      toast.error("An error occurred while submitting the application");
+      
+      // Store the response in localStorage
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      
+      // Show success message
+      toast.success("Application submitted successfully!");
+      
+      // Redirect to document upload page
+      window.location.href = "/document-upload?type=postgraduate";
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      setError(error.message || "Failed to submit application. Please try again.");
+      toast.error(error.message || "Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1284,6 +1266,203 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     </div>
   );
 
+  const handleProceedToPayment = async () => {
+    try {
+      // Validate required fields
+      if (!postgraduateData.personalDetails.surname) {
+        toast.error("Surname is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.firstName) {
+        toast.error("First name is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.gender) {
+        toast.error("Gender is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.dateOfBirth.day || !postgraduateData.personalDetails.dateOfBirth.month || !postgraduateData.personalDetails.dateOfBirth.year) {
+        toast.error("Date of birth is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.streetAddress) {
+        toast.error("Street address is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.city) {
+        toast.error("City is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.country) {
+        toast.error("Country is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.phoneNumber) {
+        toast.error("Phone number is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.email) {
+        toast.error("Email is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.nationality) {
+        toast.error("Nationality is required");
+        return;
+      }
+      // State of origin only required for Nigerian applicants
+      if (postgraduateData.applicantType === "Nigerian" && !postgraduateData.personalDetails.stateOfOrigin) {
+        toast.error("State of origin is required for Nigerian applicants");
+        return;
+      }
+
+      // Validate academic qualifications
+      const qual1 = postgraduateData.academicQualifications.qualification1;
+      if (!qual1.type) {
+        toast.error("First qualification type is required");
+        return;
+      }
+      if (!qual1.grade) {
+        toast.error("First qualification grade is required");
+        return;
+      }
+      if (!qual1.cgpa) {
+        toast.error("First qualification CGPA is required");
+        return;
+      }
+      if (!qual1.subject) {
+        toast.error("First qualification subject is required");
+        return;
+      }
+      if (!qual1.institution) {
+        toast.error("First qualification institution is required");
+        return;
+      }
+      if (!qual1.startDate.day || !qual1.startDate.month || !qual1.startDate.year) {
+        toast.error("First qualification start date is required");
+        return;
+      }
+      if (!qual1.endDate.day || !qual1.endDate.month || !qual1.endDate.year) {
+        toast.error("First qualification end date is required");
+        return;
+      }
+      if (!qual1.degreeCertificate) {
+        toast.error("First degree certificate is required");
+        return;
+      }
+      if (!qual1.transcript) {
+        toast.error("First degree transcript is required");
+        return;
+      }
+
+      // Validate second qualification for PhD students
+      if (postgraduateData.programType === "PhD") {
+        const qual2 = postgraduateData.academicQualifications.qualification2;
+        if (!qual2?.type) {
+          toast.error("Second qualification type is required for PhD applicants");
+          return;
+        }
+        if (!qual2.grade) {
+          toast.error("Second qualification grade is required for PhD applicants");
+          return;
+        }
+        if (!qual2.cgpa) {
+          toast.error("Second qualification CGPA is required for PhD applicants");
+          return;
+        }
+        if (!qual2.subject) {
+          toast.error("Second qualification subject is required for PhD applicants");
+          return;
+        }
+        if (!qual2.institution) {
+          toast.error("Second qualification institution is required for PhD applicants");
+          return;
+        }
+        if (!qual2.startDate?.day || !qual2.startDate?.month || !qual2.startDate?.year) {
+          toast.error("Second qualification start date is required for PhD applicants");
+          return;
+        }
+        if (!qual2.endDate?.day || !qual2.endDate?.month || !qual2.endDate?.year) {
+          toast.error("Second qualification end date is required for PhD applicants");
+          return;
+        }
+        if (!qual2.degreeCertificate) {
+          toast.error("Second degree certificate is required for PhD applicants");
+          return;
+        }
+        if (!qual2.transcript) {
+          toast.error("Second degree transcript is required for PhD applicants");
+          return;
+        }
+      }
+
+      // Validate statement of purpose
+      if (postgraduateData.statementOfPurpose.length === 0) {
+        toast.error("Statement of purpose is required");
+        return;
+      }
+
+      // Validate references
+      const { referee1, referee2 } = postgraduateData.references;
+      if (!referee1.name) {
+        toast.error("Referee 1 name is required");
+        return;
+      }
+      if (!referee1.email) {
+        toast.error("Referee 1 email is required");
+        return;
+      }
+      if (!referee2.name) {
+        toast.error("Referee 2 name is required");
+        return;
+      }
+      if (!referee2.email) {
+        toast.error("Referee 2 email is required");
+        return;
+      }
+
+      // Validate declaration
+      if (!postgraduateData.declaration) {
+        toast.error("You must agree to the declaration");
+        return;
+      }
+
+      // Validate passport photo
+      if (!postgraduateData.passportPhoto && !passportPhotoUrl) {
+        toast.error("Passport photo is required");
+        return;
+      }
+
+      // If all validations pass, proceed with submission
+      setIsProcessingPaymentState(true);
+      const formData = buildPostgraduateFormData(postgraduateData);
+      formData.append('is_draft', 'false');
+      
+      const response = await apiService.submitPostgraduateApplication(formData) as { applications?: Array<{ has_paid: boolean; referee_1: any; referee_2: any }> };
+      
+      // Store the response in localStorage
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      
+      // Check if user has already paid
+      if (response.applications?.[0]?.has_paid) {
+        // If paid, redirect to referee status page
+        navigate('/referee-status', { 
+          state: { 
+            referee1: response.applications[0].referee_1,
+            referee2: response.applications[0].referee_2
+          }
+        });
+      } else {
+        // If not paid, show payment modal
+        setShowPaymentModal(true);
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error('Failed to submit application. Please try again.');
+    } finally {
+      setIsProcessingPaymentState(false);
+    }
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -1491,11 +1670,15 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
-                  {programs[postgraduateData.programType].map((program) => (
-                    <SelectItem key={program} value={program}>
-                      {program}
-                    </SelectItem>
-                  ))}
+                  {postgraduateData.programType && programs[postgraduateData.programType] ? (
+                    programs[postgraduateData.programType].map((program) => (
+                      <SelectItem key={program} value={program}>
+                        {program}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem key="placeholder" value="placeholder" disabled>Select a program type first</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -1702,7 +1885,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
             <PhoneInput
               international
               defaultCountry="NG"
-              value={postgraduateData.personalDetails.phoneNumber}
+              value={postgraduateData.personalDetails.phoneNumber || undefined}
               onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
               className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
               placeholder="Enter phone number"
@@ -2494,28 +2677,32 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           </div>
         </div>
 
-        {/* Payment Information */}
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Payment Information</h3>
-          <div className="space-y-2 text-yellow-800">
-            <p className="text-sm">
-              <span className="font-medium">Application Fee:</span> ₦20,000 (Nigerian Applicants) / $50 (International Applicants)
-            </p>
-            <p className="text-sm">
-              <span className="font-medium">Payment Method:</span> Paystack
-            </p>
-            <div className="mt-2 space-y-1">
-              <p className="text-sm font-medium">Important Notes:</p>
-              <ul className="list-disc list-inside text-sm space-y-1">
-                <li>Nigerian applicants will use Paystack NGN payment gateway</li>
-                <li>International applicants will use Paystack USD payment gateway</li>
-                <li>Payment must be completed to submit your application</li>
-                <li>A payment receipt will be automatically generated after successful payment</li>
-              </ul>
+        {/* Payment Information Section */}
+        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
+          <h3 className="text-lg font-semibold">Application Fee Payment</h3>
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800 space-y-2">
+                <strong>Application Fees (Non-refundable):</strong>
+                <br />
+                <span className="block mt-2">
+                  <strong>Nigerian Applicants:</strong> ₦20,000
+                </span>
+                <span className="block mt-1">
+                  <strong>International Applicants:</strong> $50
+                </span>
+                <div className="mt-4">
+                  <p className="font-medium">Payment Process:</p>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Payment will be processed through Paystack</li>
+                    <li>Nigerian applicants will use Paystack NGN payment gateway</li>
+                    <li>International applicants will use Paystack USD payment gateway</li>
+                    <li>The Paystack payment window will open when you click "Proceed to Payment"</li>
+                    <li>A payment receipt will be automatically generated after successful payment</li>
+                  </ul>
+                </div>
+              </p>
             </div>
-            <p className="text-sm italic text-blue-600 mt-2">
-              When you click "Proceed to Payment", the Paystack payment popup will appear automatically.
-            </p>
           </div>
         </div>
 
@@ -2526,15 +2713,30 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
               type="button"
               variant="outline"
               onClick={handleSaveAsDraft}
-              disabled={isProcessingPaymentState}
+              disabled={isProcessingPaymentState || isSaving}
             >
-              Save Draft
+              {isSaving ? (
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
+                  Saving...
+                </span>
+              ) : (
+                "Save Draft"
+              )}
             </Button>
             <Button
-              type="submit"
-              disabled={isProcessingPaymentState}
+              type="button"
+              onClick={handleProceedToPayment}
+              disabled={isProcessingPaymentState || isSaving}
             >
-              {isProcessingPaymentState ? "Processing..." : "Proceed to Payment"}
+              {isProcessingPaymentState ? (
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
+                  Processing...
+                </span>
+              ) : (
+                "Proceed to Payment"
+              )}
             </Button>
           </div>
         </div>
@@ -2549,7 +2751,17 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           localStorage.setItem("paymentCompleted", "true");
           localStorage.setItem("paymentReference", reference);
           setShowPaymentModal(false);
-          navigate("/payment-success");
+          
+          // After successful payment, redirect to referee status page
+          const applicationData = JSON.parse(localStorage.getItem('applicationData') || '{}');
+          if (applicationData.applications && applicationData.applications[0]) {
+            navigate('/referee-status', { 
+              state: { 
+                referee1: applicationData.applications[0].referee_1,
+                referee2: applicationData.applications[0].referee_2
+              }
+            });
+          }
         }}
       />
     </>

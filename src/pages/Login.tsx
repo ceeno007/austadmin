@@ -65,9 +65,9 @@ const Login = () => {
         return;
       }
       
-      console.log("Making fastApiSignin request to:", API_ENDPOINTS.FASTAPI_TOKEN);
+      console.log("Making login request to:", API_ENDPOINTS.LOGIN);
       
-      const data = await apiService.fastApiSignin({
+      const data = await apiService.login({
         username: email,
         password
       }) as TokenResponse;
@@ -75,7 +75,13 @@ const Login = () => {
       console.log("Login response received:", data);
       
       if (!data.access_token) {
+        console.error("No access token in response:", data);
         throw new Error("No access token received from server");
+      }
+      
+      if (!data.user) {
+        console.error("No user data in response:", data);
+        throw new Error("No user data received from server");
       }
       
       console.log("Logging in user with data:", data);
@@ -84,7 +90,7 @@ const Login = () => {
       toast.dismiss(loadingToast);
       toast.success("Login successful!");
       
-      let programType = data.user?.program?.toLowerCase() || "undergraduate";
+      let programType = data.user.program?.toLowerCase() || "undergraduate";
       localStorage.setItem("programType", programType);
       
       let destination = location.state?.from?.pathname;
