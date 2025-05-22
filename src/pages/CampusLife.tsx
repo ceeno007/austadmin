@@ -273,23 +273,28 @@ const CampusLife = () => {
       
       {/* Flickr External Link Confirmation Dialog */}
       <Dialog open={showFlickrDialog} onOpenChange={setShowFlickrDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Leaving this site</DialogTitle>
-            <DialogDescription>
-              You are about to be redirected to an external website to view images of our research facilities.
+        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-md rounded-2xl border-gray-200/50 shadow-xl">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-semibold">External Link</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              You are about to visit an external website to view images of our research facilities. Would you like to continue?
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4 hidden">
-            <p className="text-sm text-gray-500">
-              
-            </p>
-          </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleConfirmNavigation}>Continue</Button>
+            <div className="flex flex-col items-center justify-center gap-3 mt-6 w-full">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <DialogClose asChild>
+                  <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
+                </DialogClose>
+                <Button
+                  onClick={handleConfirmNavigation}
+                  className="w-full sm:w-auto bg-[#FF5500] hover:bg-[#e64d00] flex items-center gap-2"
+                >
+                  Continue to Flickr
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
