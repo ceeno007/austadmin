@@ -153,7 +153,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/cafeteria.jpg"
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/aust3.jpg?updatedAt=1747928047990"
                     alt="Cafeteria"
                     className="w-full h-full object-cover"
                   />
@@ -174,7 +174,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    // src={library}
+                    src='https://ik.imagekit.io/nsq6yvxg1/Upload/aust2.jpg?updatedAt=1747928050526'
                     alt="Sports Facilities"
                     className="w-full h-full object-cover"
                   />

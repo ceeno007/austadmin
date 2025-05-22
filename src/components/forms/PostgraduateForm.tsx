@@ -206,64 +206,96 @@ const FileUploadField = ({
   maxSize = "10MB",
   multiple = false 
 }: FileUploadFieldProps) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const fileNames = hasFiles 
-    ? Array.isArray(value) 
-      ? value.map(f => f.name).join(", ") 
-      : (value as File).name
-    : "";
 
-  const acceptedTypes = accept.split(',').map(type => 
-    type.replace('.', '').toUpperCase()
-  ).join(', ');
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = (files: File[]) => {
+    if (multiple) {
+      onChange(files);
+    } else {
+      onChange(files[0] ? [files[0]] : null);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
+    }
+  };
+
+  const handleRemove = () => {
+    onChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const fileNames = Array.isArray(value) 
+    ? value.map(file => file.name).join(', ')
+    : value?.name || '';
 
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-        hasFiles ? 'border-green-500 bg-green-50' : 'border-gray-300'
-      }`}>
+      <div 
+        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors ${
+          hasFiles ? 'bg-white' : 'bg-white'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <input
+          ref={fileInputRef}
           type="file"
           id={id}
-          className="hidden"
           accept={accept}
+          onChange={handleFileChange}
           multiple={multiple}
-          onChange={(e) => {
-            const files = Array.from(e.target.files || []);
-            onChange(files.length > 0 ? files : null);
-          }}
+          className="hidden"
         />
-        <label
-          htmlFor={id}
-          className="flex flex-col items-center justify-center w-full cursor-pointer"
-        >
-          {hasFiles ? (
-            <div className="flex items-center justify-center w-full gap-2">
-              <span className="text-sm text-green-800 text-center">{fileNames}</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onRemove();
-                }}
-                className="p-1 hover:bg-green-100 rounded-full ml-2"
-              >
-                <X className="h-4 w-4 text-green-600" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full">
-              <Upload className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-600 text-center">
-                Click to upload {typeof label === 'string' ? label : 'file'}
-              </span>
-              <span className="mt-1 text-xs text-gray-500 text-center">
-                Accepted formats: {acceptedTypes} (Max: {maxSize})
-              </span>
-            </div>
-          )}
-        </label>
+        
+        {hasFiles ? (
+          <div className="flex flex-col items-center">
+            <span className="text-sm text-gray-800 text-center">{fileNames}</span>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="mt-2 p-1 hover:bg-red-100 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center w-full">
+            <Upload className="h-8 w-8 text-gray-600" />
+            <span className="mt-2 text-sm text-gray-800 text-center">
+              Click to upload {label}
+            </span>
+            <span className="mt-1 text-xs text-gray-700 text-center">
+              Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

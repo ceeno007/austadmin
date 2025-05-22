@@ -156,8 +156,8 @@ const FileUploadField = ({
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-        hasFiles ? 'border-green-500 bg-green-50' : 'border-gray-300'
+      <div className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors ${
+        hasFiles ? 'bg-blue-50' : 'bg-white'
       }`}>
         <input
           type="file"
@@ -191,10 +191,10 @@ const FileUploadField = ({
           ) : (
             <div className="flex flex-col items-center justify-center w-full">
               <Upload className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-600 text-center">
+              <span className="mt-2 text-sm text-gray-800 text-center">
                 Click to upload {label}
               </span>
-              <span className="mt-1 text-xs text-gray-500 text-center">
+              <span className="mt-1 text-xs text-gray-700 text-center">
                 Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
               </span>
             </div>
@@ -2398,8 +2398,8 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
         <h3 className="text-lg font-semibold">Declaration</h3>
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
+          <div className="p-4 bg-white border border-yellow-300 rounded-md">
+            <p className="text-sm text-yellow-900">
               By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
               <br />- cancel my application.
               <br />- if admitted, be dismissed from the University.
@@ -2418,7 +2418,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required
             />
-            <label htmlFor="declaration" className="text-sm text-gray-700">
+            <label htmlFor="declaration" className="text-sm text-gray-900">
               I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
             </label>
           </div>

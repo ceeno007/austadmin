@@ -1460,7 +1460,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
               {/* Selected Subjects Display */}
               {foundationRemedialData.programChoice.subjectCombination && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                <div className="mt-4 p-3 bg-white rounded-md">
                   <h4 className="text-sm font-medium mb-2">Selected Subjects:</h4>
                   <div className="flex flex-wrap gap-2">
                     {foundationRemedialData.programChoice.subjectCombination
