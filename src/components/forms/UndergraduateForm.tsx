@@ -573,140 +573,60 @@ function buildUndergraduateFormData(data) {
     formData.append('disability_description', data.personalDetails.disabilityDescription);
   }
   
-  // Exam results
-  const selectedExams = data.selectedExams || [];
-  console.log('Processing selected exams:', selectedExams);
+  // Handle Exam Types - Search for filled data regardless of selectedExams
+  // Check if we have WAEC data
+  let examNumber = 1;
   
-  // First exam
-  if (selectedExams.length > 0) {
-    const examType = selectedExams[0];
-    console.log('Processing first exam type:', examType);
-    
-    // Get the exam data from the corresponding results object
+  // Check each exam type for filled data
+  const examTypes = ['waec', 'neco', 'nabteb'];
+  for (const examType of examTypes) {
     const examData = data.academicQualifications[`${examType}Results`];
-    console.log(`Exam data for ${examType}:`, examData);
     
-    // Set exam type
-    formData.append('exam_type_1', examType);
-    console.log('Added exam_type_1:', examType);
+    // Check if this exam has data (even if not in selectedExams)
+    const hasData = examData && (
+      examData.examNumber || 
+      examData.examYear || 
+      (examData.subjects && examData.subjects.length > 0) ||
+      examData.documents
+    );
     
-    // Set exam number
-    if (examData?.examNumber) {
-      formData.append('exam_number_1', examData.examNumber);
-      console.log('Added exam_number_1:', examData.examNumber);
-    } else {
-      formData.append('exam_number_1', '');
-    }
-    
-    // Set exam year
-    if (examData?.examYear) {
-      const year = parseInt(examData.examYear);
-      if (!isNaN(year)) {
-        formData.append('exam_year_1', year.toString());
-        console.log('Added exam_year_1:', year.toString());
-      } else {
-        formData.append('exam_year_1', '0');
+    if (hasData) {
+      console.log(`Found ${examType} data:`, examData);
+      
+      // Add exam type
+      formData.append(`exam_type_${examNumber}`, examType);
+      console.log(`Added exam_type_${examNumber}: ${examType}`);
+      
+      // Add exam number
+      if (examData.examNumber) {
+        formData.append(`exam_number_${examNumber}`, examData.examNumber);
+        console.log(`Added exam_number_${examNumber}: ${examData.examNumber}`);
       }
-    } else {
-      formData.append('exam_year_1', '0');
-    }
-    
-    // Handle subjects
-    if (examData?.subjects && examData.subjects.length > 0) {
-      const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
-      if (validSubjects.length > 0) {
-        const subjectsArray = validSubjects.map(s => ({
-          subject: s.subject.trim(),
-          grade: s.grade.trim()
-        }));
-        const jsonString = JSON.stringify(subjectsArray);
-        console.log('Subjects 1 JSON string:', jsonString);
-        formData.append('subjects_1', jsonString);
-      } else {
-        formData.append('subjects_1', '[]');
+      
+      // Add exam year
+      if (examData.examYear) {
+        formData.append(`exam_year_${examNumber}`, examData.examYear);
+        console.log(`Added exam_year_${examNumber}: ${examData.examYear}`);
       }
-    } else {
-      formData.append('subjects_1', '[]');
-    }
-    
-    // Add exam result document
-    if (examData?.documents) {
-      formData.append('exam_type_1_result', examData.documents);
-      console.log(`Added ${examType} result document:`, examData.documents.name);
-    }
-  } else {
-    // If no exam is selected, set empty values
-    formData.append('exam_type_1', '');
-    formData.append('exam_number_1', '');
-    formData.append('exam_year_1', '0');
-    formData.append('subjects_1', '[]');
-    console.log('No first exam selected, setting empty values');
-  }
-  
-  // Second exam
-  if (selectedExams.length > 1) {
-    const examType = selectedExams[1];
-    console.log('Processing second exam type:', examType);
-    
-    // Get the exam data from the corresponding results object
-    const examData = data.academicQualifications[`${examType}Results`];
-    console.log(`Exam data for ${examType}:`, examData);
-    
-    // Set exam type
-    formData.append('exam_type_2', examType);
-    console.log('Added exam_type_2:', examType);
-    
-    // Set exam number
-    if (examData?.examNumber) {
-      formData.append('exam_number_2', examData.examNumber);
-      console.log('Added exam_number_2:', examData.examNumber);
-    } else {
-      formData.append('exam_number_2', '');
-    }
-    
-    // Set exam year
-    if (examData?.examYear) {
-      const year = parseInt(examData.examYear);
-      if (!isNaN(year)) {
-        formData.append('exam_year_2', year.toString());
-        console.log('Added exam_year_2:', year.toString());
-      } else {
-        formData.append('exam_year_2', '0');
+      
+      // Add subjects
+      if (examData.subjects && examData.subjects.length > 0) {
+        const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
+        const subjectsJson = JSON.stringify(validSubjects);
+        formData.append(`subjects_${examNumber}`, subjectsJson);
+        console.log(`Added subjects_${examNumber}: ${subjectsJson}`);
       }
-    } else {
-      formData.append('exam_year_2', '0');
-    }
-    
-    // Handle subjects
-    if (examData?.subjects && examData.subjects.length > 0) {
-      const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
-      if (validSubjects.length > 0) {
-        const subjectsArray = validSubjects.map(s => ({
-          subject: s.subject.trim(),
-          grade: s.grade.trim()
-        }));
-        const jsonString = JSON.stringify(subjectsArray);
-        console.log('Subjects 2 JSON string:', jsonString);
-        formData.append('subjects_2', jsonString);
-      } else {
-        formData.append('subjects_2', '[]');
+      
+      // Add document
+      if (examData.documents) {
+        formData.append(`exam_type_${examNumber}_result`, examData.documents);
+        console.log(`Added exam_type_${examNumber}_result: ${examData.documents.name}`);
       }
-    } else {
-      formData.append('subjects_2', '[]');
+      
+      // Only process max 2 exams
+      examNumber++;
+      if (examNumber > 2) break;
     }
-    
-    // Add exam result document
-    if (examData?.documents) {
-      formData.append('exam_type_2_result', examData.documents);
-      console.log(`Added ${examType} result document:`, examData.documents.name);
-    }
-  } else {
-    // If no second exam is selected, set empty values
-    formData.append('exam_type_2', '');
-    formData.append('exam_number_2', '');
-    formData.append('exam_year_2', '0');
-    formData.append('subjects_2', '[]');
-    console.log('No second exam selected, setting empty values');
   }
   
   // JAMB results
@@ -873,6 +793,49 @@ const autofillFromApplication = (application: any, prev: UndergraduateFormData):
   };
 };
 
+// Utility function to check application status and redirect if needed
+export const checkApplicationStatusAndRedirect = (authResponse: any) => {
+  try {
+    // Check if there's an application in the response
+    if (authResponse?.applications?.length > 0) {
+      const application = authResponse.applications[0];
+      
+      // If the application is already submitted, redirect to success page
+      if (application.submitted === true) {
+        console.log('Found submitted application, redirecting to success page');
+        
+        // Store the application data for reference on the success page
+        localStorage.setItem('applicationData', JSON.stringify(authResponse));
+        
+        // Show success notification
+        toast.success("You have an existing application!", {
+          description: "Redirecting to your application status...",
+          duration: 2000,
+          style: {
+            background: '#10B981',
+            color: 'white',
+            border: 'none',
+          },
+          icon: <CheckCircle2 className="h-5 w-5" />
+        });
+        
+        // Redirect to application success page after a short delay
+        setTimeout(() => {
+          window.location.href = '/application-success';
+        }, 2000);
+        
+        return true; // Indicate that redirection is happening
+      }
+    }
+    
+    // No submitted application found
+    return false;
+  } catch (error) {
+    console.error('Error checking application status:', error);
+    return false;
+  }
+};
+
 const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
   const navigate = useNavigate();
   // Get application data from localStorage if available
@@ -889,7 +852,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   // Add state for showing payment selection modal
   const [showPaymentSelection, setShowPaymentSelection] = useState(false);
 
-  // Update the useEffect to properly set selected exams
+  // Update the useEffect to properly set selected exams and check application status
   useEffect(() => {
     try {
       const storedData = localStorage.getItem('applicationData');
@@ -898,6 +861,24 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         if (parsedData.applications && parsedData.applications.length > 0) {
           const application = parsedData.applications[0];
           console.log('Loading application data:', application);
+          
+          // Check if the application is already submitted
+          if (application.submitted === true) {
+            // If already submitted, redirect to success page
+            console.log('Application is already submitted, redirecting to success page');
+            toast.success("You have an existing submitted application", {
+              description: "Redirecting to application status...",
+              duration: 2000,
+            });
+            
+            setTimeout(() => {
+              window.location.href = '/application-success';
+            }, 2000);
+            
+            return;
+          }
+          
+          // If not submitted, continue with form initialization
           setApplicationData(application);
           
           // Set selected exams based on exam types
@@ -1087,10 +1068,64 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       formData.append('is_draft', 'true');
       
       const response = await apiService.submitUndergraduateApplication(formData);
-      toast.success("Draft saved successfully");
+      
+      // Check if the application is marked as submitted
+      if (response?.applications?.[0]?.submitted === true) {
+        // If submitted, redirect to success page
+        toast.success("Application submitted successfully!", {
+          duration: 2000,
+          style: {
+            background: '#10B981',
+            color: 'white',
+            border: 'none',
+          },
+          icon: <CheckCircle2 className="h-5 w-5" />
+        });
+        
+        // Save to localStorage for reference
+        localStorage.setItem('applicationData', JSON.stringify(response));
+        
+        // Redirect to success page after toast is shown
+        setTimeout(() => {
+          window.location.href = '/application-success';
+        }, 2000);
+        
+        return;
+      }
+      
+      // If not submitted, show the draft saved notification
+      toast.success("Draft saved successfully!", {
+        description: "Your application has been saved as a draft and can be completed later.",
+        duration: 4000,
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+          border: 'none',
+        },
+        icon: <CheckCircle2 className="h-5 w-5" />
+      });
+      
+      // Store response data
+      if (response) {
+        // Save to localStorage for later retrieval
+        localStorage.setItem('applicationData', JSON.stringify(response));
+        
+        // Set draft ID if available
+        if (response.applications?.[0]?.id) {
+          setDraftId(response.applications[0].id);
+        }
+      }
     } catch (error) {
       console.error("Error saving draft:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save draft");
+      toast.error(error instanceof Error ? error.message : "Failed to save draft", {
+        duration: 4000,
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+          border: 'none',
+        },
+        icon: <AlertCircle className="h-5 w-5" />
+      });
     } finally {
       setIsSaving(false);
     }
