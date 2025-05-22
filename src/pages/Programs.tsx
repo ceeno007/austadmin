@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useCallback, useMemo } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -68,7 +68,10 @@ const ProgramCard = React.memo<{ program: Program }>(({ program }) => {
         </div>
       </div>
       <div className="p-4">
-        <p className="text-gray-600 mb-4 line-clamp-2">{program.description}</p>
+        <p
+          className="text-gray-600 mb-4 line-clamp-2"
+          dangerouslySetInnerHTML={{ __html: program.description }}
+        />
         <div className="flex justify-between items-center">
           <Button
             variant="outline"
@@ -90,24 +93,23 @@ const Programs: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Prefetch threshold
   const PREFETCH_THRESHOLD = 3;
 
-  // Effect for URL params
+  // Sync tab with URL
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const tabParam = queryParams.get("tab") as TabType;
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab") as TabType;
     if (tabParam && Object.values(TABS).includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
 
-  // Reset visible items when tab changes
+  // Reset pagination on tab change
   useEffect(() => {
     setVisibleItems(ITEMS_PER_PAGE);
   }, [activeTab]);
 
-  // Get current programs based on active tab
+  // Filter programs by tab
   const getCurrentPrograms = (): Program[] => {
     switch (activeTab) {
       case TABS.UNDERGRADUATE:
@@ -121,42 +123,47 @@ const Programs: React.FC = () => {
     }
   };
 
-  // Optimized scroll handler with debounce
-  const handleScroll = useMemo(() => debounce(() => {
-    if (isLoading) return;
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
-    const currentPrograms = getCurrentPrograms();
-    // Prefetch when within PREFETCH_THRESHOLD of the end
-    if (visibleItems >= currentPrograms.length) return;
-    const bufferIndex = visibleItems - PREFETCH_THRESHOLD;
-    const bufferElement = document.querySelectorAll('.program-card')[bufferIndex];
-    let bufferOffset = 0;
-    if (bufferElement) {
-      bufferOffset = (bufferElement as HTMLElement).getBoundingClientRect().bottom;
-    }
-    if (
-      scrollPosition >= documentHeight - 100 ||
-      (bufferOffset && bufferOffset < window.innerHeight + 200)
-    ) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, currentPrograms.length));
-        setIsLoading(false);
-      }, 400);
-    }
-  }, 100), [isLoading, visibleItems, activeTab]);
+  // Infinite scroll handler
+  const handleScroll = useMemo(
+    () =>
+      debounce(() => {
+        if (isLoading) return;
+        const scrollPos = window.innerHeight + window.scrollY;
+        const docHeight = document.documentElement.scrollHeight;
+        const current = getCurrentPrograms();
+        if (visibleItems >= current.length) return;
+
+        const bufferIndex = visibleItems - PREFETCH_THRESHOLD;
+        const bufferEl = document.querySelectorAll('.program-card')[bufferIndex];
+        let bufferOffset = 0;
+        if (bufferEl) {
+          bufferOffset = (bufferEl as HTMLElement).getBoundingClientRect().bottom;
+        }
+
+        if (
+          scrollPos >= docHeight - 100 ||
+          (bufferOffset && bufferOffset < window.innerHeight + 200)
+        ) {
+          setIsLoading(true);
+          setTimeout(() => {
+            setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, current.length));
+            setIsLoading(false);
+          }, 400);
+        }
+      }, 100),
+    [isLoading, visibleItems, activeTab]
+  );
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Generate structured data for programs
+  // Structured data for SEO
   const generateStructuredData = () => ({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "itemListElement": getCurrentPrograms().map((program, index) => ({
+    "itemListElement": getCurrentPrograms().map((program, idx) => ({
       "@type": "EducationalProgram",
       "name": program.title,
       "description": program.description,
@@ -166,7 +173,7 @@ const Programs: React.FC = () => {
       },
       "timeToComplete": program.duration,
       "educationalProgramMode": "full-time",
-      "position": index + 1
+      "position": idx + 1
     }))
   });
 
@@ -175,41 +182,39 @@ const Programs: React.FC = () => {
 
   return (
     <Suspense fallback={<ProgramsSkeleton />}>
-      <SEO 
+      <SEO
         title="Academic Programs | AUST"
-        description="Explore AUST's comprehensive range of undergraduate, postgraduate, and foundation programs in science, technology, and business. Find your path to success with our world-class education."
-        keywords="AUST programs, undergraduate degrees, postgraduate programs, foundation courses, science and technology education, African university"
+        description="Explore AUST's comprehensive range of undergraduate, postgraduate, and foundation programs."
+        keywords="AUST programs, undergraduate, postgraduate, foundation"
         url={`${window.location.origin}/programs`}
         type="website"
         structuredData={generateStructuredData()}
       />
-      
+
       <main className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
+        {/* Hero */}
         <section className="py-8 sm:py-16 bg-gradient-to-r from-[#FF5500]/10 via-[#FF7A00]/10 to-[#FFA500]/10">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
               Explore Our <span className="text-[#FF5500]">Programs</span>
             </h1>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our wide range of undergraduate, postgraduate, and foundation programs designed to prepare you for success in your chosen field.
+              Discover our wide range of undergraduate, postgraduate, and foundation programs.
             </p>
           </div>
         </section>
 
-        {/* Programs Section */}
+        {/* Tabs & Cards */}
         <section className="py-8 sm:py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
-            {/* Simple Tab Navigation */}
+            {/* Tabs */}
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
-              {Object.entries(TABS).map(([key, value]) => (
+              {Object.entries(TABS).map(([key, val]) => (
                 <button
                   key={key}
-                  onClick={() => setActiveTab(value)}
+                  onClick={() => setActiveTab(val)}
                   className={`px-4 py-2 rounded text-sm sm:text-base ${
-                    activeTab === value
-                      ? "bg-[#FF5500] text-white"
-                      : "bg-gray-200 text-gray-700"
+                    activeTab === val ? "bg-[#FF5500] text-white" : "bg-gray-200 text-gray-700"
                   }`}
                 >
                   {key === 'FOUNDATION' ? (
@@ -224,28 +229,25 @@ const Programs: React.FC = () => {
               ))}
             </div>
 
-            {/* Program Cards */}
+            {/* Program Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedPrograms.map(program => (
-                <div className="program-card" key={program.id}>
-                  <ProgramCard program={program} />
+              {displayedPrograms.map(prog => (
+                <div className="program-card" key={prog.id}>
+                  <ProgramCard program={prog} />
                 </div>
               ))}
-              {/* Always fill the grid with skeletons up to ITEMS_PER_PAGE */}
+
+              {/* Skeleton / Spacer filler */}
               {(() => {
-                const skeletonCount = Math.max(
-                  0,
-                  ITEMS_PER_PAGE - (displayedPrograms.length % ITEMS_PER_PAGE || ITEMS_PER_PAGE)
-                );
-                // If there are more items to load, show a full batch of skeletons
+                const remainder = displayedPrograms.length % ITEMS_PER_PAGE;
+                const fillCount = remainder === 0 ? 0 : ITEMS_PER_PAGE - remainder;
                 if (visibleItems < currentPrograms.length) {
-                  return Array.from({ length: skeletonCount }).map((_, i) => (
-                    <SkeletonCard key={`skeleton-${i}`} />
+                  return Array.from({ length: fillCount }).map((_, i) => (
+                    <SkeletonCard key={`skel-${i}`} />
                   ));
                 }
-                // If all items are loaded but the last row is not full, fill the row with invisible divs for visual consistency
-                if (displayedPrograms.length % ITEMS_PER_PAGE !== 0) {
-                  return Array.from({ length: skeletonCount }).map((_, i) => (
+                if (remainder !== 0) {
+                  return Array.from({ length: fillCount }).map((_, i) => (
                     <div key={`empty-${i}`} className="invisible" />
                   ));
                 }
