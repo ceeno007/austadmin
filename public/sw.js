@@ -85,7 +85,7 @@ self.addEventListener('sync', (event) => {
 async function syncData() {
   try {
     // Implement your background sync logic here
-    console.log('Syncing data in background...');
+    // console.log('Syncing data in background...');
   } catch (error) {
     console.error('Background sync failed:', error);
   }

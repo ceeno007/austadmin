@@ -171,7 +171,10 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <TooltipProvider>
-          <BrowserRouter>
+          <BrowserRouter future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}>
             <AuthProvider>
               <PerformanceOptimizer>
                 <Suspense fallback={<LoadingSpinner />}>

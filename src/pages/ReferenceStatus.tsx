@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle2, XCircle, AlertCircle, Mail, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion } from "framer-motion";
 
 interface Referee {
   name: string;
@@ -131,8 +132,8 @@ const ReferenceStatus: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 flex flex-col items-center pt-0 px-2">
-      <div className="w-full max-w-2xl rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-gray-200 p-8 mt-8 relative">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 md:p-8 relative">
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
@@ -143,66 +144,70 @@ const ReferenceStatus: React.FC = () => {
           Sign Out
         </button>
 
-        <div className="text-center mb-10 pt-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Reference Status</h1>
-          <p className="text-lg text-gray-500">Track the status of your referee submissions</p>
+        <div className="text-center mb-8 pt-12">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Reference Status</h1>
+          <p className="text-gray-600">Track the status of your referee submissions</p>
         </div>
 
         {application.referee_1 && application.referee_2 && (
-          <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-100 p-6 rounded-2xl border border-green-100 shadow">
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-green-100 p-3 rounded-full shadow">
-                <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-semibold text-green-800 text-center mb-2">
-              All References Received! 🎉
-            </h2>
-            <p className="text-green-700 text-center mb-4">
-              Both of your referees have submitted their recommendations. Your application is now complete!
-            </p>
-            <div className="bg-white/80 p-4 rounded-xl border border-green-100">
-              <div className="flex items-center text-green-700">
-                <Mail className="h-5 w-5 mr-2" />
-                <p className="text-sm">
-                  Please check your email for further instructions and updates on your application status.
-                </p>
-              </div>
-            </div>
-          </div>
+          <motion.div 
+            className="mb-6 p-4 bg-green-100 border border-green-200 rounded-md flex items-center justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <CheckCircle2 className="h-8 w-8 text-green-600 mr-3" />
+            <h2 className="text-lg font-semibold text-green-800">All References Received!</h2>
+          </motion.div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {referees.map((referee, index) => (
-            <div
+            <motion.div
               key={index}
-              className="flex items-center justify-between bg-white/90 rounded-2xl shadow p-6 border border-gray-100 transition hover:shadow-lg"
+              className="flex items-center justify-between p-4 bg-white rounded-md border border-gray-200"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
             >
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                  Referee {index + 1}
-                </h3>
-                <p className="text-gray-600 mb-1">{referee.name}</p>
-                <p className="text-gray-400 text-sm">{referee.email}</p>
+                <h3 className="text-base font-medium text-gray-900">Referee {index + 1}</h3>
+                <p className="text-gray-700 text-sm break-words">{referee.name}</p>
+                <p className="text-gray-500 text-xs break-words">{referee.email}</p>
               </div>
-              <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2">
                 {getStatusIcon(referee.status)}
-                <span className={`mt-2 font-semibold text-base ${getStatusColor(referee.status)}`}>
+                <span className={`font-semibold text-sm ${getStatusColor(referee.status)}`}>
                   {getStatusText(referee.status)}
                 </span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {!application.referee_1 || !application.referee_2 ? (
-          <div className="bg-blue-50 p-4 rounded-xl mt-10 flex flex-col items-center">
-            <AlertCircle className="h-6 w-6 text-blue-500 mb-2" />
-            <p className="text-blue-700 text-center">
+          <motion.div 
+            className="bg-blue-100 border border-blue-200 p-4 rounded-md mt-6 flex items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 + referees.length * 0.1, duration: 0.5 }}
+          >
+             <AlertCircle className="h-6 w-6 text-blue-600 mr-3" />
+            <p className="text-blue-800 text-sm">
               Your referees will receive an email with instructions to submit their recommendations.
             </p>
-          </div>
+          </motion.div>
         ) : null}
+        
+        {/* Optional: Add a button to resend reminder emails if needed */}
+        {/* {!application.referee_1 || !application.referee_2 ? (
+          <div className="text-center mt-6">
+            <Button variant="outline" className="text-blue-600 hover:text-blue-800">
+              <Mail className="h-4 w-4 mr-2" /> Resend Reminder Emails
+            </Button>
+          </div>
+        ) : null} */}
+
       </div>
     </div>
   );

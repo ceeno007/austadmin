@@ -1036,28 +1036,129 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
+    
     try {
+      // Validate all required fields
+      // Personal details validation
+      if (!postgraduateData.personalDetails.surname) {
+        toast.error("Surname is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.firstName) {
+        toast.error("First name is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.gender) {
+        toast.error("Gender is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.dateOfBirth.day || !postgraduateData.personalDetails.dateOfBirth.month || !postgraduateData.personalDetails.dateOfBirth.year) {
+        toast.error("Complete date of birth is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.streetAddress) {
+        toast.error("Street address is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.city) {
+        toast.error("City is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.country) {
+        toast.error("Country is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.phoneNumber) {
+        toast.error("Phone number is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.email) {
+        toast.error("Email is required");
+        return;
+      }
+      if (!postgraduateData.personalDetails.nationality) {
+        toast.error("Nationality is required");
+        return;
+      }
+
+      // Academic qualifications validation
+      const qual1 = postgraduateData.academicQualifications.qualification1;
+      if (!qual1.type) {
+        toast.error("First qualification type is required");
+        return;
+      }
+      if (!qual1.grade) {
+        toast.error("First qualification grade is required");
+        return;
+      }
+      if (!qual1.subject) {
+        toast.error("First qualification subject is required");
+        return;
+      }
+      if (!qual1.institution) {
+        toast.error("First qualification institution is required");
+        return;
+      }
+
+      // Statement of purpose validation
+      if (postgraduateData.statementOfPurpose.length === 0) {
+        toast.error("Statement of purpose is required");
+        return;
+      }
+
+      // Referee validation
+      const { referee1, referee2 } = postgraduateData.references;
+      if (!referee1.name) {
+        toast.error("First referee name is required");
+        return;
+      }
+      if (!referee1.email) {
+        toast.error("First referee email is required");
+        return;
+      }
+      if (!referee2.name) {
+        toast.error("Second referee name is required");
+        return;
+      }
+      if (!referee2.email) {
+        toast.error("Second referee email is required");
+        return;
+      }
+
+      // Declaration validation
+      if (!postgraduateData.declaration) {
+        toast.error("You must agree to the declaration");
+        return;
+      }
+
+      // Passport photo validation
+      if (!postgraduateData.passportPhoto && !passportPhotoUrl) {
+        toast.error("Passport photo is required");
+        return;
+      }
+
+      setIsProcessingPaymentState(true);
       const formData = buildPostgraduateFormData(postgraduateData);
       formData.append('is_draft', 'false');
-      const response = await apiService.submitPostgraduateApplication(formData);
       
-      // Store the response in localStorage
+      const response = await apiService.submitPostgraduateApplication(formData) as { applications?: Array<{ has_paid: boolean; referee_1: any; referee_2: any }> };
+      
+      // Store the response in localStorage for reference status page
       localStorage.setItem('applicationData', JSON.stringify(response));
       
-      // Show success message
-      toast.success("Application submitted successfully!");
-      
-      // Redirect to document upload page
-      window.location.href = "/document-upload?type=postgraduate";
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      setError(error.message || "Failed to submit application. Please try again.");
-      toast.error(error.message || "Failed to submit application. Please try again.");
+      // Check if user has already paid
+      if (response.applications?.[0]?.has_paid) {
+        // If paid, redirect to reference status page
+        navigate('/reference-status');
+      } else {
+        // If not paid, show payment modal
+        setShowPaymentModal(true);
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error('Failed to submit application. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsProcessingPaymentState(false);
     }
   };
 

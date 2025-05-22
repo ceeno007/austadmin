@@ -65,6 +65,10 @@ interface ApplicationData {
   waec_result_path?: string;
   jamb_result_path?: string;
   other_qualifications_path?: string;
+  // Additional properties for application status
+  submitted?: boolean;
+  exam_type_1?: string;
+  exam_type_2?: string;
 }
 
 interface ExamResults {
@@ -491,9 +495,6 @@ interface UndergraduateRequestBody {
 
 // Helper function to create a request body for the API
 function buildUndergraduateFormData(data) {
-  // console.log('Building form data with raw data:', data);
-  // console.log('Selected exams:', data.selectedExams);
-  
   // Create a FormData object directly
   const formData = new FormData();
   
@@ -591,22 +592,17 @@ function buildUndergraduateFormData(data) {
     );
     
     if (hasData) {
-      // console.log(`Found ${examType} data:`, examData);
-      
       // Add exam type
       formData.append(`exam_type_${examNumber}`, examType);
-      // console.log(`Added exam_type_${examNumber}: ${examType}`);
       
       // Add exam number
       if (examData.examNumber) {
         formData.append(`exam_number_${examNumber}`, examData.examNumber);
-        // console.log(`Added exam_number_${examNumber}: ${examData.examNumber}`);
       }
       
       // Add exam year
       if (examData.examYear) {
         formData.append(`exam_year_${examNumber}`, examData.examYear);
-        // console.log(`Added exam_year_${examNumber}: ${examData.examYear}`);
       }
       
       // Add subjects
@@ -614,13 +610,11 @@ function buildUndergraduateFormData(data) {
         const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
         const subjectsJson = JSON.stringify(validSubjects);
         formData.append(`subjects_${examNumber}`, subjectsJson);
-        // console.log(`Added subjects_${examNumber}: ${subjectsJson}`);
       }
       
       // Add document
       if (examData.documents) {
         formData.append(`exam_type_${examNumber}_result`, examData.documents);
-        // console.log(`Added exam_type_${examNumber}_result: ${examData.documents.name}`);
       }
       
       // Only process max 2 exams
@@ -660,24 +654,7 @@ function buildUndergraduateFormData(data) {
   // Add JAMB results document
   if (jambResults?.documents) {
     formData.append('jamb_result', jambResults.documents);
-    // console.log('Added JAMB result document:', jambResults.documents.name);
   }
-  
-  // Add passport photo
-  if (data.passportPhoto) {
-    formData.append('passport_photo', data.passportPhoto);
-    // console.log('Added passport photo:', data.passportPhoto.name);
-  }
-  
-  // Log all form data entries
-  // console.log('Final form data entries:');
-  // for (let [key, value] of formData.entries()) {
-  //   if (value instanceof File) {
-  //     console.log(`${key}: [File: ${value.name}]`);
-  //   } else {
-  //     console.log(`${key}: ${value}`);
-  //   }
-  // }
   
   return formData;
 }
@@ -1025,35 +1002,144 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
   const isFormValid = () => {
     const { personalDetails, academicQualifications, declaration } = undergraduateData;
+    
+    // Check declaration first
     if (declaration !== "true") {
       toast.error("Please agree to the declaration before proceeding");
       return false;
     }
-    if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
-        !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
-        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.stateOfOrigin ||
-        !personalDetails.phoneNumber || !personalDetails.email) {
-      toast.error("Please fill in all required personal details fields");
+    
+    // Check academic session
+    if (!undergraduateData.academicSession) {
+      toast.error("Please select an academic session");
       return false;
     }
+    
+    // Check personal details with specific error messages
+    if (!personalDetails.surname) {
+      toast.error("Please enter your surname");
+      return false;
+    }
+    
+    if (!personalDetails.firstName) {
+      toast.error("Please enter your first name");
+      return false;
+    }
+    
+    if (!personalDetails.gender) {
+      toast.error("Please select your gender");
+      return false;
+    }
+    
+    // Check date of birth fields
+    if (!personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year) {
+      toast.error("Please enter your complete date of birth");
+      return false;
+    }
+    
+    if (!personalDetails.streetAddress) {
+      toast.error("Please enter your street address");
+      return false;
+    }
+    
+    if (!personalDetails.city) {
+      toast.error("Please enter your city");
+      return false;
+    }
+    
+    if (!personalDetails.country) {
+      toast.error("Please select your country");
+      return false;
+    }
+    
+    // Make state of origin required only for Nigerian applicants
+    if (personalDetails.nationality === 'Nigeria' && !personalDetails.stateOfOrigin) {
+      toast.error("Please select your state of origin");
+      return false;
+    }
+    
+    if (!personalDetails.nationality) {
+      toast.error("Please select your nationality");
+      return false;
+    }
+    
+    if (!personalDetails.phoneNumber) {
+      toast.error("Please enter your phone number");
+      return false;
+    }
+    
+    if (!personalDetails.email) {
+      toast.error("Please enter your email address");
+      return false;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(personalDetails.email)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
+    
     // Only require at least one exam result
     if (selectedExams.length < 1) {
       toast.error("Please select at least one O'Level exam result (WAEC, NECO, or NABTEB)");
       return false;
     }
+    
     // Only require at least one subject for the first selected exam
     const firstExamType = selectedExams[0];
     const firstExam = academicQualifications[`${firstExamType}Results`];
+    
+    if (!firstExam || !firstExam.examNumber) {
+      toast.error(`Please enter your ${firstExamType.toUpperCase()} exam number`);
+      return false;
+    }
+    
+    if (!firstExam || !firstExam.examYear) {
+      toast.error(`Please select your ${firstExamType.toUpperCase()} exam year`);
+      return false;
+    }
+    
     if (!firstExam || !firstExam.subjects || firstExam.subjects.length === 0) {
       toast.error(`Please enter at least one subject for your selected ${firstExamType ? firstExamType.toUpperCase() : ''} result`);
       return false;
     }
-    if (!academicQualifications.jambResults.regNumber || 
-        !academicQualifications.jambResults.examYear || 
-        !academicQualifications.jambResults.score) {
-      toast.error("Please fill in all required JAMB fields");
+    
+    // Check if all subjects have both subject and grade
+    const incompleteSubjects = firstExam.subjects.some(s => !s.subject || !s.grade);
+    if (incompleteSubjects) {
+      toast.error(`Please complete all subject entries for ${firstExamType.toUpperCase()} results`);
       return false;
     }
+    
+    // Check O'level exam documents
+    if (!firstExam.documents) {
+      toast.error(`Please upload your ${firstExamType.toUpperCase()} result document`);
+      return false;
+    }
+    
+    // Check JAMB fields with specific messages
+    if (!academicQualifications.jambResults.regNumber) {
+      toast.error("Please enter your JAMB registration number");
+      return false;
+    }
+    
+    if (!academicQualifications.jambResults.examYear) {
+      toast.error("Please select your JAMB exam year");
+      return false;
+    }
+    
+    if (!academicQualifications.jambResults.score) {
+      toast.error("Please enter your JAMB score");
+      return false;
+    }
+    
+    // Check JAMB documents
+    if (!academicQualifications.jambResults.documents) {
+      toast.error("Please upload your JAMB result document");
+      return false;
+    }
+    
     return true;
   };
 
@@ -1221,8 +1307,8 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate the form without showing the generic message
     if (!isFormValid()) {
-      toast.error("Please fill in all required fields correctly");
       return;
     }
 
@@ -1232,14 +1318,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       formData.append('is_draft', 'false');
       formData.append('submitted', 'true');
       
-      // console.log('Final form data before submission:');
-      // for (let [key, value] of formData.entries()) {
-      //   console.log(`${key}: ${value instanceof File ? '[File: ' + value.name + ']' : value}`);
-      // }
-      
-      // console.log('Making API call to submit application...');
       const response = await apiService.submitUndergraduateApplication(formData);
-      // console.log('API Response:', response);
       
       // Store the response in localStorage
       localStorage.setItem('applicationData', JSON.stringify(response));

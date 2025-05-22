@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
   '/favicon.ico',
   '/logo192.png',
   '/logo512.png',
-  '/logo/aust-logo.png',
+  '/logo/aust-logo.webp',
   '/assets/index.css',
   '/assets/index.js'
 ];
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        // console.log('Opened cache');
         return cache.addAll(STATIC_ASSETS);
       })
   );
@@ -88,8 +88,8 @@ self.addEventListener('sync', (event) => {
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data.text(),
-    icon: '/logo/aust-logo.png',
-    badge: '/logo/aust-logo.png',
+    icon: '/logo/aust-logo.webp',
+    badge: '/logo/aust-logo.webp',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -99,12 +99,12 @@ self.addEventListener('push', (event) => {
       {
         action: 'explore',
         title: 'View Details',
-        icon: '/logo/aust-logo.png'
+        icon: '/logo/aust-logo.webp'
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/logo/aust-logo.png'
+        icon: '/logo/aust-logo.webp'
       }
     ]
   };
