@@ -685,32 +685,94 @@ const apiService = {
   //======================================
   
   /**
-   * Submit a contact form
-   * @param contactData - Contact form data
+   * Submit contact form
+   * @param formData - Contact form data (name, email, subject, message)
    * @returns Promise with the API response
    */
-  submitContactForm: async (contactData: {
+  submitContactForm: async (formData: {
     name: string;
     email: string;
     subject: string;
     message: string;
   }) => {
     try {
-      const response = await fetch(API_ENDPOINTS.CONTACT, {
+      const url = `${FASTAPI_BASE_URL}/contact/send`; // Corrected endpoint
+      
+      const formBody = new URLSearchParams();
+      formBody.append('full_name', formData.name); // Map 'name' to 'full_name'
+      formBody.append('email', formData.email);
+      formBody.append('subject', formData.subject);
+      formBody.append('message', formData.message);
+
+      const response = await fetch(url, {
         method: "POST",
-        headers: defaultHeaders,
-        body: JSON.stringify(contactData),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formBody.toString()
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to send message");
+        throw new Error(errorData.detail || "Failed to submit contact form");
       }
 
       return await response.json();
     } catch (error) {
       console.error("Contact form submission error:", error);
-      throw error;
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while submitting the contact form");
+    }
+  },
+
+  /**
+   * Change referee details for a postgraduate application
+   * @param data - Object containing referee_number, new_referee_name, and new_referee_email
+   * @returns Promise with the API response
+   */
+  changePostgraduateReferee: async (data: {
+    referee_number: 1 | 2;
+    new_referee_name: string;
+    new_referee_email: string;
+  }) => {
+    try {
+      const url = `${FASTAPI_BASE_URL}/postgraduate/change-reference`;
+      
+      const formBody = new URLSearchParams();
+      formBody.append('referee_number', data.referee_number.toString());
+      formBody.append('new_referee_name', data.new_referee_name);
+      formBody.append('new_referee_email', data.new_referee_email);
+
+      const token = localStorage.getItem('accessToken');
+      const headers: HeadersInit = {
+        'accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers,
+        body: formBody.toString()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Failed to change referee details");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Change referee error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while changing referee details");
     }
   },
 

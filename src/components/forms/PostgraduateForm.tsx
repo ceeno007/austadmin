@@ -249,6 +249,10 @@ const FileUploadField = ({
     }
   };
 
+  const handleContainerClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const fileNames = Array.isArray(value) 
     ? value.map(file => file.name).join(', ')
     : value?.name || '';
@@ -257,12 +261,13 @@ const FileUploadField = ({
     <div className="space-y-2">
       <Label>{label}</Label>
       <div 
-        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors ${
+        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors cursor-pointer ${
           hasFiles ? 'bg-white' : 'bg-white'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={handleContainerClick} // Add click handler to the container
       >
         <input
           ref={fileInputRef}
@@ -279,7 +284,10 @@ const FileUploadField = ({
             <span className="text-sm text-gray-800 text-center">{fileNames}</span>
             <button
               type="button"
-              onClick={handleRemove}
+              onClick={(e) => { // Prevent click from propagating to container
+                e.stopPropagation();
+                handleRemove();
+              }}
               className="mt-2 p-1 hover:bg-red-100 rounded-full transition-colors"
             >
               <X className="h-4 w-4 text-red-600" />

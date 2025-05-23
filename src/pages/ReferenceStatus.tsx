@@ -6,6 +6,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle2, XCircle, AlertCircle, Mail, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import apiService from "@/services/api";
 
 interface Referee {
   name: string;
@@ -30,6 +32,11 @@ const ReferenceStatus: React.FC = () => {
   const { logout } = useAuth();
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingRefereeIndex, setEditingRefereeIndex] = useState<number | null>(null);
+  const [newRefereeName, setNewRefereeName] = useState("");
+  const [newRefereeEmail, setNewRefereeEmail] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const fetchApplicationData = async () => {
@@ -81,6 +88,125 @@ const ReferenceStatus: React.FC = () => {
     logout();
     navigate("/login");
   };
+
+  const handleEditClick = (index: number) => {
+    const currentReferee = referees[index];
+    setEditingRefereeIndex(index);
+    setNewRefereeName(currentReferee.name === "Not provided" ? "" : currentReferee.name);
+    setNewRefereeEmail(currentReferee.email === "Not provided" ? "" : currentReferee.email);
+    setEmailError(""); // Clear previous errors
+  };
+
+  const handleCancelClick = () => {
+    setEditingRefereeIndex(null);
+    setNewRefereeName("");
+    setNewRefereeEmail("");
+    setEmailError("");
+  };
+
+  const validateAcademicEmail = (email: string) => {
+    // Basic validation for academic email (ends with .edu or similar academic domains)
+    const academicEmailRegex = /^[\w.-]+@(?:[a-zA-Z0-9-]+\.)+(?:edu|ac|university|college|inst)\b/i;
+    if (!email) {
+        return "Email is required.";
+    }
+    if (!academicEmailRegex.test(email)) {
+        return "Please enter a valid academic email address.";
+    }
+    return "";
+  };
+
+  const handleSaveClick = async (index: number) => {
+    if (!newRefereeName || !newRefereeEmail) {
+        setEmailError("Name and Email are required.");
+        return;
+    }
+
+    const emailValidationMessage = validateAcademicEmail(newRefereeEmail);
+    if (emailValidationMessage) {
+        setEmailError(emailValidationMessage);
+        return;
+    }
+
+    // Check if the new email is the same as the other referee's email
+    if (application) {
+        const otherRefereeEmail = index === 0 ? application.second_referee_email : application.first_referee_email;
+        if (newRefereeEmail.toLowerCase() === otherRefereeEmail.toLowerCase()) {
+            setEmailError("Referee emails cannot be the same.");
+            return;
+        }
+    }
+
+    setIsSaving(true);
+    setEmailError("");
+
+    try {
+        const refereeNumber = index === 0 ? 1 : 2; // 1 for first referee, 2 for second
+        await apiService.changePostgraduateReferee({
+            referee_number: refereeNumber as 1 | 2,
+            new_referee_name: newRefereeName,
+            new_referee_email: newRefereeEmail,
+        });
+
+        // Update local application state and localStorage
+        if (application) {
+            const updatedApplication = { ...application };
+            if (index === 0) {
+                updatedApplication.first_referee_name = newRefereeName;
+                updatedApplication.first_referee_email = newRefereeEmail;
+                updatedApplication.referee_1 = false; // Reset status after change
+            } else {
+                updatedApplication.second_referee_name = newRefereeName;
+                updatedApplication.second_referee_email = newRefereeEmail;
+                updatedApplication.referee_2 = false; // Reset status after change
+            }
+            setApplication(updatedApplication);
+            // Assuming applicationData in localStorage stores an object with an applications array
+            const storedData = localStorage.getItem("applicationData");
+            if (storedData) {
+                try {
+                    const parsedData = JSON.parse(storedData);
+                    if (parsedData.applications && parsedData.applications.length > 0) {
+                        parsedData.applications[0] = updatedApplication;
+                        localStorage.setItem("applicationData", JSON.stringify(parsedData));
+                    }
+                } catch(e) {
+                    console.error("Failed to parse or update applicationData in localStorage", e);
+                }
+            } else {
+                 // If no applicationData in localStorage, maybe just store the updated application directly
+                 // This might depend on how the app uses this storage.
+                 // For now, logging a warning. Consider a more robust localStorage strategy.
+                 console.warn("applicationData not found in localStorage, cannot update.");
+            }
+
+        }
+
+        toast({
+            title: "Success",
+            description: `Referee ${index + 1} details updated.`,
+            style: {
+                background: '#10B981', // Green background
+                color: 'white',
+            }
+        });
+        handleCancelClick(); // Exit editing mode
+
+    } catch (error: any) {
+        console.error("Error changing referee:", error);
+        toast({
+            title: "Error",
+            description: error.message || "Failed to update referee details. Please try again.",
+            variant: "destructive",
+            style: {
+              background: '#EF4444', // Red background
+              color: 'white',
+            }
+        });
+    } finally {
+        setIsSaving(false);
+    }
+};
 
   if (loading) {
     return (
@@ -170,17 +296,86 @@ const ReferenceStatus: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
             >
-              <div>
-                <h3 className="text-base font-medium text-gray-900">Referee {index + 1}</h3>
-                <p className="text-gray-700 text-sm break-words">{referee.name}</p>
-                <p className="text-gray-500 text-xs break-words">{referee.email}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(referee.status)}
-                <span className={`font-semibold text-sm ${getStatusColor(referee.status)}`}>
-                  {getStatusText(referee.status)}
-                </span>
-              </div>
+              {editingRefereeIndex === index ? (
+                // Editing mode
+                <div className="flex flex-col w-full space-y-3">
+                    <h3 className="text-base font-medium text-gray-900">Editing Referee {index + 1}</h3>
+                    <div>
+                        <label htmlFor={`new-referee-name-${index}`} className="sr-only">New Name</label>
+                        <Input
+                            id={`new-referee-name-${index}`}
+                            placeholder="New Referee Name"
+                            value={newRefereeName}
+                            onChange={(e) => setNewRefereeName(e.target.value)}
+                            disabled={isSaving}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor={`new-referee-email-${index}`} className="sr-only">New Email</label>
+                        <Input
+                            id={`new-referee-email-${index}`}
+                            type="email"
+                            placeholder="New Referee Academic Email"
+                            value={newRefereeEmail}
+                            onChange={(e) => {
+                                setNewRefereeEmail(e.target.value);
+                                setEmailError(""); // Clear error on change
+                            }}
+                            disabled={isSaving}
+                        />
+                         {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="secondary" 
+                            onClick={handleCancelClick} 
+                            disabled={isSaving}
+                            className="flex-grow"
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={() => handleSaveClick(index)} 
+                            disabled={isSaving} 
+                            className="flex-grow bg-[#FF5500] hover:bg-[#e64d00]"
+                        >
+                             {isSaving ? (
+                                <div className="flex items-center justify-center">
+                                    Saving...
+                                </div>
+                                ) : (
+                                    "Save"
+                                )
+                            }
+                        </Button>
+                    </div>
+                </div>
+              ) : (
+                // Display mode
+                <div className="flex items-center justify-between w-full">
+                    <div>
+                        <h3 className="text-base font-medium text-gray-900">Referee {index + 1}</h3>
+                        <p className="text-gray-700 text-sm break-words">{referee.name}</p>
+                        <p className="text-gray-500 text-xs break-words">{referee.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {!referee.status && ( // Only show edit if status is not submitted
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditClick(index)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <XCircle className="h-5 w-5" />
+                            </Button>
+                        )}
+                        {getStatusIcon(referee.status)}
+                        <span className={`font-semibold text-sm ${getStatusColor(referee.status)}`}>
+                            {getStatusText(referee.status)}
+                        </span>
+                    </div>
+                </div>
+              )}
             </motion.div>
           ))}
         </div>

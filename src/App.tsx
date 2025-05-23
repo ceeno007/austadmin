@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Toaster } from 'sonner';
+import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { HelmetProvider } from 'react-helmet-async';
 import ConditionalNavbar from './components/ConditionalNavbar';
@@ -73,7 +73,8 @@ const AppLayout: React.FC = () => {
       mainContent.style.transform = 'translateZ(0)';
       mainContent.style.backfaceVisibility = 'hidden';
       mainContent.style.perspective = '1000px';
-      mainContent.style.willChange = 'transform';
+      // Optimize for scrolling and content changes
+      mainContent.style.willChange = 'transform, scroll-position, contents';
     }
   }, []);
 
@@ -180,16 +181,7 @@ const App: React.FC = () => {
                 <Suspense fallback={<LoadingSpinner />}>
                   <AppLayout />
                 </Suspense>
-                <Toaster 
-                  position="top-right" 
-                  toastOptions={{
-                    style: {
-                      maxWidth: '320px',
-                    },
-                    className: 'toast-compact',
-                  }} 
-                  richColors
-                />
+                <Toaster />
               </PerformanceOptimizer>
             </AuthProvider>
           </BrowserRouter>
