@@ -1,21 +1,21 @@
 // Image URLs for programs
 const imageMap = {
-  "software-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/software-engineering.jpg",
-  "computer-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/programming-background-with-person-working-with-codes-computer.jpg",
-  "petroleum-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/petroleum-engineering.jpg",
-  "accounting": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/accounting.jpg",
-  "business-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/business-admin.jpg",
-  "civil-engineering": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/civil-engineering.jpg",
-  "aerospace": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/aerospace.jpg",
-  "gis": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/gis.jpg",
-  "math": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/physics.jpg?updatedAt=1747311900930",
-  "public-admin": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/public-admin.jpg",
-  "space-physics": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/space-physics.jpg",
-  "policy": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/policy.jpg",
-  "applied-stats": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/applied-stats.jpg",
-  "jupeb-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/jupeb-science.jpg",
-  "foundation-science": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/jupeb-science.jpg",
-  "default": "https://ik.imagekit.io/nsq6yvxg1/Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg"
+  "software-engineering": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/software-engineering.jpg",
+  "computer-science": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/programming-background-with-person-working-with-codes-computer.jpg",
+  "petroleum-engineering": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/petroleum-engineering.jpg",
+  "accounting": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/accounting.jpg",
+  "business-admin": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/business-admin.jpg",
+  "civil-engineering": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/civil-engineering.jpg",
+  "aerospace": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/aerospace.jpg",
+  "gis": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/gis.jpg",
+  "math": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/physics.jpg?updatedAt=1747311900930",
+  "public-admin": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/public-admin.jpg",
+  "space-physics": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/space-physics.jpg",
+  "policy": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/policy.jpg",
+  "applied-stats": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/applied-stats.jpg",
+  "jupeb-science": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/jupeb-science.jpg",
+  "foundation-science": "https://ik.imagekit.io/nsq6yvxg1/tr:q-10/Upload/images/jupeb-science.jpg",
+  "default": "https://ik.imagekit.io/nsq6yvxg/tr:q-10//Upload/images/artturi-jalli-gYrYa37fAKI-unsplash.jpg"
 };
 
 export interface Program {
@@ -134,49 +134,8 @@ export const programs: Program[] = [
       { question: 'What facilities are available for students?', answer: 'Students have access to modern computer labs, high-speed internet, specialized software, and research facilities for practical work and projects.' }
     ]
   },
-  {
-    id: 'foundation-science',
-    title: 'Foundation & Remedial Sciences Programme (Foundation)',
-    duration: '1 year',
-    level: 'Foundation',
-    category: 'foundation',
-    schoolFees: '₦993,000 total',
-    image: imageMap['foundation-science'],
-    description: 'Prepare for undergraduate studies in science and engineering fields. Build strong foundations in Mathematics, Physics, Chemistry, Biology, English, and Computer Science.',
-    requirements: [
-      'Five O Level credits including English, Mathematics, Physics, Chemistry, Biology',
-      'Minimum age of 16 years',
-      'Completed secondary education',
-      'Pass in Basic Science subjects'
-    ],
-    pdf: '/pdfs/2024-2025 School of Foundation & Remedial Studies Fees.pdf',
-    faqs: [
-      { question: 'What happens after completing the foundation programme?', answer: 'Successful completion allows direct entry into undergraduate programmes in science and engineering fields at AUST.' },
-      { question: 'Can I transfer to another university after foundation?', answer: 'Yes, the programme is recognised by other universities, but transfer policies vary by institution.' },
-      { question: 'What subjects are covered?', answer: 'Mathematics, Physics, Chemistry, Biology, English, and Computer Science at an advanced level.' }
-    ]
-  },
-  {
-    id: 'jupeb-science',
-    title: 'JUPEB Programme (JUPEB)',
-    duration: '1 year',
-    level: 'JUPEB',
-    category: 'jupeb',
-    schoolFees: '₦1,343,000 total',
-    image: imageMap['jupeb-science'],
-    description: 'Advanced preparation for direct entry into 200-level university programmes. Intensive study in science subjects and development of academic skills.',
-    requirements: [
-      'Five O Level credits including English, Mathematics, Physics, Chemistry, Biology',
-      'Minimum age of 16 years',
-      'Completed secondary education',
-      'Pass in Basic Science subjects'
-    ],
-    faqs: [
-      { question: 'What is JUPEB?', answer: 'JUPEB (Joint Universities Preliminary Examinations Board) is a national programme that prepares students for direct entry into university programmes. For more information, visit https://jupeb.edu.ng' },
-      { question: 'What are the benefits of JUPEB?', answer: 'Successful candidates gain direct entry into 200-level of their chosen degree programmes, often with advanced standing.' },
-      { question: 'How is the programme assessed?', answer: 'Assessment is through continuous evaluation, assignments, and final examinations set by JUPEB.' }
-    ]
-  },
+  
+ 
   {
     id: 'beng-materials-metallurgical',
     title: 'Materials & Metallurgical Engineering (BEng)',
