@@ -1,10 +1,10 @@
-import React, { useState, useEffect, Suspense, useMemo } from "react";
+import React, { useState, useEffect, Suspense, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import SEO from "@/components/SEO";
 import { programs, type Program } from "@/data/programs";
-import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import SequentialImageLoader from "@/components/SequentialImageLoader";
 
 // Constants
 const TABS = {
@@ -47,53 +47,77 @@ const SkeletonCard = () => (
 );
 
 // Memoized ProgramCard
-const ProgramCard = React.memo<{ program: Program }>(({ program }) => {
-  const navigate = useNavigate();
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate(`/programs/${program.id}`);
-  };
-  return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="relative aspect-[16/9]">
-        <ImageWithSkeleton
-          src={program.image}
-          alt={program.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h3 className="text-xl font-semibold mb-1">{program.title}</h3>
-          <p className="text-sm opacity-90">{program.duration}</p>
+const ProgramCard = React.memo<{ program: Program, index: number, scrollDirection: 'up' | 'down' | null }>(
+  ({ program, index, scrollDirection }) => {
+    const navigate = useNavigate();
+    const handleViewDetails = (e: React.MouseEvent) => {
+      e.preventDefault();
+      navigate(`/programs/${program.id}`);
+    };
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+        <div className="relative aspect-[16/9]">
+          <SequentialImageLoader
+            src={program.image}
+            alt={program.title}
+            className="w-full h-full object-cover"
+            index={index}
+            scrollDirection={scrollDirection}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            <h3 className="text-xl font-semibold mb-1">{program.title}</h3>
+            <p className="text-sm opacity-90">{program.duration}</p>
+          </div>
+        </div>
+        <div className="p-4">
+          <p
+            className="text-gray-600 mb-4 line-clamp-2"
+            dangerouslySetInnerHTML={{ __html: program.description }}
+          />
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              className="border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white transition-all duration-200 ease-in-out"
+              onClick={handleViewDetails}
+            >
+              Learn More
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="p-4">
-        <p
-          className="text-gray-600 mb-4 line-clamp-2"
-          dangerouslySetInnerHTML={{ __html: program.description }}
-        />
-        <div className="flex justify-between items-center">
-          <Button
-            variant="outline"
-            className="border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white transition-all duration-200 ease-in-out"
-            onClick={handleViewDetails}
-          >
-            Learn More
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 const Programs: React.FC = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>(TABS.UNDERGRADUATE);
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>('down');
+  const lastScrollY = useRef<number>(0);
   const navigate = useNavigate();
 
   const PREFETCH_THRESHOLD = 3;
+
+  // Track scroll direction
+  useEffect(() => {
+    const handleScrollDirection = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current) {
+        setScrollDirection('down');
+      } else if (currentScrollY < lastScrollY.current) {
+        setScrollDirection('up');
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScrollDirection);
+    return () => window.removeEventListener('scroll', handleScrollDirection);
+  }, []);
 
   // Sync tab with URL
   useEffect(() => {
@@ -231,9 +255,13 @@ const Programs: React.FC = () => {
 
             {/* Program Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedPrograms.map(prog => (
+              {displayedPrograms.map((prog, index) => (
                 <div className="program-card" key={prog.id}>
-                  <ProgramCard program={prog} />
+                  <ProgramCard 
+                    program={prog} 
+                    index={index} 
+                    scrollDirection={scrollDirection}
+                  />
                 </div>
               ))}
 
@@ -248,12 +276,26 @@ const Programs: React.FC = () => {
                 }
                 if (remainder !== 0) {
                   return Array.from({ length: fillCount }).map((_, i) => (
-                    <div key={`empty-${i}`} className="invisible" />
+                    <div key={`spacer-${i}`} className="invisible"></div>
                   ));
                 }
                 return null;
               })()}
             </div>
+
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="flex justify-center mt-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#FF5500]"></div>
+              </div>
+            )}
+
+            {/* End of results indicator */}
+            {visibleItems >= currentPrograms.length && currentPrograms.length > 0 && (
+              <div className="text-center mt-8 text-gray-500">
+                That's all the programs in this category
+              </div>
+            )}
           </div>
         </section>
       </main>
