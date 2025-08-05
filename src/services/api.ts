@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   FASTAPI_POSTGRADUATE_UPLOAD: `${FASTAPI_BASE_URL}/postgraduate/upload`,
   FASTAPI_SIGNUP: `${FASTAPI_BASE_URL}/auth/signup`,
   FOUNDATION: `${FASTAPI_BASE_URL}/foundation/applications`,
+  UNIVERSITIES: `${FASTAPI_BASE_URL}/universities`,
 };
 
 // Default Headers for JSON requests
@@ -982,6 +983,28 @@ const apiService = {
         throw new Error(error.response.data.detail);
       }
       throw new Error("Failed to initialize payment");
+    }
+  },
+
+  /**
+   * Fetch universities based on search query and country
+   * @param query - Search query for university name
+   * @param country - Country to search in
+   * @returns Promise with universities data
+   */
+  fetchUniversities: async (query: string, country: string = 'Nigeria') => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.UNIVERSITIES}?search=${encodeURIComponent(query)}&country=${encodeURIComponent(country)}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch universities');
+      }
+      
+      const data = await response.json();
+      return data.slice(0, 20); // Limit to 20 results
+    } catch (error) {
+      console.error('Error fetching universities:', error);
+      throw error;
     }
   },
 

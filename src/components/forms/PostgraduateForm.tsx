@@ -1241,11 +1241,9 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
     }
     setIsLoadingUniversities(true);
     try {
-      const response = await fetch(`https://admissions-jcvy.onrender.com/universities?search=${encodeURIComponent(query)}&country=${encodeURIComponent(universityCountry)}`);
-      const data = await response.json();
-      const limitedData = data.slice(0, 20);
-      setUniversities(limitedData);
-      setUniversityCache(prev => ({ ...prev, [cacheKey]: limitedData }));
+      const data = await apiService.fetchUniversities(query, universityCountry);
+      setUniversities(data);
+      setUniversityCache(prev => ({ ...prev, [cacheKey]: data }));
     } catch (error) {
       toast.error("Failed to fetch universities");
       console.error("Error fetching universities:", error);
@@ -1334,7 +1332,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
   // Update the PopoverContent to ensure proper positioning and interaction
   const renderInstitutionField = () => (
     <div className="space-y-2">
-      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Label>Institution <span className="text-red-500 text-xs">*</span></Label>
       <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
         <PopoverTrigger asChild>
           <Button
@@ -1374,7 +1372,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
   // Update renderInstitutionField2 similarly
   const renderInstitutionField2 = () => (
     <div className="space-y-2">
-      <Label>Institution <span className="text-red-500">Required</span></Label>
+      <Label>Institution <span className="text-red-500 text-xs">*</span></Label>
       <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
         <PopoverTrigger asChild>
           <Button
@@ -2108,18 +2106,18 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              Phone Number
-              <span className="text-red-500 text-xs">*</span>
-            </Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                          Phone Number
+                          <span className="text-red-500 text-xs">*</span>
+                        </Label>
             <PhoneInput
               international
               defaultCountry="NG"
               value={postgraduateData.personalDetails.phoneNumber || undefined}
               onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-              className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!px-4 [&>input]:!border-gray-300 [&>input]:!rounded-xl [&>input]:!focus:ring-2 [&>input]:!focus:ring-amber-500 [&>input]:!focus:border-amber-500 [&>input]:!transition-all [&>input]:!duration-200 [&>input]:!text-base [&>input]:!bg-background [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+              className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!px-4 [&>input]:!border-2 [&>input]:!border-gray-300 [&>input]:!rounded-xl [&>input]:!focus:ring-2 [&>input]:!focus:ring-amber-500 [&>input]:!focus:border-amber-500 [&>input]:!transition-all [&>input]:!duration-200 [&>input]:!text-base [&>input]:!bg-background [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
               placeholder="Enter phone number"
             />
           </div>

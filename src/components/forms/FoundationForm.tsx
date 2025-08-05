@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search } from "lucide-react";
-import PaymentModal from "@/components/PaymentModal";
+import SquadPaymentModal from "@/components/SquadPaymentModal";
 
 interface DocumentField {
   id: string;
@@ -852,6 +852,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
     }
 
     try {
+      // Set program type for Squad payment
+      localStorage.setItem("programType", "foundation");
       setShowPaymentModal(true);
     } catch (error) {
       console.error("Payment initialization failed:", error);
@@ -941,11 +943,9 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
     }
     setIsLoadingUniversities(true);
     try {
-      const response = await fetch(`https://admissions-jcvy.onrender.com/universities?search=${encodeURIComponent(query)}&country=${encodeURIComponent(universityCountry)}`);
-      const data = await response.json();
-      const limitedData = data.slice(0, 20);
-      setUniversities(limitedData);
-      setUniversityCache(prev => ({ ...prev, [cacheKey]: limitedData }));
+      const data = await apiService.fetchUniversities(query, universityCountry);
+      setUniversities(data);
+      setUniversityCache(prev => ({ ...prev, [cacheKey]: data }));
     } catch (error) {
       toast.error("Failed to fetch universities");
       console.error("Error fetching universities:", error);
@@ -2162,19 +2162,9 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
             <p className="text-sm text-amber-800 space-y-2">
               <strong>Application Fees (Non-refundable):</strong>
               <br />
-              <span className="block mt-2">
-                <strong>Nigerian Applicants:</strong> ₦10,000 (Application Fee Only)
-              </span>
-              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
-                  <strong>Payment Processing Fee:</strong> Squad charges 1.9% processing fee (capped at ₦2,000). 
-                  Total amount you will pay: <strong>₦10,190</strong> (₦10,000 + ₦190 processing fee).
-                </p>
-              </div>
               <div className="mt-4">
                 <p className="font-medium">Payment Process:</p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Payment will be processed through Squad by GTBank</li>
                   <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
                   <li>A payment receipt will be automatically generated after successful payment</li>
                   <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees (₦1,343,000 total for Foundation) will be communicated upon admission</li>
@@ -2237,7 +2227,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                </form>
        </div>
 
-       <PaymentModal
+       <SquadPaymentModal
          isOpen={showPaymentModal}
          onClose={() => setShowPaymentModal(false)}
          application={foundationRemedialData}

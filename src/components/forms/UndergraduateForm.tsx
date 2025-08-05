@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -150,6 +150,8 @@ const FileUploadField = ({
   maxSize?: string;
   multiple?: boolean;
 }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('/'));
   const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
@@ -171,27 +173,71 @@ const FileUploadField = ({
     return "";
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = (files: File[]) => {
+    if (multiple) {
+      onChange(files);
+    } else {
+      onChange(files[0] ? [files[0]] : null);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
+    }
+  };
+
+  const handleRemove = () => {
+    onChange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleContainerClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <div className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors ${
-        hasFiles ? 'bg-blue-50' : 'bg-white'
-      }`}>
+      <div 
+        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors cursor-pointer ${
+          hasFiles ? 'bg-blue-50' : isDragging ? 'bg-blue-100' : 'bg-white'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleContainerClick}
+      >
         <input
+          ref={fileInputRef}
           type="file"
           id={id}
           className="hidden"
           accept={accept}
           multiple={multiple}
-          onChange={(e) => {
-            const files = Array.from(e.target.files || []);
-            onChange(multiple ? files : files[0] ? [files[0]] : null);
-          }}
+          onChange={handleFileChange}
         />
-        <label
-          htmlFor={id}
-          className="flex flex-col items-center justify-center w-full cursor-pointer"
-        >
+        <div className="flex flex-col items-center justify-center w-full cursor-pointer">
           {hasFiles ? (
             <div className="flex items-center justify-center w-full gap-2">
               {isUrl ? (
@@ -211,7 +257,8 @@ const FileUploadField = ({
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  onRemove();
+                  e.stopPropagation();
+                  handleRemove();
                 }}
                 className="p-1 hover:bg-green-100 rounded-full ml-2"
               >
@@ -222,14 +269,14 @@ const FileUploadField = ({
             <div className="flex flex-col items-center justify-center w-full">
               <Upload className="h-8 w-8 text-gray-400" />
               <span className="mt-2 text-sm text-gray-800 text-center">
-                Click to upload {label}
+                Click or drag to upload {label}
               </span>
               <span className="mt-1 text-xs text-gray-700 text-center">
                 Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
               </span>
             </div>
           )}
-        </label>
+        </div>
       </div>
     </div>
   );
@@ -805,8 +852,6 @@ export const checkApplicationStatusAndRedirect = (authResponse: any) => {
       
       // If the application is already submitted, redirect to success page
       if (application.submitted === true) {
-        console.log('Found submitted application, redirecting to success page');
-        
         // Store the application data for reference on the success page
         localStorage.setItem('applicationData', JSON.stringify(authResponse));
         
@@ -863,12 +908,10 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         const parsedData = JSON.parse(storedData);
         if (parsedData.applications && parsedData.applications.length > 0) {
           const application = parsedData.applications[0];
-          console.log('Loading application data:', application);
           
           // Check if the application is already submitted
           if (application.submitted === true) {
             // If already submitted, redirect to success page
-            console.log('Application is already submitted, redirecting to success page');
             toast.success("You have an existing submitted application", {
               description: "Redirecting to application status...",
               duration: 2000,
@@ -888,7 +931,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           const selectedExams = [];
           if (application.exam_type_1) selectedExams.push(application.exam_type_1);
           if (application.exam_type_2) selectedExams.push(application.exam_type_2);
-          console.log('Setting selected exams to:', selectedExams);
           setSelectedExams(selectedExams);
           
           setUndergraduateData(prev => autofillFromApplication(application, prev));
@@ -1520,7 +1562,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           onChange={(e) => handlePersonalDetailsChange('surname', e.target.value)}
                       onBlur={handleAutoSave}
                       className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
-          required 
         />
       </div>
                   <div className="space-y-3">
@@ -1534,7 +1575,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
                       onBlur={handleAutoSave}
                       className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
-          required 
         />
       </div>
                   <div className="space-y-3">
@@ -1599,7 +1639,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               }
             }
           }))}
-          required
         >
                       <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select your course" />
@@ -1747,18 +1786,16 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Label className="text-sm font-medium text-gray-700">
           Phone Number
-                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <PhoneInput
           international
           defaultCountry="NG"
           value={undergraduateData.personalDetails.phoneNumber}
           onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-                      className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                      className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border-2 [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
           placeholder="Enter phone number"
-          required
         />
       </div>
                   <div className="space-y-3">

@@ -23,11 +23,6 @@ export const checkSignInApplicationStatus = (signInResponse: any): boolean => {
         toast.success("Welcome back!", {
           description: "You have a submitted application. Redirecting to status page...",
           duration: 2000,
-          style: {
-            background: '#10B981',
-            color: 'white',
-            border: 'none',
-          }
         });
         
         // Redirect to application success page after a short delay
@@ -67,11 +62,6 @@ export const checkExistingApplicationStatus = (): boolean => {
           toast.success("Application found!", {
             description: "Redirecting to your application status...",
             duration: 2000,
-            style: {
-              background: '#10B981',
-              color: 'white',
-              border: 'none',
-            }
           });
           
           // Redirect to application success page after a short delay
