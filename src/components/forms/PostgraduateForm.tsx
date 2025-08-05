@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, X, Check, Search } from "lucide-react";
+import { Upload, X, Check, Search, Building2, CreditCard, FileCheck, User, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
@@ -20,6 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from "@/components/PaymentModal";
+import SquadPaymentModal from "@/components/SquadPaymentModal";
 
 interface DateField {
   day: string;
@@ -36,8 +37,8 @@ interface PostgraduateDocumentData {
   institution: string;
   startDate: DateField;
   endDate: DateField;
-  degreeCertificate: File;
-  transcript: File;
+  degreeCertificate: File | null;
+  transcript: File | null;
 }
 
 interface PostgraduateFormData {
@@ -64,7 +65,7 @@ interface PostgraduateFormData {
   academicQualifications: {
     qualification1: PostgraduateDocumentData;
     qualification2: PostgraduateDocumentData;
-    otherQualifications: File;
+    otherQualifications: File | null;
   };
   statementOfPurpose: File[];
   references: {
@@ -178,7 +179,7 @@ interface FileUploadFieldProps {
   id: string;
   label: string | React.ReactNode;
   accept: string;
-  value: File | File[] | null;
+  value: File | File[] | string | null;
   onChange: (files: File[] | null) => void;
   onRemove: () => void;
   maxSize?: string;
@@ -196,11 +197,30 @@ const FileUploadField = ({
   multiple = false 
 }: FileUploadFieldProps) => {
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
+  
+  // Check if the value is a URL (from backend) or a File object
+  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
+  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
+  
   const fileNames = hasFiles 
     ? Array.isArray(value) 
       ? value.map(f => f.name).join(", ") 
-      : (value as File).name
+      : value instanceof File 
+        ? value.name 
+        : ""
     : "";
+
+  // Extract filename from URL
+  const getFileNameFromUrl = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const filename = pathname.split('/').pop() || 'document.pdf';
+      return decodeURIComponent(filename);
+    } catch {
+      return 'document.pdf';
+    }
+  };
 
   const acceptedTypes = accept.split(',').map(type => 
     type.replace('.', '').toUpperCase()
@@ -229,17 +249,52 @@ const FileUploadField = ({
         >
           {hasFiles ? (
             <div className="flex items-center justify-center w-full gap-2">
-              <span className="text-sm text-green-800 text-center">{fileNames}</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onRemove();
-                }}
-                className="p-1 hover:bg-green-100 rounded-full ml-2"
-              >
-                <X className="h-4 w-4 text-green-600" />
-              </button>
+              {isUrl ? (
+                // Show URL as clickable link
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-800">
+                    {getFileNameFromUrl(value as string)}
+                  </span>
+                  <a
+                    href={value as string}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <FileCheck className="h-3 w-3 mr-1" />
+                    View PDF
+                  </a>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onRemove();
+                    }}
+                    className="p-1 hover:bg-green-100 rounded-full"
+                  >
+                    <X className="h-4 w-4 text-green-600" />
+                  </button>
+                </div>
+              ) : isFile ? (
+                // Show uploaded file
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-800">{fileNames}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onRemove();
+                    }}
+                    className="p-1 hover:bg-green-100 rounded-full"
+                  >
+                    <X className="h-4 w-4 text-green-600" />
+                  </button>
+                </div>
+              ) : (
+                // Fallback
+                <span className="text-sm text-green-800">{fileNames}</span>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center w-full">
@@ -445,46 +500,35 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   useEffect(() => {
     try {
-      // Fallback: Check application data from localStorage
       const storedData = localStorage.getItem('applicationData');
       if (storedData) {
         const parsedData = JSON.parse(storedData);
-        // Check if there are applications in the response
-        const application = parsedData.applications && parsedData.applications.length > 0 
-          ? parsedData.applications[0] 
-          : null;
-        if (application) {
-          // Use the application data as our source
+        
+        if (parsedData.applications && parsedData.applications.length > 0) {
+          const application = parsedData.applications[0];
           setApplicationData(application);
-          // Check for program_type in the application
-          const programType = application.program_type?.toLowerCase();
-          // Get stored program type from localStorage for comparison
-          const savedProgramType = localStorage.getItem("programType");
-          // Only redirect if program type exists and is different from 'postgraduate'
-          if (programType && 
-              programType !== 'postgraduate' && 
-              programType !== 'msc' && 
-              programType !== 'phd' && 
-              savedProgramType && 
-              savedProgramType !== 'postgraduate') {
-            window.location.href = `/document-upload?type=${programType}`;
-          } else {
-            // If program type matches, update localStorage to be consistent
-            localStorage.setItem("programType", "postgraduate");
+          
+          // Set application fields
+          if (application) {
+            setPostgraduateData(prev => ({
+              ...prev,
+              academicSession: application.academic_session,
+              programType: application.program_type as any,
+              program: application.selected_program,
+              applicantType: application.applicant_type,
+              // ... set other fields similarly
+            }));
           }
-        } else {
-          // No applications found, check if user object has program
-          const userProgram = parsedData.user?.program?.toLowerCase();
-          if (userProgram && 
-              userProgram !== 'postgraduate' && 
-              userProgram !== 'msc' && 
-              userProgram !== 'phd') {
-            window.location.href = `/document-upload?type=${userProgram}`;
+          
+          // Handle passport photo if exists
+          if (application.passport_photo_path) {
+            const fullUrl = `https://admissions-jcvy.onrender.com/${application.passport_photo_path}`;
+            setPassportPhotoUrl(fullUrl);
           }
         }
       }
     } catch (error) {
-      // Error handling without console.log
+      setError("Failed to load application data");
     }
   }, []);
 
@@ -518,8 +562,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         institution: "",
         startDate: { day: "", month: "", year: "" },
         endDate: { day: "", month: "", year: "" },
-        degreeCertificate: new File([], ""),
-        transcript: new File([], ""),
+        degreeCertificate: null,
+        transcript: null,
       },
       qualification2: {
         type: "",
@@ -529,10 +573,10 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         institution: "",
         startDate: { day: "", month: "", year: "" },
         endDate: { day: "", month: "", year: "" },
-        degreeCertificate: new File([], ""),
-        transcript: new File([], ""),
+        degreeCertificate: null,
+        transcript: null,
       },
-      otherQualifications: new File([], ""),
+      otherQualifications: null,
     },
     statementOfPurpose: [],
     references: {
@@ -917,7 +961,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   const handleSaveAsDraft = async () => {
     try {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("fastApiAccessToken");
       if (!token) {
         throw new Error("No authentication token found");
       }
@@ -1032,18 +1076,21 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
     }
 
     try {
-      const formData = new FormData();
-      // Add form data...
+      setIsSubmitting(true);
+      const formData = buildPostgraduateFormData(postgraduateData);
       
-      const response = await apiService.submitPostgraduateApplication(formData);
+              const response = await apiService.uploadPostgraduateApplication(formData);
+      
       if (response.success) {
-        toast.success("Application submitted successfully!");
-        navigate('/application-success');
+        // Show payment modal after successful submission
+        setShowPaymentModal(true);
       } else {
-        toast.error(response.message || "Failed to submit application");
+        throw new Error(response.message || "Failed to submit application");
       }
     } catch (err) {
-      toast.error("An error occurred while submitting the application");
+      toast.error(err.message || "An error occurred while submitting the application");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1286,13 +1333,23 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <form onSubmit={handleSubmit} className="space-y-8">
         {/* Applicant Type Section */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-          <h3 className="text-lg font-semibold">Applicant Type</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <User className="h-5 w-5 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Applicant Type</h3>
+          </div>
           <div className="max-w-md">
-            <div className="space-y-2">
-              <Label>Are you a Nigerian or International Applicant? <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Are you a Nigerian or International Applicant?
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={postgraduateData.applicantType}
                 onValueChange={(value) => {
@@ -1306,7 +1363,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   }));
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select applicant type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1320,11 +1377,19 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
 
         {/* Passport Photo Upload */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-          <h3 className="text-lg font-semibold">Passport Photograph</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <Camera className="h-5 w-5 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Passport Photograph</h3>
+          </div>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Passport Photograph <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Passport Photograph
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <div className={`max-w-[250px] h-[250px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center overflow-hidden transition-colors ${
                 postgraduateData.passportPhoto || passportPhotoUrl ? 'border-green-500 bg-green-50' : 'border-gray-300'
               }`}> 
@@ -1503,48 +1568,65 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         </div>
 
        {/* Personal Details Section */}
-    <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-      <h3 className="text-lg font-semibold">Personal Details</h3>
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Surname <span className="text-red-500 text-xs italic">Required</span></Label>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-amber-100 rounded-lg">
+          <User className="h-5 w-5 text-amber-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">Personal Details</h3>
+      </div>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Surname
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Input
               placeholder="Enter your surname"
               value={postgraduateData.personalDetails.surname}
               onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label>First Name <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              First Name
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Input
               placeholder="Enter your first name"
               value={postgraduateData.personalDetails.firstName}
               onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Other Names</Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-gray-700">Other Names</Label>
           <Input
             placeholder="Enter other names (if any)"
             value={postgraduateData.personalDetails.otherNames}
             onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+            className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
           />
         </div>
 
         {/* Gender and Date of Birth side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Gender <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Gender
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Select
               value={postgraduateData.personalDetails.gender}
               onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -1555,14 +1637,17 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           </div>
 
           {/* Date of Birth */}
-          <div className="space-y-2">
-            <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Date of Birth
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <div className="grid grid-cols-3 gap-2">
               <Select
                 value={postgraduateData.personalDetails.dateOfBirth.day}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Day" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1577,7 +1662,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 value={postgraduateData.personalDetails.dateOfBirth.month}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1592,7 +1677,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 value={postgraduateData.personalDetails.dateOfBirth.year}
                 onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1607,35 +1692,46 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="streetAddress">Street Address <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="space-y-3">
+          <Label htmlFor="streetAddress" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            Street Address
+            <span className="text-red-500 text-xs">*</span>
+          </Label>
           <Textarea
             id="streetAddress"
             placeholder="Enter your street address"
             value={postgraduateData.personalDetails.streetAddress}
             onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+            className="min-h-[48px] px-4 py-3 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base resize-none"
             required
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city">City <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label htmlFor="city" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              City
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Input
               id="city"
               placeholder="Enter your city"
               value={postgraduateData.personalDetails.city}
               onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="country">Country <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label htmlFor="country" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Country
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Select
               value={postgraduateData.personalDetails.country}
               onValueChange={(value) => handlePersonalDetailsChange("country", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                 <SelectValue placeholder="Select country" />
               </SelectTrigger>
               <SelectContent>
@@ -1650,17 +1746,20 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         </div>
 
         {/* Nationality and State of Origin side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Nationality <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Nationality
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             {postgraduateData.applicantType === "Nigerian" ? (
-              <Input value="Nigerian" disabled className="bg-gray-100" />
+              <Input value="Nigerian" disabled className="h-12 px-4 border-gray-300 rounded-xl bg-gray-100 text-base" />
             ) : (
               <Select
                 value={postgraduateData.personalDetails.nationality}
                 onValueChange={(value) => handlePersonalDetailsChange("nationality", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select nationality" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1675,13 +1774,16 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           </div>
 
           {postgraduateData.applicantType === "Nigerian" && (
-            <div className="space-y-2">
-              <Label>State of Origin <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                State of Origin
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={postgraduateData.personalDetails.stateOfOrigin}
                 onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select state of origin" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1696,38 +1798,48 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Phone Number <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Phone Number
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <PhoneInput
               international
               defaultCountry="NG"
               value={postgraduateData.personalDetails.phoneNumber}
               onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-              className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+              className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!px-4 [&>input]:!border-gray-300 [&>input]:!rounded-xl [&>input]:!focus:ring-2 [&>input]:!focus:ring-amber-500 [&>input]:!focus:border-amber-500 [&>input]:!transition-all [&>input]:!duration-200 [&>input]:!text-base [&>input]:!bg-background [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
               placeholder="Enter phone number"
             />
           </div>
-          <div className="space-y-2">
-            <Label>Email <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Email
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Input
               type="email"
               placeholder="Enter your email"
               value={postgraduateData.personalDetails.email}
               onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Do you have any disabilities? <span className="text-red-500 text-xs italic">Required</span></Label>
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            Do you have any disabilities?
+            <span className="text-red-500 text-xs">*</span>
+          </Label>
           <div className="max-w-md">
             <Select
               value={postgraduateData.personalDetails.hasDisabilities}
               onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -1739,12 +1851,16 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         </div>
 
         {postgraduateData.personalDetails.hasDisabilities === "Yes" && (
-          <div className="space-y-2">
-            <Label>Please describe your disability <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Please describe your disability
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Input
               placeholder="Describe your disability"
               value={postgraduateData.personalDetails.disabilityDescription}
               onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
             />
           </div>
         )}
@@ -2500,6 +2616,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           <div className="space-y-2 text-yellow-800">
             <p className="text-sm">
               <span className="font-medium">Application Fee:</span> ₦20,000 (Nigerian Applicants) / $50 (International Applicants)
+        <br />
+        <span className="text-sm text-orange-600">*Application fee only. Tuition fees: ₦906K - ₦5.1M (Nigerian) / $1K - $12K (International) depending on program</span>
             </p>
             <p className="text-sm">
               <span className="font-medium">Payment Method:</span> Paystack
@@ -2539,6 +2657,8 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
           </div>
         </div>
       </form>
+      </div>
+    </div>
 
       <PaymentModal
         isOpen={showPaymentModal}

@@ -34,7 +34,7 @@ const PostgraduateForm: React.FC = () => {
   useEffect(() => {
     const checkAndRedirect = async () => {
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem("accessToken") || localStorage.getItem("fastApiAccessToken");
         if (!token) {
           navigate("/login");
           return;

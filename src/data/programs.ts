@@ -42,7 +42,7 @@ export const programs: Program[] = [
     duration: "4 years",
     level: "Undergraduate",
     category: 'undergraduate',
-    schoolFees: "₦2,212,727 per session",
+    schoolFees: "₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session",
     image: imageMap["software-engineering"],
     description: "Focus on software development methodologies, tools, and systems design. Learn programming languages, software architecture, and project management.",
     requirements: [
@@ -75,7 +75,7 @@ export const programs: Program[] = [
     duration: "4 years",
     level: "Undergraduate",
     category: 'undergraduate',
-    schoolFees: "₦2,212,727 per session",
+    schoolFees: "₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session",
     image: imageMap["computer-science"],
     description: "Develop skills in algorithms, software engineering, and computer systems. Study artificial intelligence, data structures, and computer networks.",
     requirements: [
@@ -108,7 +108,7 @@ export const programs: Program[] = [
     duration: "5 years",
     level: "Undergraduate",
     category: 'undergraduate',
-    schoolFees: "₦2,212,727 per session",
+    schoolFees: "₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session",
     image: imageMap["petroleum-engineering"],
     description: "Study oil and gas exploration, production, and processing. Learn about reservoir engineering, drilling operations, and petroleum economics.",
     requirements: [
@@ -141,7 +141,7 @@ export const programs: Program[] = [
     duration: '5 years',
     level: 'Undergraduate',
     category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
+    schoolFees: '₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session',
     image: imageMap["civil-engineering"],
     description: 'Study the design, construction, and maintenance of infrastructure such as roads, bridges, and buildings.',
     requirements: [
@@ -165,7 +165,7 @@ export const programs: Program[] = [
     duration: '5 years',
     level: 'Undergraduate',
     category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
+    schoolFees: '₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session',
     image: imageMap["default"],
     description: 'Learn about the design, analysis, and manufacturing of mechanical systems and machines.',
     requirements: [
@@ -189,7 +189,7 @@ export const programs: Program[] = [
     duration: '5 years',
     level: 'Undergraduate',
     category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
+    schoolFees: '₦2,338,182 (Returning Students) / ₦2,553,182 (New Students) per session',
     image: imageMap["default"],
     description: 'Study the properties, processing, and applications of engineering materials.',
     requirements: [
@@ -213,7 +213,7 @@ export const programs: Program[] = [
     duration: '4 years',
     level: 'Undergraduate',
     category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
+    schoolFees: '₦2,060,727 (Returning Students) / ₦2,253,182 (New Students) per session',
     image: imageMap["accounting"],
     description: 'Gain knowledge in financial accounting, auditing, taxation, and management accounting.',
     requirements: [
@@ -237,7 +237,7 @@ export const programs: Program[] = [
     duration: '4 years',
     level: 'Undergraduate',
     category: 'undergraduate',
-    schoolFees: '₦2,212,727 per session',
+    schoolFees: '₦2,060,727 (Returning Students) / ₦2,253,182 (New Students) per session',
     image: imageMap["business-admin"],
     description: 'Learn about management, marketing, finance, entrepreneurship, and organizational behavior.',
     requirements: [
@@ -321,10 +321,10 @@ export const programs: Program[] = [
   {
     id: 'msc-computer-science',
     title: "M.Sc. Computer Science",
-    duration: "2 years",
+    duration: "3 semesters/1.5 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦2,500,000",
+    schoolFees: "₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000",
     image: imageMap["computer-science"],
     description: "Advanced study of computer science principles and research methodologies. Focus on artificial intelligence, machine learning, and software systems.",
     requirements: [
@@ -356,10 +356,10 @@ export const programs: Program[] = [
   {
     id: 'phd-computer-science',
     title: "Ph.D. Computer Science",
-    duration: "3 years",
+    duration: "6 semesters/3 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦4,200,000 total",
+    schoolFees: "₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000",
     image: imageMap["computer-science"],
     description: "Doctoral research program focusing on computer science innovations, artificial intelligence, data science, and software engineering methodologies.",
     requirements: [
@@ -392,10 +392,10 @@ export const programs: Program[] = [
   {
     id: 'msc-petroleum-engineering',
     title: "M.Sc. Petroleum Engineering",
-    duration: "2 years",
+    duration: "3 semesters/1.5 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦2,500,000",
+    schoolFees: "₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000",
     image: imageMap["petroleum-engineering"],
     description: "Advanced study of petroleum engineering principles, reservoir management, and enhanced oil recovery techniques.",
     requirements: [
@@ -427,10 +427,10 @@ export const programs: Program[] = [
   {
     id: 'phd-petroleum-engineering',
     title: "Ph.D. Petroleum Engineering",
-    duration: "3 years",
+    duration: "6 semesters/3 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦4,200,000 total",
+    schoolFees: "₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000",
     image: imageMap["petroleum-engineering"],
     description: "Doctoral research program focusing on advanced petroleum engineering concepts, reservoir simulation, and enhanced oil recovery methods.",
     requirements: [
@@ -462,10 +462,10 @@ export const programs: Program[] = [
   {
     id: 'msc-aerospace-engineering',
     title: "M.Sc. Aerospace Engineering",
-    duration: "2 years",
+    duration: "3 semesters/1.5 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦2,500,000",
+    schoolFees: "₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000",
     image: imageMap["aerospace"],
     description: "Advanced study of aerospace systems, aerodynamics, propulsion, and space technology.",
     requirements: [
@@ -497,10 +497,10 @@ export const programs: Program[] = [
   {
     id: 'phd-aerospace-engineering',
     title: "Ph.D. Aerospace Engineering",
-    duration: "3 years",
+    duration: "6 semesters/3 Years",
     level: "Postgraduate",
     category: 'postgraduate',
-    schoolFees: "₦4,200,000 total",
+    schoolFees: "₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000",
     image: imageMap["aerospace"],
     description: "Doctoral research program focusing on advanced aerospace concepts, propulsion systems, and space technology innovations.",
     requirements: [
@@ -535,7 +535,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["public-admin"] || imageMap["default"],
     description: 'Advanced study in public sector management, policy analysis, and governance.',
     requirements: [
@@ -558,7 +558,7 @@ export const programs: Program[] = [
     duration: '2 semesters/1 Year',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,200,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
     image: imageMap["public-admin"] || imageMap["default"],
     description: 'Professional program focused on practical skills for public sector leadership.',
     requirements: [
@@ -580,7 +580,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["policy"] || imageMap["default"],
     description: 'In-depth study of policy formulation, analysis, and implementation in the public sector.',
     requirements: [
@@ -603,7 +603,7 @@ export const programs: Program[] = [
     duration: '2 semesters/1 Year',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,200,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
     image: imageMap["policy"] || imageMap["default"],
     description: 'Professional program for practical policy skills and leadership.',
     requirements: [
@@ -625,7 +625,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["math"] || imageMap["default"],
     description: 'Advanced mathematical theory, modeling, and computational methods.',
     requirements: [
@@ -649,7 +649,7 @@ export const programs: Program[] = [
     duration: '6 semesters/3 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦4,200,000',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
     image: imageMap["math"] || imageMap["default"],
     description: 'Doctoral research in advanced mathematics and its applications.',
     requirements: [
@@ -672,7 +672,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["space-physics"] || imageMap["default"],
     description: 'Study of space environment, plasma physics, and astrophysics.',
     requirements: [
@@ -695,7 +695,7 @@ export const programs: Program[] = [
     duration: '6 semesters/3 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦4,200,000',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
     image: imageMap["space-physics"] || imageMap["default"],
     description: 'Doctoral research in space physics, astrophysics, and plasma science.',
     requirements: [
@@ -718,7 +718,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["default"],
     description: 'Advanced study in systems design, optimization, and integration.',
     requirements: [
@@ -741,7 +741,7 @@ export const programs: Program[] = [
     duration: '6 semesters/3 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦4,200,000',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
     image: imageMap["default"],
     description: 'Doctoral research in systems engineering, optimization, and integration.',
     requirements: [
@@ -764,7 +764,7 @@ export const programs: Program[] = [
     duration: '3 semesters/1.5 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦1,800,000',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
     image: imageMap["default"],
     description: 'Advanced study in theoretical and applied physics, including quantum mechanics and materials science.',
     requirements: [
@@ -788,7 +788,7 @@ export const programs: Program[] = [
     duration: '6 semesters/3 Years',
     level: 'Postgraduate',
     category: 'postgraduate',
-    schoolFees: '₦4,200,000',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
     image: imageMap["default"],
     description: 'Doctoral research in theoretical and applied physics.',
     requirements: [

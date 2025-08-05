@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X, CheckCircle2, AlertCircle, Check, Copy } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Check, Copy, User, GraduationCap, MapPin, Phone, Mail, FileCheck, Camera, Award, Calendar, Building2, CreditCard, Save } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
@@ -119,7 +119,7 @@ interface FoundationRemedialFormData {
         subject: string;
         grade: string;
       }>;
-      documents: File | null;
+      documents: File | string | null;
     };
   };
   declaration: string;
@@ -151,22 +151,36 @@ const FileUploadField = ({
   id: string;
   label: string;
   accept: string;
-  value: File | File[] | null;
+  value: File | File[] | string | null;
   onChange: (files: File[] | null) => void;
   onRemove: () => void;
   maxSize?: string;
   multiple?: boolean;
 }) => {
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const fileNames = hasFiles 
-    ? Array.isArray(value) 
-      ? value.map(f => f.name).join(", ") 
-      : (value as File).name
-    : "";
+  const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('/'));
+  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
+  
+  const getFileNameFromUrl = (url: string) => {
+    const urlParts = url.split('/');
+    return urlParts[urlParts.length - 1] || 'Document';
+  };
+
+  const getDisplayText = () => {
+    if (isUrl) {
+      return getFileNameFromUrl(value as string);
+    }
+    if (isFile) {
+      return Array.isArray(value) 
+        ? value.map(f => f.name).join(", ") 
+        : (value as File).name;
+    }
+    return "";
+  };
 
   return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-gray-700">{label}</Label>
       <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
         hasFiles ? 'border-green-500 bg-green-50' : 'border-gray-300'
       }`}>
@@ -187,7 +201,19 @@ const FileUploadField = ({
         >
           {hasFiles ? (
             <div className="flex items-center justify-center w-full gap-2">
-              <span className="text-sm text-green-800 text-center">{fileNames}</span>
+              {isUrl ? (
+                <a
+                  href={value as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline text-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {getDisplayText()}
+                </a>
+              ) : (
+                <span className="text-sm text-green-800 text-center">{getDisplayText()}</span>
+              )}
               <button
                 type="button"
                 onClick={(e) => {
@@ -540,6 +566,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
   const [isSaving, setIsSaving] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isProceedingToPayment, setIsProceedingToPayment] = useState(false);
 
   // Generate years from current year to 30 years back
@@ -725,9 +752,9 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       }
 
       // Log the FormData contents for debugging
-      console.log('FormData contents:');
+      // console.log('FormData contents:');
       for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
+        // console.log(pair[0], pair[1]);
       }
 
       const response = await apiService.createFoundationApplication(formData);
@@ -743,6 +770,44 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
     }
   };
 
+  // Auto-save function for field blur
+  const handleAutoSave = async () => {
+    // Only auto-save if we have some data filled
+    const hasData = foundationRemedialData.personalDetails.surname || 
+                   foundationRemedialData.personalDetails.firstName || 
+                   foundationRemedialData.personalDetails.email;
+    
+    if (hasData && !isSavingDraft && !isAutoSaving) {
+      setIsAutoSaving(true);
+      try {
+        await handleSaveDraft();
+        toast.success("Auto-saved successfully");
+      } catch (error) {
+        toast.error("Auto-save failed");
+      } finally {
+        setIsAutoSaving(false);
+      }
+    }
+  };
+
+  // Add auto-save to window beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      const hasData = foundationRemedialData.personalDetails.surname || 
+                     foundationRemedialData.personalDetails.firstName || 
+                     foundationRemedialData.personalDetails.email;
+      
+      if (hasData && !isSavingDraft) {
+        e.preventDefault();
+        e.returnValue = '';
+        await handleSaveDraft();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [foundationRemedialData, isSavingDraft]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -755,7 +820,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       const formData = new FormData();
       // Add form data...
       
-      const response = await apiService.submitFoundationApplication(formData);
+      const response = await apiService.createFoundationApplication(formData);
       if (response.success) {
         toast.success("Application submitted successfully!");
         navigate('/application-success');
@@ -928,8 +993,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
   // Update the PopoverContent to ensure proper positioning and interaction
   const renderInstitutionField = () => (
-    <div className="space-y-2">
-      <Label>Institution <span className="text-red-500">Required</span></Label>
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        Institution
+        <span className="text-red-500 text-xs">*</span>
+      </Label>
       <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
         <PopoverTrigger asChild>
           <Button
@@ -968,8 +1036,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
   // Update renderInstitutionField2 similarly
   const renderInstitutionField2 = () => (
-    <div className="space-y-2">
-      <Label>Institution <span className="text-red-500">Required</span></Label>
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+        Institution
+        <span className="text-red-500 text-xs">*</span>
+      </Label>
       <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
         <PopoverTrigger asChild>
           <Button
@@ -1020,175 +1091,272 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Passport Photo Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Passport Photograph <span className="text-red-500 text-xs italic">Required</span></h3>
-        <div className="flex flex-col items-center justify-center w-full">
-          <div className="relative w-48 h-48 mb-4">
-            {foundationRemedialData.passportPhoto ? (
-              <div className="relative w-full h-full">
-                <img
-                  src={getPassportPhotoUrl()}
-                  alt="Passport"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleClearFile("passportPhoto")}
-                  className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+
+
+          {/* Passport Photo Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Camera className="h-5 w-5 text-amber-600" />
               </div>
-            ) : (
-              <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto" />
-                  <p className="mt-2 text-sm text-gray-600">No photo uploaded</p>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  Passport Photograph
+                  <span className="text-red-500 text-xs">*</span>
+                </h3>
+                <p className="text-gray-600">Upload a clear, recent passport-sized photo</p>
+              </div>
+            </div>
+            
+                         <div className="flex flex-col items-center justify-center w-full">
+               <input
+                 type="file"
+                 id="passportPhoto"
+                 accept="image/*"
+                 className="hidden"
+                 onChange={(e) => {
+                   const file = e.target.files?.[0];
+                   if (file) {
+                     if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                       toast.error("File size should be less than 5MB");
+                       return;
+                     }
+                     handleFileUpload("passportPhoto", file);
+                   }
+                 }}
+               />
+               
+               <label
+                 htmlFor="passportPhoto"
+                 className="relative w-48 h-48 cursor-pointer group"
+                 onDragOver={(e) => {
+                   e.preventDefault();
+                   e.currentTarget.classList.add('border-amber-400', 'bg-amber-50');
+                 }}
+                 onDragLeave={(e) => {
+                   e.preventDefault();
+                   e.currentTarget.classList.remove('border-amber-400', 'bg-amber-50');
+                 }}
+                 onDrop={(e) => {
+                   e.preventDefault();
+                   e.currentTarget.classList.remove('border-amber-400', 'bg-amber-50');
+                   const files = e.dataTransfer.files;
+                   if (files.length > 0) {
+                     const file = files[0];
+                     if (file.type.startsWith('image/')) {
+                       if (file.size > 5 * 1024 * 1024) {
+                         toast.error("File size should be less than 5MB");
+                         return;
+                       }
+                       handleFileUpload("passportPhoto", file);
+                     } else {
+                       toast.error("Please select an image file");
+                     }
+                   }
+                 }}
+               >
+                 {foundationRemedialData.passportPhoto ? (
+                   <div className="relative w-full h-full group">
+                     {typeof foundationRemedialData.passportPhoto === 'string' && foundationRemedialData.passportPhoto.startsWith('http') ? (
+                       <a
+                         href={foundationRemedialData.passportPhoto}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="block w-full h-full"
+                         onClick={(e) => e.stopPropagation()}
+                       >
+                         <img
+                           src={getPassportPhotoUrl()}
+                           alt="Passport"
+                           className="w-full h-full object-cover rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
+                         />
+                       </a>
+                     ) : (
+                       <img
+                         src={getPassportPhotoUrl()}
+                         alt="Passport"
+                         className="w-full h-full object-cover rounded-2xl shadow-lg"
+                       />
+                     )}
+                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-2xl transition-all duration-200 flex items-center justify-center">
+                       <button
+                         type="button"
+                         onClick={(e) => {
+                           e.preventDefault();
+                           e.stopPropagation();
+                           handleClearFile("passportPhoto");
+                         }}
+                         className="opacity-0 group-hover:opacity-100 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200"
+                       >
+                         <X className="h-4 w-4" />
+                       </button>
+                     </div>
+                   </div>
+                 ) : (
+                   <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group-hover:border-amber-400 group-hover:bg-amber-50">
+                     <div className="text-center">
+                       <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                         <Upload className="h-8 w-8 text-amber-600" />
+                       </div>
+                       <p className="text-sm text-gray-600 font-medium">Click or drag to upload</p>
+                       <p className="text-xs text-gray-500 mt-1">JPG, PNG (Max: 5MB)</p>
+                     </div>
+                   </div>
+                 )}
+               </label>
+               
+               <div className="mt-4 text-center">
+                 <p className="text-xs text-gray-500">
+                   Drag and drop an image here, or click to select
+                 </p>
+                 <p className="text-xs text-gray-400 mt-1">
+                   Make sure your face is clearly visible
+                 </p>
+               </div>
+             </div>
+          </div>
+
+          {/* Personal Details Section */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <User className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Personal Details</h3>
+                <p className="text-gray-600">Tell us about yourself</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Surname
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
+                                     <Input
+                     placeholder="Enter your surname"
+                     value={foundationRemedialData.personalDetails.surname}
+                     onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
+                     onBlur={handleAutoSave}
+                     className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
+                     required
+                   />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    First Name
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
+                                     <Input
+                     placeholder="Enter your first name"
+                     value={foundationRemedialData.personalDetails.firstName}
+                     onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
+                     onBlur={handleAutoSave}
+                     className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
+                     required
+                   />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700">Other Names</Label>
+                                     <Input
+                     placeholder="Enter other names (if any)"
+                     value={foundationRemedialData.personalDetails.otherNames}
+                     onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
+                     onBlur={handleAutoSave}
+                     className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
+                   />
+                </div>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Gender
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
+                                     <Select
+                     value={foundationRemedialData.personalDetails.gender}
+                     onValueChange={(value) => {
+                       handlePersonalDetailsChange("gender", value);
+                       setTimeout(handleAutoSave, 100);
+                     }}
+                   >
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                      <SelectValue placeholder="Select your gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
-          </div>
-          <div className="w-full max-w-md">
-            <input
-              type="file"
-              id="passportPhoto"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    toast.error("File size should be less than 5MB");
-                    return;
-                  }
-                  handleFileUpload("passportPhoto", file);
-                }
-              }}
-            />
-            <label
-              htmlFor="passportPhoto"
-              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
-            >
-              <Upload className="h-5 w-5 mr-2 text-gray-400" />
-              Upload Passport Photograph
-            </label>
-            <p className="mt-2 text-xs text-gray-500 text-center">
-              Accepted formats: JPG, PNG (Max: 5MB)
-            </p>
-          </div>
-        </div>
-      </div>
 
-      {/* Personal Details Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Personal Details</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Surname <span className="text-red-500 text-xs italic">Required</span></Label>
-              <Input
-                placeholder="Enter your surname"
-                value={foundationRemedialData.personalDetails.surname}
-                onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>First Name <span className="text-red-500 text-xs italic">Required</span></Label>
-              <Input
-                placeholder="Enter your first name"
-                value={foundationRemedialData.personalDetails.firstName}
-                onChange={(e) => handlePersonalDetailsChange("firstName", e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Other Names</Label>
-            <Input
-              placeholder="Enter other names (if any)"
-              value={foundationRemedialData.personalDetails.otherNames}
-              onChange={(e) => handlePersonalDetailsChange("otherNames", e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Gender */}
-            <div className="space-y-2">
-              <Label>Gender <span className="text-red-500 text-xs italic">Required</span></Label>
-              <Select
-                value={foundationRemedialData.personalDetails.gender}
-                onValueChange={(value) => handlePersonalDetailsChange("gender", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Date of Birth */}
-            <div className="space-y-2">
-              <Label>Date of Birth <span className="text-red-500 text-xs italic">Required</span></Label>
-              <div className="grid grid-cols-3 gap-2">
-                <Select
-                  value={foundationRemedialData.personalDetails.dateOfBirth.day}
-                  onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {days.map((day) => (
-                      <SelectItem key={day} value={day}>
-                        {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={foundationRemedialData.personalDetails.dateOfBirth.month}
-                  onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((month, index) => (
-                      <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
-                        {month}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={foundationRemedialData.personalDetails.dateOfBirth.year}
-                  onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {examYears.map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Date of Birth */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Date of Birth
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
+                <div className="grid grid-cols-3 gap-4">
+                  <Select
+                    value={foundationRemedialData.personalDetails.dateOfBirth.day}
+                    onValueChange={(value) => handleDateChange("dateOfBirth", "day", value)}
+                  >
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                      <SelectValue placeholder="Day" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {days.map((day) => (
+                        <SelectItem key={day} value={day}>
+                          {day}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={foundationRemedialData.personalDetails.dateOfBirth.month}
+                    onValueChange={(value) => handleDateChange("dateOfBirth", "month", value)}
+                  >
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                      <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((month, index) => (
+                        <SelectItem key={month} value={(index + 1).toString().padStart(2, '0')}>
+                          {month}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={foundationRemedialData.personalDetails.dateOfBirth.year}
+                    onValueChange={(value) => handleDateChange("dateOfBirth", "year", value)}
+                  >
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {examYears.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Nationality <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Nationality
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={foundationRemedialData.personalDetails.nationality}
                 onValueChange={(value) => {
@@ -1197,9 +1365,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   if (value !== "Nigeria") {
                     handlePersonalDetailsChange("stateOfOrigin", "");
                   }
+                  setTimeout(handleAutoSave, 100);
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select nationality" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1212,13 +1381,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
               </Select>
             </div>
             {foundationRemedialData.personalDetails.nationality === "Nigeria" && (
-              <div className="space-y-2">
-                <Label>State of Origin <span className="text-red-500 text-xs italic">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  State of Origin
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Select
                   value={foundationRemedialData.personalDetails.stateOfOrigin}
-                  onValueChange={(value) => handlePersonalDetailsChange("stateOfOrigin", value)}
+                  onValueChange={(value) => {
+                    handlePersonalDetailsChange("stateOfOrigin", value);
+                    setTimeout(handleAutoSave, 100);
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Select state of origin" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1234,56 +1409,80 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Phone Number <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Phone Number
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <PhoneInput
                 international
                 defaultCountry="NG"
                 value={foundationRemedialData.personalDetails.phoneNumber}
                 onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!focus-visible:border-amber-500 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
                 placeholder="Enter phone number"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Email <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Email
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 type="email"
                 placeholder="Enter your email"
                 value={foundationRemedialData.personalDetails.email}
                 onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="streetAddress">Street Address <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Street Address
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Textarea
               id="streetAddress"
               value={foundationRemedialData.personalDetails.streetAddress}
               onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+              onBlur={handleAutoSave}
+              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                City
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 id="city"
                 value={foundationRemedialData.personalDetails.city}
                 onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">Country <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Country
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={foundationRemedialData.personalDetails.country}
-                onValueChange={(value) => handlePersonalDetailsChange("country", value)}
+                onValueChange={(value) => {
+                  handlePersonalDetailsChange("country", value);
+                  setTimeout(handleAutoSave, 100);
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1297,13 +1496,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Do you have any disabilities? <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Do you have any disabilities?
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <Select
               value={foundationRemedialData.personalDetails.hasDisabilities}
-              onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
+              onValueChange={(value) => {
+                handlePersonalDetailsChange("hasDisabilities", value);
+                setTimeout(handleAutoSave, 100);
+              }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -1314,12 +1519,17 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
 
           {foundationRemedialData.personalDetails.hasDisabilities === "yes" && (
-            <div className="space-y-2">
-              <Label htmlFor="disabilityDescription">Please describe your disability *</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Please describe your disability
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Textarea
                 id="disabilityDescription"
                 value={foundationRemedialData.personalDetails.disabilityDescription}
                 onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
@@ -1328,17 +1538,32 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Program Choice Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Program Choice</h3>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Academic Session <span className="text-red-500 text-xs italic">Required</span></Label>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+            <Award className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Program Choice</h3>
+            <p className="text-gray-600">Select your academic program and session</p>
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Academic Session
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={foundationRemedialData.academicSession}
-                onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, academicSession: value }))}
+                onValueChange={(value) => {
+                  setFoundationRemedialData(prev => ({ ...prev, academicSession: value }));
+                  setTimeout(handleAutoSave, 100);
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select academic session" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1357,19 +1582,25 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Programme of Choice <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Programme of Choice
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={foundationRemedialData.programChoice.program}
-                onValueChange={(value) => setFoundationRemedialData(prev => ({
-                  ...prev,
-                  programChoice: {
-                    ...prev.programChoice,
-                    program: value
-                  }
-                }))}
+                onValueChange={(value) => {
+                  setFoundationRemedialData(prev => ({
+                    ...prev,
+                    programChoice: {
+                      ...prev.programChoice,
+                      program: value
+                    }
+                  }));
+                  setTimeout(handleAutoSave, 100);
+                }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select programme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1383,10 +1614,13 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
 
           <div className="space-y-4">
-            <Label>Subject Combination <span className="text-red-500 text-xs italic">Required</span></Label>
+            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Subject Combination
+              <span className="text-red-500 text-xs">*</span>
+            </Label>
             <div className="space-y-4">
               {/* Predefined Combinations */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-sm text-gray-600">Select from predefined combinations:</Label>
                 <Select
                   value=""
@@ -1399,10 +1633,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                           subjectCombination: value
                         }
                       }));
+                      setTimeout(handleAutoSave, 100);
                     }
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Choose a subject combination" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1421,7 +1656,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
               </div>
 
               {/* Custom Combination */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-sm text-gray-600">Or enter your own combination:</Label>
                 <div className="flex gap-2">
                   <Input
@@ -1434,6 +1669,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                         subjectCombination: e.target.value
                       }
                     }))}
+                    onBlur={handleAutoSave}
+                    className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   />
                   <Button
                     type="button"
@@ -1460,7 +1697,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
               {/* Selected Subjects Display */}
               {foundationRemedialData.programChoice.subjectCombination && (
-                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                <div className="mt-4 p-3 bg-white rounded-md">
                   <h4 className="text-sm font-medium mb-2">Selected Subjects:</h4>
                   <div className="flex flex-wrap gap-2">
                     {foundationRemedialData.programChoice.subjectCombination
@@ -1501,11 +1738,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           <div className="space-y-4">
             <h4 className="font-medium flex items-center gap-2">
               First Choice of University, Department and Faculty
-              <span className="text-red-500 text-xs italic">Required</span>
+              <span className="text-red-500 text-xs">*</span>
             </h4>
             {renderInstitutionField()}
-            <div className="space-y-2">
-              <Label>Department</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">Department</Label>
               <Input
                 placeholder="Enter department"
                 value={foundationRemedialData.programChoice.firstChoice.department}
@@ -1519,11 +1756,13 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     }
                   }
                 }))}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>Faculty</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">Faculty</Label>
               <Input
                 placeholder="Enter faculty"
                 value={foundationRemedialData.programChoice.firstChoice.faculty}
@@ -1537,6 +1776,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     }
                   }
                 }))}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
@@ -1545,11 +1786,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           <div className="space-y-4">
             <h4 className="font-medium flex items-center gap-2">
               Second Choice of University, Department and Faculty
-              <span className="text-red-500 text-xs italic">Required</span>
+              <span className="text-red-500 text-xs">*</span>
             </h4>
             {renderInstitutionField2()}
-            <div className="space-y-2">
-              <Label>Department</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">Department</Label>
               <Input
                 placeholder="Enter department"
                 value={foundationRemedialData.programChoice.secondChoice.department}
@@ -1563,11 +1804,13 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     }
                   }
                 }))}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label>Faculty</Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700">Faculty</Label>
               <Input
                 placeholder="Enter faculty"
                 value={foundationRemedialData.programChoice.secondChoice.faculty}
@@ -1581,6 +1824,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     }
                   }
                 }))}
+                onBlur={handleAutoSave}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 required
               />
             </div>
@@ -1594,30 +1839,37 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         <div className="space-y-6">
           {/* O'Level Results */}
           <div className="space-y-4">
-            <h4 className="font-medium">O'Level Results</h4>
-            <p className="text-red-500 text-xs italic">Required</p>
+            <h4 className="font-medium flex items-center gap-2">
+              O'Level Results
+              <span className="text-red-500 text-xs">*</span>
+            </h4>
             
             {/* WAEC Results */}
             <div className="space-y-4 p-4 border border-gray-200 rounded-md">
               {/* <h5 className="font-medium">O,level Results</h5> */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Exam Type</Label>
-                  <p className="text-red-500 text-xs italic">Required</p>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Exam Type
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Select
                     value={foundationRemedialData.academicQualifications.examResults.examType}
-                    onValueChange={(value) => setFoundationRemedialData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        examResults: {
-                          ...prev.academicQualifications.examResults,
-                          examType: value
+                    onValueChange={(value) => {
+                      setFoundationRemedialData(prev => ({
+                        ...prev,
+                        academicQualifications: {
+                          ...prev.academicQualifications,
+                          examResults: {
+                            ...prev.academicQualifications.examResults,
+                            examType: value
+                          }
                         }
-                      }
-                    }))}
+                      }));
+                      setTimeout(handleAutoSave, 100);
+                    }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Select exam type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1627,9 +1879,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Exam Number</Label>
-                  <p className="text-red-500 text-xs italic">Required</p>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Exam Number
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Input
                     value={foundationRemedialData.academicQualifications.examResults.examNumber}
                     onChange={(e) => setFoundationRemedialData(prev => ({
@@ -1642,26 +1896,33 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                         }
                       }
                     }))}
+                    onBlur={handleAutoSave}
                     placeholder="Enter exam number"
+                    className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Exam Year</Label>
-                  <p className="text-red-500 text-xs italic">Required</p>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Exam Year
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Select
                     value={foundationRemedialData.academicQualifications.examResults.examYear}
-                    onValueChange={(value) => setFoundationRemedialData(prev => ({
-                      ...prev,
-                      academicQualifications: {
-                        ...prev.academicQualifications,
-                        examResults: {
-                          ...prev.academicQualifications.examResults,
-                          examYear: value
+                    onValueChange={(value) => {
+                      setFoundationRemedialData(prev => ({
+                        ...prev,
+                        academicQualifications: {
+                          ...prev.academicQualifications,
+                          examResults: {
+                            ...prev.academicQualifications.examResults,
+                            examYear: value
+                          }
                         }
-                      }
-                    }))}
+                      }));
+                      setTimeout(handleAutoSave, 100);
+                    }}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Select exam year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1677,7 +1938,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <Label>Subjects and Grades <span className="text-red-500 text-xs italic">Required</span></Label>
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Subjects and Grades
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                   <Button
                     type="button"
                     variant="outline"
@@ -1812,9 +2076,9 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 )}
               </div>
 
-              <Label className="flex items-center gap-2">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 Upload WAEC Results
-                <span className="text-red-500 text-xs italic">Required</span>
+                <span className="text-red-500 text-xs">*</span>
               </Label>
               <FileUploadField
                 id="waecDocuments"
@@ -1849,7 +2113,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
       {/* Declaration Section */}
       <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Declaration <span className="text-red-500 text-xs italic">Required</span></h3>
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                  Declaration
+                  <span className="text-red-500 text-xs">*</span>
+                </h3>
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
@@ -1879,23 +2146,38 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Application Fee Payment Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Application Fee Payment</h3>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900">Application Fee Payment</h3>
+            <p className="text-gray-600">Complete your payment to submit your application</p>
+          </div>
+        </div>
+        
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800 space-y-2">
+          <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-sm text-amber-800 space-y-2">
               <strong>Application Fees (Non-refundable):</strong>
               <br />
               <span className="block mt-2">
-                <strong>Nigerian Applicants:</strong> ₦20,000
+                <strong>Nigerian Applicants:</strong> ₦10,000 (Application Fee Only)
               </span>
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Payment Processing Fee:</strong> Squad charges 1.9% processing fee (capped at ₦2,000). 
+                  Total amount you will pay: <strong>₦10,190</strong> (₦10,000 + ₦190 processing fee).
+                </p>
+              </div>
               <div className="mt-4">
                 <p className="font-medium">Payment Process:</p>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Payment will be processed through Paystack</li>
-                  <li>Nigerian applicants will be redirected to Paystack NGN payment gateway</li>
-                  <li>The Paystack payment popup will appear automatically when you click "Proceed to Payment"</li>
+                  <li>Payment will be processed through Squad by GTBank</li>
+                  <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
                   <li>A payment receipt will be automatically generated after successful payment</li>
+                  <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees (₦1,343,000 total for Foundation) will be communicated upon admission</li>
                 </ul>
               </div>
             </p>
@@ -1903,41 +2185,72 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         </div>
       </div>
 
-      {/* Form Buttons */}
-      <div className="space-y-4">
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleSaveDraft}
-            disabled={isProcessingPayment}
-          >
-            Save Draft
-          </Button>
-          <Button
-            type="button"
-            onClick={handleProceedToPayment}
-            disabled={isProcessingPayment}
-          >
-            {isProcessingPayment ? "Processing..." : "Proceed to Payment"}
-          </Button>
-        </div>
-      </div>
+          {/* Form Actions */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="text-center lg:text-left">
+                <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
+                <p className="text-gray-600 text-sm md:text-base">Review your information and proceed to payment</p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSaveDraft}
+                  disabled={isProcessingPayment || isSavingDraft}
+                  className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                >
+                  {isSavingDraft ? (
+                    <span className="flex items-center justify-center">
+                      <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-600 mr-2"></span>
+                      Saving...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center">
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Draft
+                    </span>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleProceedToPayment}
+                  disabled={isProcessingPayment}
+                  className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
+                >
+                 {isProcessingPayment ? (
+                   <span className="flex items-center justify-center">
+                     <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                     Processing...
+                   </span>
+                 ) : (
+                   <span className="flex items-center justify-center">
+                     <CreditCard className="h-4 w-4 mr-2" />
+                     Proceed to Payment
+                   </span>
+                 )}
+               </Button>
+              </div>
+            </div>
+          </div>
       
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        application={foundationRemedialData}
-        onPaymentSuccess={(reference) => {
-          // Handle successful payment
-          localStorage.setItem("paymentCompleted", "true");
-          localStorage.setItem("paymentReference", reference);
-          setShowPaymentModal(false);
-          navigate("/payment-success");
-        }}
-      />
-    </form>
-  );
-};
+               </form>
+       </div>
+
+       <PaymentModal
+         isOpen={showPaymentModal}
+         onClose={() => setShowPaymentModal(false)}
+         application={foundationRemedialData}
+         onPaymentSuccess={(reference) => {
+           // Handle successful payment
+           localStorage.setItem("paymentCompleted", "true");
+           localStorage.setItem("paymentReference", reference);
+           setShowPaymentModal(false);
+           navigate("/payment-success");
+         }}
+       />
+     </div>
+   );
+ };
 
 export default FoundationForm; 

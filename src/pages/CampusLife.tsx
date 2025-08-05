@@ -140,7 +140,7 @@ const CampusLife = () => {
                     <h3 className="text-xl font-bold">Student Housing</h3>
                   </div>
                   <p className="text-gray-600 mb-4">
-                    Comfortable and secure accommodation options to make you feel at home while you focus on your studies.
+                    Comfortable and secure accommodation options starting from ₦340,000 per semester. Shared rooms for 2-4 persons with modern amenities.
                   </p>
                   <Button asChild variant="outline" className="border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]">
                     <Link to="/hostels" className="flex items-center">
@@ -153,7 +153,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/cafeteria.jpg"
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/aust3.jpg?updatedAt=1747928047990"
                     alt="Cafeteria"
                     className="w-full h-full object-cover"
                   />
@@ -174,7 +174,7 @@ const CampusLife = () => {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    // src={library}
+                    src='https://ik.imagekit.io/nsq6yvxg1/Upload/aust2.jpg?updatedAt=1747928050526'
                     alt="Sports Facilities"
                     className="w-full h-full object-cover"
                   />

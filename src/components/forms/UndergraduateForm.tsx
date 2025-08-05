@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X, CheckCircle2, AlertCircle, Check } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Check, User, MapPin, Phone, Mail, FileCheck, Camera, Award, Calendar, Building2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
@@ -139,22 +139,36 @@ const FileUploadField = ({
   id: string;
   label: React.ReactNode;
   accept: string;
-  value: File | File[] | null;
+  value: File | File[] | string | null;
   onChange: (files: File[] | null) => void;
   onRemove: () => void;
   maxSize?: string;
   multiple?: boolean;
 }) => {
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const fileNames = hasFiles 
-    ? Array.isArray(value) 
+  const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('/'));
+  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
+  
+  const getFileNameFromUrl = (url: string) => {
+    const urlParts = url.split('/');
+    return urlParts[urlParts.length - 1] || 'Document';
+  };
+
+  const getDisplayText = () => {
+    if (isUrl) {
+      return getFileNameFromUrl(value as string);
+    }
+    if (isFile) {
+      return Array.isArray(value) 
       ? value.map(f => f.name).join(", ") 
-      : (value as File).name
-    : "";
+        : (value as File).name;
+    }
+    return "";
+  };
 
   return (
-    <div className="space-y-2">
-      <Label>{label}</Label>
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-gray-700">{label}</Label>
       <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
         hasFiles ? 'border-green-500 bg-green-50' : 'border-gray-300'
       }`}>
@@ -175,7 +189,19 @@ const FileUploadField = ({
         >
           {hasFiles ? (
             <div className="flex items-center justify-center w-full gap-2">
-              <span className="text-sm text-green-800 text-center">{fileNames}</span>
+              {isUrl ? (
+                <a
+                  href={value as string}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline text-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {getDisplayText()}
+                </a>
+              ) : (
+                <span className="text-sm text-green-800 text-center">{getDisplayText()}</span>
+              )}
               <button
                 type="button"
                 onClick={(e) => {
@@ -593,22 +619,6 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   // Add state for showing payment selection modal
   const [showPaymentSelection, setShowPaymentSelection] = useState(false);
 
-  useEffect(() => {
-    try {
-      const storedData = localStorage.getItem('applicationData');
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        if (parsedData.applications && parsedData.applications.length > 0) {
-          const application = parsedData.applications[0];
-          setApplicationData(application);
-          setUndergraduateData(prev => autofillFromApplication(application, prev));
-        }
-      }
-    } catch (error) {
-      // Handle error silently
-    }
-  }, []);
-
   const [undergraduateData, setUndergraduateData] = useState<UndergraduateFormData>({
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
@@ -658,6 +668,34 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     },
     declaration: ""
   });
+
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.applications && parsedData.applications.length > 0) {
+          const application = parsedData.applications[0];
+          setApplicationData(application);
+          setUndergraduateData(prev => autofillFromApplication(application, prev));
+        }
+      }
+    } catch (error) {
+      // Handle error silently
+    }
+  }, []);
+
+  // Add beforeunload event listener for auto-save
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Auto-save functionality will be added later when handleSaveAsDraft is defined
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [undergraduateData]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -723,6 +761,21 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     }));
   };
 
+  const handleAutoSave = () => {
+    // Auto-save after a short delay to avoid too many API calls
+    setTimeout(() => {
+      // Check if there's any meaningful data to save
+      const hasPersonalData = Object.values(undergraduateData.personalDetails).some(value => 
+        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      );
+      const hasExamData = selectedExams.length > 0;
+      
+      if (hasPersonalData || hasExamData) {
+        handleSaveAsDraft();
+      }
+    }, 2000);
+  };
+
   const handleDateChange = (field: string, type: "day" | "month" | "year", value: string) => {
     setUndergraduateData(prev => ({
       ...prev,
@@ -744,9 +797,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     }
     if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
         !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
-        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.stateOfOrigin ||
-        !personalDetails.phoneNumber || !personalDetails.email) {
+        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.phoneNumber || !personalDetails.email) {
       toast.error("Please fill in all required personal details fields");
+      return false;
+    }
+    
+    // State of Origin is only required for Nigerian applicants
+    if (personalDetails.nationality === 'Nigeria' && !personalDetails.stateOfOrigin) {
+      toast.error("State of Origin is required for Nigerian applicants");
       return false;
     }
     // Only require at least one exam result
@@ -761,11 +819,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       toast.error(`Please enter at least one subject for your selected ${firstExamType ? firstExamType.toUpperCase() : ''} result`);
       return false;
     }
-    if (!academicQualifications.jambResults.regNumber || 
-        !academicQualifications.jambResults.examYear || 
-        !academicQualifications.jambResults.score) {
-      toast.error("Please fill in all required JAMB fields");
-      return false;
+    // JAMB fields are only required for Nigerian applicants
+    if (personalDetails.nationality === 'Nigeria') {
+      if (!academicQualifications.jambResults.regNumber || 
+          !academicQualifications.jambResults.examYear || 
+          !academicQualifications.jambResults.score) {
+        toast.error("Please fill in all required JAMB fields");
+        return false;
+      }
     }
     return true;
   };
@@ -778,17 +839,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     setIsSaving(true);
     try {
       const formData = new FormData();
+      
       // Helper to append only if value is filled
       const appendIfFilled = (key, value) => {
         if (value !== undefined && value !== null && value !== "") {
           formData.append(key, value);
         }
       };
+      
       // Add personal details
       appendIfFilled("surname", undergraduateData.personalDetails.surname);
       appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
       appendIfFilled("other_names", undergraduateData.personalDetails.otherNames);
       appendIfFilled("gender", undergraduateData.personalDetails.gender);
+      
       if (
         undergraduateData.personalDetails.dateOfBirth.year &&
         undergraduateData.personalDetails.dateOfBirth.month &&
@@ -799,6 +863,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`
         );
       }
+      
       appendIfFilled("street_address", undergraduateData.personalDetails.streetAddress);
       appendIfFilled("city", undergraduateData.personalDetails.city);
       appendIfFilled("country", undergraduateData.personalDetails.country);
@@ -808,21 +873,28 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       appendIfFilled("email", undergraduateData.personalDetails.email);
       appendIfFilled("has_disability", undergraduateData.personalDetails.hasDisabilities);
       appendIfFilled("disability_description", undergraduateData.personalDetails.disabilityDescription);
+      
       // Add academic session and program details
       appendIfFilled("academic_session", undergraduateData.academicSession);
       appendIfFilled("program_type", "undergraduate");
       appendIfFilled("selected_course", undergraduateData.selectedCourse);
-      // Add O'Level results
-      const examResults = undergraduateData.academicQualifications[`${selectedExamType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
-      appendIfFilled("exam_type", selectedExamType);
-      appendIfFilled("exam_number", examResults?.examNumber);
-      appendIfFilled("exam_year", examResults?.examYear);
-      if (examResults?.subjects && examResults.subjects.length > 0) {
-        appendIfFilled("subjects", JSON.stringify(examResults.subjects));
-      }
-      if (examResults?.documents) {
-        formData.append("result_document", examResults.documents);
-      }
+      
+      // Add O'Level results for selected exams
+      selectedExams.forEach((examType, index) => {
+        const examResults = undergraduateData.academicQualifications[`${examType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
+        if (examResults) {
+          appendIfFilled(`exam_type_${index + 1}`, examType);
+          appendIfFilled(`exam_number_${index + 1}`, examResults.examNumber);
+          appendIfFilled(`exam_year_${index + 1}`, examResults.examYear);
+          if (examResults.subjects && examResults.subjects.length > 0) {
+            appendIfFilled(`subjects_${index + 1}`, JSON.stringify(examResults.subjects));
+          }
+          if (examResults.documents) {
+            formData.append(`exam_type_${index + 1}_result`, examResults.documents);
+          }
+        }
+      });
+      
       // Add JAMB results
       appendIfFilled("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
       appendIfFilled("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
@@ -830,27 +902,39 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       if (undergraduateData.academicQualifications.jambResults.documents) {
         formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
       }
+      
       // Add documents
       if (undergraduateData.passportPhoto) {
         formData.append("passport_photo", undergraduateData.passportPhoto);
       }
+      
       // Add declaration
       appendIfFilled("declaration", undergraduateData.declaration);
+      
       // Set is_draft to true
       formData.append("is_draft", "true");
+      
       // Save the draft
-      const response = await apiService.submitUndergraduateApplication(formData) as DraftResponse;
-      if (response.id) {
-        setDraftId(response.id);
+      const response = await apiService.submitUndergraduateApplication(formData);
+      
+      if (response) {
+        setDraftId(response.id || 'draft-saved');
         setIsDraft(true);
-        toast.success("Draft saved successfully", {
+        toast.success("Draft saved successfully!", {
           description: "Your application has been saved as a draft.",
+          duration: 5000,
+        });
+      } else {
+        toast.error("Failed to save draft", {
+          description: "There was an error saving your application. Please try again.",
+          duration: 5000,
         });
       }
     } catch (error) {
       console.error('Error saving draft:', error);
       toast.error("Failed to save draft", {
         description: "There was an error saving your application. Please try again.",
+        duration: 5000,
       });
     } finally {
       setIsSaving(false);
@@ -863,14 +947,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     const allowedExams = ['waec', 'neco', 'nabteb'];
     if (!allowedExams.includes(examType)) return; // Only allow O'Level exams
     setSelectedExams(prev => {
+      let newExams;
       if (prev.includes(examType)) {
-        return prev.filter(type => type !== examType);
+        newExams = prev.filter(type => type !== examType);
+      } else {
+        if (prev.length >= 3) {
+          toast.error("You can only select a maximum of 3 exam results");
+          return prev;
+        }
+        newExams = [...prev, examType];
       }
-      if (prev.length >= 3) {
-        toast.error("You can only select a maximum of 3 exam results");
-        return prev;
-      }
-      return [...prev, examType];
+      
+      // Auto-save after exam selection
+      setTimeout(handleAutoSave, 100);
+      return newExams;
     });
   };
 
@@ -908,99 +998,130 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       
-      // Program choice
-      formData.append('program_type', 'undergraduate');
-      formData.append('selected_program', undergraduateData.selectedCourse);
-      formData.append('academic_session', undergraduateData.academicSession);
-      
-      // Personal details
-      formData.append('surname', undergraduateData.personalDetails.surname);
-      formData.append('first_name', undergraduateData.personalDetails.firstName);
-      formData.append('other_names', undergraduateData.personalDetails.otherNames || '');
-      formData.append('gender', undergraduateData.personalDetails.gender);
-      formData.append('date_of_birth', `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`);
-      formData.append('street_address', undergraduateData.personalDetails.streetAddress);
-      formData.append('city', undergraduateData.personalDetails.city);
-      formData.append('country', undergraduateData.personalDetails.country);
-      formData.append('state_of_origin', undergraduateData.personalDetails.stateOfOrigin);
-      formData.append('nationality', undergraduateData.personalDetails.nationality);
-      formData.append('phone_number', undergraduateData.personalDetails.phoneNumber);
-      formData.append('email', undergraduateData.personalDetails.email);
-      formData.append('has_disability', undergraduateData.personalDetails.hasDisabilities === 'Yes' ? 'true' : 'false');
-      formData.append('disability_description', undergraduateData.personalDetails.disabilityDescription || '');
-      
-      // Academic qualifications
-      if (undergraduateData.academicQualifications.waecResults) {
-        formData.append('exam_type_1', 'waec');
-        formData.append('exam_number_1', undergraduateData.academicQualifications.waecResults.examNumber);
-        formData.append('exam_year_1', undergraduateData.academicQualifications.waecResults.examYear);
-        formData.append('subjects_1', JSON.stringify(undergraduateData.academicQualifications.waecResults.subjects));
-        if (undergraduateData.academicQualifications.waecResults.documents) {
-          formData.append('exam_type_1_result', undergraduateData.academicQualifications.waecResults.documents);
+      // Helper to append only if value is filled
+      const appendIfFilled = (key, value) => {
+        if (value !== undefined && value !== null && value !== "") {
+          formData.append(key, value);
         }
+      };
+      
+      // Add personal details
+      appendIfFilled("surname", undergraduateData.personalDetails.surname);
+      appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
+      appendIfFilled("other_names", undergraduateData.personalDetails.otherNames);
+      appendIfFilled("gender", undergraduateData.personalDetails.gender);
+      
+      if (
+        undergraduateData.personalDetails.dateOfBirth.year &&
+        undergraduateData.personalDetails.dateOfBirth.month &&
+        undergraduateData.personalDetails.dateOfBirth.day
+      ) {
+        appendIfFilled(
+          "date_of_birth",
+          `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`
+        );
       }
       
-      if (undergraduateData.academicQualifications.necoResults) {
-        formData.append('exam_type_2', 'neco');
-        formData.append('exam_number_2', undergraduateData.academicQualifications.necoResults.examNumber);
-        formData.append('exam_year_2', undergraduateData.academicQualifications.necoResults.examYear);
-        formData.append('subjects_2', JSON.stringify(undergraduateData.academicQualifications.necoResults.subjects));
-        if (undergraduateData.academicQualifications.necoResults.documents) {
-          formData.append('exam_type_2_result', undergraduateData.academicQualifications.necoResults.documents);
-        }
-      }
+      appendIfFilled("street_address", undergraduateData.personalDetails.streetAddress);
+      appendIfFilled("city", undergraduateData.personalDetails.city);
+      appendIfFilled("country", undergraduateData.personalDetails.country);
+      appendIfFilled("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
+      appendIfFilled("nationality", undergraduateData.personalDetails.nationality);
+      appendIfFilled("phone_number", undergraduateData.personalDetails.phoneNumber);
+      appendIfFilled("email", undergraduateData.personalDetails.email);
+      appendIfFilled("has_disability", undergraduateData.personalDetails.hasDisabilities);
+      appendIfFilled("disability_description", undergraduateData.personalDetails.disabilityDescription);
       
-      if (undergraduateData.academicQualifications.nabtebResults) {
-        formData.append('exam_type_2', 'nabteb');
-        formData.append('exam_number_2', undergraduateData.academicQualifications.nabtebResults.examNumber);
-        formData.append('exam_year_2', undergraduateData.academicQualifications.nabtebResults.examYear);
-        formData.append('subjects_2', JSON.stringify(undergraduateData.academicQualifications.nabtebResults.subjects));
-        if (undergraduateData.academicQualifications.nabtebResults.documents) {
-          formData.append('exam_type_2_result', undergraduateData.academicQualifications.nabtebResults.documents);
-        }
-      }
+      // Add academic session and program details
+      appendIfFilled("academic_session", undergraduateData.academicSession);
+      appendIfFilled("program_type", "undergraduate");
+      appendIfFilled("selected_course", undergraduateData.selectedCourse);
       
-      formData.append('jamb_reg_number', undergraduateData.academicQualifications.jambResults.regNumber);
-      formData.append('jamb_year', undergraduateData.academicQualifications.jambResults.examYear);
-      formData.append('jamb_score', undergraduateData.academicQualifications.jambResults.score);
+      // Add O'Level results for selected exams
+      selectedExams.forEach((examType, index) => {
+        const examResults = undergraduateData.academicQualifications[`${examType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
+        if (examResults) {
+          appendIfFilled(`exam_type_${index + 1}`, examType);
+          appendIfFilled(`exam_number_${index + 1}`, examResults.examNumber);
+          appendIfFilled(`exam_year_${index + 1}`, examResults.examYear);
+          if (examResults.subjects && examResults.subjects.length > 0) {
+            appendIfFilled(`subjects_${index + 1}`, JSON.stringify(examResults.subjects));
+          }
+          if (examResults.documents) {
+            formData.append(`exam_type_${index + 1}_result`, examResults.documents);
+          }
+        }
+      });
+      
+      // Add JAMB results
+      appendIfFilled("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
+      appendIfFilled("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
+      appendIfFilled("jamb_score", undergraduateData.academicQualifications.jambResults.score);
       if (undergraduateData.academicQualifications.jambResults.documents) {
-        formData.append('jamb_result', undergraduateData.academicQualifications.jambResults.documents);
+        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
       }
       
-      // Passport photo
+      // Add documents
       if (undergraduateData.passportPhoto) {
-        formData.append('passport_photo', undergraduateData.passportPhoto);
+        formData.append("passport_photo", undergraduateData.passportPhoto);
       }
       
-      // Declaration
-      formData.append('declaration', undergraduateData.declaration);
+      // Add declaration
+      appendIfFilled("declaration", undergraduateData.declaration);
+      
+      // Set is_draft to false for final submission
+      formData.append("is_draft", "false");
       
       const response = await apiService.submitUndergraduateApplication(formData);
-      if (response.success) {
-        toast.success("Application submitted successfully!");
+      
+      if (response) {
+        toast.success("Application submitted successfully!", {
+          description: "Your application has been submitted successfully.",
+          duration: 5000,
+        });
         navigate('/application-success');
       } else {
-        toast.error(response.message || "Failed to submit application");
+        toast.error("Failed to submit application", {
+          description: response?.message || "There was an error submitting your application. Please try again.",
+          duration: 5000,
+        });
       }
     } catch (err) {
-      toast.error("An error occurred while submitting the application");
+      console.error('Error submitting application:', err);
+      toast.error("An error occurred while submitting the application", {
+        description: "Please check your internet connection and try again.",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
     return (
-    <>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* JAMB Notice */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-orange-500 p-6 bg-orange-50">
-          <h3 className="text-lg font-semibold text-orange-700">Important JAMB Notice</h3>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Important JAMB Notice</h3>
+                  <p className="text-gray-600">Requirements for undergraduate applicants</p>
+                </div>
+              </div>
+              
           <div className="space-y-4">
-            <p className="text-orange-700">
+                <p className="text-gray-700">
               The African University of Science and Technology (AUST) requires all undergraduate applicants to:
             </p>
-            <ol className="list-decimal list-inside space-y-2 text-orange-700">
+                <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
               <li>Register for JAMB UTME/DE examination</li>
               <li>Select AUST as your first choice institution</li>
               <li>Take the JAMB examination</li>
@@ -1008,12 +1129,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               <li>Receive admission from JAMB</li>
               <li>Complete this application form</li>
             </ol>
-            <div className="mt-4">
+                <div className="mt-6">
               <a 
                 href="https://efacility.jamb.gov.ng/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-medium"
               >
                 Visit JAMB Portal
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1025,52 +1146,67 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
 
 {/* Personal Details Section */}
-<div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-  <h3 className="text-lg font-semibold">Personal Details</h3>
-  <div className="space-y-4">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Personal Details</h3>
+                  <p className="text-gray-600">Enter your personal information</p>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Surname
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <Input 
           id="surname" 
           value={undergraduateData.personalDetails.surname} 
           onChange={(e) => handlePersonalDetailsChange('surname', e.target.value)}
+                      onBlur={handleAutoSave}
+                      className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
           required 
         />
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           First Name
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <Input 
           id="firstName" 
           value={undergraduateData.personalDetails.firstName} 
           onChange={(e) => handlePersonalDetailsChange('firstName', e.target.value)}
+                      onBlur={handleAutoSave}
+                      className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
           required 
         />
       </div>
-      <div className="space-y-2">
-        <Label>Other Names</Label>
-        <Input 
-          id="otherNames" 
-          value={undergraduateData.personalDetails.otherNames} 
-          onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)} 
-        />
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700">Other Names</Label>
+                            <Input 
+                      id="otherNames" 
+                      value={undergraduateData.personalDetails.otherNames} 
+                      onChange={(e) => handlePersonalDetailsChange('otherNames', e.target.value)}
+                      onBlur={handleAutoSave}
+                      className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
+                    />
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Academic Session
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <Select
           value={undergraduateData.academicSession}
           onValueChange={(value) => setUndergraduateData(prev => ({ ...prev, academicSession: value }))}
         >
-          <SelectTrigger>
+                      <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select academic session" />
           </SelectTrigger>
           <SelectContent>
@@ -1088,10 +1224,10 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Course of Study
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <Select 
           value={undergraduateData.selectedCourse} 
@@ -1115,7 +1251,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           }))}
           required
         >
-          <SelectTrigger>
+                      <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select your course" />
           </SelectTrigger>
           <SelectContent>
@@ -1127,17 +1263,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Gender
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
-        <Select 
-          value={undergraduateData.personalDetails.gender} 
-          onValueChange={(value) => handlePersonalDetailsChange('gender', value)}
-          required
-        >
-          <SelectTrigger>
+                              <Select 
+                        value={undergraduateData.personalDetails.gender} 
+                        onValueChange={(value) => {
+                          handlePersonalDetailsChange('gender', value);
+                          setTimeout(handleAutoSave, 100);
+                        }}
+                        required
+                      >
+                      <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select gender" />
           </SelectTrigger>
           <SelectContent>
@@ -1146,18 +1285,18 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Date of Birth
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
-        <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-4">
           <Select 
             value={undergraduateData.personalDetails.dateOfBirth.day} 
             onValueChange={(value) => handleDateChange('dateOfBirth', 'day', value)}
             required
           >
-            <SelectTrigger>
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
               <SelectValue placeholder="Day" />
             </SelectTrigger>
             <SelectContent>
@@ -1173,7 +1312,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
             onValueChange={(value) => handleDateChange('dateOfBirth', 'month', value)}
             required
           >
-            <SelectTrigger>
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
             <SelectContent>
@@ -1189,7 +1328,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
             onValueChange={(value) => handleDateChange('dateOfBirth', 'year', value)}
             required
           >
-            <SelectTrigger>
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
               <SelectValue placeholder="Year" />
             </SelectTrigger>
             <SelectContent>
@@ -1202,17 +1341,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           </Select>
         </div>
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Nationality
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
-        <Select 
-          value={undergraduateData.personalDetails.nationality} 
-          onValueChange={(value) => handlePersonalDetailsChange('nationality', value)}
-          required
-        >
-          <SelectTrigger>
+                              <Select 
+                        value={undergraduateData.personalDetails.nationality} 
+                        onValueChange={(value) => {
+                          handlePersonalDetailsChange('nationality', value);
+                          setTimeout(handleAutoSave, 100);
+                        }}
+                        required
+                      >
+                      <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select nationality" />
           </SelectTrigger>
           <SelectContent>
@@ -1225,17 +1367,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </Select>
       </div>
       {undergraduateData.personalDetails.nationality === 'Nigeria' && (
-        <div className="space-y-2">
-          <Label className="flex items-center gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
             State of Origin
-            <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
           </Label>
-          <Select 
-            value={undergraduateData.personalDetails.stateOfOrigin} 
-            onValueChange={(value) => handlePersonalDetailsChange('stateOfOrigin', value)}
-            required
-          >
-            <SelectTrigger>
+                                <Select 
+                        value={undergraduateData.personalDetails.stateOfOrigin} 
+                        onValueChange={(value) => {
+                          handlePersonalDetailsChange('stateOfOrigin', value);
+                          setTimeout(handleAutoSave, 100);
+                        }}
+                        required
+                      >
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
             <SelectContent>
@@ -1250,73 +1395,79 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       )}
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Phone Number
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <PhoneInput
           international
           defaultCountry="NG"
           value={undergraduateData.personalDetails.phoneNumber}
           onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-          className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-10 [&>input]:!rounded-md [&>input]:!border [&>input]:!border-input [&>input]:!bg-background [&>input]:!px-3 [&>input]:!py-2 [&>input]:!text-sm [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-ring [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                      className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
           placeholder="Enter phone number"
           required
         />
       </div>
-      <div className="space-y-2">
-        <Label className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Email
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
-        <Input
-          type="email"
-          placeholder="Enter your email"
-          value={undergraduateData.personalDetails.email}
-          onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-          required
-        />
+                              <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={undergraduateData.personalDetails.email}
+                        onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
+                        onBlur={handleAutoSave}
+                        className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
+                        required
+                      />
       </div>
     </div>
 
-    <div className="space-y-2">
-      <Label htmlFor="streetAddress" className="flex items-center gap-2">
+                <div className="space-y-3">
+                  <Label htmlFor="streetAddress" className="text-sm font-medium text-gray-700 flex items-center gap-2">
         Street Address
-        <span className="text-red-500 text-xs italic">Required</span>
+                    <span className="text-red-500 text-xs">*</span>
       </Label>
-      <Textarea
-        id="streetAddress"
-        value={undergraduateData.personalDetails.streetAddress}
-        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
-        required
-      />
+                            <Textarea
+                        id="streetAddress"
+                        value={undergraduateData.personalDetails.streetAddress}
+                        onChange={(e) => handlePersonalDetailsChange("streetAddress", e.target.value)}
+                        onBlur={handleAutoSave}
+                        className="min-h-[48px] px-4 py-3 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base resize-none"
+                        required
+                      />
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label htmlFor="city" className="flex items-center gap-2">
-          City
-          <span className="text-red-500 text-xs italic">Required</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="city" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      City
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
-        <Input
-          id="city"
-          value={undergraduateData.personalDetails.city}
-          onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
-          required
-        />
+                              <Input
+                        id="city"
+                        value={undergraduateData.personalDetails.city}
+                        onChange={(e) => handlePersonalDetailsChange("city", e.target.value)}
+                        onBlur={handleAutoSave}
+                        className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
+                        required
+                      />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="country" className="flex items-center gap-2">
+                  <div className="space-y-3">
+                    <Label htmlFor="country" className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Country
-          <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
         </Label>
         <Select
           value={undergraduateData.personalDetails.country}
           onValueChange={(value) => handlePersonalDetailsChange("country", value)}
         >
-          <SelectTrigger>
+                      <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select country" />
           </SelectTrigger>
           <SelectContent>
@@ -1330,17 +1481,17 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
     </div>
 
-    <div className="space-y-2">
-      <Label className="flex items-center gap-2">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
         Do you have any disabilities?
-        <span className="text-red-500 text-xs italic">Required</span>
+                    <span className="text-red-500 text-xs">*</span>
       </Label>
       <Select
         value={undergraduateData.personalDetails.hasDisabilities}
         onValueChange={(value) => handlePersonalDetailsChange("hasDisabilities", value)}
         required
       >
-        <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
           <SelectValue placeholder="Select option" />
         </SelectTrigger>
         <SelectContent>
@@ -1351,52 +1502,64 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
     </div>
 
     {undergraduateData.personalDetails.hasDisabilities === "Yes" && (
-      <div className="space-y-2">
-        <Label>Please specify your disabilities</Label>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      Disability Description
+                      <span className="text-red-500 text-xs">*</span>
+                    </Label>
         <Textarea
           placeholder="Describe your disabilities"
           value={undergraduateData.personalDetails.disabilityDescription}
           onChange={(e) => handlePersonalDetailsChange("disabilityDescription", e.target.value)}
+                      className="min-h-[48px] px-4 py-3 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base resize-none"
+                      required
         />
       </div>
     )}
-
-
   </div>
 </div>
 
       {/* Academic Qualifications Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Academic Qualifications</h3>
-        <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <Award className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Academic Qualifications</h3>
+                  <p className="text-gray-600">Enter your examination results</p>
+                </div>
+              </div>
+              
+              <div className="space-y-8">
           {/* O'Level Results */}
-          <div className="space-y-4">
-            <h4 className="font-medium flex items-center gap-2">
-              O'Level Results
-              <span className="text-red-500 text-xs italic">Required</span>
-            </h4>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-lg font-semibold text-gray-900">O'Level Results</h4>
+                    <span className="text-red-500 text-xs">*</span>
+                  </div>
             <p className="text-sm text-gray-600">Please select a maximum of two exam results for submission</p>
             
             {/* WAEC Results */}
-            <div className="space-y-4 p-4 border border-gray-200 rounded-md">
-              <div className="flex items-center gap-2">
+                  <div className="space-y-6 p-6 border border-gray-200 rounded-xl bg-gray-50">
+                    <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   id="waec"
                   checked={selectedExams.includes('waec')}
                   onChange={() => handleExamSelection('waec')}
-                  className="h-4 w-4 rounded border-gray-300"
+                        className="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                 />
-                <Label htmlFor="waec" className="font-medium">WAEC Results</Label>
+                      <Label htmlFor="waec" className="text-base font-medium text-gray-900">WAEC Results</Label>
               </div>
               
               {selectedExams.includes('waec') && (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Number
-                        <span className="text-red-500 text-xs italic">Required</span>
+                              <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Input
                         placeholder="Enter WAEC exam number"
@@ -1411,13 +1574,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }
                           }
                         }))}
+                              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                          <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Year
-                        <span className="text-red-500 text-xs italic">Required</span>
+                              <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Select
                         value={undergraduateData.academicQualifications.waecResults.examYear}
@@ -1433,7 +1597,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         }))}
                         required
                       >
-                        <SelectTrigger>
+                              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                           <SelectValue placeholder="Select year" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1449,12 +1613,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   <div className="space-y-4">
                     <h5 className="font-medium flex items-center gap-2">
                       Subjects and Grades
-                      <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
                     </h5>
                     {undergraduateData.academicQualifications.waecResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Subject</Label>
+                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -1473,7 +1637,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }}
                             required
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select subject" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1486,7 +1650,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label>Grade</Label>
+                          <Label className="text-sm font-medium text-gray-700">Grade</Label>
                           <Select
                             value={subject.grade}
                             onValueChange={(value) => {
@@ -1505,7 +1669,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }}
                             required
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select grade" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1538,6 +1702,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           }
                         }));
                       }}
+                      className="px-4 py-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
                     >
                       Add Subject
                     </Button>
@@ -1548,7 +1713,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                     label={
                       <div className="flex items-center gap-2">
                         Upload WAEC Results
-                        <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
                       </div>
                     }
                     accept=".pdf,.jpg,.jpeg,.png"
@@ -1594,10 +1759,10 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               {selectedExams.includes('neco') && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Number
-                        <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Input
                         placeholder="Enter NECO exam number"
@@ -1612,13 +1777,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }
                           }
                         }))}
+                        className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Year
-                        <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Select
                         value={undergraduateData.academicQualifications.necoResults.examYear}
@@ -1634,7 +1800,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         }))}
                         required
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                           <SelectValue placeholder="Select year" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1650,12 +1816,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   <div className="space-y-4">
                     <h5 className="font-medium flex items-center gap-2">
                       Subjects and Grades
-                      <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
                     </h5>
                     {undergraduateData.academicQualifications.necoResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Subject</Label>
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -1674,7 +1840,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }}
                             required
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select subject" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1686,8 +1852,8 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label>Grade</Label>
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-gray-700">Grade</Label>
                           <Select
                             value={subject.grade}
                             onValueChange={(value) => {
@@ -1706,7 +1872,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }}
                             required
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select grade" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1739,6 +1905,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           }
                         }));
                       }}
+                      className="px-4 py-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
                     >
                       Add Subject
                     </Button>
@@ -1790,10 +1957,10 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               {selectedExams.includes('nabteb') && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Number
-                        <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Input
                         placeholder="Enter NABTEB exam number"
@@ -1808,13 +1975,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }
                           }
                         }))}
+                        className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                         Exam Year
-                        <span className="text-red-500 text-xs italic">Required</span>
+                        <span className="text-red-500 text-xs">*</span>
                       </Label>
                       <Select
                         value={undergraduateData.academicQualifications.nabtebResults.examYear}
@@ -1830,7 +1998,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                         }))}
                         required
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                           <SelectValue placeholder="Select year" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1846,12 +2014,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   <div className="space-y-4">
                     <h5 className="font-medium flex items-center gap-2">
                       Subjects and Grades
-                      <span className="text-red-500 text-xs italic">Required</span>
+                      <span className="text-red-500 text-xs">*</span>
                     </h5>
                     {undergraduateData.academicQualifications.nabtebResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Subject</Label>
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -1870,7 +2038,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                             }}
                             required
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select subject" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1880,29 +2048,29 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                                 </SelectItem>
                               ))}
                             </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Grade</Label>
-                          <Select
-                            value={subject.grade}
-                            onValueChange={(value) => {
-                              const newSubjects = [...undergraduateData.academicQualifications.nabtebResults.subjects];
-                              newSubjects[index] = { ...subject, grade: value };
-                              setUndergraduateData(prev => ({
-                                ...prev,
-                                academicQualifications: {
-                                  ...prev.academicQualifications,
-                                  nabtebResults: {
-                                    ...prev.academicQualifications.nabtebResults,
-                                    subjects: newSubjects
+                                                      </Select>
+                          </div>
+                          <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-700">Grade</Label>
+                            <Select
+                              value={subject.grade}
+                              onValueChange={(value) => {
+                                const newSubjects = [...undergraduateData.academicQualifications.nabtebResults.subjects];
+                                newSubjects[index] = { ...subject, grade: value };
+                                setUndergraduateData(prev => ({
+                                  ...prev,
+                                  academicQualifications: {
+                                    ...prev.academicQualifications,
+                                    nabtebResults: {
+                                      ...prev.academicQualifications.nabtebResults,
+                                      subjects: newSubjects
+                                    }
                                   }
-                                }
-                              }));
-                            }}
-                            required
-                          >
-                            <SelectTrigger>
+                                }));
+                              }}
+                              required
+                            >
+                            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                               <SelectValue placeholder="Select grade" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1935,6 +2103,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           }
                         }));
                       }}
+                      className="px-4 py-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
                     >
                       Add Subject
                     </Button>
@@ -1975,13 +2144,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           <div className="space-y-4">
             <h4 className="font-medium flex items-center gap-2">
               JAMB Results
-              <span className="text-red-500 text-xs italic">Required</span>
+              <span className="text-red-500 text-xs">*</span>
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Registration Number
-                  <span className="text-red-500 text-xs italic">Required</span>
+                  <span className="text-red-500 text-xs">*</span>
                 </Label>
                 <Input
                   placeholder="Enter JAMB registration number"
@@ -1996,13 +2165,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                       }
                     }
                   }))}
+                  className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   JAMB Score
-                  <span className="text-red-500 text-xs italic">Required</span>
+                  <span className="text-red-500 text-xs">*</span>
                 </Label>
                 <Input
                   type="number"
@@ -2018,13 +2188,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                       }
                     }
                   }))}
+                  className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Exam Year
-                  <span className="text-red-500 text-xs italic">Required</span>
+                  <span className="text-red-500 text-xs">*</span>
                 </Label>
                 <Select
                   value={undergraduateData.academicQualifications.jambResults.examYear}
@@ -2040,7 +2211,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   }))}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -2056,7 +2227,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               label={
                 <div className="flex items-center gap-2">
                   Upload JAMB Results
-                  <span className="text-red-500 text-xs italic">Required</span>
+                  <span className="text-red-500 text-xs">*</span>
                 </div>
               }
               accept=".pdf,.jpg,.jpeg,.png"
@@ -2087,8 +2258,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
 
       {/* Declaration Section */}
-      <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-        <h3 className="text-lg font-semibold">Declaration</h3>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                  <FileCheck className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                    Declaration
+                    <span className="text-red-500 text-xs">*</span>
+                  </h3>
+                  <p className="text-gray-600">Confirm your application details</p>
+                </div>
+              </div>
+              
         <div className="space-y-4">
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-800">
@@ -2117,36 +2300,56 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
       </div>
       
-      {/* Form Buttons */}
-      <div className="flex justify-end space-x-4">
+            {/* Form Actions */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="text-center lg:text-left">
+                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
+                  <p className="text-gray-600 text-sm md:text-base">Review your information and submit your application</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
         <Button
           type="button"
           variant="outline"
           onClick={handleSaveAsDraft}
           disabled={isProcessingPayment || isSaving}
-          className="w-32"
+                    className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200"
         >
           {isSaving ? (
             <span className="flex items-center justify-center">
-              <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
+                        <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-600 mr-2"></span>
               Saving...
             </span>
           ) : (
-            "Save as Draft"
+                      <span className="flex items-center justify-center">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Draft
+                      </span>
           )}
         </Button>
-        <Button type="submit" className="w-40 bg-primary" disabled={isSubmitting || isSaving}>
+                  <Button 
+                    type="submit" 
+                    className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
+                    disabled={isSubmitting || isSaving}
+                  >
           {isSubmitting ? (
             <span className="flex items-center justify-center">
-              <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>Submitting...
+                        <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                        Submitting...
             </span>
           ) : (
-            "Submit"
+                      <span className="flex items-center justify-center">
+                        <Check className="h-4 w-4 mr-2" />
+                        Submit Application
+                      </span>
           )}
         </Button>
+                </div>
+              </div>
       </div>
     </form>
-  </>
+        </div>
+      </div>
 );
 };
 

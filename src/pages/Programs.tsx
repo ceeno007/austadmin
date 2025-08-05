@@ -89,6 +89,8 @@ const Programs: React.FC = () => {
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
 
   // Prefetch threshold
   const PREFETCH_THRESHOLD = 3;
@@ -102,10 +104,10 @@ const Programs: React.FC = () => {
     }
   }, [location.search]);
 
-  // Reset visible items when tab changes
+  // Reset visible items when tab changes or filters change
   useEffect(() => {
     setVisibleItems(ITEMS_PER_PAGE);
-  }, [activeTab]);
+  }, [activeTab, search, filterCategory]);
 
   // Get current programs based on active tab
   const getCurrentPrograms = (): Program[] => {
@@ -121,14 +123,40 @@ const Programs: React.FC = () => {
     }
   };
 
+  // Enhanced filter logic
+  const filteredPrograms = useMemo(() => {
+    // When filters are active, search through all programs, not just current tab
+    let list = (search.trim() || filterCategory) ? programs : getCurrentPrograms();
+    
+    if (search.trim()) {
+      list = list.filter(p =>
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        p.description.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    if (filterCategory) {
+      if (filterCategory === "M.Sc.") {
+        list = list.filter(p => p.title.startsWith("M.Sc."));
+      } else if (filterCategory === "Ph.D.") {
+        list = list.filter(p => p.title.startsWith("Ph.D."));
+      } else if (filterCategory === "Taught Masters") {
+        list = list.filter(p => p.title.includes("Taught Masters"));
+      } else {
+      list = list.filter(p => p.category === filterCategory);
+    }
+    }
+    return list;
+  }, [search, filterCategory, activeTab]);
+
+  const displayedPrograms = filteredPrograms.slice(0, visibleItems);
+
   // Optimized scroll handler with debounce
   const handleScroll = useMemo(() => debounce(() => {
     if (isLoading) return;
     const scrollPosition = window.innerHeight + window.scrollY;
     const documentHeight = document.documentElement.scrollHeight;
-    const currentPrograms = getCurrentPrograms();
-    // Prefetch when within PREFETCH_THRESHOLD of the end
-    if (visibleItems >= currentPrograms.length) return;
+    // Use filtered programs for pagination
+    if (visibleItems >= filteredPrograms.length) return;
     const bufferIndex = visibleItems - PREFETCH_THRESHOLD;
     const bufferElement = document.querySelectorAll('.program-card')[bufferIndex];
     let bufferOffset = 0;
@@ -141,11 +169,11 @@ const Programs: React.FC = () => {
     ) {
       setIsLoading(true);
       setTimeout(() => {
-        setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, currentPrograms.length));
+        setVisibleItems(prev => Math.min(prev + ITEMS_PER_PAGE, filteredPrograms.length));
         setIsLoading(false);
       }, 400);
     }
-  }, 100), [isLoading, visibleItems, activeTab]);
+  }, 100), [isLoading, visibleItems, filteredPrograms.length]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -156,7 +184,7 @@ const Programs: React.FC = () => {
   const generateStructuredData = () => ({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "itemListElement": getCurrentPrograms().map((program, index) => ({
+    "itemListElement": filteredPrograms.map((program, index) => ({
       "@type": "EducationalProgram",
       "name": program.title,
       "description": program.description,
@@ -169,9 +197,6 @@ const Programs: React.FC = () => {
       "position": index + 1
     }))
   });
-
-  const currentPrograms = getCurrentPrograms();
-  const displayedPrograms = currentPrograms.slice(0, visibleItems);
 
   return (
     <Suspense fallback={<ProgramsSkeleton />}>
@@ -196,11 +221,44 @@ const Programs: React.FC = () => {
             </p>
           </div>
         </section>
-
+        {/* Search & Filter UI */}
+        <section className="py-4 bg-white border-b">
+          <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-center gap-4">
+            <input
+              type="text"
+              placeholder="Search programs..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full md:w-1/3 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#FF5500]"
+            />
+            <select
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+              className="w-full md:w-1/4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#FF5500]"
+            >
+              <option value="">All Categories</option>
+              <option value="undergraduate">Undergraduate</option>
+              <option value="M.Sc.">M.Sc.</option>
+              <option value="Ph.D.">Ph.D.</option>
+              <option value="Taught Masters">Taught Masters</option>
+              <option value="foundation">Foundation</option>
+              <option value="jupeb">JUPEB</option>
+            </select>
+            {(search || filterCategory) && (
+              <button
+                onClick={() => { setSearch(""); setFilterCategory(""); }}
+                className="text-sm text-[#FF5500] underline ml-2"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </section>
         {/* Programs Section */}
         <section className="py-8 sm:py-16" aria-label="Academic Programs">
           <div className="container mx-auto px-4">
-            {/* Simple Tab Navigation */}
+            {/* Show Tab Navigation only when no filters are active */}
+            {!search && !filterCategory && (
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
               {Object.entries(TABS).map(([key, value]) => (
                 <button
@@ -223,7 +281,23 @@ const Programs: React.FC = () => {
                 </button>
               ))}
             </div>
+            )}
 
+
+
+            {/* Show Results Header when filters are active */}
+            {(search || filterCategory) && (
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Search Results
+                </h2>
+                <p className="text-gray-600">
+                  {filteredPrograms.length} program{filteredPrograms.length !== 1 ? 's' : ''} found
+                  {search && ` for "${search}"`}
+                  {filterCategory && ` in ${filterCategory}`}
+                </p>
+              </div>
+            )}
             {/* Program Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedPrograms.map(program => (
@@ -238,7 +312,7 @@ const Programs: React.FC = () => {
                   ITEMS_PER_PAGE - (displayedPrograms.length % ITEMS_PER_PAGE || ITEMS_PER_PAGE)
                 );
                 // If there are more items to load, show a full batch of skeletons
-                if (visibleItems < currentPrograms.length) {
+                if (visibleItems < filteredPrograms.length) {
                   return Array.from({ length: skeletonCount }).map((_, i) => (
                     <SkeletonCard key={`skeleton-${i}`} />
                   ));

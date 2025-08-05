@@ -133,63 +133,130 @@ const ProgramDetails: React.FC = () => {
         </div>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto grid gap-10">
-            <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100">
-              <h2 className="text-2xl font-bold mb-4 text-[#FF5500]">Program Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Duration</h3>
-                  <p className="text-gray-700">{program.duration}</p>
+            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold mb-4 text-[#FF5500]">Program Details</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">Duration</h3>
+                  <p className="text-gray-700 font-medium">{program.duration}</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Level</h3>
-                  <p className="text-gray-700">{program.level}</p>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">Level</h3>
+                  <p className="text-gray-700 font-medium">{program.level}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">Category</h3>
+                  <p className="text-gray-700 font-medium capitalize">{program.category.replace('-', ' ')}</p>
+                </div>
                 </div>
                 {program.schoolFees && (
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">School Fees</h3>
-                    <p className="text-gray-700">{program.schoolFees}</p>
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-gray-900">Tuition Fees</h3>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+                    {program.schoolFees.includes('Returning Students') ? (
+                      // Undergraduate format
+                      <div className="space-y-3">
+                        <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-l-emerald-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <h4 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">Returning Students</h4>
+                          </div>
+                          <p className="text-xl font-bold text-gray-900">
+                            {program.schoolFees.split('(Returning Students)')[0].trim()}
+                          </p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-l-indigo-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                            <h4 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">New Students</h4>
+                          </div>
+                          <p className="text-xl font-bold text-gray-900">
+                            {program.schoolFees.split('(New Students)')[0].split('/')[1]?.trim() || 'Contact Admissions'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : program.schoolFees.includes('Nigerian') ? (
+                      // Postgraduate format
+                      <div className="space-y-3">
+                        <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-l-emerald-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <h4 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">Nigerian Students</h4>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-lg font-bold text-gray-900">
+                              {program.schoolFees.split('(Nigerian)')[0].trim()}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Total: {program.schoolFees.includes('Total:') ? program.schoolFees.split('Total:')[1].split('/')[0].trim() : 'Contact Admissions'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-l-indigo-500">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                            <h4 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">International Students</h4>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-lg font-bold text-gray-900">
+                              {program.schoolFees.split('(International)')[0].split('/')[1]?.trim() || 'Contact Admissions'}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Total: {program.schoolFees.includes('Total:') ? program.schoolFees.split('Total:')[1].split('/')[1]?.trim() : 'Contact Admissions'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      // Fallback for other formats
+                      <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <p className="text-xl font-bold text-gray-900">
+                          {program.schoolFees}
+                        </p>
                   </div>
                 )}
               </div>
             </div>
-            <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100">
-              <h2 className="text-2xl font-bold mb-4 text-[#FF5500] flex items-center gap-2">
-                <FileText className="h-6 w-6 text-[#FF5500]" /> Program Description
+              )}
+            </div>
+            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold mb-4 text-[#FF5500] flex items-center gap-2">
+                <FileText className="h-5 w-5 text-[#FF5500]" /> Program Description
               </h2>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-700 leading-relaxed">
                 {program.description}
               </p>
             </div>
-            <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100">
-              <h2 className="text-2xl font-bold mb-4 text-[#FF5500]">Entry Requirements</h2>
-              <ul className="space-y-3">
+            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold mb-4 text-[#FF5500]">Entry Requirements</h2>
+              <ul className="space-y-2">
                 {program.requirements.map((req, index) => (
                   <li key={index} className="flex items-start">
                     <span className="text-[#FF5500] mr-2 mt-1">•</span>
-                    <span className="text-gray-700 text-base">{req}</span>
+                    <span className="text-gray-700">{req}</span>
                   </li>
                 ))}
               </ul>
             </div>
             {program.faqs && program.faqs.length > 0 && (
-              <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100">
-                <h2 className="text-2xl font-bold mb-6 text-[#FF5500]">Frequently Asked Questions</h2>
-                <div className="space-y-8">
+              <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100">
+                <h2 className="text-xl font-bold mb-4 text-[#FF5500]">Frequently Asked Questions</h2>
+                <div className="space-y-4">
                   {program.faqs.map((faq, index) => (
-                    <div key={index} className="border-b border-gray-200 pb-6 last:border-0 last:pb-0">
+                    <div key={index} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
                       <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
-                      <p className="text-gray-700 text-base">{faq.answer}</p>
+                      <p className="text-gray-700">{faq.answer}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             {program.pdf && (
-              <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100 flex flex-col items-start">
-                <h2 className="text-2xl font-bold mb-4 text-[#FF5500] flex items-center gap-2">
-                  <Download className="h-6 w-6 text-[#FF5500]" /> Program Brochure
+              <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100 flex flex-col items-start">
+                <h2 className="text-xl font-bold mb-4 text-[#FF5500] flex items-center gap-2">
+                  <Download className="h-5 w-5 text-[#FF5500]" /> Program Brochure
                 </h2>
-                <p className="text-gray-700 mb-6 text-base">
+                <p className="text-gray-700 mb-4">
                   Download our detailed program brochure for more information about this program.
                 </p>
                 <Button
@@ -201,14 +268,14 @@ const ProgramDetails: React.FC = () => {
                 </Button>
               </div>
             )}
-            <div className="bg-white/90 rounded-2xl shadow-lg p-10 border border-gray-100 flex flex-col items-center text-center">
-              <h2 className="text-2xl font-bold mb-4 text-[#FF5500]">Ready to Apply?</h2>
-              <p className="text-gray-700 mb-8 max-w-2xl">
+            <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100 flex flex-col items-center text-center">
+              <h2 className="text-xl font-bold mb-4 text-[#FF5500]">Ready to Apply?</h2>
+              <p className="text-gray-700 mb-6 max-w-2xl">
                 Take the first step towards your future at AUST. Our application process is straightforward and our admissions team is here to help you every step of the way.
               </p>
               <Button
                 variant="outline"
-                className="border-2 border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white px-8 py-6 text-lg rounded-lg transition-all duration-200"
+                className="border-2 border-[#FF5500] text-[#FF5500] hover:bg-[#FF5500] hover:text-white px-6 py-3 text-base rounded-lg transition-all duration-200"
                 onClick={() => navigate('/signup')}
               >
                 Apply Now

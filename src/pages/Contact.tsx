@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import apiService from "@/services/api";
 import SEO from "@/components/SEO";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Contact = () => {
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -42,25 +41,10 @@ const Contact = () => {
         message: ""
       });
       
-      toast({
-        title: "Message Sent",
-        description: "Thank you for contacting us. We'll get back to you soon!",
-        style: {
-          background: '#10B981', // Green background
-          color: 'white',
-        }
-      });
+      toast.success("Thank you for contacting us. We'll get back to you soon!");
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send your message. Please try again later.",
-        variant: "destructive",
-        style: {
-          background: '#EF4444', // Red background
-          color: 'white',
-        }
-      });
+      toast.error("Failed to send your message. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -148,8 +132,8 @@ const Contact = () => {
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center">
-                          <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                          <Skeleton className="h-4 w-24" />
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Sending...
                         </div>
                       ) : (
                         <>

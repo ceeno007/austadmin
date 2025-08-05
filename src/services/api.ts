@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admissions-jcvy.onrender.com';
-const FASTAPI_BASE_URL = 'https://admissions-jcvy.onrender.com';
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admissions-jcvy.onrender.com';
+const FASTAPI_BASE_URL = 'https://admissions-l9fv.onrender.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -193,37 +193,42 @@ const apiService = {
    * @param credentials - User login credentials
    * @returns Promise with the API response
    */
-  login: async (credentials: { username: string; password: string }) => {
+  login: async (credentials: { email: string; password: string }) => {
     try {
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'password');
-      formData.append('username', credentials.username);
-      formData.append('password', credentials.password);
-      formData.append('scope', '');
-      formData.append('client_id', 'string');
-      formData.append('client_secret', 'string');
-
       const response = await fetch(API_ENDPOINTS.LOGIN, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: formData.toString()
+        body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "Login failed");
+        throw new Error('Login failed');
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      // Store token
+      localStorage.setItem('access_token', data.access_token);
+      
+      // Store user info
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Store full application data
+      localStorage.setItem('applicationData', JSON.stringify(data));
+
+      // Store program type
+      if (data.user.program) {
+        localStorage.setItem('programType', data.user.program.toLowerCase());
+      }
+
+      return data;
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       throw error;
     }
   },
-  
 
   /**
    * Upload a document
@@ -762,40 +767,7 @@ const apiService = {
     }
   },
 
-  /**
-   * Get saved postgraduate application draft
-   * @returns Promise with the saved draft data
-   */
-  getPostgraduateDraft: async () => {
-    try {
-      // Get the token from localStorage
-      const token = localStorage.getItem('fastApiAccessToken');
-      
-      if (!token) {
-        throw new Error("Authentication required to retrieve draft");
-      }
-      
-      // Make the request
-      const response = await axios.get(
-        API_ENDPOINTS.FASTAPI_POSTGRADUATE_SAVED,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      return response.data;
-    } catch (error: any) {
-      console.error("Get postgraduate draft error:", error);
-      if (error.response && error.response.data && error.response.data.detail) {
-        throw new Error(error.response.data.detail);
-      }
-      throw new Error("An error occurred while retrieving the saved application");
-    }
-  },
-
+  
   /**
    * Request OTP for email verification
    */
@@ -852,7 +824,7 @@ const apiService = {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications', {
+    const response = await fetch(`${FASTAPI_BASE_URL}/undergraduate/applications`, {
       method: 'POST',
       headers,
       body: formData,
@@ -881,7 +853,7 @@ const apiService = {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    const response = await fetch('https://admissions-jcvy.onrender.com/undergraduate/applications/me', {
+    const response = await fetch(`${FASTAPI_BASE_URL}/undergraduate/applications/me`, {
       method: 'GET',
       headers,
     });
@@ -975,8 +947,8 @@ const apiService = {
       throw new Error("Failed to initialize payment");
     }
   },
+
+  
 };
-
-
 
 export default apiService;

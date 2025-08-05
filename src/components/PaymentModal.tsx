@@ -232,17 +232,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <strong>Application Fees (Non-refundable):</strong>
                 <br />
                 <span className="block mt-2">
-                  <strong>Nigerian Applicants:</strong> ₦20,000
+                  <strong>Nigerian Applicants:</strong> ₦20,000 (Application Fee Only)
                 </span>
                 <span className="block mt-1">
-                  <strong>International Applicants:</strong> $50
+                  <strong>International Applicants:</strong> $50 (Application Fee Only)
                 </span>
                 <div className="mt-4">
                   <p className="font-medium">Payment Process:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
                     <li>Payment will be processed through Paystack</li>
-                    <li>Nigerian applicants will use Paystack NGN payment gateway</li>
-                    <li>International applicants will use Paystack USD payment gateway</li>
                     <li>The Paystack payment window will open when you click "Pay Now"</li>
                     <li>A payment receipt will be automatically generated after successful payment</li>
                   </ul>

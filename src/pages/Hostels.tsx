@@ -30,16 +30,36 @@ const Hostels = () => {
   const hostels = useMemo(() => [
     {
       name: "Nnamdi Azikiwe Hall",
-      type: "Shared Room",
+      type: "Shared Room - 2 persons",
       duration: "1 year lease",
-      feePerSemester: "N280,000",
-      totalFee: "N560,000",
+      feePerSemester: "N400,000",
+      totalFee: "N800,000",
       images: [
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Room%20(2).jpg?updatedAt=1747307202535",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Study.jpg?updatedAt=1747307214591",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Toilet.jpg?updatedAt=1747307223294"
       ],
-      description: "Comfortable shared accommodation in a vibrant community setting.",
+      description: "Comfortable shared accommodation for 2 persons in a vibrant community setting.",
+      features: [
+        "Shared bathroom facilities",
+        "Study desk and chair",
+        "Wardrobe",
+        "Internet access",
+        "24/7 security"
+      ]
+    },
+    {
+      name: "Nnamdi Azikiwe Hall",
+      type: "Shared Room - 3 persons",
+      duration: "1 year lease",
+      feePerSemester: "N350,000",
+      totalFee: "N700,000",
+      images: [
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Room%20(2).jpg?updatedAt=1747307202535",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Study.jpg?updatedAt=1747307214591",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Nnamdi%20Azikiwe%20Hall/Toilet.jpg?updatedAt=1747307223294"
+      ],
+      description: "Shared accommodation for 3 persons with modern amenities.",
       features: [
         "Shared bathroom facilities",
         "Study desk and chair",
@@ -50,10 +70,10 @@ const Hostels = () => {
     },
     {
       name: "Kwame Nkrumah Hall",
-      type: "Shared Room",
+      type: "Shared Room - 2 persons",
       duration: "1 year lease",
-      feePerSemester: "N280,000",
-      totalFee: "N560,000",
+      feePerSemester: "N400,000",
+      totalFee: "N800,000",
       images: [
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/IMG_8005.jpg?updatedAt=1747307361297",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Room%202.jpg?updatedAt=1747307371806",
@@ -61,7 +81,7 @@ const Hostels = () => {
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Study.jpg?updatedAt=1747307412176",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Toilet.jpg?updatedAt=1747307415061"
       ],
-      description: "Shared accommodation with modern amenities.",
+      description: "Shared accommodation for 2 persons with modern amenities.",
       features: [
         "Shared bathroom facilities",
         "Study desk and chair",
@@ -72,19 +92,20 @@ const Hostels = () => {
     },
     {
       name: "Kwame Nkrumah Hall",
-      type: "Single Room",
+      type: "Shared Room - 4 persons",
       duration: "1 year lease",
-      feePerSemester: "N350,000",
-      totalFee: "N700,000",
+      feePerSemester: "N340,000",
+      totalFee: "N680,000",
       images: [
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Room%202.jpg?updatedAt=1747307444703",
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Toilet.jpg?updatedAt=1747307453392",
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Single%20room/Study.jpg?updatedAt=1747307450473",
-        
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/IMG_8005.jpg?updatedAt=1747307361297",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Room%202.jpg?updatedAt=1747307371806",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Study%20(2).jpg?updatedAt=1747307404873",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Study.jpg?updatedAt=1747307412176",
+        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Kwame%20Nkrumah%20Hall/Shared%20room/Toilet.jpg?updatedAt=1747307415061"
       ],
-      description: "Private room with enhanced privacy and comfort.",
+      description: "Shared accommodation for 4 persons with modern amenities.",
       features: [
-        "Private bathroom",
+        "Shared bathroom facilities",
         "Study desk and chair",
         "Wardrobe",
         "Internet access",
@@ -93,32 +114,10 @@ const Hostels = () => {
     },
     {
       name: "Julius Nyerere Hall",
-      type: "Single Room",
+      type: "Shared Room - 3 persons",
       duration: "1 year lease",
-      feePerSemester: "N455,000",
-      totalFee: "N910,000",
-      images: [
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%203.jpg?updatedAt=1747307294452",
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Kitchenette.jpg?updatedAt=1747307297156",
-        "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Single%20room/Room%202.jpg?updatedAt=1747307301317",
-       
-      ],
-      description: "Single room with modern amenities and privacy.",
-      features: [
-        "Private bathroom",
-        "Study desk and chair",
-        "Wardrobe",
-        "Internet access",
-        "24/7 security",
-        "Air conditioning"
-      ]
-    },
-    {
-      name: "Julius Nyerere Hall",
-      type: "Shared Room",
-      duration: "1 year lease",
-      feePerSemester: "N238,000",
-      totalFee: "N476,000",
+      feePerSemester: "N340,000",
+      totalFee: "N680,000",
       images: [
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Room%202.jpg?updatedAt=1747307228940",
         "https://ik.imagekit.io/nsq6yvxg1/AUST%20New%20work/Julius%20Nyerere%20Hall/Shared%20room/Kitchenette.jpg?updatedAt=1747307233197",
@@ -170,7 +169,7 @@ const Hostels = () => {
             </div>
             <div>
               <h4 className="font-semibold mb-2">Capacity:</h4>
-              <p className="text-gray-600">{hostel.type === "Shared Room" ? "Shared" : "Single"} Room</p>
+              <p className="text-gray-600">{hostel.type.includes("Shared") ? hostel.type : "Single Room"}</p>
             </div>
           </div>
           <div>
