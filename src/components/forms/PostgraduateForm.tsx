@@ -1908,23 +1908,30 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
               </div>
 
               {postgraduateData.academicQualifications.qualification1.type === "other" && (
-                <div className="space-y-2">
-                  <Label>Specify Other Qualification <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Specify Other Qualification
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Input
                     placeholder="Enter other qualification"
                     value={postgraduateData.academicQualifications.qualification1.otherType || ""}
                     onChange={(e) => handleAcademicQualificationChange("qualification1", "otherType", e.target.value)}
+                    className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   />
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Grade <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Grade
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Select
                   value={postgraduateData.academicQualifications.qualification1.grade}
                   onValueChange={(value) => handleAcademicQualificationChange("qualification1", "grade", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1937,8 +1944,11 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>CGPA <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  CGPA
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -1952,27 +1962,35 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                       handleAcademicQualificationChange("qualification1", "cgpa", value);
                     }
                   }}
+                  className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Subject <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Subject
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Input
                   placeholder="Enter subject"
                   value={postgraduateData.academicQualifications.qualification1.subject}
                   onChange={(e) => handleAcademicQualificationChange("qualification1", "subject", e.target.value)}
+                  className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Institution <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Institution
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Popover open={openUniversityPopover} onOpenChange={setOpenUniversityPopover}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       role="combobox"
                       aria-expanded={openUniversityPopover}
-                      className="w-full justify-between"
+                      className="w-full justify-between h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                     >
                       <span className="truncate">
                         {postgraduateData.academicQualifications.qualification1.institution || "Search for your institution..."}
@@ -2001,14 +2019,17 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label>Start Date <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Start Date
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Select
                     value={postgraduateData.academicQualifications.qualification1.startDate.day}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "day", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Day" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2023,7 +2044,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     value={postgraduateData.academicQualifications.qualification1.startDate.month}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "month", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Month" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2038,7 +2059,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     value={postgraduateData.academicQualifications.qualification1.startDate.year}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "startDate", "year", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2052,14 +2073,17 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>End Date <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  End Date
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Select
                     value={postgraduateData.academicQualifications.qualification1.endDate.day}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "day", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Day" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2074,7 +2098,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     value={postgraduateData.academicQualifications.qualification1.endDate.month}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "month", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Month" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2089,7 +2113,7 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     value={postgraduateData.academicQualifications.qualification1.endDate.year}
                     onValueChange={(value) => handleAcademicDateChange("qualification1", "endDate", "year", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Year" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2137,13 +2161,16 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
             <div className="space-y-4 mt-8">
               <h4 className="font-medium"><b>Second Academic Qualification (Required for PhD)</b></h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Qualification Type <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Qualification Type
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Select
                     value={postgraduateData.academicQualifications.qualification2?.type || ""}
                     onValueChange={(value) => handleAcademicQualificationChange("qualification2", "type", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Select qualification type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2155,23 +2182,30 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                 </div>
 
                 {postgraduateData.academicQualifications.qualification2?.type === "other" && (
-                  <div className="space-y-2">
-                    <Label>Specify Other Qualification <span className="text-red-500">Required</span></Label>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      Specify Other Qualification
+                      <span className="text-red-500 text-xs">*</span>
+                    </Label>
                     <Input
                       placeholder="Enter other qualification"
                       value={postgraduateData.academicQualifications.qualification2?.otherType || ""}
                       onChange={(e) => handleAcademicQualificationChange("qualification2", "otherType", e.target.value)}
+                      className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                     />
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label>Grade <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Grade
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Select
                     value={postgraduateData.academicQualifications.qualification2?.grade || ""}
                     onValueChange={(value) => handleAcademicQualificationChange("qualification2", "grade", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Select grade" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2184,8 +2218,11 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>CGPA <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    CGPA
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -2199,27 +2236,35 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                         handleAcademicQualificationChange("qualification2", "cgpa", value);
                       }
                     }}
+                    className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Subject <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Subject
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Input
                     placeholder="Enter subject"
                     value={postgraduateData.academicQualifications.qualification2?.subject || ""}
                     onChange={(e) => handleAcademicQualificationChange("qualification2", "subject", e.target.value)}
+                    className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Institution <span className="text-red-500">Required</span></Label>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Institution
+                    <span className="text-red-500 text-xs">*</span>
+                  </Label>
                   <Popover open={openUniversityPopover2} onOpenChange={setOpenUniversityPopover2}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         role="combobox"
                         aria-expanded={openUniversityPopover2}
-                        className="w-full justify-between"
+                        className="w-full justify-between h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
                       >
                         <span className="truncate">
                           {postgraduateData.academicQualifications.qualification2?.institution || "Search for your institution..."}
@@ -2478,8 +2523,13 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         )}
 
        {/* References Section */}
-    <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-      <h3 className="text-lg font-semibold">Academic References</h3>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-amber-100 rounded-lg">
+          <User className="h-5 w-5 text-amber-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900">Academic References</h3>
+      </div>
       <div className="space-y-4">
         <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
           <p className="text-sm text-yellow-800">
@@ -2497,9 +2547,12 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         {/* Referee 1 */}
         <div className="space-y-4">
           <h4 className="font-medium">Referee 1</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Full Name <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Full Name
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 placeholder="Enter referee's full name"
                 value={postgraduateData.references.referee1.name}
@@ -2513,15 +2566,20 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     }
                   }
                 }))}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Email Address <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Email Address
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 type="email"
                 placeholder="Enter referee's email"
                 value={postgraduateData.references.referee1.email}
                 onChange={(e) => handleRefereeEmailChange(1, e.target.value)}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
               {referee1EmailError && <p className="text-xs text-red-500">{referee1EmailError}</p>}
             </div>
@@ -2531,9 +2589,12 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
         {/* Referee 2 */}
         <div className="space-y-4">
           <h4 className="font-medium">Referee 2</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Full Name <span className="text-red-500 text-xs italic">Required</span></Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Full Name
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 placeholder="Enter referee's full name"
                 value={postgraduateData.references.referee2.name}
@@ -2547,15 +2608,20 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
                     }
                   }
                 }))}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Email Address <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Email Address
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Input
                 type="email"
                 placeholder="Enter referee's email"
                 value={postgraduateData.references.referee2.email}
                 onChange={(e) => handleRefereeEmailChange(2, e.target.value)}
+                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
               {referee2EmailError && <p className="text-xs text-red-500">{referee2EmailError}</p>}
             </div>
@@ -2566,8 +2632,13 @@ const PostgraduateForm = ({ onPayment, isProcessingPayment }: PostgraduateFormPr
 
 
         {/* Declaration */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-          <h3 className="text-lg font-semibold">Declaration</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <FileCheck className="h-5 w-5 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Declaration</h3>
+          </div>
           <div className="space-y-4">
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
