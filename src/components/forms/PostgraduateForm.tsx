@@ -2814,7 +2814,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 id="statementOfPurpose"
                 label={
                   <>
-                    Statement of Purpose <span className="text-red-500 text-xs italic">Required</span>
+                    Statement of Purpose <span className="text-red-500 text-xs">*</span>
                   </>
                 }
                 accept=".pdf,.doc,.docx"
