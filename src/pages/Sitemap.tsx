@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 const Sitemap = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      
       <main className="flex-grow py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -118,7 +118,7 @@ const Sitemap = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   );
 };

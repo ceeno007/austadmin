@@ -69,12 +69,19 @@ export const getImageDimensions = (src: string): Promise<{ width: number; height
  * @param height The desired height
  * @returns The responsive image URL
  */
-export const getResponsiveImageUrl = (src: string, width: number, height: number): string => {
+export const getResponsiveImageUrl = (src: string, width: number, height: number, quality: number = 70): string => {
   // If the image is from Cloudinary, modify the URL to include size parameters
   if (src.includes('cloudinary.com')) {
     const baseUrl = src.split('/upload/')[0] + '/upload/';
     const imagePath = src.split('/upload/')[1];
-    return `${baseUrl}w_${width},h_${height},c_scale/${imagePath}`;
+    return `${baseUrl}w_${width},h_${height},q_${quality},c_scale/${imagePath}`;
   }
-  return src;
+  
+  // If it's a local or server image with a query string
+  if (src.includes('?')) {
+    return `${src}&w=${width}&h=${height}&q=${quality}`;
+  }
+  
+  // If it's a local or server image without a query string
+  return `${src}?w=${width}&h=${height}&q=${quality}`;
 }; 

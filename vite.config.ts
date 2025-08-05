@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
       },
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'logo/aust-logo.png') {
+          if (assetInfo.name === 'logo/aust-logo.webp.webp.png') {
             return 'logo/[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';

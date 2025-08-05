@@ -5,6 +5,9 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle2, XCircle, AlertCircle, Mail, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import apiService from "@/services/api";
 
 interface Referee {
   name: string;
@@ -29,6 +32,11 @@ const ReferenceStatus: React.FC = () => {
   const { logout } = useAuth();
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingRefereeIndex, setEditingRefereeIndex] = useState<number | null>(null);
+  const [newRefereeName, setNewRefereeName] = useState("");
+  const [newRefereeEmail, setNewRefereeEmail] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const fetchApplicationData = async () => {
@@ -81,6 +89,125 @@ const ReferenceStatus: React.FC = () => {
     navigate("/login");
   };
 
+  const handleEditClick = (index: number) => {
+    const currentReferee = referees[index];
+    setEditingRefereeIndex(index);
+    setNewRefereeName(currentReferee.name === "Not provided" ? "" : currentReferee.name);
+    setNewRefereeEmail(currentReferee.email === "Not provided" ? "" : currentReferee.email);
+    setEmailError(""); // Clear previous errors
+  };
+
+  const handleCancelClick = () => {
+    setEditingRefereeIndex(null);
+    setNewRefereeName("");
+    setNewRefereeEmail("");
+    setEmailError("");
+  };
+
+  const validateAcademicEmail = (email: string) => {
+    // Basic validation for academic email (ends with .edu or similar academic domains)
+    const academicEmailRegex = /^[\w.-]+@(?:[a-zA-Z0-9-]+\.)+(?:edu|ac|university|college|inst)\b/i;
+    if (!email) {
+        return "Email is required.";
+    }
+    if (!academicEmailRegex.test(email)) {
+        return "Please enter a valid academic email address.";
+    }
+    return "";
+  };
+
+  const handleSaveClick = async (index: number) => {
+    if (!newRefereeName || !newRefereeEmail) {
+        setEmailError("Name and Email are required.");
+        return;
+    }
+
+    const emailValidationMessage = validateAcademicEmail(newRefereeEmail);
+    if (emailValidationMessage) {
+        setEmailError(emailValidationMessage);
+        return;
+    }
+
+    // Check if the new email is the same as the other referee's email
+    if (application) {
+        const otherRefereeEmail = index === 0 ? application.second_referee_email : application.first_referee_email;
+        if (newRefereeEmail.toLowerCase() === otherRefereeEmail.toLowerCase()) {
+            setEmailError("Referee emails cannot be the same.");
+            return;
+        }
+    }
+
+    setIsSaving(true);
+    setEmailError("");
+
+    try {
+        const refereeNumber = index === 0 ? 1 : 2; // 1 for first referee, 2 for second
+        await apiService.changePostgraduateReferee({
+            referee_number: refereeNumber as 1 | 2,
+            new_referee_name: newRefereeName,
+            new_referee_email: newRefereeEmail,
+        });
+
+        // Update local application state and localStorage
+        if (application) {
+            const updatedApplication = { ...application };
+            if (index === 0) {
+                updatedApplication.first_referee_name = newRefereeName;
+                updatedApplication.first_referee_email = newRefereeEmail;
+                updatedApplication.referee_1 = false; // Reset status after change
+            } else {
+                updatedApplication.second_referee_name = newRefereeName;
+                updatedApplication.second_referee_email = newRefereeEmail;
+                updatedApplication.referee_2 = false; // Reset status after change
+            }
+            setApplication(updatedApplication);
+            // Assuming applicationData in localStorage stores an object with an applications array
+            const storedData = localStorage.getItem("applicationData");
+            if (storedData) {
+                try {
+                    const parsedData = JSON.parse(storedData);
+                    if (parsedData.applications && parsedData.applications.length > 0) {
+                        parsedData.applications[0] = updatedApplication;
+                        localStorage.setItem("applicationData", JSON.stringify(parsedData));
+                    }
+                } catch(e) {
+                    console.error("Failed to parse or update applicationData in localStorage", e);
+                }
+            } else {
+                 // If no applicationData in localStorage, maybe just store the updated application directly
+                 // This might depend on how the app uses this storage.
+                 // For now, logging a warning. Consider a more robust localStorage strategy.
+                 console.warn("applicationData not found in localStorage, cannot update.");
+            }
+
+        }
+
+        toast({
+            title: "Success",
+            description: `Referee ${index + 1} details updated.`,
+            style: {
+                background: '#10B981', // Green background
+                color: 'white',
+            }
+        });
+        handleCancelClick(); // Exit editing mode
+
+    } catch (error: any) {
+        console.error("Error changing referee:", error);
+        toast({
+            title: "Error",
+            description: error.message || "Failed to update referee details. Please try again.",
+            variant: "destructive",
+            style: {
+              background: '#EF4444', // Red background
+              color: 'white',
+            }
+        });
+    } finally {
+        setIsSaving(false);
+    }
+};
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-white to-gray-200">
@@ -131,8 +258,8 @@ const ReferenceStatus: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 flex flex-col items-center pt-0 px-2">
-      <div className="w-full max-w-2xl rounded-3xl shadow-2xl bg-white/80 backdrop-blur-md border border-gray-200 p-8 mt-8 relative">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center pt-8 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6 md:p-8 relative">
         {/* Sign Out Button */}
         <button
           onClick={handleSignOut}
@@ -143,66 +270,139 @@ const ReferenceStatus: React.FC = () => {
           Sign Out
         </button>
 
-        <div className="text-center mb-10 pt-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Reference Status</h1>
-          <p className="text-lg text-gray-500">Track the status of your referee submissions</p>
+        <div className="text-center mb-8 pt-12">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Reference Status</h1>
+          <p className="text-gray-600">Track the status of your referee submissions</p>
         </div>
 
         {application.referee_1 && application.referee_2 && (
-          <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-100 p-6 rounded-2xl border border-green-100 shadow">
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-green-100 p-3 rounded-full shadow">
-                <CheckCircle2 className="h-10 w-10 text-green-600 animate-bounce" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-semibold text-green-800 text-center mb-2">
-              All References Received! 🎉
-            </h2>
-            <p className="text-green-700 text-center mb-4">
-              Both of your referees have submitted their recommendations. Your application is now complete!
-            </p>
-            <div className="bg-white/80 p-4 rounded-xl border border-green-100">
-              <div className="flex items-center text-green-700">
-                <Mail className="h-5 w-5 mr-2" />
-                <p className="text-sm">
-                  Please check your email for further instructions and updates on your application status.
-                </p>
-              </div>
-            </div>
-          </div>
+          <motion.div 
+            className="mb-6 p-4 bg-green-100 border border-green-200 rounded-md flex items-center justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <CheckCircle2 className="h-8 w-8 text-green-600 mr-3" />
+            <h2 className="text-lg font-semibold text-green-800">All References Received!</h2>
+          </motion.div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {referees.map((referee, index) => (
-            <div
+            <motion.div
               key={index}
-              className="flex items-center justify-between bg-white/90 rounded-2xl shadow p-6 border border-gray-100 transition hover:shadow-lg"
+              className="flex items-center justify-between p-4 bg-white rounded-md border border-gray-200"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
             >
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                  Referee {index + 1}
-                </h3>
-                <p className="text-gray-600 mb-1">{referee.name}</p>
-                <p className="text-gray-400 text-sm">{referee.email}</p>
-              </div>
-              <div className="flex flex-col items-center">
-                {getStatusIcon(referee.status)}
-                <span className={`mt-2 font-semibold text-base ${getStatusColor(referee.status)}`}>
-                  {getStatusText(referee.status)}
-                </span>
-              </div>
-            </div>
+              {editingRefereeIndex === index ? (
+                // Editing mode
+                <div className="flex flex-col w-full space-y-3">
+                    <h3 className="text-base font-medium text-gray-900">Editing Referee {index + 1}</h3>
+                    <div>
+                        <label htmlFor={`new-referee-name-${index}`} className="sr-only">New Name</label>
+                        <Input
+                            id={`new-referee-name-${index}`}
+                            placeholder="New Referee Name"
+                            value={newRefereeName}
+                            onChange={(e) => setNewRefereeName(e.target.value)}
+                            disabled={isSaving}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor={`new-referee-email-${index}`} className="sr-only">New Email</label>
+                        <Input
+                            id={`new-referee-email-${index}`}
+                            type="email"
+                            placeholder="New Referee Academic Email"
+                            value={newRefereeEmail}
+                            onChange={(e) => {
+                                setNewRefereeEmail(e.target.value);
+                                setEmailError(""); // Clear error on change
+                            }}
+                            disabled={isSaving}
+                        />
+                         {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="secondary" 
+                            onClick={handleCancelClick} 
+                            disabled={isSaving}
+                            className="flex-grow"
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            onClick={() => handleSaveClick(index)} 
+                            disabled={isSaving} 
+                            className="flex-grow bg-[#FF5500] hover:bg-[#e64d00]"
+                        >
+                             {isSaving ? (
+                                <div className="flex items-center justify-center">
+                                    Saving...
+                                </div>
+                                ) : (
+                                    "Save"
+                                )
+                            }
+                        </Button>
+                    </div>
+                </div>
+              ) : (
+                // Display mode
+                <div className="flex items-center justify-between w-full">
+                    <div>
+                        <h3 className="text-base font-medium text-gray-900">Referee {index + 1}</h3>
+                        <p className="text-gray-700 text-sm break-words">{referee.name}</p>
+                        <p className="text-gray-500 text-xs break-words">{referee.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {!referee.status && ( // Only show edit if status is not submitted
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditClick(index)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <XCircle className="h-5 w-5" />
+                            </Button>
+                        )}
+                        {getStatusIcon(referee.status)}
+                        <span className={`font-semibold text-sm ${getStatusColor(referee.status)}`}>
+                            {getStatusText(referee.status)}
+                        </span>
+                    </div>
+                </div>
+              )}
+            </motion.div>
           ))}
         </div>
 
         {!application.referee_1 || !application.referee_2 ? (
-          <div className="bg-blue-50 p-4 rounded-xl mt-10 flex flex-col items-center">
-            <AlertCircle className="h-6 w-6 text-blue-500 mb-2" />
-            <p className="text-blue-700 text-center">
+          <motion.div 
+            className="bg-blue-100 border border-blue-200 p-4 rounded-md mt-6 flex items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 + referees.length * 0.1, duration: 0.5 }}
+          >
+             <AlertCircle className="h-6 w-6 text-blue-600 mr-3" />
+            <p className="text-blue-800 text-sm">
               Your referees will receive an email with instructions to submit their recommendations.
             </p>
-          </div>
+          </motion.div>
         ) : null}
+        
+        {/* Optional: Add a button to resend reminder emails if needed */}
+        {/* {!application.referee_1 || !application.referee_2 ? (
+          <div className="text-center mt-6">
+            <Button variant="outline" className="text-blue-600 hover:text-blue-800">
+              <Mail className="h-4 w-4 mr-2" /> Resend Reminder Emails
+            </Button>
+          </div>
+        ) : null} */}
+
       </div>
     </div>
   );

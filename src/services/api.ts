@@ -189,39 +189,39 @@ const apiService = {
   },
 
   /**
-   * Log in a user with username and password
+   * Log in a user with email and password
    * @param credentials - User login credentials
    * @returns Promise with the API response
    */
   login: async (credentials: { email: string; password: string }) => {
     try {
+      // Use FastAPI OAuth2 token endpoint
+      const formData = new URLSearchParams();
+      formData.append('grant_type', 'password');
+      formData.append('username', credentials.email); // FastAPI expects 'username' field
+      formData.append('password', credentials.password);
+      
       const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(credentials),
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Login failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Login failed');
       }
 
       const data = await response.json();
 
-      // Store token
-      localStorage.setItem('access_token', data.access_token);
-      
-      // Store user info
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Store token with consistent key
+      localStorage.setItem('accessToken', data.access_token);
       
       // Store full application data
       localStorage.setItem('applicationData', JSON.stringify(data));
-
-      // Store program type
-      if (data.user.program) {
-        localStorage.setItem('programType', data.user.program.toLowerCase());
-      }
 
       return data;
     } catch (error) {

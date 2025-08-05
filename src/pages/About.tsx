@@ -47,7 +47,7 @@ const About = () => {
               <div className="md:w-1/2 ml-0 md:ml-8">
                 <div className="rounded-xl overflow-hidden shadow-lg">
                   <img
-                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/images/aboutimg.jpg"
+                    src="https://ik.imagekit.io/nsq6yvxg1/Upload/SKF00909.jpg?updatedAt=1747908548002"
                     alt="AUST Campus"
                     className="w-full h-80 object-cover"
                   />

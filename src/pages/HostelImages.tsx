@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, Home, XCircle, Maximize2, Minimize2
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { Skeleton } from "@/components/ui/skeleton";
+import OptimizedImage from "@/components/OptimizedImage";
 
 // Define the structure of our hostel data
 interface Hostel {
@@ -156,10 +157,13 @@ const HostelImages = () => {
         {fullscreen ? (
           <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
             <div className="relative w-full h-full flex items-center justify-center">
-              <img 
+              <OptimizedImage 
                 src={hostel.images[currentIndex]} 
                 alt={`${hostel.name} ${currentIndex + 1}`}
                 className="max-w-full max-h-full object-contain"
+                width={1200}
+                height={900}
+                quality={80}
               />
               <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
                 {hostel.name} - {hostel.type}
@@ -210,10 +214,13 @@ const HostelImages = () => {
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                   >
-                    <img 
+                    <OptimizedImage 
                       src={hostel.images[currentIndex]} 
                       alt={`${hostel.name} ${currentIndex + 1}`}
                       className="w-full h-full object-contain bg-gray-100"
+                      width={800}
+                      height={600}
+                      quality={70}
                     />
                     <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
                       {hostel.name} - {hostel.type}
@@ -249,22 +256,26 @@ const HostelImages = () => {
                   <div className="text-center text-gray-600 mb-1 sm:mb-4 text-xs sm:text-lg">
                     {currentIndex + 1} / {hostel.images.length}
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-4">
-                    {hostel.images.map((image, idx) => (
-                      <button
-                        key={idx}
-                        className={`relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-all ${
-                          idx === currentIndex ? 'ring-2 ring-[#FF5500] scale-105' : ''
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 overflow-x-auto pb-2">
+                    {hostel.images.map((image, index) => (
+                      <div
+                        key={index}
+                        onClick={() => handleGoToIndex(index)}
+                        className={`cursor-pointer relative ${
+                          currentIndex === index
+                            ? 'outline outline-2 outline-offset-2 outline-[#FF5500]'
+                            : ''
                         }`}
-                        onClick={() => handleGoToIndex(idx)}
                       >
-                        <img
+                        <OptimizedImage
                           src={image}
-                          alt={`Thumbnail ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
+                          alt={`${hostel.name} thumbnail ${index + 1}`}
+                          className="w-full aspect-square object-cover rounded-md"
+                          width={120}
+                          height={120}
+                          quality={40}
                         />
-                      </button>
+                      </div>
                     ))}
                   </div>
                 </div>

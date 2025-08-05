@@ -18,6 +18,12 @@ interface TokenResponse {
     program?: string;
     full_name: string;
   };
+  applications?: Array<{
+    has_paid: boolean;
+    referee_1: boolean;
+    referee_2: boolean;
+    program_type: string;
+  }>;
 }
 
 const Login = () => {
@@ -38,7 +44,6 @@ const Login = () => {
     }
     
     setIsLoading(true);
-    console.log("Attempting login with email:", email);
     
     const loadingToast = toast.loading("Logging in...");
     
@@ -65,35 +70,42 @@ const Login = () => {
         return;
       }
       
-      console.log("Making fastApiSignin request to:", API_ENDPOINTS.FASTAPI_TOKEN);
-      
-      const data = await apiService.fastApiSignin({
-        username: email,
+      const data = await apiService.login({
+        email: email,
         password
       }) as TokenResponse;
       
-      console.log("Login response received:", data);
-      
       if (!data.access_token) {
+        console.error("No access token in response:", data);
         throw new Error("No access token received from server");
       }
       
-      console.log("Logging in user with data:", data);
+      // Store the login response in localStorage
       login(data.access_token, data);
       
       toast.dismiss(loadingToast);
       toast.success("Login successful!");
       
-      let programType = data.user?.program?.toLowerCase() || "undergraduate";
-      localStorage.setItem("programType", programType);
-      
-      let destination = location.state?.from?.pathname;
-      if (!destination) {
-        destination = `/document-upload?type=${programType}`;
+      const programType = data.user?.program?.toLowerCase();
+      const application = data.applications?.[0];
+
+      if (programType === "postgraduate") {
+        if (application?.has_paid === true) {
+          // Postgraduate user has paid, redirect to reference status
+          navigate("/reference-status", { replace: true });
+        } else {
+          // Postgraduate user has not paid or no application, redirect to application form (postgraduate section)
+          navigate("/document-upload?type=postgraduate", { replace: true }); 
+        }
+      } else {
+        // Default flow for other program types (undergraduate, foundation, etc.)
+        localStorage.setItem("programType", programType || "undergraduate");
+        let destination = location.state?.from?.pathname;
+        if (!destination || destination === "/login" || destination === "/signup") { // Prevent redirecting back to auth pages
+          destination = `/document-upload?type=${programType || "undergraduate"}`;
+        }
+        navigate(destination, { replace: true });
       }
-      
-      console.log("Navigating to:", destination, "with program type:", programType);
-      navigate(destination, { replace: true });
       
     } catch (error) {
       console.error("Login error details:", error); 

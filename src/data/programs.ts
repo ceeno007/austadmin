@@ -48,7 +48,7 @@ export const programs: Program[] = [
     requirements: [
       "Five O Level credits including English, Mathematics, Physics/Data Processing",
       "UTME Subjects: Mathematics, Physics, and one other Science subject",
-      "JAMB score of 200+",
+      "JAMB score of 150+",
       "Direct Entry: A Level passes in Mathematics and Physics",
       "Direct Entry: ND/HND in Computer Science or related field",
       "Direct Entry: Minimum of 10 points in IJMB"
@@ -81,7 +81,7 @@ export const programs: Program[] = [
     requirements: [
       "Five O Level credits including English, Mathematics, Physics/Data Processing",
       "UTME Subjects: Mathematics, Physics, and one other Science subject",
-      "JAMB score of 200+",
+      "JAMB score of 150+",
       "Direct Entry: A Level passes in Mathematics and Physics",
       "Direct Entry: ND/HND in Computer Science or related field",
       "Direct Entry: Minimum of 10 points in IJMB"
@@ -114,7 +114,7 @@ export const programs: Program[] = [
     requirements: [
       "Five O Level credits including English, Mathematics, Physics, Chemistry",
       "UTME Subjects: Mathematics, Physics, Chemistry",
-      "JAMB score of 200+",
+      "JAMB score of 150+",
       "Direct Entry: A Level passes in Mathematics, Physics, and Chemistry",
       "Direct Entry: ND/HND in Petroleum Engineering or related field",
       "Direct Entry: Minimum of 10 points in IJMB"
@@ -147,7 +147,7 @@ export const programs: Program[] = [
     requirements: [
       'Five O Level credits including English, Mathematics, Physics, Chemistry',
       'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
+      'JAMB score of 150+',
       'Direct Entry: A Level passes in Mathematics, Physics, and Chemistry',
       'Direct Entry: ND/HND in Civil Engineering or related field',
       'Direct Entry: Minimum of 10 points in IJMB'
@@ -171,7 +171,7 @@ export const programs: Program[] = [
     requirements: [
       'Five O Level credits including English, Mathematics, Physics, Chemistry',
       'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
+      'JAMB score of 150+',
       'Direct Entry: A Level passes in Mathematics, Physics, and Chemistry',
       'Direct Entry: ND/HND in Mechanical Engineering or related field',
       'Direct Entry: Minimum of 10 points in IJMB'
@@ -195,7 +195,7 @@ export const programs: Program[] = [
     requirements: [
       'Five O Level credits including English, Mathematics, Physics, Chemistry',
       'UTME Subjects: Mathematics, Physics, Chemistry',
-      'JAMB score of 200+',
+      'JAMB score of 150+',
       'Direct Entry: A Level passes in Mathematics, Physics, and Chemistry',
       'Direct Entry: ND/HND in Materials/Metallurgical Engineering or related field',
       'Direct Entry: Minimum of 10 points in IJMB'
@@ -219,7 +219,7 @@ export const programs: Program[] = [
     requirements: [
       "Five O Level credits including English, Mathematics, Economics, and two other relevant subjects",
       "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-      "JAMB score of 200+",
+      "JAMB score of 150+",
       "Direct Entry: A Level passes in Accounting, Economics, or Business",
       "Direct Entry: ND/HND in Accounting or related field",
       "Direct Entry: Minimum of 10 points in IJMB"
@@ -243,7 +243,7 @@ export const programs: Program[] = [
     requirements: [
       "Five O Level credits including English, Mathematics, Economics, and two other relevant subjects",
       "UTME Subjects: Mathematics, Economics, and one other Social Science subject",
-      "JAMB score of 200+",
+      "JAMB score of 150+",
       "Direct Entry: A Level passes in Business, Economics, or related field",
       "Direct Entry: ND/HND in Business Administration or related field",
       "Direct Entry: Minimum of 10 points in IJMB"

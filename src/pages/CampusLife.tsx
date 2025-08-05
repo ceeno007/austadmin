@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,13 +11,35 @@ import {
   Dumbbell, 
   Gamepad2,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  ExternalLink
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SEO from "@/components/SEO";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 const CampusLife = () => {
+  const [showFlickrDialog, setShowFlickrDialog] = useState(false);
+
+  const handleFlickrClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowFlickrDialog(true);
+  }, []);
+
+  const handleConfirmNavigation = useCallback(() => {
+    window.open("https://www.flickr.com/photos/austabuja/albums/72157719735619470/with/51380207850/", "_blank");
+    setShowFlickrDialog(false);
+  }, []);
+
   return (
     <Suspense fallback={<div className="p-8"><Skeleton className="h-96 w-full rounded-xl" /></div>}>
       <SEO 
@@ -120,7 +142,14 @@ const CampusLife = () => {
                   <p className="text-gray-600">
                     Our research facilities are equipped with cutting-edge technology and resources to support innovative research across various disciplines:
                   </p>
-                
+                  
+                  <Button 
+                    onClick={handleFlickrClick}
+                    variant="outline" 
+                    className="mt-4 border-[#FF5500] text-[#FF5500] hover:bg-[#ff550011]"
+                  >
+                    View Images <ExternalLink className="ml-2 h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
               
@@ -241,6 +270,34 @@ const CampusLife = () => {
           </div>
         </section>
       </main>
+      
+      {/* Flickr External Link Confirmation Dialog */}
+      <Dialog open={showFlickrDialog} onOpenChange={setShowFlickrDialog}>
+        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-md rounded-2xl border-gray-200/50 shadow-xl">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-xl font-semibold">External Link</DialogTitle>
+            <DialogDescription className="text-gray-600">
+              You are about to visit an external website to view images of our research facilities. Would you like to continue?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <div className="flex flex-col items-center justify-center gap-3 mt-6 w-full">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <DialogClose asChild>
+                  <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
+                </DialogClose>
+                <Button
+                  onClick={handleConfirmNavigation}
+                  className="w-full sm:w-auto bg-[#FF5500] hover:bg-[#e64d00] flex items-center gap-2"
+                >
+                  Continue to Flickr
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Suspense>
   );
 };

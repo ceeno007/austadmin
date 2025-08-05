@@ -136,6 +136,26 @@ const Footer = () => {
                   Campus Life
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/hostels"
+                  className="text-gray-400 hover:text-[#FF5500] transition-colors flex items-center group"
+                  onClick={scrollToTop}
+                >
+                  <span className="w-1.5 h-1.5 bg-[#FF5500] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Hostel
+                </Link>
+              </li>
+                 <li>
+                <Link
+                  to="/contact"
+                  className="text-gray-400 hover:text-[#FF5500] transition-colors flex items-center group"
+                  onClick={scrollToTop}
+                >
+                  <span className="w-1.5 h-1.5 bg-[#FF5500] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
 

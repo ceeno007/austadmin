@@ -14,6 +14,7 @@ import 'react-phone-number-input/style.css';
 import apiService from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import PaymentModal from "@/components/PaymentModal";
 
 interface DocumentField {
   id: string;
@@ -64,6 +65,10 @@ interface ApplicationData {
   waec_result_path?: string;
   jamb_result_path?: string;
   other_qualifications_path?: string;
+  // Additional properties for application status
+  submitted?: boolean;
+  exam_type_1?: string;
+  exam_type_2?: string;
 }
 
 interface ExamResults {
@@ -167,10 +172,10 @@ const FileUploadField = ({
   };
 
   return (
-    <div className="space-y-3">
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
-      <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-        hasFiles ? 'border-green-500 bg-green-50' : 'border-gray-300'
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors ${
+        hasFiles ? 'bg-blue-50' : 'bg-white'
       }`}>
         <input
           type="file"
@@ -216,10 +221,10 @@ const FileUploadField = ({
           ) : (
             <div className="flex flex-col items-center justify-center w-full">
               <Upload className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-600 text-center">
+              <span className="mt-2 text-sm text-gray-800 text-center">
                 Click to upload {label}
               </span>
-              <span className="mt-1 text-xs text-gray-500 text-center">
+              <span className="mt-1 text-xs text-gray-700 text-center">
                 Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
               </span>
             </div>
@@ -480,57 +485,235 @@ function getYearOptions() {
   return years;
 }
 
-// Helper to build FormData for undergraduate application with exact backend field names
+// Define a type for our request body
+interface UndergraduateRequestBody {
+  program_type: string;
+  applicant_type: string;
+  selected_program?: string;
+  academic_session?: string;
+  surname?: string;
+  first_name?: string;
+  other_names?: string;
+  gender?: string;
+  date_of_birth?: string;
+  nationality?: string;
+  state_of_origin?: string;
+  street_address?: string;
+  city?: string;
+  country?: string;
+  phone_number?: string;
+  email?: string;
+  has_disability: boolean;
+  disability_description?: string;
+  exam_type_1?: string;
+  exam_number_1?: string;
+  exam_year_1?: number;
+  subjects_1?: Array<{subject: string; grade: string}>;
+  exam_type_2?: string;
+  exam_number_2?: string;
+  exam_year_2?: number;
+  subjects_2?: Array<{subject: string; grade: string}> | null;
+  jamb_reg_number?: string;
+  jamb_year?: number;
+  jamb_score?: number;
+  submitted?: boolean;
+}
+
+// Helper function to create a request body for the API
 function buildUndergraduateFormData(data) {
+  // Create a FormData object directly
   const formData = new FormData();
-  formData.append('state_of_origin', data.personalDetails.stateOfOrigin || '');
-  formData.append('selected_program', data.selectedCourse || '');
-  formData.append('gender', data.personalDetails.gender || '');
-  formData.append('has_disability', data.personalDetails.hasDisabilities === 'yes' ? 'true' : 'false');
-  if (data.passportPhoto) formData.append('passport_photo', data.passportPhoto);
-  formData.append('jamb_reg_number', data.academicQualifications.jambResults.regNumber || '');
-  formData.append('date_of_birth', `${data.personalDetails.dateOfBirth.year}-${data.personalDetails.dateOfBirth.month}-${data.personalDetails.dateOfBirth.day}`);
-  formData.append('city', data.personalDetails.city || '');
-  // Exam types and results
-  const selectedExams = data.selectedExams || [];
-  formData.append('exam_type_1', selectedExams[0] || '');
-  formData.append('exam_type_2', selectedExams[1] || '');
-  if (selectedExams[0]) {
-    formData.append('exam_type_1_result', data.academicQualifications[`${selectedExams[0]}Results`].documents || '');
-    formData.append('exam_year_1', data.academicQualifications[`${selectedExams[0]}Results`].examYear || '');
-    formData.append('exam_number_1', data.academicQualifications[`${selectedExams[0]}Results`].examNumber || '');
-    formData.append('subjects_1', JSON.stringify(data.academicQualifications[`${selectedExams[0]}Results`].subjects || []));
-  }
-  if (selectedExams[1]) {
-    formData.append('exam_type_2_result', data.academicQualifications[`${selectedExams[1]}Results`].documents || '');
-    formData.append('exam_year_2', data.academicQualifications[`${selectedExams[1]}Results`].examYear || '');
-    formData.append('exam_number_2', data.academicQualifications[`${selectedExams[1]}Results`].examNumber || '');
-    formData.append('subjects_2', JSON.stringify(data.academicQualifications[`${selectedExams[1]}Results`].subjects || []));
-  }
-  if (data.academicQualifications.jambResults.documents) formData.append('jamb_result', data.academicQualifications.jambResults.documents);
-  formData.append('jamb_year', data.academicQualifications.jambResults.examYear || '');
+  
+  // Basic Information
   formData.append('program_type', 'undergraduate');
-  formData.append('country', data.personalDetails.country || '');
   formData.append('applicant_type', 'fresh');
-  formData.append('street_address', data.personalDetails.streetAddress || '');
-  formData.append('disability_description', data.personalDetails.disabilityDescription || '');
-  formData.append('other_names', data.personalDetails.otherNames || '');
-  formData.append('first_name', data.personalDetails.firstName || '');
-  formData.append('surname', data.personalDetails.surname || '');
-  formData.append('phone_number', data.personalDetails.phoneNumber || '');
-  formData.append('nationality', data.personalDetails.nationality || '');
-  formData.append('email', data.personalDetails.email || '');
-  formData.append('academic_session', data.academicSession || '');
-  formData.append('jamb_score', data.academicQualifications.jambResults.score || '');
+  
+  // Only append if values exist
+  if (data.selectedCourse) {
+    formData.append('selected_program', data.selectedCourse);
+  }
+  
+  if (data.academicSession) {
+    formData.append('academic_session', data.academicSession);
+  }
+
+  // Personal details
+  if (data.personalDetails.surname) {
+    formData.append('surname', data.personalDetails.surname);
+  }
+  
+  if (data.personalDetails.firstName) {
+    formData.append('first_name', data.personalDetails.firstName);
+  }
+  
+  if (data.personalDetails.otherNames) {
+    formData.append('other_names', data.personalDetails.otherNames);
+  }
+  
+  if (data.personalDetails.gender) {
+    formData.append('gender', data.personalDetails.gender);
+  }
+  
+  // Date of birth
+  if (data.personalDetails.dateOfBirth.year && data.personalDetails.dateOfBirth.month && data.personalDetails.dateOfBirth.day) {
+    const date = new Date(
+      parseInt(data.personalDetails.dateOfBirth.year),
+      parseInt(data.personalDetails.dateOfBirth.month) - 1,
+      parseInt(data.personalDetails.dateOfBirth.day)
+    );
+    formData.append('date_of_birth', date.toISOString());
+  }
+  
+  // Contact info
+  if (data.personalDetails.nationality) {
+    formData.append('nationality', data.personalDetails.nationality);
+  }
+  
+  if (data.personalDetails.stateOfOrigin) {
+    formData.append('state_of_origin', data.personalDetails.stateOfOrigin);
+  }
+  
+  if (data.personalDetails.streetAddress) {
+    formData.append('street_address', data.personalDetails.streetAddress);
+  }
+  
+  if (data.personalDetails.city) {
+    formData.append('city', data.personalDetails.city);
+  }
+  
+  if (data.personalDetails.country) {
+    formData.append('country', data.personalDetails.country);
+  }
+  
+  if (data.personalDetails.phoneNumber) {
+    formData.append('phone_number', data.personalDetails.phoneNumber);
+  }
+  
+  if (data.personalDetails.email) {
+    formData.append('email', data.personalDetails.email);
+  }
+  
+  // Disability
+  formData.append('has_disability', data.personalDetails.hasDisabilities === 'yes' ? 'true' : 'false');
+  
+  if (data.personalDetails.hasDisabilities === 'yes' && data.personalDetails.disabilityDescription) {
+    formData.append('disability_description', data.personalDetails.disabilityDescription);
+  }
+  
+  // Handle Exam Types - Search for filled data regardless of selectedExams
+  // Check if we have WAEC data
+  let examNumber = 1;
+  
+  // Check each exam type for filled data
+  const examTypes = ['waec', 'neco', 'nabteb'];
+  for (const examType of examTypes) {
+    const examData = data.academicQualifications[`${examType}Results`];
+    
+    // Check if this exam has data (even if not in selectedExams)
+    const hasData = examData && (
+      examData.examNumber || 
+      examData.examYear || 
+      (examData.subjects && examData.subjects.length > 0) ||
+      examData.documents
+    );
+    
+    if (hasData) {
+      // Add exam type
+      formData.append(`exam_type_${examNumber}`, examType);
+      
+      // Add exam number
+      if (examData.examNumber) {
+        formData.append(`exam_number_${examNumber}`, examData.examNumber);
+      }
+      
+      // Add exam year
+      if (examData.examYear) {
+        formData.append(`exam_year_${examNumber}`, examData.examYear);
+      }
+      
+      // Add subjects
+      if (examData.subjects && examData.subjects.length > 0) {
+        const validSubjects = examData.subjects.filter(s => s.subject && s.grade);
+        const subjectsJson = JSON.stringify(validSubjects);
+        formData.append(`subjects_${examNumber}`, subjectsJson);
+      }
+      
+      // Add document
+      if (examData.documents) {
+        formData.append(`exam_type_${examNumber}_result`, examData.documents);
+      }
+      
+      // Only process max 2 exams
+      examNumber++;
+      if (examNumber > 2) break;
+    }
+  }
+  
+  // JAMB results
+  const jambResults = data.academicQualifications.jambResults;
+  if (jambResults?.regNumber) {
+    formData.append('jamb_reg_number', jambResults.regNumber);
+  }
+  
+  if (jambResults?.examYear) {
+    const year = parseInt(jambResults.examYear);
+    if (!isNaN(year)) {
+      formData.append('jamb_year', year.toString());
+    } else {
+      formData.append('jamb_year', '0');
+    }
+  } else {
+    formData.append('jamb_year', '0');
+  }
+  
+  if (jambResults?.score) {
+    const score = parseInt(jambResults.score);
+    if (!isNaN(score)) {
+      formData.append('jamb_score', score.toString());
+    } else {
+      formData.append('jamb_score', '0');
+    }
+  } else {
+    formData.append('jamb_score', '0');
+  }
+  
+  // Add JAMB results document
+  if (jambResults?.documents) {
+    formData.append('jamb_result', jambResults.documents);
+  }
+  
   return formData;
 }
 
-// Add this function before the UndergraduateForm component
+// Update the autofillFromApplication function to correctly set selected exams
 const autofillFromApplication = (application: any, prev: UndergraduateFormData): UndergraduateFormData => {
+  // console.log('Autofilling from application:', application);
+  
   // Set selected exams based on exam types
   const selectedExams = [];
   if (application.exam_type_1) selectedExams.push(application.exam_type_1);
   if (application.exam_type_2) selectedExams.push(application.exam_type_2);
+  
+  // console.log('Selected exams for autofill:', selectedExams);
+
+  // Safely parse subjects
+  let subjects1 = [];
+  let subjects2 = [];
+  try {
+    if (application.subjects_1 && typeof application.subjects_1 === 'string') {
+      subjects1 = JSON.parse(application.subjects_1);
+    } else if (Array.isArray(application.subjects_1)) {
+      subjects1 = application.subjects_1;
+    }
+    
+    if (application.subjects_2 && typeof application.subjects_2 === 'string') {
+      subjects2 = JSON.parse(application.subjects_2);
+    } else if (Array.isArray(application.subjects_2)) {
+      subjects2 = application.subjects_2;
+    }
+  } catch (error) {
+    console.error('Error parsing subjects:', error);
+  }
 
   return {
     ...prev,
@@ -568,7 +751,7 @@ const autofillFromApplication = (application: any, prev: UndergraduateFormData):
       nationality: application.nationality || prev.personalDetails.nationality,
       phoneNumber: application.phone_number || prev.personalDetails.phoneNumber,
       email: application.email || prev.personalDetails.email,
-      hasDisabilities: application.has_disability ? "Yes" : "No",
+      hasDisabilities: application.has_disability ? "yes" : "no",
       disabilityDescription: application.disability_description || prev.personalDetails.disabilityDescription
     },
     academicQualifications: {
@@ -576,21 +759,31 @@ const autofillFromApplication = (application: any, prev: UndergraduateFormData):
       waecResults: application.exam_type_1 === 'waec' ? {
         examNumber: application.exam_number_1 || '',
         examYear: application.exam_year_1?.toString() || '',
-        subjects: application.subjects_1 || [],
+        subjects: subjects1,
         documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
       } : prev.academicQualifications.waecResults,
       necoResults: application.exam_type_1 === 'neco' ? {
         examNumber: application.exam_number_1 || '',
         examYear: application.exam_year_1?.toString() || '',
-        subjects: application.subjects_1 || [],
+        subjects: subjects1,
         documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
-      } : prev.academicQualifications.necoResults,
+      } : (application.exam_type_2 === 'neco' ? {
+        examNumber: application.exam_number_2 || '',
+        examYear: application.exam_year_2?.toString() || '',
+        subjects: subjects2,
+        documents: application.exam_type_2_result_path ? createPlaceholderFile(application.exam_type_2_result_path) : null
+      } : prev.academicQualifications.necoResults),
       nabtebResults: application.exam_type_1 === 'nabteb' ? {
         examNumber: application.exam_number_1 || '',
         examYear: application.exam_year_1?.toString() || '',
-        subjects: application.subjects_1 || [],
+        subjects: subjects1,
         documents: application.exam_type_1_result_path ? createPlaceholderFile(application.exam_type_1_result_path) : null
-      } : prev.academicQualifications.nabtebResults,
+      } : (application.exam_type_2 === 'nabteb' ? {
+        examNumber: application.exam_number_2 || '',
+        examYear: application.exam_year_2?.toString() || '',
+        subjects: subjects2,
+        documents: application.exam_type_2_result_path ? createPlaceholderFile(application.exam_type_2_result_path) : null
+      } : prev.academicQualifications.nabtebResults),
       jambResults: {
         regNumber: application.jamb_reg_number || '',
         examYear: application.jamb_year?.toString() || '',
@@ -601,6 +794,49 @@ const autofillFromApplication = (application: any, prev: UndergraduateFormData):
     passportPhoto: application.passport_photo_path ? createPlaceholderFile(application.passport_photo_path) : null,
     declaration: application.submitted ? "true" : prev.declaration
   };
+};
+
+// Utility function to check application status and redirect if needed
+export const checkApplicationStatusAndRedirect = (authResponse: any) => {
+  try {
+    // Check if there's an application in the response
+    if (authResponse?.applications?.length > 0) {
+      const application = authResponse.applications[0];
+      
+      // If the application is already submitted, redirect to success page
+      if (application.submitted === true) {
+        console.log('Found submitted application, redirecting to success page');
+        
+        // Store the application data for reference on the success page
+        localStorage.setItem('applicationData', JSON.stringify(authResponse));
+        
+        // Show success notification
+        toast.success("You have an existing application!", {
+          description: "Redirecting to your application status...",
+          duration: 2000,
+          style: {
+            background: '#10B981',
+            color: 'white',
+            border: 'none',
+          },
+          icon: <CheckCircle2 className="h-5 w-5" />
+        });
+        
+        // Redirect to application success page after a short delay
+        setTimeout(() => {
+          window.location.href = '/application-success';
+        }, 2000);
+        
+        return true; // Indicate that redirection is happening
+      }
+    }
+    
+    // No submitted application found
+    return false;
+  } catch (error) {
+    console.error('Error checking application status:', error);
+    return false;
+  }
 };
 
 const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
@@ -619,6 +855,49 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   // Add state for showing payment selection modal
   const [showPaymentSelection, setShowPaymentSelection] = useState(false);
 
+  // Update the useEffect to properly set selected exams and check application status
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('applicationData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        if (parsedData.applications && parsedData.applications.length > 0) {
+          const application = parsedData.applications[0];
+          console.log('Loading application data:', application);
+          
+          // Check if the application is already submitted
+          if (application.submitted === true) {
+            // If already submitted, redirect to success page
+            console.log('Application is already submitted, redirecting to success page');
+            toast.success("You have an existing submitted application", {
+              description: "Redirecting to application status...",
+              duration: 2000,
+            });
+            
+            setTimeout(() => {
+              window.location.href = '/application-success';
+            }, 2000);
+            
+            return;
+          }
+          
+          // If not submitted, continue with form initialization
+          setApplicationData(application);
+          
+          // Set selected exams based on exam types
+          const selectedExams = [];
+          if (application.exam_type_1) selectedExams.push(application.exam_type_1);
+          if (application.exam_type_2) selectedExams.push(application.exam_type_2);
+          console.log('Setting selected exams to:', selectedExams);
+          setSelectedExams(selectedExams);
+          
+          setUndergraduateData(prev => autofillFromApplication(application, prev));
+        }
+      }
+    } catch (error) {
+      console.error('Error processing stored application data:', error);
+    }
+  }, []);
   const [undergraduateData, setUndergraduateData] = useState<UndergraduateFormData>({
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
@@ -791,20 +1070,80 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 
   const isFormValid = () => {
     const { personalDetails, academicQualifications, declaration } = undergraduateData;
+    
+    // Check declaration first
     if (declaration !== "true") {
       toast.error("Please agree to the declaration before proceeding");
       return false;
     }
-    if (!personalDetails.surname || !personalDetails.firstName || !personalDetails.gender || 
-        !personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year ||
-        !personalDetails.streetAddress || !personalDetails.city || !personalDetails.phoneNumber || !personalDetails.email) {
-      toast.error("Please fill in all required personal details fields");
+    // Check academic session
+    if (!undergraduateData.academicSession) {
+      toast.error("Please select an academic session");
       return false;
     }
     
-    // State of Origin is only required for Nigerian applicants
+    // Check personal details with specific error messages
+    if (!personalDetails.surname) {
+      toast.error("Please enter your surname");
+      return false;
+    }
+    
+    if (!personalDetails.firstName) {
+      toast.error("Please enter your first name");
+      return false;
+    }
+    
+    if (!personalDetails.gender) {
+      toast.error("Please select your gender");
+      return false;
+    }
+    
+    // Check date of birth fields
+    if (!personalDetails.dateOfBirth.day || !personalDetails.dateOfBirth.month || !personalDetails.dateOfBirth.year) {
+      toast.error("Please enter your complete date of birth");
+      return false;
+    }
+    
+    if (!personalDetails.streetAddress) {
+      toast.error("Please enter your street address");
+      return false;
+    }
+    
+    if (!personalDetails.city) {
+      toast.error("Please enter your city");
+      return false;
+    }
+    
+    if (!personalDetails.country) {
+      toast.error("Please select your country");
+      return false;
+    }
+    
+    // Make state of origin required only for Nigerian applicants
     if (personalDetails.nationality === 'Nigeria' && !personalDetails.stateOfOrigin) {
-      toast.error("State of Origin is required for Nigerian applicants");
+      toast.error("Please select your state of origin");
+      return false;
+    }
+    
+    if (!personalDetails.nationality) {
+      toast.error("Please select your nationality");
+      return false;
+    }
+    
+    if (!personalDetails.phoneNumber) {
+      toast.error("Please enter your phone number");
+      return false;
+    }
+    
+    if (!personalDetails.email) {
+      toast.error("Please enter your email address");
+      return false;
+    }
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(personalDetails.email)) {
+      toast.error("Please enter a valid email address");
       return false;
     }
     // Only require at least one exam result
@@ -812,9 +1151,21 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       toast.error("Please select at least one O'Level exam result (WAEC, NECO, or NABTEB)");
       return false;
     }
+    
     // Only require at least one subject for the first selected exam
     const firstExamType = selectedExams[0];
     const firstExam = academicQualifications[`${firstExamType}Results`];
+    
+    if (!firstExam || !firstExam.examNumber) {
+      toast.error(`Please enter your ${firstExamType.toUpperCase()} exam number`);
+      return false;
+    }
+    
+    if (!firstExam || !firstExam.examYear) {
+      toast.error(`Please select your ${firstExamType.toUpperCase()} exam year`);
+      return false;
+    }
+    
     if (!firstExam || !firstExam.subjects || firstExam.subjects.length === 0) {
       toast.error(`Please enter at least one subject for your selected ${firstExamType ? firstExamType.toUpperCase() : ''} result`);
       return false;
@@ -828,6 +1179,42 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         return false;
       }
     }
+    
+    // Check if all subjects have both subject and grade
+    const incompleteSubjects = firstExam.subjects.some(s => !s.subject || !s.grade);
+    if (incompleteSubjects) {
+      toast.error(`Please complete all subject entries for ${firstExamType.toUpperCase()} results`);
+      return false;
+    }
+    
+    // Check O'level exam documents
+    if (!firstExam.documents) {
+      toast.error(`Please upload your ${firstExamType.toUpperCase()} result document`);
+      return false;
+    }
+    
+    // Check JAMB fields with specific messages
+    if (!academicQualifications.jambResults.regNumber) {
+      toast.error("Please enter your JAMB registration number");
+      return false;
+    }
+    
+    if (!academicQualifications.jambResults.examYear) {
+      toast.error("Please select your JAMB exam year");
+      return false;
+    }
+    
+    if (!academicQualifications.jambResults.score) {
+      toast.error("Please enter your JAMB score");
+      return false;
+    }
+    
+    // Check JAMB documents
+    if (!academicQualifications.jambResults.documents) {
+      toast.error("Please upload your JAMB result document");
+      return false;
+    }
+    
     return true;
   };
 
@@ -836,131 +1223,133 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   const [draftId, setDraftId] = useState<string | null>(null);
 
   const handleSaveAsDraft = async () => {
-    setIsSaving(true);
     try {
-      const formData = new FormData();
+      setIsSaving(true);
+      const formData = buildUndergraduateFormData(undergraduateData);
+      formData.append('is_draft', 'true');
       
-      // Helper to append only if value is filled
-      const appendIfFilled = (key, value) => {
-        if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, value);
-        }
-      };
-      
-      // Add personal details
-      appendIfFilled("surname", undergraduateData.personalDetails.surname);
-      appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
-      appendIfFilled("other_names", undergraduateData.personalDetails.otherNames);
-      appendIfFilled("gender", undergraduateData.personalDetails.gender);
-      
-      if (
-        undergraduateData.personalDetails.dateOfBirth.year &&
-        undergraduateData.personalDetails.dateOfBirth.month &&
-        undergraduateData.personalDetails.dateOfBirth.day
-      ) {
-        appendIfFilled(
-          "date_of_birth",
-          `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`
-        );
-      }
-      
-      appendIfFilled("street_address", undergraduateData.personalDetails.streetAddress);
-      appendIfFilled("city", undergraduateData.personalDetails.city);
-      appendIfFilled("country", undergraduateData.personalDetails.country);
-      appendIfFilled("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
-      appendIfFilled("nationality", undergraduateData.personalDetails.nationality);
-      appendIfFilled("phone_number", undergraduateData.personalDetails.phoneNumber);
-      appendIfFilled("email", undergraduateData.personalDetails.email);
-      appendIfFilled("has_disability", undergraduateData.personalDetails.hasDisabilities);
-      appendIfFilled("disability_description", undergraduateData.personalDetails.disabilityDescription);
-      
-      // Add academic session and program details
-      appendIfFilled("academic_session", undergraduateData.academicSession);
-      appendIfFilled("program_type", "undergraduate");
-      appendIfFilled("selected_course", undergraduateData.selectedCourse);
-      
-      // Add O'Level results for selected exams
-      selectedExams.forEach((examType, index) => {
-        const examResults = undergraduateData.academicQualifications[`${examType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
-        if (examResults) {
-          appendIfFilled(`exam_type_${index + 1}`, examType);
-          appendIfFilled(`exam_number_${index + 1}`, examResults.examNumber);
-          appendIfFilled(`exam_year_${index + 1}`, examResults.examYear);
-          if (examResults.subjects && examResults.subjects.length > 0) {
-            appendIfFilled(`subjects_${index + 1}`, JSON.stringify(examResults.subjects));
-          }
-          if (examResults.documents) {
-            formData.append(`exam_type_${index + 1}_result`, examResults.documents);
-          }
-        }
-      });
-      
-      // Add JAMB results
-      appendIfFilled("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
-      appendIfFilled("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
-      appendIfFilled("jamb_score", undergraduateData.academicQualifications.jambResults.score);
-      if (undergraduateData.academicQualifications.jambResults.documents) {
-        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
-      }
-      
-      // Add documents
-      if (undergraduateData.passportPhoto) {
-        formData.append("passport_photo", undergraduateData.passportPhoto);
-      }
-      
-      // Add declaration
-      appendIfFilled("declaration", undergraduateData.declaration);
-      
-      // Set is_draft to true
-      formData.append("is_draft", "true");
-      
-      // Save the draft
       const response = await apiService.submitUndergraduateApplication(formData);
       
+      // Check if the application is marked as submitted
+      if (response?.applications?.[0]?.submitted === true) {
+        // If submitted, redirect to success page
+        toast.success("Application submitted successfully!", {
+          duration: 2000,
+          style: {
+            background: '#10B981',
+            color: 'white',
+            border: 'none',
+          },
+          icon: <CheckCircle2 className="h-5 w-5" />
+        });
+        
+        // Save to localStorage for reference
+        localStorage.setItem('applicationData', JSON.stringify(response));
+        
+        // Redirect to success page after toast is shown
+        setTimeout(() => {
+          window.location.href = '/application-success';
+        }, 2000);
+        
+        return;
+      }
+      
+      // If not submitted, show the draft saved notification
+      toast.success("Draft saved successfully!", {
+        description: "Your application has been saved as a draft and can be completed later.",
+        duration: 4000,
+        style: {
+          background: '#10B981', // Green background
+          color: 'white',
+          border: 'none',
+        },
+        icon: <CheckCircle2 className="h-5 w-5" />
+      });
+      
+      // Store response data
       if (response) {
-        setDraftId(response.id || 'draft-saved');
-        setIsDraft(true);
-        toast.success("Draft saved successfully!", {
-          description: "Your application has been saved as a draft.",
-          duration: 5000,
-        });
-      } else {
-        toast.error("Failed to save draft", {
-          description: "There was an error saving your application. Please try again.",
-          duration: 5000,
-        });
+        // Save to localStorage for later retrieval
+        localStorage.setItem('applicationData', JSON.stringify(response));
+        
+        // Set draft ID if available
+        if (response.applications?.[0]?.id) {
+          setDraftId(response.applications[0].id);
+        }
       }
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error("Failed to save draft", {
-        description: "There was an error saving your application. Please try again.",
-        duration: 5000,
+      console.error("Error saving draft:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save draft", {
+        duration: 4000,
+        style: {
+          background: '#EF4444', // Red background
+          color: 'white',
+          border: 'none',
+        },
+        icon: <AlertCircle className="h-5 w-5" />
       });
     } finally {
       setIsSaving(false);
     }
   };
 
+  const handleProceedToPayment = async () => {
+    try {
+      // Payment processing handled by parent component
+      const formData = buildUndergraduateFormData(undergraduateData);
+      formData.append('is_draft', 'false');
+      
+      const response = await apiService.submitUndergraduateApplication(formData);
+      
+      // Check if user has already paid
+      if (response.applications?.[0]?.has_paid) {
+        // If paid, redirect to success page
+        navigate('/success', { 
+          state: { 
+            applicationId: response.applications[0].id,
+            programType: 'undergraduate'
+          }
+        });
+      } else {
+        // If not paid, show payment modal
+        setShowPaymentModal(true);
+      }
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to submit application");
+    } finally {
+      // Payment processing handled by parent component
+    }
+  };
+
   const [selectedExams, setSelectedExams] = useState<string[]>([]);
 
+  // Update the handleExamSelection function to ensure it's working correctly
   const handleExamSelection = (examType: string) => {
     const allowedExams = ['waec', 'neco', 'nabteb'];
-    if (!allowedExams.includes(examType)) return; // Only allow O'Level exams
+    const examTypeLower = examType.toLowerCase();
+    
+    if (!allowedExams.includes(examTypeLower)) return;
+    
     setSelectedExams(prev => {
-      let newExams;
-      if (prev.includes(examType)) {
-        newExams = prev.filter(type => type !== examType);
-      } else {
-        if (prev.length >= 3) {
-          toast.error("You can only select a maximum of 3 exam results");
-          return prev;
-        }
-        newExams = [...prev, examType];
+      // console.log('Current selected exams:', prev);
+      // console.log('Toggling exam:', examTypeLower);
+      
+      if (prev.includes(examTypeLower)) {
+        // Remove the exam
+        const newSelectedExams = prev.filter(type => type !== examTypeLower);
+        // console.log('New selected exams after removal:', newSelectedExams);
+        return newSelectedExams;
       }
       
-      // Auto-save after exam selection
-      setTimeout(handleAutoSave, 100);
-      return newExams;
+      if (prev.length >= 2) {
+        toast.error("You can only select a maximum of 2 exam results");
+        return prev;
+      }
+      
+      // Add the exam
+      const newSelectedExams = [...prev, examTypeLower];
+      // console.log('New selected exams after addition:', newSelectedExams);
+      return newSelectedExams;
     });
   };
 
@@ -993,117 +1382,78 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate the form without showing the generic message
     if (!isFormValid()) {
-      toast.error("Please fill in all required fields correctly");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
-      
-      // Helper to append only if value is filled
-      const appendIfFilled = (key, value) => {
-        if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, value);
-        }
-      };
-      
-      // Add personal details
-      appendIfFilled("surname", undergraduateData.personalDetails.surname);
-      appendIfFilled("first_name", undergraduateData.personalDetails.firstName);
-      appendIfFilled("other_names", undergraduateData.personalDetails.otherNames);
-      appendIfFilled("gender", undergraduateData.personalDetails.gender);
-      
-      if (
-        undergraduateData.personalDetails.dateOfBirth.year &&
-        undergraduateData.personalDetails.dateOfBirth.month &&
-        undergraduateData.personalDetails.dateOfBirth.day
-      ) {
-        appendIfFilled(
-          "date_of_birth",
-          `${undergraduateData.personalDetails.dateOfBirth.year}-${undergraduateData.personalDetails.dateOfBirth.month}-${undergraduateData.personalDetails.dateOfBirth.day}`
-        );
-      }
-      
-      appendIfFilled("street_address", undergraduateData.personalDetails.streetAddress);
-      appendIfFilled("city", undergraduateData.personalDetails.city);
-      appendIfFilled("country", undergraduateData.personalDetails.country);
-      appendIfFilled("state_of_origin", undergraduateData.personalDetails.stateOfOrigin);
-      appendIfFilled("nationality", undergraduateData.personalDetails.nationality);
-      appendIfFilled("phone_number", undergraduateData.personalDetails.phoneNumber);
-      appendIfFilled("email", undergraduateData.personalDetails.email);
-      appendIfFilled("has_disability", undergraduateData.personalDetails.hasDisabilities);
-      appendIfFilled("disability_description", undergraduateData.personalDetails.disabilityDescription);
-      
-      // Add academic session and program details
-      appendIfFilled("academic_session", undergraduateData.academicSession);
-      appendIfFilled("program_type", "undergraduate");
-      appendIfFilled("selected_course", undergraduateData.selectedCourse);
-      
-      // Add O'Level results for selected exams
-      selectedExams.forEach((examType, index) => {
-        const examResults = undergraduateData.academicQualifications[`${examType}Results` as keyof typeof undergraduateData.academicQualifications] as ExamResults;
-        if (examResults) {
-          appendIfFilled(`exam_type_${index + 1}`, examType);
-          appendIfFilled(`exam_number_${index + 1}`, examResults.examNumber);
-          appendIfFilled(`exam_year_${index + 1}`, examResults.examYear);
-          if (examResults.subjects && examResults.subjects.length > 0) {
-            appendIfFilled(`subjects_${index + 1}`, JSON.stringify(examResults.subjects));
-          }
-          if (examResults.documents) {
-            formData.append(`exam_type_${index + 1}_result`, examResults.documents);
-          }
-        }
-      });
-      
-      // Add JAMB results
-      appendIfFilled("jamb_reg_number", undergraduateData.academicQualifications.jambResults.regNumber);
-      appendIfFilled("jamb_year", undergraduateData.academicQualifications.jambResults.examYear);
-      appendIfFilled("jamb_score", undergraduateData.academicQualifications.jambResults.score);
-      if (undergraduateData.academicQualifications.jambResults.documents) {
-        formData.append("jamb_result", undergraduateData.academicQualifications.jambResults.documents);
-      }
-      
-      // Add documents
-      if (undergraduateData.passportPhoto) {
-        formData.append("passport_photo", undergraduateData.passportPhoto);
-      }
-      
-      // Add declaration
-      appendIfFilled("declaration", undergraduateData.declaration);
-      
-      // Set is_draft to false for final submission
-      formData.append("is_draft", "false");
+      const formData = buildUndergraduateFormData(undergraduateData);
+      formData.append('is_draft', 'false');
+      formData.append('submitted', 'true');
       
       const response = await apiService.submitUndergraduateApplication(formData);
       
-      if (response) {
-        toast.success("Application submitted successfully!", {
-          description: "Your application has been submitted successfully.",
-          duration: 5000,
-        });
-        navigate('/application-success');
-      } else {
-        toast.error("Failed to submit application", {
-          description: response?.message || "There was an error submitting your application. Please try again.",
-          duration: 5000,
-        });
-      }
-    } catch (err) {
-      console.error('Error submitting application:', err);
-      toast.error("An error occurred while submitting the application", {
-        description: "Please check your internet connection and try again.",
-        duration: 5000,
-      });
+      // Store the response in localStorage
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      
+      // Add a small delay to ensure data is saved
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Always show success and redirect - we're setting submitted=true in the request
+      toast.success("Application submitted successfully!");
+      
+      // Use setTimeout to ensure the toast is shown before navigation
+      setTimeout(() => {
+        // Make sure to use the correct path with leading slash
+        window.location.href = '/application-success';
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to submit application");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+  // Check for submitted application and redirect if needed
+  useEffect(() => {
+    if (applicationData?.submitted) {
+      // console.log('Found submitted application, redirecting to success page');
+      navigate('/application-success');
+    }
+  }, [applicationData, navigate]);
+
+  useEffect(() => {
+    // Load real application data if available
+    if (applicationData) {
+      // console.log('Loading application data:', applicationData);
+      
+      if (applicationData.submitted) {
+        // console.log('Application is already submitted, redirecting to success page');
+        navigate('/application-success');
+        return;
+      }
+      
+      // Set selected exams from application data
+      const updatedSelectedExams: string[] = [];
+      if (applicationData.exam_type_1) updatedSelectedExams.push(applicationData.exam_type_1);
+      if (applicationData.exam_type_2) updatedSelectedExams.push(applicationData.exam_type_2);
+      
+      // console.log('Setting selected exams to:', updatedSelectedExams);
+      setSelectedExams(updatedSelectedExams);
+      
+      // More initialization logic...
+    }
+  }, [applicationData, navigate]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* JAMB Notice */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
@@ -2273,8 +2623,8 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               </div>
               
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
+          <div className="p-4 bg-white border border-yellow-300 rounded-md">
+            <p className="text-sm text-yellow-900">
               By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
               <br />- cancel my application.
               <br />- if admitted, be dismissed from the University.
@@ -2293,7 +2643,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required
             />
-            <label htmlFor="declaration" className="text-sm text-gray-700">
+            <label htmlFor="declaration" className="text-sm text-gray-900">
               I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
             </label>
           </div>
