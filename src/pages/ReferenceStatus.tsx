@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { CheckCircle2, XCircle, AlertCircle, Mail, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
@@ -28,7 +28,7 @@ interface Application {
 
 const ReferenceStatus: React.FC = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+
   const { logout } = useAuth();
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,11 +66,7 @@ const ReferenceStatus: React.FC = () => {
           setApplication(data.applications[0]);
         }
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load application data. Please try again.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load application data. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -182,27 +178,12 @@ const ReferenceStatus: React.FC = () => {
 
         }
 
-        toast({
-            title: "Success",
-            description: `Referee ${index + 1} details updated.`,
-            style: {
-                background: '#10B981', // Green background
-                color: 'white',
-            }
-        });
+        toast.success(`Referee ${index + 1} details updated.`);
         handleCancelClick(); // Exit editing mode
 
     } catch (error: any) {
         console.error("Error changing referee:", error);
-        toast({
-            title: "Error",
-            description: error.message || "Failed to update referee details. Please try again.",
-            variant: "destructive",
-            style: {
-              background: '#EF4444', // Red background
-              color: 'white',
-            }
-        });
+        toast.error(error.message || "Failed to update referee details. Please try again.");
     } finally {
         setIsSaving(false);
     }

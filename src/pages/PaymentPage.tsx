@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { PaystackConsumer } from "react-paystack";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import PaymentSuccessPopup from "@/components/PaymentSuccessPopup";
 import {
@@ -40,7 +40,7 @@ type Residency = "nigeria" | "international";
 const PaymentPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
+
   const application = location.state?.application;
   const [residency, setResidency] = useState<Residency>("nigeria");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);

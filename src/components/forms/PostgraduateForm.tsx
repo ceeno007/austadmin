@@ -1822,7 +1822,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   Program Type
                   <span className="text-red-500 text-xs">*</span>
@@ -1837,7 +1837,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                     }));
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Select program type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1849,13 +1849,16 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Program <span className="text-red-500 text-xs italic">Required</span></Label>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Program
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
               <Select
                 value={postgraduateData.program}
                 onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, program: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2196,13 +2199,16 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           <div className="space-y-4">
             <h4 className="font-medium"><b>First Academic Qualification</b></h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Qualification Type <span className="text-red-500">Required</span></Label>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  Qualification Type
+                  <span className="text-red-500 text-xs">*</span>
+                </Label>
                 <Select
                   value={postgraduateData.academicQualifications.qualification1.type}
                   onValueChange={(value) => handleAcademicQualificationChange("qualification1", "type", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                     <SelectValue placeholder="Select qualification type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -2469,9 +2475,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               <h4 className="font-medium"><b>Second Academic Qualification (Required for PhD)</b></h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Label className="text-sm font-medium text-gray-700">
                     Qualification Type
-                    <span className="text-red-500 text-xs">*</span>
                   </Label>
                   <Select
                     value={postgraduateData.academicQualifications.qualification2?.type || ""}

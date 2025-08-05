@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { Toaster } from "@/components/ui/toaster";
+import { toast } from "sonner";
+
 import { Info, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DocumentUpload = () => {
-  const { toast } = useToast();
+
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
@@ -156,19 +156,11 @@ const DocumentUpload = () => {
         // Redirect to Paystack payment page
         window.location.href = response.data.authorization_url;
       } else {
-        toast({
-          title: "Payment Error",
-          description: response.message || "Failed to initialize payment",
-          variant: "destructive",
-        });
+        toast.error(response.message || "Failed to initialize payment");
       }
     } catch (error) {
       console.error('Payment error:', error);
-      toast({
-        title: "Payment Error",
-        description: "An error occurred while processing your payment",
-        variant: "destructive",
-      });
+      toast.error("An error occurred while processing your payment");
     } finally {
       setIsProcessingPayment(false);
     }
@@ -180,27 +172,16 @@ const DocumentUpload = () => {
       const response = await paymentService.verifyPayment(reference);
       
       if (response.status === 'success' && response.data?.status === 'success') {
-        toast({
-          title: "Payment Successful",
-          description: "Your payment has been processed successfully",
-        });
+        toast.success("Your payment has been processed successfully");
         // Handle successful payment (e.g., enable document upload)
         return true;
       } else {
-        toast({
-          title: "Payment Failed",
-          description: response.message || "Payment verification failed",
-          variant: "destructive",
-        });
+        toast.error(response.message || "Payment verification failed");
         return false;
       }
     } catch (error) {
       console.error('Payment verification error:', error);
-      toast({
-        title: "Payment Error",
-        description: "Failed to verify payment status",
-        variant: "destructive",
-      });
+      toast.error("Failed to verify payment status");
       return false;
     }
   };
@@ -230,30 +211,15 @@ const DocumentUpload = () => {
       localStorage.setItem("paymentReference", reference.reference);
       
       // Show success message
-      toast({
-        title: "Payment Successful!",
-        description: "Your application has been submitted successfully.",
+      toast.success("Your application has been submitted successfully.", {
         duration: 5000,
-        style: {
-          background: '#10B981',
-          color: 'white',
-          border: 'none',
-          padding: '16px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-        }
       });
 
       // Navigate to success page
       navigate("/payment-success");
     } catch (error) {
       console.error("Payment error:", error);
-      toast({
-        title: "Payment Error",
-        description: "Please contact support if this persists.",
-        variant: "destructive",
-        duration: 5000
-      });
+      toast.error("Please contact support if this persists.");
     }
   };
 
@@ -326,12 +292,7 @@ const DocumentUpload = () => {
     };
 
     const handleClose = () => {
-      toast({
-        title: "Payment cancelled",
-        description: "You can try again when you're ready.",
-        variant: "destructive",
-        duration: 5000
-      });
+      toast.error("Payment cancelled. You can try again when you're ready.");
     };
 
     // Get display amount based on program and residency
@@ -423,7 +384,7 @@ const DocumentUpload = () => {
             </div>
           </div>
         </main>
-        <Toaster />
+
       </div>
     </ApplicationStatusCheck>
   );

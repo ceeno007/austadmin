@@ -767,6 +767,43 @@ const apiService = {
     }
   },
 
+  /**
+   * Submit postgraduate application
+   * @param formData - FormData object containing all fields and files
+   * @returns Promise with the API response
+   */
+  submitPostgraduateApplication: async (formData: FormData) => {
+    try {
+      // Get the token from localStorage
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('fastApiAccessToken');
+      
+      // Ensure is_draft=false is set (or remove it if it exists)
+      if (formData.has('is_draft')) {
+        formData.set('is_draft', 'false');
+      }
+      
+      // Make the request to the postgraduate upload endpoint
+      const response = await axios.post(
+        API_ENDPOINTS.FASTAPI_POSTGRADUATE_UPLOAD,
+        formData,
+        {
+          headers: {
+            'Accept': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error: any) {
+      console.error("Submit postgraduate application error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      }
+      throw new Error("An error occurred while submitting the application");
+    }
+  },
+
   
   /**
    * Request OTP for email verification
