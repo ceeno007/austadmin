@@ -287,7 +287,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
       
       {/* Modal */}
       <div 
-        className="relative w-full max-w-md mx-4 p-8 rounded-2xl shadow-2xl border-2 text-center"
+        className="relative w-full max-w-md mx-4 p-8 rounded-2xl shadow-2xl border-2 text-center max-h-[90vh] overflow-y-auto"
         style={getModalStyles()}
       >
         {/* Close button */}
