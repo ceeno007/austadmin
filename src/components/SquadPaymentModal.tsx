@@ -139,10 +139,17 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
       let amount, currency, reference;
       
       if (programType === "postgraduate") {
-        // Use USD for postgraduate
-        amount = totalAmountUSD * 100; // Convert to cents
-        currency = "USD";
-        reference = `SQUADCO_USD_${Date.now()}`;
+        // Use applicantType to determine currency for postgraduate
+        const applicantType = application.applicantType || application.applicant_type;
+        if (applicantType === "Nigerian") {
+          amount = totalAmount * 100; // Convert to kobo
+          currency = "NGN";
+          reference = `SQUADCO_NGN_${Date.now()}`;
+        } else {
+          amount = totalAmountUSD * 100; // Convert to cents
+          currency = "USD";
+          reference = `SQUADCO_USD_${Date.now()}`;
+        }
       } else {
         // Use NGN for foundation
         amount = totalAmount * 100; // Convert to kobo
@@ -241,126 +248,8 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
   };
 
   if (!isOpen) return null;
-
-  const getModalStyles = () => {
-    switch (paymentStatus) {
-      case 'success':
-        return {
-          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-          borderColor: '#10b981'
-        };
-      case 'error':
-        return {
-          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-          borderColor: '#ef4444'
-        };
-      case 'processing':
-        return {
-          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-          borderColor: '#f59e0b'
-        };
-      default:
-        return {
-          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-          borderColor: '#f59e0b'
-        };
-    }
-  };
-
-  const getIcon = () => {
-    switch (paymentStatus) {
-      case 'success':
-        return <CheckCircle className="h-16 w-16 text-white" />;
-      case 'error':
-        return <XCircle className="h-16 w-16 text-white" />;
-      case 'processing':
-        return <Loader2 className="h-16 w-16 text-white animate-spin" />;
-      default:
-        return <Loader2 className="h-16 w-16 text-white animate-spin" />;
-    }
-  };
-
-  return (
-    <div className="fixed top-0 left-0 w-screen h-screen z-50 flex items-center justify-center overflow-hidden pointer-events-auto">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
-      
-      {/* Modal */}
-      <div 
-        className="relative w-full max-w-md mx-4 p-8 rounded-2xl shadow-2xl border-2 text-center max-h-[90vh] overflow-y-auto"
-        style={getModalStyles()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
-        >
-          <XCircle className="h-6 w-6" />
-        </button>
-
-        {/* Icon */}
-        <div className="flex justify-center mb-6">
-          {getIcon()}
-        </div>
-
-        {/* Title */}
-        <h3 className="text-2xl font-bold text-white mb-4">
-          {paymentStatus === 'success' && 'Payment Successful!'}
-          {paymentStatus === 'error' && 'Payment Failed'}
-          {paymentStatus === 'processing' && 'Processing Payment'}
-        </h3>
-
-        {/* Message */}
-        <p className="text-white text-lg mb-6">
-          {paymentMessage}
-        </p>
-
-        {/* Additional info for processing */}
-        {paymentStatus === 'processing' && (
-          <div className="bg-white bg-opacity-20 rounded-lg p-4 mb-6">
-            <p className="text-white text-sm">
-              Please complete your payment in the popup window. Do not close this page.
-            </p>
-          </div>
-        )}
-
-        {/* Action buttons */}
-        {paymentStatus === 'error' && (
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
-            >
-              Close
-            </button>
-            <button
-              onClick={() => {
-                setPaymentStatus('processing');
-                setPaymentMessage('Retrying payment...');
-                handleSquadPayment();
-              }}
-              className="flex-1 bg-white text-red-600 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-all duration-200"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Success action */}
-        {paymentStatus === 'success' && (
-          <button
-            onClick={() => {
-              onClose();
-              navigate("/application-success");
-            }}
-            className="w-full bg-white text-green-600 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-all duration-200"
-          >
-            Continue to Application
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  // Do not render any modal at all
+  return null;
 };
 
 export default SquadPaymentModal; 
