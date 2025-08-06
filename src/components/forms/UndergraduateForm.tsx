@@ -15,6 +15,7 @@ import apiService from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PaymentModal from "@/components/PaymentModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DocumentField {
   id: string;
@@ -886,6 +887,7 @@ export const checkApplicationStatusAndRedirect = (authResponse: any) => {
 
 const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateFormProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
   
@@ -940,6 +942,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       console.error('Error processing stored application data:', error);
     }
   }, []);
+
+  // Set user email from context when user data is available
+  useEffect(() => {
+    if (user?.email) {
+      setUndergraduateData(prev => ({
+        ...prev,
+        personalDetails: {
+          ...prev.personalDetails,
+          email: user.email
+        }
+      }));
+    }
+  }, [user]);
+
   const [undergraduateData, setUndergraduateData] = useState<UndergraduateFormData>({
     passportPhoto: null,
     academicSession: getCurrentAcademicSession(),
@@ -1798,21 +1814,20 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           placeholder="Enter phone number"
         />
       </div>
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-          Email
-                      <span className="text-red-500 text-xs">*</span>
-        </Label>
-                              <Input
-                        type="email"
-                        placeholder="Enter your email"
-                        value={undergraduateData.personalDetails.email}
-                        onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-                        onBlur={handleAutoSave}
-                        className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
-                        required
-                      />
-      </div>
+                              <div className="space-y-3">
+              <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Email
+                <span className="text-red-500 text-xs">*</span>
+              </Label>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={undergraduateData.personalDetails.email}
+                readOnly
+                className="h-12 px-4 border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed transition-all duration-200 text-base"
+                required
+              />
+            </div>
     </div>
 
                 <div className="space-y-3">
@@ -2660,13 +2675,23 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               </div>
               
         <div className="space-y-4">
-          <div className="p-4 bg-white border border-yellow-300 rounded-md">
-            <p className="text-sm text-yellow-900">
-              By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-              <br />- cancel my application.
-              <br />- if admitted, be dismissed from the University.
-              <br />- if degree already awarded, rescind degree awarded.
-            </p>
+          <div className="alert-warning">
+            <div className="alert-content">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="alert-icon text-amber-600" />
+                <div className="flex-1">
+                  <h4 className="alert-title">Important Declaration</h4>
+                  <div className="alert-message space-y-2">
+                    <p>By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-4">
+                      <li>Cancel my application</li>
+                      <li>If admitted, be dismissed from the University</li>
+                      <li>If degree already awarded, rescind degree awarded</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <input

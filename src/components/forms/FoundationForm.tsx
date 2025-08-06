@@ -19,6 +19,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search } from "lucide-react";
 import SquadPaymentModal from "@/components/SquadPaymentModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DocumentField {
   id: string;
@@ -464,6 +465,7 @@ const autofillFromApplication = (application: any, prev: any) => {
 
 const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessingPayment, application }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [foundationRemedialData, setFoundationRemedialData] = useState<FoundationRemedialFormData>({
     passportPhoto: null,
@@ -561,6 +563,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       console.error("Error parsing application data:", error);
     }
   }, [application, navigate]);
+
+  // Set user email from context when user data is available
+  useEffect(() => {
+    if (user?.email) {
+      setFoundationRemedialData(prev => ({
+        ...prev,
+        personalDetails: {
+          ...prev.personalDetails,
+          email: user.email
+        }
+      }));
+    }
+  }, [user]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -852,12 +867,114 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
     }
 
     try {
-      // Set program type for Squad payment
+      setIsProceedingToPayment(true);
+      
+      // Build form data similar to handleSaveDraft
+      const pd = foundationRemedialData.personalDetails;
+      const aq = foundationRemedialData.academicQualifications.examResults;
+      const pc = foundationRemedialData.programChoice;
+
+      // Create FormData object
+      const formData = new FormData();
+
+      // Helper function to check if a value is actually filled
+      const isFilled = (value: any): boolean => {
+        if (!value) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        if (Array.isArray(value) && value.length === 0) return false;
+        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        return true;
+      };
+      
+      // Helper function to append only if filled
+      const appendIfFilled = (key: string, value: any) => {
+        if (isFilled(value)) {
+          formData.append(key, value);
+        }
+      };
+
+      // Add all required form data
+      appendIfFilled('academic_session', foundationRemedialData.academicSession);
+      appendIfFilled('program_type', foundationRemedialData.program);
+      appendIfFilled('surname', pd.surname);
+      appendIfFilled('first_name', pd.firstName);
+      appendIfFilled('other_names', pd.otherNames);
+      appendIfFilled('gender', pd.gender);
+      if (isFilled(pd.dateOfBirth.day) && isFilled(pd.dateOfBirth.month) && isFilled(pd.dateOfBirth.year)) {
+        formData.append('date_of_birth', `${pd.dateOfBirth.year}-${pd.dateOfBirth.month}-${pd.dateOfBirth.day}`);
+      }
+      appendIfFilled('street_address', pd.streetAddress);
+      appendIfFilled('city', pd.city);
+      appendIfFilled('country', pd.country);
+      if (pd.nationality === "Nigeria" && isFilled(pd.stateOfOrigin)) {
+        formData.append('state_of_origin', pd.stateOfOrigin);
+      }
+      appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
+      appendIfFilled('phone_number', pd.phoneNumber);
+      appendIfFilled('email', pd.email);
+      if (pd.hasDisabilities === "yes") {
+        formData.append('has_disability', "true");
+        if (isFilled(pd.disabilityDescription)) {
+          formData.append('disability_description', pd.disabilityDescription);
+        }
+      } else if (pd.hasDisabilities === "no") {
+        formData.append('has_disability', "false");
+      }
+      appendIfFilled('exam_type', aq.examType);
+      appendIfFilled('exam_number', aq.examNumber);
+      appendIfFilled('exam_year', aq.examYear);
+      if (isFilled(aq.subjects) && aq.subjects.length > 0) {
+        formData.append('subjects', JSON.stringify(aq.subjects));
+      }
+
+      // Add program choice
+      const programChoiceData = {
+        program: foundationRemedialData.program,
+        subjectCombination: pc.subjectCombination,
+        firstChoice: {
+          university: pc.firstChoice.university,
+          department: pc.firstChoice.department,
+          faculty: pc.firstChoice.faculty
+        },
+        secondChoice: {
+          university: pc.secondChoice.university,
+          department: pc.secondChoice.department,
+          faculty: pc.secondChoice.faculty
+        }
+      };
+      formData.append('program_choice', JSON.stringify(programChoiceData));
+
+      // Add files
+      if (foundationRemedialData.passportPhoto instanceof File) {
+        formData.append('passport_photo', foundationRemedialData.passportPhoto);
+      }
+      if (aq.documents instanceof File) {
+        formData.append('exam_result', aq.documents);
+      }
+
+      // Set as not draft (final submission)
+      formData.append('is_draft', 'false');
+
+      // Submit to backend first
+      const response = await apiService.createFoundationApplication(formData);
+      
+      // Store the response in localStorage
+      localStorage.setItem('applicationData', JSON.stringify(response));
+      
+      // Check if user has already paid
+      if (response.applications?.[0]?.has_paid) {
+        // If paid, redirect to success page
+        navigate('/application-success');
+      } else {
+        // If not paid, set program type for Squad payment and show payment modal
       localStorage.setItem("programType", "foundation");
       setShowPaymentModal(true);
+      }
     } catch (error) {
       console.error("Payment initialization failed:", error);
-      toast.error("Failed to initialize payment. Please try again.");
+      toast.error("Failed to submit application. Please try again.");
+    } finally {
+      setIsProceedingToPayment(false);
     }
   };
 
@@ -1432,9 +1549,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 type="email"
                 placeholder="Enter your email"
                 value={foundationRemedialData.personalDetails.email}
-                onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-                onBlur={handleAutoSave}
-                className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
+                readOnly
+                className="h-12 px-4 border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed transition-all duration-200 text-base"
                 required
               />
             </div>
@@ -2118,13 +2234,23 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   <span className="text-red-500 text-xs">*</span>
                 </h3>
         <div className="space-y-4">
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:
-              <br />- cancel my application.
-              <br />- if admitted, be dismissed from the University.
-              <br />- if degree already awarded, rescind degree awarded.
-            </p>
+          <div className="alert-warning">
+            <div className="alert-content">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="alert-icon text-amber-600" />
+                <div className="flex-1">
+                  <h4 className="alert-title">Important Declaration</h4>
+                  <div className="alert-message space-y-2">
+                    <p>By clicking the checkbox below, I confirm that the information I have provided in this form is true, complete and accurate, and no information or other material information has been omitted. I acknowledge that knowingly providing false information gives AUST the right to:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-4">
+                      <li>Cancel my application</li>
+                      <li>If admitted, be dismissed from the University</li>
+                      <li>If degree already awarded, rescind degree awarded</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <input
@@ -2158,19 +2284,25 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         </div>
         
         <div className="space-y-4">
-          <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl">
-            <p className="text-sm text-amber-800 space-y-2">
-              <strong>Application Fees (Non-refundable):</strong>
-              <br />
-              <div className="mt-4">
-                <p className="font-medium">Payment Process:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
+          <div className="payment-info">
+            <div className="content">
+              <div className="flex items-start gap-3">
+                <CreditCard className="alert-icon text-amber-600" />
+                <div className="flex-1">
+                  <h4 className="title">Application Fees (Non-refundable)</h4>
+                  <div className="message">
+                    <div className="space-y-3">
+                      <p><strong>Payment Process:</strong></p>
+                      <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
                   <li>A payment receipt will be automatically generated after successful payment</li>
                   <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees (₦1,343,000 total for Foundation) will be communicated upon admission</li>
                 </ul>
               </div>
-            </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2187,7 +2319,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   type="button"
                   variant="outline"
                   onClick={handleSaveDraft}
-                  disabled={isProcessingPayment || isSavingDraft}
+                  disabled={isProceedingToPayment || isSavingDraft}
                   className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200 text-sm sm:text-base"
                 >
                   {isSavingDraft ? (
@@ -2205,10 +2337,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 <Button
                   type="button"
                   onClick={handleProceedToPayment}
-                  disabled={isProcessingPayment}
+                  disabled={isProceedingToPayment}
                   className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200 text-sm sm:text-base"
                 >
-                 {isProcessingPayment ? (
+                 {isProceedingToPayment ? (
                    <span className="flex items-center justify-center">
                      <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
                      Processing...

@@ -10,7 +10,7 @@ export const API_ENDPOINTS = {
   LOGIN: `${FASTAPI_BASE_URL}/auth/token`,
   DOCUMENT_UPLOAD: `${FASTAPI_BASE_URL}/documents/upload`,
   FORGOT_PASSWORD: `${FASTAPI_BASE_URL}/auth/forgot-password`,
-  CONTACT: `${FASTAPI_BASE_URL}/contact`,
+  CONTACT: `${FASTAPI_BASE_URL}/contact/send`,
   SEND_VERIFICATION: `${FASTAPI_BASE_URL}/auth/send-verification`,
   VERIFY_EMAIL: `${FASTAPI_BASE_URL}/auth/verify-email`,
   SEND_PASSWORD_RESET_OTP: `${FASTAPI_BASE_URL}/auth/send-password-reset-otp`,
@@ -299,21 +299,31 @@ const apiService = {
    * @returns Promise with the API response
    */
   submitContactForm: async (contactData: {
-    name: string;
+    full_name: string;
     email: string;
     subject: string;
     message: string;
   }) => {
     try {
+      // Create form data for x-www-form-urlencoded format
+      const formData = new URLSearchParams();
+      formData.append('full_name', contactData.full_name);
+      formData.append('email', contactData.email);
+      formData.append('subject', contactData.subject);
+      formData.append('message', contactData.message);
+
       const response = await fetch(API_ENDPOINTS.CONTACT, {
         method: "POST",
-        headers: defaultHeaders,
-        body: JSON.stringify(contactData),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData,
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to send message");
+        throw new Error(errorData.detail || errorData.message || "Failed to send message");
       }
 
       return await response.json();

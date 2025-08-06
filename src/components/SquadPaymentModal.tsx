@@ -93,6 +93,19 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
     }
   }, [isOpen, squadLoaded]);
 
+  // Show toast notification for payment result
+  useEffect(() => {
+    if (paymentStatus === 'success') {
+      toast.success('Payment Successful!', {
+        description: paymentMessage || 'Your payment was processed successfully.'
+      });
+    } else if (paymentStatus === 'error') {
+      toast.error('Payment Failed', {
+        description: paymentMessage || 'There was a problem processing your payment.'
+      });
+    }
+  }, [paymentStatus]);
+
   const handleSquadPayment = async () => {
     if (!squadLoaded || !window.squad) {
       console.error('Squad widget not available');
@@ -116,8 +129,8 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
         toast.success("No payment required for undergraduate applications!");
         onPaymentSuccess("NO_PAYMENT_REQUIRED");
         setTimeout(() => {
-          onClose();
-          navigate("/application-success");
+        onClose();
+        navigate("/application-success");
         }, 2000);
         return;
       }
@@ -182,7 +195,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
           setPaymentStatus('error');
           setPaymentMessage('Payment was cancelled or failed. Please try again.');
           setTimeout(() => {
-            onClose();
+          onClose();
           }, 3000);
         },
         onSuccess: (response: any) => {
@@ -206,7 +219,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
           setIsProcessingPayment(false);
           toast.error('Payment failed. Please try again.');
           setTimeout(() => {
-            onClose();
+          onClose();
           }, 3000);
         }
       });
@@ -222,7 +235,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
       setIsProcessingPayment(false);
       toast.error('Payment initialization failed. Please try again.');
       setTimeout(() => {
-        onClose();
+      onClose();
       }, 3000);
     }
   };
@@ -268,7 +281,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed top-0 left-0 w-screen h-screen z-50 flex items-center justify-center overflow-hidden pointer-events-auto">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
       

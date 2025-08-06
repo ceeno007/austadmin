@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, X, Check, Search, Building2, CreditCard, FileCheck, User, Camera } from "lucide-react";
+import { Upload, X, Check, Search, Building2, CreditCard, FileCheck, User, Camera, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
@@ -20,6 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from 'react-router-dom';
 import SquadPaymentModal from "@/components/SquadPaymentModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DateField {
   day: string;
@@ -277,7 +278,9 @@ const FileUploadField = ({
   };
 
   const handleContainerClick = () => {
-    fileInputRef.current?.click();
+    if (!hasFiles) {
+      fileInputRef.current?.click();
+    }
   };
 
   return (
@@ -493,6 +496,7 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
 }
 
 const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProcessingPayment, application }) => {
+  const { user } = useAuth();
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
   const [universities, setUniversities] = useState<University[]>([]);
@@ -592,6 +596,19 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       console.error("Error loading application data:", error);
     }
   }, []);
+
+  // Set user email from context when user data is available
+  useEffect(() => {
+    if (user?.email) {
+      setPostgraduateData(prev => ({
+        ...prev,
+        personalDetails: {
+          ...prev.personalDetails,
+          email: user.email
+        }
+      }));
+    }
+  }, [user]);
 
   // Update form data when application data changes
   useEffect(() => {
@@ -2130,8 +2147,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               type="email"
               placeholder="Enter your email"
               value={postgraduateData.personalDetails.email}
-              onChange={(e) => handlePersonalDetailsChange("email", e.target.value)}
-              className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
+              readOnly
+              className="h-12 px-4 border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed transition-all duration-200 text-base"
               required
             />
           </div>
