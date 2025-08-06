@@ -234,7 +234,7 @@ const Programs: React.FC = () => {
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value)}
-              className="w-full md:w-1/4 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#FF5500]"
+              className="programs-select w-full md:w-1/4"
             >
               <option value="">All Categories</option>
               <option value="undergraduate">Undergraduate</option>

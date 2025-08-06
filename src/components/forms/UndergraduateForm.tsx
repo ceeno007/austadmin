@@ -1494,18 +1494,18 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   }, [applicationData, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* JAMB Notice */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <AlertCircle className="h-5 w-5 text-orange-600" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Important JAMB Notice</h3>
-                  <p className="text-gray-600">Requirements for undergraduate applicants</p>
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Important JAMB Notice</h3>
+                  <p className="text-sm sm:text-base text-gray-600">Requirements for undergraduate applicants</p>
                 </div>
               </div>
               
@@ -1521,12 +1521,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               <li>Receive admission from JAMB</li>
               <li>Complete this application form</li>
             </ol>
-                <div className="mt-6">
+                <div className="mt-4 sm:mt-6">
               <a 
                 href="https://efacility.jamb.gov.ng/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-medium"
+                    className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-medium text-sm sm:text-base"
               >
                 Visit JAMB Portal
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1538,19 +1538,19 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
 
 {/* Personal Details Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
+                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <User className="h-5 w-5 text-amber-600" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Personal Details</h3>
-                  <p className="text-gray-600">Enter your personal information</p>
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Personal Details</h3>
+                  <p className="text-sm sm:text-base text-gray-600">Enter your personal information</p>
                 </div>
               </div>
               
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-3">
                     <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
           Surname
@@ -1794,7 +1794,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           defaultCountry="NG"
           value={undergraduateData.personalDetails.phoneNumber}
           onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-                      className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border-2 [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+          className="phone-input-field"
           placeholder="Enter phone number"
         />
       </div>

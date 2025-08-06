@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavigate } from 'react-router-dom';
-import PaymentModal from "@/components/PaymentModal";
 import SquadPaymentModal from "@/components/SquadPaymentModal";
 
 interface DateField {
@@ -1615,7 +1614,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           }
         });
       } else {
-        // If not paid, show payment modal
+        // If not paid, set program type for Squad payment and show payment modal
+        localStorage.setItem("programType", "postgraduate");
         setShowPaymentModal(true);
       }
     } catch (error) {
@@ -1628,16 +1628,16 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-4 sm:py-8">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Applicant Type Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-amber-100 rounded-lg">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+            <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
               <User className="h-5 w-5 text-amber-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">Applicant Type</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Applicant Type</h3>
           </div>
           <div className="max-w-md">
             <div className="space-y-3">
@@ -1658,7 +1658,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                   }));
                 }}
               >
-                <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                <SelectTrigger className="h-11 sm:h-12 px-3 sm:px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base">
                   <SelectValue placeholder="Select applicant type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1672,12 +1672,12 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
 
 
         {/* Passport Photo Upload */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-amber-100 rounded-lg">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+            <div className="p-2 bg-amber-100 rounded-lg flex-shrink-0">
               <Camera className="h-5 w-5 text-amber-600" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">Passport Photograph</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Passport Photograph</h3>
           </div>
           <div className="space-y-4">
             <div className="space-y-3">
@@ -1685,7 +1685,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 Passport Photograph
                 <span className="text-red-500 text-xs">*</span>
               </Label>
-              <div className={`max-w-[250px] h-[250px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center overflow-hidden transition-colors ${
+              <div className={`max-w-[200px] sm:max-w-[250px] h-[200px] sm:h-[250px] border-2 border-dashed rounded-lg flex flex-col items-center justify-center overflow-hidden transition-colors ${
                 postgraduateData.passportPhoto || passportPhotoUrl ? 'border-green-500 bg-green-50' : 'border-gray-300'
               }`}> 
                 {/* Always render the file input, but keep it hidden */}
@@ -2117,7 +2117,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               defaultCountry="NG"
               value={postgraduateData.personalDetails.phoneNumber || undefined}
               onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-              className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!px-4 [&>input]:!border-2 [&>input]:!border-gray-300 [&>input]:!rounded-xl [&>input]:!focus:ring-2 [&>input]:!focus:ring-amber-500 [&>input]:!focus:border-amber-500 [&>input]:!transition-all [&>input]:!duration-200 [&>input]:!text-base [&>input]:!bg-background [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-offset-2 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+              className="phone-input-field"
               placeholder="Enter phone number"
             />
           </div>
@@ -3008,10 +3008,10 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 <div className="mt-4">
                   <p className="font-medium">Payment Process:</p>
                   <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Payment will be processed through Paystack</li>
-                    <li>Nigerian applicants will use Paystack NGN payment gateway</li>
-                    <li>International applicants will use Paystack USD payment gateway</li>
-                    <li>The Paystack payment window will open when you click "Proceed to Payment"</li>
+                    <li>Payment will be processed through Squadco</li>
+                    <li>Nigerian applicants will use Squadco NGN payment gateway</li>
+                    <li>International applicants will use Squadco USD payment gateway</li>
+                    <li>The Squadco payment window will open when you click "Proceed to Payment"</li>
                     <li>A payment receipt will be automatically generated after successful payment</li>
                   </ul>
                 </div>
@@ -3058,7 +3058,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       </div>
     </div>
 
-      <PaymentModal
+      <SquadPaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         application={postgraduateData}

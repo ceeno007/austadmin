@@ -1091,25 +1091,25 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
 
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
 
 
           {/* Passport Photo Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <Camera className="h-5 w-5 text-amber-600" />
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <div className="flex-1">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
                   Passport Photograph
                   <span className="text-red-500 text-xs">*</span>
                 </h3>
-                <p className="text-gray-600">Upload a clear, recent passport-sized photo</p>
+                <p className="text-sm sm:text-base text-gray-600">Upload a clear, recent passport-sized photo</p>
               </div>
             </div>
             
@@ -1133,7 +1133,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                
                <label
                  htmlFor="passportPhoto"
-                 className="relative w-48 h-48 cursor-pointer group"
+                 className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 cursor-pointer group"
                  onDragOver={(e) => {
                    e.preventDefault();
                    e.currentTarget.classList.add('border-amber-400', 'bg-amber-50');
@@ -1200,17 +1200,17 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                  ) : (
                    <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group-hover:border-amber-400 group-hover:bg-amber-50">
                      <div className="text-center">
-                       <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                         <Upload className="h-8 w-8 text-amber-600" />
+                       <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                         <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600" />
                        </div>
-                       <p className="text-sm text-gray-600 font-medium">Click or drag to upload</p>
+                       <p className="text-xs sm:text-sm text-gray-600 font-medium">Click or drag to upload</p>
                        <p className="text-xs text-gray-500 mt-1">JPG, PNG (Max: 5MB)</p>
                      </div>
                    </div>
                  )}
                </label>
                
-               <div className="mt-4 text-center">
+               <div className="mt-3 sm:mt-4 text-center">
                  <p className="text-xs text-gray-500">
                    Drag and drop an image here, or click to select
                  </p>
@@ -1222,19 +1222,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
 
           {/* Personal Details Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-5 w-5 text-amber-600" />
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">Personal Details</h3>
-                <p className="text-gray-600">Tell us about yourself</p>
+              <div className="flex-1">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Personal Details</h3>
+                <p className="text-sm sm:text-base text-gray-600">Tell us about yourself</p>
               </div>
             </div>
             
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-3">
                   <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     Surname
@@ -1245,7 +1245,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                      value={foundationRemedialData.personalDetails.surname}
                      onChange={(e) => handlePersonalDetailsChange("surname", e.target.value)}
                      onBlur={handleAutoSave}
-                     className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200"
+                     className="h-11 sm:h-12 px-3 sm:px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                      required
                    />
                 </div>
@@ -1419,7 +1419,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 defaultCountry="NG"
                 value={foundationRemedialData.personalDetails.phoneNumber}
                 onChange={(value) => handlePersonalDetailsChange("phoneNumber", value || "")}
-                className="!flex !items-center !gap-2 [&>input]:!flex-1 [&>input]:!h-12 [&>input]:!rounded-xl [&>input]:!border [&>input]:!border-gray-300 [&>input]:!bg-background [&>input]:!px-4 [&>input]:!py-3 [&>input]:!text-base [&>input]:!ring-offset-background [&>input]:!placeholder:text-muted-foreground [&>input]:!focus-visible:outline-none [&>input]:!focus-visible:ring-2 [&>input]:!focus-visible:ring-amber-500 [&>input]:!focus-visible:ring-offset-2 [&>input]:!focus-visible:border-amber-500 [&>input]:!disabled:cursor-not-allowed [&>input]:!disabled:opacity-50"
+                className="phone-input-field"
                 placeholder="Enter phone number"
               />
             </div>
@@ -2146,14 +2146,14 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Application Fee Payment Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
             <CreditCard className="h-5 w-5 text-amber-600" />
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900">Application Fee Payment</h3>
-            <p className="text-gray-600">Complete your payment to submit your application</p>
+          <div className="flex-1">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Application Fee Payment</h3>
+            <p className="text-sm sm:text-base text-gray-600">Complete your payment to submit your application</p>
           </div>
         </div>
         
@@ -2176,11 +2176,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
           {/* Form Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
               <div className="text-center lg:text-left">
-                <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
-                <p className="text-gray-600 text-sm md:text-base">Review your information and proceed to payment</p>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
+                <p className="text-sm sm:text-base text-gray-600">Review your information and proceed to payment</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
                 <Button
@@ -2188,7 +2188,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   variant="outline"
                   onClick={handleSaveDraft}
                   disabled={isProcessingPayment || isSavingDraft}
-                  className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                  className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200 text-sm sm:text-base"
                 >
                   {isSavingDraft ? (
                     <span className="flex items-center justify-center">
@@ -2206,7 +2206,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   type="button"
                   onClick={handleProceedToPayment}
                   disabled={isProcessingPayment}
-                  className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
+                  className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200 text-sm sm:text-base"
                 >
                  {isProcessingPayment ? (
                    <span className="flex items-center justify-center">
@@ -2220,6 +2220,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                    </span>
                  )}
                </Button>
+               
+
               </div>
             </div>
           </div>
