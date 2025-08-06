@@ -2858,10 +2858,10 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         <h3 className="text-lg font-semibold text-gray-900">Academic References</h3>
       </div>
       <div className="space-y-4">
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-sm text-yellow-800">
+        <div className="alert-info">
+          <p className="text-sm">
             It is your responsibility to ensure that you provide TWO references to support your application. Your
-            referees must be able to comment on your academic suitability for the program. A secure link will be sent to the email address of each referee — they must fill it or you cannot proceed with your application.
+            referees must be able to comment on your academic suitability for the program. A secure link will be sent to the email address of each referee they must fill it or you cannot proceed with your application.
             <br />
             ⚠️ <strong>Only institutional or academic email addresses will receive the reference link.</strong>
             <br />
