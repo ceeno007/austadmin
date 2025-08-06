@@ -333,9 +333,7 @@ export const programs: Program[] = [
       "Academic Transcripts",
       "Research Proposal",
       "Two Academic Reference Letters",
-      "Statement of Purpose",
-      "CV/Resume",
-      "Evidence of English Proficiency (if applicable)"
+      "Statement of Purpose"
     ],
     pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Computer%20Science%20_Class%20of%202025_.pdf?updatedAt=1747320125550",
     faqs: [
@@ -370,9 +368,7 @@ export const programs: Program[] = [
       "Detailed Research Proposal",
       "Three Academic Reference Letters",
       "Statement of Purpose",
-      "Research publications (if any)",
-      "CV/Resume",
-      "IELTS/TOEFL (for international students)"
+      "Research publications (if any)"
     ],
     faqs: [
       {
@@ -404,9 +400,7 @@ export const programs: Program[] = [
       "Academic Transcripts",
       "Research Proposal",
       "Two Academic Reference Letters",
-      "Statement of Purpose",
-      "CV/Resume",
-      "Evidence of English Proficiency (if applicable)"
+      "Statement of Purpose"
     ],
     pdf: "/pdfs/Curriculum Handbook - M.Sc. Petroleum Engineering [Class of 2025].pdf",
     faqs: [
@@ -440,9 +434,7 @@ export const programs: Program[] = [
       "Detailed Research Proposal",
       "Three Academic Reference Letters",
       "Statement of Purpose",
-      "Research publications (if any)",
-      "CV/Resume",
-      "IELTS/TOEFL (for international students)"
+      "Research publications (if any)"
     ],
     faqs: [
       {
@@ -474,9 +466,7 @@ export const programs: Program[] = [
       "Academic Transcripts",
       "Research Proposal",
       "Two Academic Reference Letters",
-      "Statement of Purpose",
-      "CV/Resume",
-      "Evidence of English Proficiency (if applicable)"
+      "Statement of Purpose"
     ],
     pdf: "/pdfs/Curriculum Handbook - M.Sc. Aerospace Engineering [Class of 2025].pdf",
     faqs: [
@@ -510,9 +500,7 @@ export const programs: Program[] = [
       "Detailed Research Proposal",
       "Three Academic Reference Letters",
       "Statement of Purpose",
-      "Research publications (if any)",
-      "CV/Resume",
-      "IELTS/TOEFL (for international students)"
+      "Research publications (if any)"
     ],
     faqs: [
       {
@@ -543,8 +531,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'What career paths are available?', answer: 'Graduates can work in government, NGOs, international organizations, or pursue doctoral studies.' },
@@ -565,8 +552,7 @@ export const programs: Program[] = [
       'First degree in any discipline',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'Is this program suitable for non-public sector professionals?', answer: 'Yes, it is open to graduates from any discipline.' },
@@ -588,8 +574,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'What skills will I gain?', answer: 'Policy analysis, research, and communication skills.' },
@@ -610,8 +595,7 @@ export const programs: Program[] = [
       'First degree in any discipline',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'Is this program suitable for non-policy professionals?', answer: 'Yes, it is open to graduates from any discipline.' },
@@ -633,8 +617,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Pure%20and%20Applied%20Mathematics%20_Class%20of%202025_.pdf?updatedAt=1747320125483",
     faqs: [
@@ -656,9 +639,7 @@ export const programs: Program[] = [
       'Masters degree in Mathematics or related field',
       'Strong research background',
       'Academic transcripts',
-      'Research proposal',
-      'Reference letters',
-      'CV/Resume'
+      'Research proposal'
     ],
     faqs: [
       { question: 'What is the research focus?', answer: 'Original research in pure or applied mathematics.' },
@@ -680,8 +661,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'What are the research areas?', answer: 'Space weather, plasma physics, and astrophysics.' },
@@ -702,9 +682,7 @@ export const programs: Program[] = [
       'Masters degree in Physics or related field',
       'Strong research background',
       'Academic transcripts',
-      'Research proposal',
-      'Reference letters',
-      'CV/Resume'
+      'Research proposal'
     ],
     faqs: [
       { question: 'What is the research focus?', answer: 'Original research in space and plasma physics.' },
@@ -726,8 +704,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     faqs: [
       { question: 'What are the research areas?', answer: 'Systems modeling, optimization, and control.' },
@@ -748,9 +725,7 @@ export const programs: Program[] = [
       'Masters degree in Engineering or related field',
       'Strong research background',
       'Academic transcripts',
-      'Research proposal',
-      'Reference letters',
-      'CV/Resume'
+      'Research proposal'
     ],
     faqs: [
       { question: 'What is the research focus?', answer: 'Original research in systems engineering and optimization.' },
@@ -772,8 +747,7 @@ export const programs: Program[] = [
       'Minimum CGPA of 2.5/5.0',
       'Academic transcripts',
       'Reference letters',
-      'Statement of purpose',
-      'CV/Resume'
+      'Statement of purpose'
     ],
     pdf: "https://ik.imagekit.io/nsq6yvxg1/pdfs/Curriculum%20Handbook%20-%20M.Sc.%20Theoretical%20and%20Applied%20Physics%20_Class%20of%202025_.pdf?updatedAt=1747320124938",
     faqs: [
@@ -795,9 +769,7 @@ export const programs: Program[] = [
       'Masters degree in Physics or related field',
       'Strong research background',
       'Academic transcripts',
-      'Research proposal',
-      'Reference letters',
-      'CV/Resume'
+      'Research proposal'
     ],
     faqs: [
       { question: 'What is the research focus?', answer: 'Original research in theoretical and applied physics.' },
