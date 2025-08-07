@@ -165,7 +165,11 @@ const Hostels = () => {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <h4 className="font-semibold mb-2">Price:</h4>
-              <p className="text-gray-600">{hostel.feePerSemester} - {hostel.totalFee}</p>
+              <p className="text-gray-600">
+                <span className="font-medium">{hostel.feePerSemester}</span> per semester
+                <br />
+                <span className="text-sm text-gray-500">Total: {hostel.totalFee}</span>
+              </p>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Capacity:</h4>

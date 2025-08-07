@@ -27,6 +27,7 @@ const SignUp = () => {
   const [showOtpField, setShowOtpField] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
 
   // Password strength validation
@@ -55,6 +56,7 @@ const SignUp = () => {
         setPassword(data.password || "");
         setConfirmPassword(data.confirmPassword || "");
         setIsEmailVerified(!!data.isEmailVerified);
+        setOtpSent(!!data.otpSent);
       } catch {}
     }
     setHasLoaded(true);
@@ -77,11 +79,12 @@ const SignUp = () => {
       password,
       confirmPassword,
       isEmailVerified,
+      otpSent,
       lastUpdated: Date.now()
     };
     
     localStorage.setItem('signupForm', JSON.stringify(formData));
-  }, [fullName, email, programType, password, confirmPassword, isEmailVerified, hasLoaded]);
+  }, [fullName, email, programType, password, confirmPassword, isEmailVerified, otpSent, hasLoaded]);
 
   // Add cleanup on page unload
   useEffect(() => {
@@ -103,6 +106,7 @@ const SignUp = () => {
     setIsVerifying(true);
     try {
       await apiService.requestEmailOtp(email);
+      setOtpSent(true);
       toast.success("Verification code sent to your email");
     } catch (error: any) {
       toast.error(error.message || "Failed to send code");
@@ -240,23 +244,23 @@ const SignUp = () => {
                         </div>
                       )}
                     </div>
-                    {!isEmailVerified && isEmailValid && (
-                      <Button
-                        type="button"
-                        onClick={handleSendVerification}
-                        disabled={isVerifying}
-                        className="whitespace-nowrap bg-primary"
-                      >
-                        {isVerifying ? (
-                          <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>Sending...</span>
-                        ) : (
-                          <>
-                            <Mail className="mr-2 h-4 w-4" />
-                            Verify Email
-                          </>
-                        )}
-                      </Button>
-                    )}
+                                         {!isEmailVerified && isEmailValid && !otpSent && (
+                       <Button
+                         type="button"
+                         onClick={handleSendVerification}
+                         disabled={isVerifying}
+                         className="whitespace-nowrap bg-primary"
+                       >
+                         {isVerifying ? (
+                           <span className="flex items-center justify-center"><span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>Sending...</span>
+                         ) : (
+                           <>
+                             <Mail className="mr-2 h-4 w-4" />
+                             Verify Email
+                           </>
+                         )}
+                       </Button>
+                     )}
                   </div>
                   {!isEmailVerified && isEmailValid && (
                     <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-md">
@@ -292,24 +296,23 @@ const SignUp = () => {
                           placeholder="Enter the code sent to your email"
                           className="flex-grow"
                         />
-                        <Button
-                          type="button"
-                          onClick={handleVerifyOtp}
-                          disabled={isVerifyingOtp || !verificationCode}
-                          className="whitespace-nowrap bg-primary"
-                        >
-                          {isVerifyingOtp ? (
-                            <div className="flex items-center">
-                              <Skeleton className="h-4 w-4 mr-2 rounded-full" />
-                              <Skeleton className="h-4 w-16" />
-                            </div>
-                          ) : (
-                            <>
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Verify Code
-                            </>
-                          )}
-                        </Button>
+                        {!isVerifyingOtp && (
+                          <Button
+                            type="button"
+                            onClick={handleVerifyOtp}
+                            disabled={!verificationCode}
+                            className="whitespace-nowrap bg-primary"
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Verify Code
+                          </Button>
+                        )}
+                        {isVerifyingOtp && (
+                          <div className="flex items-center justify-center px-4 py-2 bg-primary text-primary-foreground rounded-md">
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Verifying...
+                          </div>
+                        )}
                       </div>
                       <p className="text-sm text-gray-500">
                         Didn't receive the code?{" "}

@@ -154,25 +154,54 @@ const FileUploadField = ({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
-  const isUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('/'));
-  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
   
+  // Extract filename from URL
   const getFileNameFromUrl = (url: string) => {
-    const urlParts = url.split('/');
-    return urlParts[urlParts.length - 1] || 'Document';
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const filename = pathname.split('/').pop() || 'document.pdf';
+      return decodeURIComponent(filename);
+    } catch {
+      return 'document.pdf';
+    }
   };
 
-  const getDisplayText = () => {
-    if (isUrl) {
-      return getFileNameFromUrl(value as string);
-    }
-    if (isFile) {
-      return Array.isArray(value) 
-      ? value.map(f => f.name).join(", ") 
-        : (value as File).name;
-    }
-    return "";
+  // Check if the value is a URL (from backend) or a File object
+  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.includes('cloudinary.com'));
+  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
+  
+  // Check if File object has originalPath (URL from backend)
+  const getOriginalPath = (file: File) => {
+    return (file as any).originalPath || null;
   };
+  
+  const hasOriginalPath = isFile && (
+    Array.isArray(value) 
+      ? value.length > 0 && getOriginalPath(value[0])
+      : getOriginalPath(value as File)
+  );
+  
+  const originalPath = hasOriginalPath ? (
+    Array.isArray(value) 
+      ? getOriginalPath(value[0])
+      : getOriginalPath(value as File)
+  ) : null;
+  
+  // Determine if the file is a PDF (either File or URL)
+  const isPdf = (isFile && ((Array.isArray(value) ? value[0] : value)?.type === 'application/pdf')) ||
+    (isUrl && value.toLowerCase().endsWith('.pdf')) ||
+    (hasOriginalPath && originalPath?.toLowerCase().endsWith('.pdf'));
+
+  const fileNames = hasFiles 
+    ? Array.isArray(value) 
+      ? value.map(f => f.name).join(", ") 
+      : value instanceof File 
+        ? value.name 
+        : isUrl 
+          ? getFileNameFromUrl(value)
+          : ""
+    : "";
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -214,15 +243,17 @@ const FileUploadField = ({
   };
 
   const handleContainerClick = () => {
-    fileInputRef.current?.click();
+    if (!hasFiles) {
+      fileInputRef.current?.click();
+    }
   };
 
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       <div 
-        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors cursor-pointer ${
-          hasFiles ? 'bg-blue-50' : isDragging ? 'bg-blue-100' : 'bg-white'
+        className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
+          isPdf ? 'border-green-500 bg-green-50' : 'border-blue-500 bg-white'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -233,51 +264,59 @@ const FileUploadField = ({
           ref={fileInputRef}
           type="file"
           id={id}
-          className="hidden"
           accept={accept}
-          multiple={multiple}
           onChange={handleFileChange}
+          multiple={multiple}
+          className="hidden"
         />
-        <div className="flex flex-col items-center justify-center w-full cursor-pointer">
-          {hasFiles ? (
-            <div className="flex items-center justify-center w-full gap-2">
-              {isUrl ? (
-                <a
-                  href={value as string}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-800 underline text-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {getDisplayText()}
-                </a>
-              ) : (
-                <span className="text-sm text-green-800 text-center">{getDisplayText()}</span>
-              )}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleRemove();
-                }}
-                className="p-1 hover:bg-green-100 rounded-full ml-2"
+        
+        {hasFiles ? (
+          <div className="flex flex-col items-center">
+            {isUrl ? (
+              <a
+                href={value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
+                title={value}
               >
-                <X className="h-4 w-4 text-green-600" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full">
-              <Upload className="h-8 w-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-800 text-center">
-                Click or drag to upload {label}
-              </span>
-              <span className="mt-1 text-xs text-gray-700 text-center">
-                Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
-              </span>
-            </div>
-          )}
-        </div>
+                {getFileNameFromUrl(value)}
+              </a>
+            ) : hasOriginalPath ? (
+              <a
+                href={originalPath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
+                title={originalPath}
+              >
+                {getFileNameFromUrl(originalPath)}
+              </a>
+            ) : (
+              <span className="text-sm text-gray-800 text-center">{fileNames}</span>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove();
+              }}
+              className="mt-2 p-1 hover:bg-red-100 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-red-600" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center w-full">
+            <Upload className="h-8 w-8 text-gray-600" />
+            <span className="mt-2 text-sm text-gray-800 text-center">
+              Click to upload {label}
+            </span>
+            <span className="mt-1 text-xs text-gray-700 text-center">
+              Accepted formats: {accept.split(',').map(type => type.replace('.', '').toUpperCase()).join(', ')} (Max: {maxSize})
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -389,9 +428,12 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   // Create the file object
   const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
   
+  // Construct full URL for the original path
+  const fullUrl = filePath.startsWith('http') || filePath.includes('cloudinary.com') ? filePath : `https://admissions-jcvy.onrender.com/${filePath}`;
+  
   // Add the original path as a custom property
   Object.defineProperty(placeholderFile, 'originalPath', {
-    value: filePath,
+    value: fullUrl,
     writable: false
   });
   

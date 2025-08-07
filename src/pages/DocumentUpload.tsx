@@ -349,44 +349,107 @@ const DocumentUpload = () => {
   };
 
   return (
-    <ApplicationStatusCheck>
-      <div className="min-h-screen bg-[hsl(var(--accent)/0.02)]">
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {programType === "undergraduate" && "Undergraduate Program"}
-                  {programType === "postgraduate" && "Postgraduate Program"}
-                  {programType === "phd" && "Ph.D. Program"}
-                  {programType === "foundation" && "Foundation and Remedial Studies Program"}
-                </h1>
-                <p className="text-gray-600 mt-2">Please upload your required documents below</p>
-              </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
+    <>
+      <style>
+        {`
+          /* Force hide login page completely */
+          .login-page, .signin-page, [data-testid="login"], [data-testid="signin"], 
+          .auth-page, .login-container, .signin-container, 
+          [class*="login"], [class*="signin"], [id*="login"], [id*="signin"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            position: absolute !important;
+            z-index: -9999 !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+          }
+          
+          /* Fix double scrollbars */
+          html, body {
+            height: 100% !important;
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
+          }
+          
+          /* Single scrollbar container */
+          .document-upload-container {
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: white !important;
+            z-index: 99999 !important;
+          }
+          
+          /* Hide any other scrollable elements */
+          main, .container, .max-w-4xl {
+            overflow: visible !important;
+          }
+        `}
+      </style>
+      <div 
+        className="document-upload-container" 
+        style={{ 
+          backgroundColor: 'white'
+        }}
+      >
+      <main 
+        className="container mx-auto px-4 py-8"
+        style={{
+          backgroundColor: 'white'
+        }}
+      >
+        <div 
+          className="max-w-4xl mx-auto"
+          style={{
+            backgroundColor: 'white'
+          }}
+        >
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {programType === "undergraduate" && "Undergraduate Program"}
+                {programType === "postgraduate" && "Postgraduate Program"}
+                {programType === "phd" && "Ph.D. Program"}
+                {programType === "foundation" && "Foundation and Remedial Studies Program"}
+              </h1>
+              <p className="text-gray-600 mt-2">Please upload your required documents below</p>
             </div>
-            
-            <div className="space-y-6">
-              {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
-                <PostgraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
-              ) : programType === "foundation" ? (
-                <FoundationForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
-              ) : (
-                <UndergraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
-              )}
-            </div>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
-        </main>
-
-      </div>
-    </ApplicationStatusCheck>
+          
+          <div 
+            className="space-y-6"
+            style={{
+              backgroundColor: 'white'
+            }}
+          >
+            {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
+              <PostgraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+            ) : programType === "foundation" ? (
+              <FoundationForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+            ) : (
+              <UndergraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+    </>
   );
 };
 

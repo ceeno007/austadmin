@@ -210,18 +210,6 @@ const FileUploadField = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   
-  // Check if the value is a URL (from backend) or a File object
-  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'));
-  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
-  
-  const fileNames = hasFiles 
-    ? Array.isArray(value) 
-      ? value.map(f => f.name).join(", ") 
-      : value instanceof File 
-        ? value.name 
-        : ""
-    : "";
-
   // Extract filename from URL
   const getFileNameFromUrl = (url: string) => {
     try {
@@ -233,6 +221,46 @@ const FileUploadField = ({
       return 'document.pdf';
     }
   };
+
+  // Check if the value is a URL (from backend) or a File object
+  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.includes('cloudinary.com'));
+  const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
+  
+  // Check if File object has originalPath (URL from backend)
+  const getOriginalPath = (file: File) => {
+    return (file as any).originalPath || null;
+  };
+  
+  const hasOriginalPath = isFile && (
+    Array.isArray(value) 
+      ? value.length > 0 && getOriginalPath(value[0])
+      : getOriginalPath(value as File)
+  );
+  
+
+  
+  const originalPath = hasOriginalPath ? (
+    Array.isArray(value) 
+      ? getOriginalPath(value[0])
+      : getOriginalPath(value as File)
+  ) : null;
+
+
+  
+  // Determine if the file is a PDF (either File or URL)
+  const isPdf = (isFile && ((Array.isArray(value) ? value[0] : value)?.type === 'application/pdf')) ||
+    (isUrl && value.toLowerCase().endsWith('.pdf')) ||
+    (hasOriginalPath && originalPath?.toLowerCase().endsWith('.pdf'));
+
+  const fileNames = hasFiles 
+    ? Array.isArray(value) 
+      ? value.map(f => f.name).join(", ") 
+      : value instanceof File 
+        ? value.name 
+        : isUrl 
+          ? getFileNameFromUrl(value)
+          : ""
+    : "";
 
   const acceptedTypes = accept.split(',').map(type => 
     type.replace('.', '').toUpperCase()
@@ -287,13 +315,13 @@ const FileUploadField = ({
     <div className="space-y-2">
       <Label>{label}</Label>
       <div 
-        className={`border-2 border-dashed border-blue-500 rounded-lg p-4 transition-colors cursor-pointer ${
-          hasFiles ? 'bg-white' : 'bg-white'
+        className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
+          isPdf ? 'border-green-500 bg-green-50' : 'border-blue-500 bg-white'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={handleContainerClick} // Add click handler to the container
+        onClick={handleContainerClick}
       >
         <input
           ref={fileInputRef}
@@ -304,13 +332,34 @@ const FileUploadField = ({
           multiple={multiple}
           className="hidden"
         />
-        
         {hasFiles ? (
           <div className="flex flex-col items-center">
-            <span className="text-sm text-gray-800 text-center">{fileNames}</span>
+            {isUrl ? (
+              <a
+                href={value}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
+                title={value}
+              >
+                {getFileNameFromUrl(value)}
+              </a>
+            ) : hasOriginalPath ? (
+              <a
+                href={originalPath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
+                title={originalPath}
+              >
+                {getFileNameFromUrl(originalPath)}
+              </a>
+            ) : (
+              <span className="text-sm text-gray-800 text-center">{fileNames}</span>
+            )}
             <button
               type="button"
-              onClick={(e) => { // Prevent click from propagating to container
+              onClick={(e) => {
                 e.stopPropagation();
                 handleRemove();
               }}
@@ -369,9 +418,12 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   // Create the file object
   const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
   
+  // Construct full URL for the original path
+  const fullUrl = filePath.startsWith('http') || filePath.includes('cloudinary.com') ? filePath : `https://admissions-jcvy.onrender.com/${filePath}`;
+  
   // Add the original path as a custom property
   Object.defineProperty(placeholderFile, 'originalPath', {
-    value: filePath,
+    value: fullUrl,
     writable: false
   });
   
