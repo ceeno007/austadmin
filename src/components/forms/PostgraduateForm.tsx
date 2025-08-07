@@ -2994,20 +2994,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           </div>
         </div>
 
-        {/* Documents Checklist */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-          <h3 className="text-lg font-semibold">Documents Checklist</h3>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <ul className="list-disc list-inside space-y-2 text-sm text-gray-600">
-                <li>A student copy of your academic transcripts and a copy of the certificate/diploma for degrees received (with notarized English translations where applicable) MUST be sent with this application form.</li>
-                <li>Applicants should arrange for official transcripts to be sent to the University directly from degree issuing institution(s).</li>
-                <li>TWO references should be supplied using the provided reference form link.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+      
         {/* Payment Information Section */}
         <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
           <h3 className="text-lg font-semibold">Application Fee Payment</h3>

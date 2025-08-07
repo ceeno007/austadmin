@@ -1,0 +1,23 @@
+/* Fade animation for page transitions */
+.page-fade-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 250ms, transform 250ms;
+}
+.page-fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.page-fade-exit-active {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 250ms, transform 250ms;
+}
+.page-fade-wrapper {
+  min-height: 100%;
+  height: 100%;
+}

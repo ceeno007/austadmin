@@ -14,6 +14,16 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
+// At the top, import the lazy-loaded pages for preloading
+const preloaders: Record<string, () => void> = {
+  "/": () => import("@/pages/Index"),
+  "/about": () => import("@/pages/About"),
+  "/programs": () => import("@/pages/Programs"),
+  "/campus": () => import("@/pages/CampusLife"),
+  "/hostels": () => import("@/pages/Hostels"),
+  "/contact": () => import("@/pages/Contact"),
+};
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showStoreDialog, setShowStoreDialog] = useState(false);
@@ -106,6 +116,8 @@ const Navbar = () => {
                       isActive(link.path) ? "text-[#FF5500]" : "hover:text-[#FF5500]"
                     )}
                     onClick={() => handleNavigation(link.path)}
+                    onMouseEnter={() => preloaders[link.path]?.()}
+                    onFocus={() => preloaders[link.path]?.()}
                   >
                     {link.label}
                   </Link>
@@ -177,6 +189,8 @@ const Navbar = () => {
                       isActive(link.path) ? "text-[#FF5500] bg-gray-50" : "hover:bg-gray-50 hover:text-[#FF5500]"
                     )}
                     onClick={() => handleNavigation(link.path)}
+                    onMouseEnter={() => preloaders[link.path]?.()}
+                    onFocus={() => preloaders[link.path]?.()}
                   >
                     {link.label}
                   </Link>

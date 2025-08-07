@@ -18,6 +18,8 @@ import PaymentPage from "@/pages/PaymentPage";
 import ReferenceStatus from "@/pages/ReferenceStatus";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import FoundationSuccess from "@/pages/FoundationSuccess";
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import './page-fade.css';
 
 // Lazy load all page components for better performance
 const Index = lazy(() => import('./pages/Index'));
@@ -82,58 +84,58 @@ const AppLayout: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-white">
       {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalNavbar />}
       <main className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus && !isApplicationSuccess ? 'pt-[72px]' : ''} bg-white`}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/campus" element={<CampusLife />} />
-          <Route path="/hostels" element={<Hostels />} />
-          <Route path="/hostel-images" element={<HostelImages />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/sitemap" element={<Sitemap />} />
-          <Route path="/application-success" element={<ApplicationSuccess />} />
-          <Route path="/reference-status" element={
-            <ProtectedRoute>
-              <ReferenceStatus />
-            </ProtectedRoute>
-          } />
-
-          {/* Protected Routes */}
-          <Route path="/application" element={
-            <ProtectedRoute>
-              <ApplicationForm />
-            </ProtectedRoute>
-          } />
-          <Route path="/document-upload" element={
-            <ProtectedRoute>
-              <DocumentUpload />
-            </ProtectedRoute>
-          } />
-          <Route path="/view-pdf" element={<ViewPDF />} />
-
-          {/* Program Details Route */}
-          <Route path="/programs/:programId" element={<ProgramDetails />} />
-
-          {/* Reference Form Route */}
-          <Route path="/references/:uuid" element={<ReferenceForm />} />
-
-          {/* Application Progress Route */}
-          <Route path="/application-progress" element={<ApplicationProgress />} />
-
-          {/* Payment Routes */}
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/foundation-success" element={<FoundationSuccess />} />
-
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <TransitionGroup component={null}>
+          <CSSTransition key={location.pathname} classNames="page-fade" timeout={250}>
+            <div className="page-fade-wrapper">
+              <Routes location={location}>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/programs" element={<Programs />} />
+                <Route path="/campus" element={<CampusLife />} />
+                <Route path="/hostels" element={<Hostels />} />
+                <Route path="/hostel-images" element={<HostelImages />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/sitemap" element={<Sitemap />} />
+                <Route path="/application-success" element={<ApplicationSuccess />} />
+                <Route path="/reference-status" element={
+                  <ProtectedRoute>
+                    <ReferenceStatus />
+                  </ProtectedRoute>
+                } />
+                {/* Protected Routes */}
+                <Route path="/application" element={
+                  <ProtectedRoute>
+                    <ApplicationForm />
+                  </ProtectedRoute>
+                } />
+                <Route path="/document-upload" element={
+                  <ProtectedRoute>
+                    <DocumentUpload />
+                  </ProtectedRoute>
+                } />
+                <Route path="/view-pdf" element={<ViewPDF />} />
+                {/* Program Details Route */}
+                <Route path="/programs/:programId" element={<ProgramDetails />} />
+                {/* Reference Form Route */}
+                <Route path="/references/:uuid" element={<ReferenceForm />} />
+                {/* Application Progress Route */}
+                <Route path="/application-progress" element={<ApplicationProgress />} />
+                {/* Payment Routes */}
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/foundation-success" element={<FoundationSuccess />} />
+                {/* Catch-all route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </CSSTransition>
+        </TransitionGroup>
       </main>
       {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalFooter />}
     </div>
