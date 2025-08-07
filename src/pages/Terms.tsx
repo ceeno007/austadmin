@@ -1,6 +1,5 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 const Terms = () => {
   return (
@@ -10,95 +9,76 @@ const Terms = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold mb-8">Terms of Use</h1>
-            
             <div className="space-y-8 text-gray-600">
               <section>
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">1. Acceptance of Terms</h2>
                 <p className="mb-4">
-                  By accessing and using the African University of Science and Technology, Abuja (AUST) website and services, you agree to be bound by these Terms of Use, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.
+                  By accessing and using the African University of Science and Technology, Abuja (AUST) admissions portal, you agree to comply with these Terms of Use and all applicable laws and regulations. If you do not agree, please do not use this site.
                 </p>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">2. Academic Integrity</h2>
-                <p className="mb-4">
-                  Students and users must maintain the highest standards of academic integrity. This includes:
-                </p>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">2. Use of the Portal</h2>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Submitting original work</li>
-                  <li>Properly citing sources</li>
-                  <li>Not engaging in plagiarism</li>
-                  <li>Not sharing account credentials</li>
-                  <li>Respecting intellectual property rights</li>
+                  <li>This portal is for prospective and current applicants to submit applications, upload documents, track progress, and make payments for AUST programs.</li>
+                  <li>You agree to provide accurate, current, and complete information during the application process.</li>
+                  <li>Impersonation or providing false information is strictly prohibited and may result in disqualification or legal action.</li>
                 </ul>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">3. User Accounts</h2>
-                <p className="mb-4">When creating an account, you agree to:</p>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">3. User Accounts & Security</h2>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Provide accurate and complete information</li>
-                  <li>Maintain the security of your account</li>
-                  <li>Accept responsibility for all activities under your account</li>
-                  <li>Notify us immediately of any security breaches</li>
-                  <li>Not transfer your account to anyone else</li>
+                  <li>You are responsible for maintaining the confidentiality of your login credentials.</li>
+                  <li>Notify AUST immediately at it@aust.edu.ng if you suspect unauthorized use of your account.</li>
+                  <li>You are responsible for all activities that occur under your account.</li>
                 </ul>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">4. Intellectual Property</h2>
-                <p className="mb-4">
-                  All content on this website, including but not limited to text, graphics, logos, images, audio clips, digital downloads, and software, is the property of AUST or its content suppliers and is protected by Nigerian and international copyright laws.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">5. Prohibited Activities</h2>
-                <p className="mb-4">Users are prohibited from:</p>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">4. Application & Payment</h2>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Using the service for any illegal purpose</li>
-                  <li>Attempting to gain unauthorized access to systems</li>
-                  <li>Interfering with other users' access to the service</li>
-                  <li>Uploading malicious software</li>
-                  <li>Engaging in harassment or discriminatory behavior</li>
-                  <li>Violating any Nigerian laws or regulations</li>
+                  <li>All application fees and payments must be made through the official payment channels provided on this portal.</li>
+                  <li>Payments are non-refundable except as expressly stated by AUST policy.</li>
+                  <li>Submission of an application does not guarantee admission.</li>
                 </ul>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">6. Payment Terms</h2>
-                <p className="mb-4">
-                  All fees and charges are subject to the university's current fee structure. Payment terms include:
-                </p>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">5. Document Uploads</h2>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Fees must be paid by specified deadlines</li>
-                  <li>All transactions are in Nigerian Naira</li>
-                  <li>Refunds are subject to university policy</li>
-                  <li>Late payment may incur additional charges</li>
+                  <li>All documents uploaded must be authentic and belong to the applicant.</li>
+                  <li>Forgery or misrepresentation of documents will result in immediate disqualification and may be reported to authorities.</li>
                 </ul>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">7. Limitation of Liability</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">6. Prohibited Conduct</h2>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>Do not attempt to gain unauthorized access to the portal or other users’ data.</li>
+                  <li>Do not upload malicious software or engage in any activity that disrupts the portal’s operation.</li>
+                  <li>Do not harass, threaten, or abuse other users or AUST staff.</li>
+                </ul>
+              </section>
+              <section>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">7. Intellectual Property</h2>
                 <p className="mb-4">
-                  AUST shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service.
+                  All content on this portal, including text, graphics, logos, and software, is the property of AUST or its licensors and is protected by copyright and other laws.
                 </p>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">8. Changes to Terms</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">8. Limitation of Liability</h2>
                 <p className="mb-4">
-                  AUST reserves the right to modify these terms at any time. We will notify users of any material changes via email or through the website.
+                  AUST is not liable for any indirect, incidental, or consequential damages arising from your use of this portal. Use of the portal is at your own risk.
                 </p>
               </section>
-
               <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800">9. Governing Law</h2>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">9. Changes to Terms</h2>
                 <p className="mb-4">
-                  These terms are governed by and construed in accordance with the laws of the Federal Republic of Nigeria. Any disputes shall be subject to the exclusive jurisdiction of the Nigerian courts.
+                  AUST may update these Terms of Use at any time. Continued use of the portal after changes constitutes acceptance of the new terms.
                 </p>
               </section>
-
+              <section>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">10. Governing Law</h2>
+                <p className="mb-4">
+                  These terms are governed by the laws of the Federal Republic of Nigeria.
+                </p>
+              </section>
               <div className="text-sm text-gray-500 mt-8">
                 Last updated: {new Date().toLocaleDateString()}
               </div>
@@ -106,7 +86,6 @@ const Terms = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

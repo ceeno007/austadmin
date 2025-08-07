@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ChevronLeft, Home, XCircle, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, Home, XCircle, Maximize2, Minimize2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SEO from "@/components/SEO";
 import { Skeleton } from "@/components/ui/skeleton";
-import OptimizedImage from "@/components/OptimizedImage";
 
 // Define the structure of our hostel data
 interface Hostel {
@@ -20,6 +19,9 @@ const HostelImages = () => {
   const [hostel, setHostel] = useState<Hostel | null>(null);
   const [loading, setLoading] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -61,6 +63,9 @@ const HostelImages = () => {
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? hostel.images.length - 1 : prevIndex - 1
     );
+    setImageLoading(true);
+    setImageError(false);
+    setRetryCount(0);
   };
 
   const handleNextImage = () => {
@@ -68,10 +73,16 @@ const HostelImages = () => {
     setCurrentIndex((prevIndex) => 
       prevIndex === hostel.images.length - 1 ? 0 : prevIndex + 1
     );
+    setImageLoading(true);
+    setImageError(false);
+    setRetryCount(0);
   };
 
   const handleGoToIndex = (index: number) => {
     setCurrentIndex(index);
+    setImageLoading(true);
+    setImageError(false);
+    setRetryCount(0);
   };
 
   const toggleFullscreen = (e: React.MouseEvent) => {
@@ -100,6 +111,34 @@ const HostelImages = () => {
     }
     touchStartX.current = null;
     touchEndX.current = null;
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    if (retryCount < 2) {
+      // Retry loading the image
+      setRetryCount(prev => prev + 1);
+      setImageLoading(true);
+      // Force a re-render by updating the src with a timestamp
+      const img = document.querySelector(`img[src*="${hostel?.images[currentIndex]}"]`) as HTMLImageElement;
+      if (img) {
+        const separator = hostel?.images[currentIndex].includes('?') ? '&' : '?';
+        img.src = `${hostel?.images[currentIndex]}${separator}t=${Date.now()}`;
+      }
+    } else {
+      setImageError(true);
+      setImageLoading(false);
+    }
+  };
+
+  const handleRetryImage = () => {
+    setRetryCount(0);
+    setImageError(false);
+    setImageLoading(true);
   };
 
   useEffect(() => {
@@ -157,14 +196,32 @@ const HostelImages = () => {
         {fullscreen ? (
           <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
             <div className="relative w-full h-full flex items-center justify-center">
-              <OptimizedImage 
-                src={hostel.images[currentIndex]} 
-                alt={`${hostel.name} ${currentIndex + 1}`}
-                className="max-w-full max-h-full object-contain"
-                width={1200}
-                height={900}
-                quality={80}
-              />
+              {imageLoading && (
+                <Skeleton className="absolute inset-0 bg-gray-800" />
+              )}
+              {imageError ? (
+                <div className="flex flex-col items-center justify-center text-white">
+                  <XCircle className="h-8 w-8 mb-2" />
+                  <span className="mb-4">Image not available</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRetryImage}
+                    className="text-white border-white hover:bg-white hover:text-black"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              ) : (
+                <img 
+                  src={hostel.images[currentIndex]} 
+                  alt={`${hostel.name} ${currentIndex + 1}`}
+                  className={`max-w-full max-h-full object-contain ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
+                />
+              )}
               <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
                 {hostel.name} - {hostel.type}
               </div>
@@ -187,8 +244,23 @@ const HostelImages = () => {
               >
                 <ArrowRight className="h-4 w-4 sm:h-8 sm:w-8" />
               </button>
-              <div className="absolute bottom-4 sm:bottom-8 left-0 right-0 text-center text-white z-10 text-sm sm:text-lg">
-                {currentIndex + 1} / {hostel.images.length}
+              <div className="absolute bottom-4 sm:bottom-8 left-0 right-0 flex flex-col items-center z-10">
+                {/* Dots indicator */}
+                <div className="flex justify-center gap-2 mb-2">
+                  {hostel.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleGoToIndex(idx)}
+                      className={`w-3 h-3 rounded-full border-2 transition-all duration-200 focus:outline-none
+                        ${currentIndex === idx ? 'bg-[#FF5500] border-[#FF5500] scale-125 shadow-lg' : 'bg-white border-gray-300 opacity-60 hover:opacity-100'}`}
+                      aria-label={`Go to image ${idx + 1}`}
+                      style={{ outline: 'none' }}
+                    />
+                  ))}
+                </div>
+                <div className="text-xs sm:text-base text-white bg-black/60 px-2 py-1 rounded">
+                  {currentIndex + 1} / {hostel.images.length}
+                </div>
               </div>
             </div>
           </div>
@@ -214,14 +286,32 @@ const HostelImages = () => {
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                   >
-                    <OptimizedImage 
-                      src={hostel.images[currentIndex]} 
-                      alt={`${hostel.name} ${currentIndex + 1}`}
-                      className="w-full h-full object-contain bg-gray-100"
-                      width={800}
-                      height={600}
-                      quality={70}
-                    />
+                    {imageLoading && (
+                      <Skeleton className="absolute inset-0 bg-gray-100" />
+                    )}
+                    {imageError ? (
+                      <div className="flex flex-col items-center justify-center h-full bg-gray-100">
+                        <XCircle className="h-8 w-8 mb-2 text-gray-400" />
+                        <span className="text-gray-400 mb-4">Image not available</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRetryImage}
+                          className="text-gray-600 border-gray-400 hover:bg-gray-400 hover:text-white"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Retry
+                        </Button>
+                      </div>
+                    ) : (
+                      <img 
+                        src={hostel.images[currentIndex]} 
+                        alt={`${hostel.name} ${currentIndex + 1}`}
+                        className={`w-full h-full object-contain bg-gray-100 ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+                        onLoad={handleImageLoad}
+                        onError={handleImageError}
+                      />
+                    )}
                     <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black/60 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-md text-sm sm:text-lg font-semibold z-20">
                       {hostel.name} - {hostel.type}
                     </div>
@@ -253,30 +343,35 @@ const HostelImages = () => {
 
                 {/* Thumbnails Grid */}
                 <div className="bg-white rounded-lg shadow-lg p-2 sm:p-6">
-                  <div className="text-center text-gray-600 mb-1 sm:mb-4 text-xs sm:text-lg">
-                    {currentIndex + 1} / {hostel.images.length}
-                  </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 overflow-x-auto pb-2">
+                  <div className="flex flex-wrap justify-center gap-2 mb-2">
                     {hostel.images.map((image, index) => (
                       <div
                         key={index}
                         onClick={() => handleGoToIndex(index)}
-                        className={`cursor-pointer relative ${
-                          currentIndex === index
-                            ? 'outline outline-2 outline-offset-2 outline-[#FF5500]'
-                            : ''
-                        }`}
+                        className={`cursor-pointer relative border-2 rounded-md transition-all duration-200
+                          ${currentIndex === index ? 'border-[#FF5500] scale-110 shadow-lg z-10' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                        style={{ width: 56, height: 56, overflow: 'hidden', background: '#f3f3f3' }}
                       >
-                        <OptimizedImage
+                        <img
                           src={image}
                           alt={`${hostel.name} thumbnail ${index + 1}`}
-                          className="w-full aspect-square object-cover rounded-md"
-                          width={120}
-                          height={120}
-                          quality={40}
+                          className="w-full h-full object-cover rounded-md"
+                          loading="lazy"
+                          style={{ display: 'block', width: '100%', height: '100%' }}
+                          onError={(e) => {
+                            // Fallback for thumbnail errors
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
                         />
+                        {currentIndex === index && (
+                          <div className="absolute inset-0 border-2 border-[#FF5500] rounded-md pointer-events-none"></div>
+                        )}
                       </div>
                     ))}
+                  </div>
+                  <div className="text-center text-gray-600 mb-1 sm:mb-4 text-xs sm:text-lg">
+                    {currentIndex + 1} / {hostel.images.length}
                   </div>
                 </div>
               </div>

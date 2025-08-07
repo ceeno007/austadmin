@@ -5,8 +5,10 @@ import Footer from './Footer';
 const ConditionalFooter = () => {
   const location = useLocation();
   
-  // Don't show footer on document upload page
-  if (location.pathname === '/document-upload') {
+  // Don't show footer on document upload page, terms, or privacy pages
+  if (location.pathname === '/document-upload' || 
+      location.pathname === '/terms' || 
+      location.pathname === '/privacy') {
     return null;
   }
   

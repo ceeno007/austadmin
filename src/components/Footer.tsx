@@ -246,7 +246,7 @@ const Footer = () => {
               &copy; {new Date().getFullYear()} African University of Science and
               Technology, Abuja. All rights reserved.
             </p>
-            <div className="flex space-x-6">
+            <div className="flex space-x-6 items-center">
               <Link to="/privacy" className="text-gray-500 hover:text-[#FF5500] transition-colors text-sm" onClick={scrollToTop}>
                 Privacy Policy
               </Link>
@@ -258,25 +258,22 @@ const Footer = () => {
               </Link>
             </div>
           </div>
+          {/* Subtle credit: hidden on mobile, inline on desktop */}
+          <div>
+            {/* Mobile: hidden */}
+            {/* Desktop: inline in footer */}
+            <div className="hidden sm:flex w-full justify-center mt-2 px-2">
+              <span className="text-xs text-gray-500 opacity-50 select-none text-center leading-tight py-1" style={{maxWidth: '95vw', wordBreak: 'break-word'}}>
+                Made with <span className="text-red-400">♥</span> by <a href="https://austinspire.com" target="_blank" rel="noopener noreferrer" className="hover:underline text-[#FF5500] opacity-80">AUSTInspire</a>
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Dismissible badge */}
-        {showBadge && (
-          <div className="fixed bottom-4 right-4 z-50 animate-fade-in max-w-[90%] sm:max-w-md mx-auto" style={{ animationDelay: '20s' }}>
-            <div className="bg-gray-800/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-700/50 p-4 flex items-center space-x-3 mx-4">
-              <span className="text-sm text-white">
-                Made with ❤️ by <a href="https://austinspire.com" target="_blank" rel="noopener noreferrer" className="text-[#FF5500] hover:underline font-medium">AUSTInspire</a>
-              </span>
-              <button
-                onClick={handleDismissBadge}
-                className="text-white/70 hover:text-white transition-colors flex-shrink-0 hover:bg-gray-700/50 p-1 rounded-full"
-                aria-label="Dismiss badge"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        {/* {showBadge && (
+          ...badge code...
+        )} */}
       </div>
     </footer>
   );
