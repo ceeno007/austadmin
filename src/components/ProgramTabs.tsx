@@ -174,10 +174,10 @@ const ProgramTabs = () => {
 
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
           <div className="flex justify-center mb-8">
-            <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-muted">
-              <TabsTrigger value="undergraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Undergraduate</TabsTrigger>
-              <TabsTrigger value="postgraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Postgraduate</TabsTrigger>
-              <TabsTrigger value="foundation" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">Foundation and Remedial Studies</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full max-w-md rounded-full p-1 bg-gray-200 dark:bg-gray-700">
+              <TabsTrigger value="undergraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white dark:text-gray-200">Undergraduate</TabsTrigger>
+              <TabsTrigger value="postgraduate" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white dark:text-gray-200">Postgraduate</TabsTrigger>
+              <TabsTrigger value="foundation" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white dark:text-gray-200">Foundation and Remedial Studies</TabsTrigger>
             </TabsList>
           </div>
 

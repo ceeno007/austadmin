@@ -24,6 +24,19 @@ const HeroSection = () => {
         </video>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/60" />
+        {/* Pause background video control (visually subtle) */}
+        <button
+          type="button"
+          aria-label="Pause background video"
+          className="absolute bottom-4 right-4 z-10 text-xs px-2 py-1 rounded bg-black/40 text-white hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white"
+          onClick={() => {
+            const vid = document.querySelector('section video') as HTMLVideoElement | null;
+            if (!vid) return;
+            if (vid.paused) { vid.play(); } else { vid.pause(); }
+          }}
+        >
+          Pause
+        </button>
       </div>
 
       {/* Content */}

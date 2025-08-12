@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ExternalLink, Accessibility, Moon, SunMedium, Contrast } from "lucide-react";
+import { Menu, X, ExternalLink, Accessibility, Moon, SunMedium, Contrast, Check } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import austLogo from "@/assets/images/austlogo.webp";
 import { cn } from "@/lib/utils";
@@ -325,9 +325,9 @@ const Navbar = () => {
             <div>
               <h3 className="font-medium mb-2">Text size</h3>
               <div className="flex items-center gap-2">
-                <Button variant={scale === 0.875 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(0.875)}>Small</Button>
-                <Button variant={scale === 1 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1)}>Default</Button>
-                <Button variant={scale === 1.25 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1.25)}>Large</Button>
+                <Button aria-pressed={scale === 0.875} variant={scale === 0.875 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(0.875)} className="flex items-center gap-2">{scale === 0.875 && <Check className="h-4 w-4"/>} Small</Button>
+                <Button aria-pressed={scale === 1} variant={scale === 1 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1)} className="flex items-center gap-2">{scale === 1 && <Check className="h-4 w-4"/>} Default</Button>
+                <Button aria-pressed={scale === 1.25} variant={scale === 1.25 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1.25)} className="flex items-center gap-2">{scale === 1.25 && <Check className="h-4 w-4"/>} Large</Button>
               </div>
             </div>
 
@@ -335,8 +335,8 @@ const Navbar = () => {
             <div>
               <h3 className="font-medium mb-2">Theme</h3>
               <div className="flex items-center gap-2">
-                <Button variant={themeMode === 'light' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('light')} className="flex items-center gap-2"><SunMedium className="h-4 w-4"/> Light</Button>
-                <Button variant={themeMode === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('dark')} className="flex items-center gap-2"><Moon className="h-4 w-4"/> Dark</Button>
+                <Button aria-pressed={themeMode === 'light'} variant={themeMode === 'light' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('light')} className="flex items-center gap-2">{themeMode === 'light' && <Check className="h-4 w-4"/>}<SunMedium className="h-4 w-4"/> Light</Button>
+                <Button aria-pressed={themeMode === 'dark'} variant={themeMode === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('dark')} className="flex items-center gap-2">{themeMode === 'dark' && <Check className="h-4 w-4"/>}<Moon className="h-4 w-4"/> Dark</Button>
               </div>
             </div>
 
@@ -344,8 +344,8 @@ const Navbar = () => {
             <div>
               <h3 className="font-medium mb-2">Contrast</h3>
               <div className="flex items-center gap-2">
-                <Button variant={!highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(false)} className="flex items-center gap-2"><Contrast className="h-4 w-4"/> Normal</Button>
-                <Button variant={highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(true)} className="flex items-center gap-2"><Contrast className="h-4 w-4"/> High</Button>
+                <Button aria-pressed={!highContrast} variant={!highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(false)} className="flex items-center gap-2">{!highContrast && <Check className="h-4 w-4"/>}<Contrast className="h-4 w-4"/> Normal</Button>
+                <Button aria-pressed={highContrast} variant={highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(true)} className="flex items-center gap-2">{highContrast && <Check className="h-4 w-4"/>}<Contrast className="h-4 w-4"/> High</Button>
               </div>
             </div>
 
@@ -353,11 +353,11 @@ const Navbar = () => {
             <div>
               <h3 className="font-medium mb-2">Color vision</h3>
               <div className="flex flex-wrap items-center gap-2">
-                <Button variant={colorFilter === 'none' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('none')}>Normal</Button>
-                <Button variant={colorFilter === 'deuteranopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('deuteranopia')}>Deuteranopia</Button>
-                <Button variant={colorFilter === 'protanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('protanopia')}>Protanopia</Button>
-                <Button variant={colorFilter === 'tritanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('tritanopia')}>Tritanopia</Button>
-                <Button variant={colorFilter === 'grayscale' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('grayscale')}>Grayscale</Button>
+                <Button aria-pressed={colorFilter === 'none'} variant={colorFilter === 'none' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('none')} className="flex items-center gap-2">{colorFilter === 'none' && <Check className="h-4 w-4"/>} Normal</Button>
+                <Button aria-pressed={colorFilter === 'deuteranopia'} variant={colorFilter === 'deuteranopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('deuteranopia')} className="flex items-center gap-2">{colorFilter === 'deuteranopia' && <Check className="h-4 w-4"/>} Deuteranopia</Button>
+                <Button aria-pressed={colorFilter === 'protanopia'} variant={colorFilter === 'protanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('protanopia')} className="flex items-center gap-2">{colorFilter === 'protanopia' && <Check className="h-4 w-4"/>} Protanopia</Button>
+                <Button aria-pressed={colorFilter === 'tritanopia'} variant={colorFilter === 'tritanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('tritanopia')} className="flex items-center gap-2">{colorFilter === 'tritanopia' && <Check className="h-4 w-4"/>} Tritanopia</Button>
+                <Button aria-pressed={colorFilter === 'grayscale'} variant={colorFilter === 'grayscale' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('grayscale')} className="flex items-center gap-2">{colorFilter === 'grayscale' && <Check className="h-4 w-4"/>} Grayscale</Button>
               </div>
             </div>
 
