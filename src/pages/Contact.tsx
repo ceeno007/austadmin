@@ -77,12 +77,14 @@ const Contact = () => {
               <div className="bg-white p-6 md:p-8 rounded-xl border-2 border-[#FF5500]">
                 <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
                 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="contact-form-title">
+                  <h2 id="contact-form-title" className="sr-only">Contact form</h2>
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium mb-1">Full Name</label>
+                    <label htmlFor="name" className="block text-base font-medium mb-1">Full Name</label>
                     <Input 
                       id="name" 
                       placeholder="Your full name" 
+                      aria-required="true"
                       required 
                       value={formData.name}
                       onChange={handleChange}
@@ -90,11 +92,12 @@ const Contact = () => {
                   </div>
                   
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-1">Email Address</label>
+                    <label htmlFor="email" className="block text-base font-medium mb-1">Email Address</label>
                     <Input 
                       id="email" 
                       type="email" 
                       placeholder="Your email address" 
+                      aria-required="true"
                       required 
                       value={formData.email}
                       onChange={handleChange}
@@ -102,10 +105,11 @@ const Contact = () => {
                   </div>
                   
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium mb-1">Subject</label>
+                    <label htmlFor="subject" className="block text-base font-medium mb-1">Subject</label>
                     <Input 
                       id="subject" 
                       placeholder="Message subject" 
+                      aria-required="true"
                       required 
                       value={formData.subject}
                       onChange={handleChange}
@@ -113,11 +117,12 @@ const Contact = () => {
                   </div>
                   
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-1">Message</label>
+                    <label htmlFor="message" className="block text-base font-medium mb-1">Message</label>
                     <Textarea 
                       id="message" 
                       placeholder="Your message" 
                       className="min-h-32" 
+                      aria-required="true"
                       required 
                       value={formData.message}
                       onChange={handleChange}
@@ -152,8 +157,8 @@ const Contact = () => {
                       <MapPin className="h-5 w-5 text-[#FF5500]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold mb-2">Our Location</h3>
-                      <p className="text-gray-600">
+                      <h3 className="text-xl font-bold mb-2">Our Location</h3>
+                      <p className="text-gray-700 text-base leading-relaxed">
                         African University of Science and Technology<br />
                         Km 10 Airport Road, Abuja<br />
                         Federal Capital Territory, Nigeria
@@ -168,12 +173,12 @@ const Contact = () => {
                       <Phone className="h-5 w-5 text-[#FF7A00]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold mb-2">Phone Contact</h3>
-                      <p className="text-gray-600">
-                        <a href="tel:+23491234567" className="hover:text-[#FF7A00] transition-colors">
+                      <h3 className="text-xl font-bold mb-2">Phone Contact</h3>
+                      <p className="text-gray-700 text-base leading-relaxed">
+                        <a href="tel:+23491234567" className="hover:text-[#FF7A00] transition-colors underline">
                           Admissions Office: +234 (0) 9 123 4567
                         </a><br />
-                        <a href="tel:+23499876543" className="hover:text-[#FF7A00] transition-colors">
+                        <a href="tel:+23499876543" className="hover:text-[#FF7A00] transition-colors underline">
                           Student Services: +234 (0) 9 987 6543
                         </a>
                       </p>
@@ -187,12 +192,12 @@ const Contact = () => {
                       <Mail className="h-5 w-5 text-[#FFA500]" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold mb-2">Email Addresses</h3>
-                      <p className="text-gray-600">
-                        <a href="mailto:admissions@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
+                      <h3 className="text-xl font-bold mb-2">Email Addresses</h3>
+                      <p className="text-gray-700 text-base leading-relaxed">
+                        <a href="mailto:admissions@aust.edu.ng" className="hover:text-[#FFA500] transition-colors underline">
                           Admissions: admissions@aust.edu.ng
                         </a><br />
-                        <a href="mailto:academics@aust.edu.ng" className="hover:text-[#FFA500] transition-colors">
+                        <a href="mailto:academics@aust.edu.ng" className="hover:text-[#FFA500] transition-colors underline">
                           Academic Affairs: academics@aust.edu.ng
                         </a><br />
                       </p>

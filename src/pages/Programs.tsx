@@ -264,10 +264,10 @@ const Programs: React.FC = () => {
                 <button
                   key={key}
                   onClick={() => setActiveTab(value)}
-                  className={`px-4 py-2 rounded text-sm sm:text-base ${
+                  className={`px-4 py-2 rounded text-sm sm:text-base transition-colors ${
                     activeTab === value
                       ? "bg-[#FF5500] text-white"
-                      : "bg-gray-200 text-gray-700"
+                      : "bg-gray-200 text-gray-800 dark:text-gray-200"
                   }`}
                 >
                   {key === 'FOUNDATION' ? (

@@ -11,13 +11,14 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
       {/* Video Background */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full" aria-hidden="true">
         <video
           autoPlay
           loop
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
+          poster="https://ik.imagekit.io/nsq6yvxg1/Upload/images/campus.jpg"
         >
           <source src="https://ik.imagekit.io/nsq6yvxg1/Upload/Timeline%201.mov/ik-video.mp4?updatedAt=1748013435253" type="video/mp4" />
         </video>

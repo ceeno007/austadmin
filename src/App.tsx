@@ -62,6 +62,7 @@ const queryClient = new QueryClient({
 // App Layout component that uses the location hook
 const AppLayout: React.FC = () => {
   const location = useLocation();
+  const [routeAnnouncement, setRouteAnnouncement] = React.useState("");
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname);
   const isPaymentPage = ['/payment', '/payment-success', '/foundation-success'].includes(location.pathname);
   const isReferenceStatus = location.pathname === '/reference-status';
@@ -80,10 +81,24 @@ const AppLayout: React.FC = () => {
     }
   }, []);
 
+  // Announce route changes for screen readers and move focus to main
+  useEffect(() => {
+    const main = document.getElementById('main-content');
+    if (main) {
+      // Move focus without scrolling the page
+      (main as HTMLElement).focus({ preventScroll: true } as any);
+    }
+    const title = document.title || location.pathname.replace('/', '') || 'Home';
+    setRouteAnnouncement(`Navigated to ${title}`);
+  }, [location.pathname]);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      {/* Removed visible skip links per request */}
+      {/* Route change announcer for screen readers */}
+      <div id="route-announcer" aria-live="polite" aria-atomic="true" className="sr-only">{routeAnnouncement}</div>
       {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalNavbar />}
-      <main className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus && !isApplicationSuccess ? 'pt-[72px]' : ''} bg-white`}>
+      <main id="main-content" role="main" tabIndex={-1} className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus && !isApplicationSuccess ? 'pt-[72px]' : ''} bg-white`}>
         <TransitionGroup component={null}>
           <CSSTransition key={location.pathname} classNames="page-fade" timeout={250}>
             <div className="page-fade-wrapper">

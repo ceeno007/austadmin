@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ExternalLink } from "lucide-react";
+import { Menu, X, ExternalLink, Accessibility, Moon, SunMedium, Contrast } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import austLogo from "@/assets/images/austlogo.webp";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,11 @@ const preloaders: Record<string, () => void> = {
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isA11yOpen, setIsA11yOpen] = useState(false);
+  const [scale, setScale] = useState<number>(1);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light');
+  const [highContrast, setHighContrast] = useState<boolean>(false);
+  const [colorFilter, setColorFilter] = useState<'none' | 'deuteranopia' | 'protanopia' | 'tritanopia' | 'grayscale'>('none');
   const [showStoreDialog, setShowStoreDialog] = useState(false);
   const location = useLocation();
 
@@ -60,6 +65,62 @@ const Navbar = () => {
     setIsMenuOpen(false);
   }, [scrollToTop]);
 
+  // Accessibility preferences helpers
+  const applyScale = (scale: number) => {
+    const html = document.documentElement;
+    html.style.setProperty('--a11y-scale', String(scale));
+    localStorage.setItem('a11y-scale', String(scale));
+    setScale(scale);
+  };
+
+  const applyTheme = (mode: 'light' | 'dark') => {
+    const html = document.documentElement;
+    html.classList.toggle('theme-dark', mode === 'dark');
+    localStorage.setItem('a11y-theme', mode);
+    setThemeMode(mode);
+  };
+
+  const applyContrast = (enabled: boolean) => {
+    const html = document.documentElement;
+    html.classList.toggle('a11y-high-contrast', enabled);
+    localStorage.setItem('a11y-contrast', enabled ? 'high' : 'normal');
+    setHighContrast(enabled);
+  };
+
+  const FILTERS: Record<string, string> = {
+    none: 'none',
+    deuteranopia: 'grayscale(20%) contrast(1.1) saturate(0.8)',
+    protanopia: 'grayscale(20%) contrast(1.15) saturate(0.75) hue-rotate(-10deg)',
+    tritanopia: 'grayscale(20%) contrast(1.15) saturate(0.75) hue-rotate(35deg)',
+    grayscale: 'grayscale(100%) contrast(1.1)'
+  };
+
+  const applyFilter = (mode: keyof typeof FILTERS) => {
+    const html = document.documentElement as HTMLElement;
+    html.style.setProperty('--a11y-filter', FILTERS[mode]);
+    localStorage.setItem('a11y-filter', mode);
+    setColorFilter(mode);
+  };
+
+  const resetA11y = () => {
+    applyScale(1);
+    applyTheme('light');
+    applyContrast(false);
+    applyFilter('none');
+  };
+
+  React.useEffect(() => {
+    // load saved preferences
+    const savedScale = parseFloat(localStorage.getItem('a11y-scale') || '1');
+    const theme = (localStorage.getItem('a11y-theme') as 'light' | 'dark') || 'light';
+    const contrast = localStorage.getItem('a11y-contrast') === 'high';
+    const filter = (localStorage.getItem('a11y-filter') as keyof typeof FILTERS) || 'none';
+    applyScale(savedScale);
+    applyTheme(theme);
+    applyContrast(contrast);
+    applyFilter(filter);
+  }, []);
+
   const navLinks = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
@@ -76,7 +137,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm will-change-transform">
+      <nav id="site-navigation" className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm will-change-transform" role="navigation" aria-label="Primary">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
@@ -128,6 +189,15 @@ const Navbar = () => {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
               <div className="flex items-center gap-4">
+                {/* Accessibility settings trigger */}
+                <button
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5500]"
+                  aria-label="Open accessibility settings"
+                  onClick={() => setIsA11yOpen(true)}
+                  title="Accessibility settings"
+                >
+                  <Accessibility className="h-5 w-5" />
+                </button>
                 <Button asChild variant="outline" size="sm">
                   <Link to="/login">Login</Link>
                 </Button>
@@ -140,9 +210,11 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <div className="lg:hidden flex items-center space-x-4">
               <button 
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5500]"
                 onClick={toggleMenu}
                 aria-label="Toggle menu"
+                aria-expanded={isMenuOpen}
+                aria-controls="primary-navigation"
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -165,8 +237,15 @@ const Navbar = () => {
           />
           
           {/* Menu Content */}
-          <div className="fixed top-[72px] left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg">
-            <div className="container mx-auto px-4 py-6 space-y-4">
+          <div id="primary-navigation" className="fixed top-[72px] left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+              <div className="container mx-auto px-4 py-6 space-y-4">
+              <button
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF5500]"
+                onClick={() => setIsA11yOpen(true)}
+                aria-label="Open accessibility settings"
+              >
+                <Accessibility className="h-5 w-5" /> Accessibility settings
+              </button>
               {navLinks.map((link) => (
                 link.external ? (
                   <a 
@@ -229,6 +308,61 @@ const Navbar = () => {
                 Continue to Store
                 <ExternalLink className="h-4 w-4" />
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Accessibility Settings Dialog */}
+      <Dialog open={isA11yOpen} onOpenChange={setIsA11yOpen}>
+        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-lg rounded-2xl border-gray-200/50 shadow-xl">
+          <DialogHeader>
+            <DialogTitle>Accessibility</DialogTitle>
+            <DialogDescription>Adjust display settings to suit your needs.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Text size */}
+            <div>
+              <h3 className="font-medium mb-2">Text size</h3>
+              <div className="flex items-center gap-2">
+                <Button variant={scale === 0.875 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(0.875)}>Small</Button>
+                <Button variant={scale === 1 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1)}>Default</Button>
+                <Button variant={scale === 1.25 ? 'default' : 'outline'} size="sm" onClick={() => applyScale(1.25)}>Large</Button>
+              </div>
+            </div>
+
+            {/* Theme */}
+            <div>
+              <h3 className="font-medium mb-2">Theme</h3>
+              <div className="flex items-center gap-2">
+                <Button variant={themeMode === 'light' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('light')} className="flex items-center gap-2"><SunMedium className="h-4 w-4"/> Light</Button>
+                <Button variant={themeMode === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => applyTheme('dark')} className="flex items-center gap-2"><Moon className="h-4 w-4"/> Dark</Button>
+              </div>
+            </div>
+
+            {/* Contrast */}
+            <div>
+              <h3 className="font-medium mb-2">Contrast</h3>
+              <div className="flex items-center gap-2">
+                <Button variant={!highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(false)} className="flex items-center gap-2"><Contrast className="h-4 w-4"/> Normal</Button>
+                <Button variant={highContrast ? 'default' : 'outline'} size="sm" onClick={() => applyContrast(true)} className="flex items-center gap-2"><Contrast className="h-4 w-4"/> High</Button>
+              </div>
+            </div>
+
+            {/* Color vision */}
+            <div>
+              <h3 className="font-medium mb-2">Color vision</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant={colorFilter === 'none' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('none')}>Normal</Button>
+                <Button variant={colorFilter === 'deuteranopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('deuteranopia')}>Deuteranopia</Button>
+                <Button variant={colorFilter === 'protanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('protanopia')}>Protanopia</Button>
+                <Button variant={colorFilter === 'tritanopia' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('tritanopia')}>Tritanopia</Button>
+                <Button variant={colorFilter === 'grayscale' ? 'default' : 'outline'} size="sm" onClick={() => applyFilter('grayscale')}>Grayscale</Button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button variant="secondary" onClick={resetA11y}>Reset all</Button>
             </div>
           </div>
         </DialogContent>
