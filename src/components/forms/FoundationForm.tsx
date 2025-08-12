@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search } from "lucide-react";
+import MediaPreviewDialog from "@/components/MediaPreviewDialog";
 import SquadPaymentModal from "@/components/SquadPaymentModal";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -208,6 +209,7 @@ const FileUploadField = ({
           : ""
     : "";
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium text-gray-700">{label}</Label>
@@ -1343,21 +1345,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                >
                  {foundationRemedialData.passportPhoto ? (
                    <div className="relative w-full h-full group">
-                     {typeof foundationRemedialData.passportPhoto === 'string' && foundationRemedialData.passportPhoto.startsWith('http') ? (
-                       <a
-                         href={foundationRemedialData.passportPhoto}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="block w-full h-full"
-                         onClick={(e) => e.stopPropagation()}
-                       >
-                         <img
-                           src={getPassportPhotoUrl()}
-                           alt="Passport"
-                           className="w-full h-full object-cover rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
-                         />
-                       </a>
-                     ) : (
+                      {typeof foundationRemedialData.passportPhoto === 'string' && foundationRemedialData.passportPhoto.startsWith('http') ? (
+                        <button
+                          type="button"
+                          className="block w-full h-full"
+                          onClick={(e) => { e.stopPropagation(); setPreviewUrl(getPassportPhotoUrl()); }}
+                        >
+                          <img
+                            src={getPassportPhotoUrl()}
+                            alt="Passport"
+                            className="w-full h-full object-cover rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
+                          />
+                        </button>
+                      ) : (
                        <img
                          src={getPassportPhotoUrl()}
                          alt="Passport"
@@ -1376,7 +1376,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                        >
                          <X className="h-4 w-4" />
                        </button>
-                     </div>
+    </div>
+    {previewUrl && (
+      <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title="Preview" />
+    )}
                    </div>
                  ) : (
                    <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group-hover:border-amber-400 group-hover:bg-amber-50">

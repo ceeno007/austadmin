@@ -80,7 +80,7 @@ const AccessibilityFab: React.FC = () => {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-lg rounded-2xl border-gray-200/50 shadow-xl will-change-transform">
+        <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[90%] sm:w-full sm:max-w-lg rounded-2xl border-gray-200/50 shadow-xl will-change-transform" aria-label="Accessibility settings">
           <DialogHeader>
             <DialogTitle>Accessibility</DialogTitle>
             <DialogDescription>Adjust display settings to suit your needs.</DialogDescription>
