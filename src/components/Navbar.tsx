@@ -75,7 +75,9 @@ const Navbar = () => {
 
   const applyTheme = (mode: 'light' | 'dark') => {
     const html = document.documentElement;
-    html.classList.toggle('theme-dark', mode === 'dark');
+    const isDark = mode === 'dark';
+    html.classList.toggle('theme-dark', isDark);
+    html.classList.toggle('dark', isDark); // Enable Tailwind dark: variants globally
     localStorage.setItem('a11y-theme', mode);
     setThemeMode(mode);
   };

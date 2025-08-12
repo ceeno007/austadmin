@@ -1552,23 +1552,49 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   }, [applicationData, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-4 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+      {/* Accessibility quick controls for forms */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-sm text-gray-600 dark:text-gray-300">Make this form easier to read</div>
+        <div className="flex items-center gap-2">
+          <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Decrease text size" onClick={() => {
+            const html = document.documentElement; const current = parseFloat(getComputedStyle(html).getPropertyValue('--a11y-scale') || '1'); html.style.setProperty('--a11y-scale', String(Math.max(0.875, Math.min(1.5, current - 0.125))));
+          }}>A-</button>
+          <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Reset text size" onClick={() => {
+            document.documentElement.style.setProperty('--a11y-scale', '1');
+          }}>Reset</button>
+          <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Increase text size" onClick={() => {
+            const html = document.documentElement; const current = parseFloat(getComputedStyle(html).getPropertyValue('--a11y-scale') || '1'); html.style.setProperty('--a11y-scale', String(Math.max(0.875, Math.min(1.5, current + 0.125))));
+          }}>A+</button>
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+        {/* Gen-Z style helper banner */}
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900/60">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-[#FF5500]/10 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4m0 4h.01M21 12c0 4.971-4.029 9-9 9s-9-4.029-9-9 4.029-9 9-9 9 4.029 9 9z" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <div className="text-sm sm:text-base text-gray-700 dark:text-gray-200">
+              Quick tip: Tackle one section at a time. You can save and finish later. You got this!
+            </div>
+          </div>
+        </div>
         {/* JAMB Notice */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-orange-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <AlertCircle className="h-5 w-5 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Important JAMB Notice</h3>
-                  <p className="text-sm sm:text-base text-gray-600">Requirements for undergraduate applicants</p>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Important JAMB Notice</h3>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Requirements for undergraduate applicants</p>
                 </div>
               </div>
               
           <div className="space-y-4">
-                <p className="text-gray-700">
+                <p className="text-gray-700 dark:text-gray-200">
               The African University of Science and Technology (AUST) requires all undergraduate applicants to:
             </p>
                 <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
@@ -1596,14 +1622,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
 
 {/* Personal Details Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <User className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Personal Details</h3>
-                  <p className="text-sm sm:text-base text-gray-600">Enter your personal information</p>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Personal Details</h3>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Enter your personal information</p>
                 </div>
               </div>
               
@@ -1964,14 +1990,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
 </div>
 
       {/* Academic Qualifications Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
                   <Award className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Academic Qualifications</h3>
-                  <p className="text-gray-600">Enter your examination results</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Academic Qualifications</h3>
+                  <p className="text-gray-600 dark:text-gray-300">Enter your examination results</p>
                 </div>
               </div>
               
@@ -1979,13 +2005,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           {/* O'Level Results */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-lg font-semibold text-gray-900">O'Level Results</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white">O'Level Results</h4>
                     <span className="text-red-500 text-xs">*</span>
                   </div>
-            <p className="text-sm text-gray-600">Please select a maximum of two exam results for submission</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Please select a maximum of two exam results for submission</p>
             
             {/* WAEC Results */}
-                  <div className="space-y-6 p-6 border border-gray-200 rounded-xl bg-gray-50">
+                  <div className="space-y-6 p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                     <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -1994,7 +2020,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   onChange={() => handleExamSelection('waec')}
                         className="h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                 />
-                      <Label htmlFor="waec" className="text-base font-medium text-gray-900">WAEC Results</Label>
+                    <Label htmlFor="waec" className="text-base font-medium text-gray-900 dark:text-white">WAEC Results</Label>
               </div>
               
               {selectedExams.includes('waec') && (
@@ -2062,7 +2088,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                     {undergraduateData.academicQualifications.waecResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -2094,7 +2120,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-sm font-medium text-gray-700">Grade</Label>
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Grade</Label>
                           <Select
                             value={subject.grade}
                             onValueChange={(value) => {
@@ -2265,7 +2291,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                     {undergraduateData.academicQualifications.necoResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-3">
-                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -2297,7 +2323,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                           </Select>
                         </div>
                         <div className="space-y-3">
-                          <Label className="text-sm font-medium text-gray-700">Grade</Label>
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Grade</Label>
                           <Select
                             value={subject.grade}
                             onValueChange={(value) => {
@@ -2463,7 +2489,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                     {undergraduateData.academicQualifications.nabtebResults.subjects.map((subject, index) => (
                       <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-3">
-                          <Label className="text-sm font-medium text-gray-700">Subject</Label>
+                          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Subject</Label>
                           <Select
                             value={subject.subject}
                             onValueChange={(value) => {
@@ -2495,7 +2521,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                                                       </Select>
                           </div>
                           <div className="space-y-3">
-                            <Label className="text-sm font-medium text-gray-700">Grade</Label>
+                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Grade</Label>
                             <Select
                               value={subject.grade}
                               onValueChange={(value) => {
@@ -2702,9 +2728,9 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
 
       {/* Declaration Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
                   <FileCheck className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
@@ -2712,7 +2738,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                     Declaration
                     <span className="text-red-500 text-xs">*</span>
                   </h3>
-                  <p className="text-gray-600">Confirm your application details</p>
+                  <p className="text-gray-600 dark:text-gray-300">Confirm your application details</p>
                 </div>
               </div>
               
@@ -2747,7 +2773,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required
             />
-            <label htmlFor="declaration" className="text-sm text-gray-900">
+            <label htmlFor="declaration" className="text-sm text-gray-900 dark:text-white">
               I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
             </label>
           </div>
@@ -2755,7 +2781,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
       
             {/* Form Actions */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="text-center lg:text-left">
                   <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>

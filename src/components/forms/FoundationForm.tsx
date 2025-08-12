@@ -1131,7 +1131,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       key={university.name}
       value={university.name}
       onSelect={() => handleUniversitySelect(university.name, choice)}
-      className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100"
+              className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none aria-selected:bg-orange-100 hover:bg-orange-100 focus:bg-orange-100 dark:aria-selected:bg-slate-700 dark:hover:bg-slate-700 dark:focus:bg-slate-700"
     >
       <div className="flex flex-col w-full">
         <span className="truncate text-gray-900" title={university.name}>
@@ -1251,17 +1251,38 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-4 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 py-4 sm:py-8">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+        {/* Quick a11y controls */}
+        <div className="mb-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 px-3 py-2">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600 dark:text-gray-300">Make this form easier to read</div>
+            <div className="flex items-center gap-2">
+              <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Decrease text size" onClick={() => { const html = document.documentElement; const current = parseFloat(getComputedStyle(html).getPropertyValue('--a11y-scale') || '1'); html.style.setProperty('--a11y-scale', String(Math.max(0.875, Math.min(1.5, current - 0.125)))); }}>A-</button>
+              <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Reset text size" onClick={() => { document.documentElement.style.setProperty('--a11y-scale', '1'); }}>Reset</button>
+              <button type="button" className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Increase text size" onClick={() => { const html = document.documentElement; const current = parseFloat(getComputedStyle(html).getPropertyValue('--a11y-scale') || '1'); html.style.setProperty('--a11y-scale', String(Math.max(0.875, Math.min(1.5, current + 0.125)))); }}>A+</button>
+            </div>
+          </div>
+        </div>
 
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900/60">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-[#FF5500]/10 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4m0 4h.01M21 12c0 4.971-4.029 9-9 9s-9-4.029-9-9 4.029-9 9-9 9 4.029 9 9z" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <div className="text-sm sm:text-base text-gray-700 dark:text-gray-200">
+                Pro-tip: One section at a time. Everything is big and easy to tap.
+              </div>
+            </div>
+          </div>
 
 
           {/* Passport Photo Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <Camera className="h-5 w-5 text-amber-600" />
               </div>
               <div className="flex-1">
@@ -1360,7 +1381,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                  ) : (
                    <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200 group-hover:border-amber-400 group-hover:bg-amber-50">
                      <div className="text-center">
-                       <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                          <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600" />
                        </div>
                        <p className="text-xs sm:text-sm text-gray-600 font-medium">Click or drag to upload</p>
@@ -1382,14 +1403,14 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
 
           {/* Personal Details Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-5 w-5 text-amber-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Personal Details</h3>
-                <p className="text-sm sm:text-base text-gray-600">Tell us about yourself</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Personal Details</h3>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Tell us about yourself</p>
               </div>
             </div>
             
@@ -1697,14 +1718,14 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Program Choice Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+      <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center">
             <Award className="h-5 w-5 text-amber-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">Program Choice</h3>
-            <p className="text-gray-600">Select your academic program and session</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Program Choice</h3>
+            <p className="text-gray-600 dark:text-gray-300">Select your academic program and session</p>
           </div>
         </div>
         
@@ -1780,7 +1801,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
             <div className="space-y-4">
               {/* Predefined Combinations */}
               <div className="space-y-3">
-                <Label className="text-sm text-gray-600">Select from predefined combinations:</Label>
+                <Label className="text-sm text-gray-600 dark:text-gray-300">Select from predefined combinations:</Label>
                 <Select
                   value=""
                   onValueChange={(value) => {
@@ -1816,7 +1837,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
               {/* Custom Combination */}
               <div className="space-y-3">
-                <Label className="text-sm text-gray-600">Or enter your own combination:</Label>
+                <Label className="text-sm text-gray-600 dark:text-gray-300">Or enter your own combination:</Label>
                 <div className="flex gap-2">
                   <Input
                     placeholder="Enter subject (e.g., Physics)"
@@ -1856,7 +1877,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
               {/* Selected Subjects Display */}
               {foundationRemedialData.programChoice.subjectCombination && (
-                <div className="mt-4 p-3 bg-white rounded-md">
+               <div className="mt-4 p-3 bg-white dark:bg-gray-900/60 rounded-md">
                   <h4 className="text-sm font-medium mb-2">Selected Subjects:</h4>
                   <div className="flex flex-wrap gap-2">
                     {foundationRemedialData.programChoice.subjectCombination
@@ -2307,7 +2328,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               required
             />
-            <label htmlFor="declaration" className="text-sm text-gray-700">
+            <label htmlFor="declaration" className="text-sm text-gray-700 dark:text-gray-200">
               I hereby declare that all the information provided in this application is true and accurate to the best of my knowledge.
             </label>
           </div>
@@ -2315,14 +2336,14 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Application Fee Payment Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+      <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
-          <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
             <CreditCard className="h-5 w-5 text-amber-600" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Application Fee Payment</h3>
-            <p className="text-sm sm:text-base text-gray-600">Complete your payment to submit your application</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Application Fee Payment</h3>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Complete your payment to submit your application</p>
           </div>
         </div>
         
@@ -2351,11 +2372,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
           {/* Form Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
               <div className="text-center lg:text-left">
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
-                <p className="text-sm sm:text-base text-gray-600">Review your information and proceed to payment</p>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Review your information and proceed to payment</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
                 <Button

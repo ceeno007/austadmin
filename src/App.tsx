@@ -9,6 +9,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import ConditionalNavbar from './components/ConditionalNavbar';
 import ConditionalFooter from './components/ConditionalFooter';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
+import AccessibilityFab from './components/AccessibilityFab';
 import { addResourceHints, registerServiceWorker } from './utils/performance';
 import ProgramDetails from "./pages/ProgramDetails";
 import ApplicationSuccess from '@/pages/ApplicationSuccess';
@@ -199,6 +200,7 @@ const App: React.FC = () => {
                   <AppLayout />
                 </Suspense>
                 <Toaster />
+                <AccessibilityFab />
               </PerformanceOptimizer>
             </AuthProvider>
           </BrowserRouter>

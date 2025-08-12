@@ -384,8 +384,11 @@ const DocumentUpload = () => {
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            background: white !important;
+            background: #ffffff !important;
             z-index: 99999 !important;
+          }
+          .theme-dark .document-upload-container {
+            background: #0f172a !important; /* slate-900 */
           }
           
           /* Hide any other scrollable elements */
@@ -395,32 +398,23 @@ const DocumentUpload = () => {
         `}
       </style>
       <div 
-        className="document-upload-container" 
-        style={{ 
-          backgroundColor: 'white'
-        }}
+        className="document-upload-container bg-white dark:bg-slate-900"
       >
       <main 
-        className="container mx-auto px-4 py-8"
-        style={{
-          backgroundColor: 'white'
-        }}
+        className="container mx-auto px-4 py-8 bg-white dark:bg-slate-900"
       >
         <div 
-          className="max-w-4xl mx-auto"
-          style={{
-            backgroundColor: 'white'
-          }}
+          className="max-w-4xl mx-auto bg-white dark:bg-slate-900"
         >
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {programType === "undergraduate" && "Undergraduate Program"}
                 {programType === "postgraduate" && "Postgraduate Program"}
                 {programType === "phd" && "Ph.D. Program"}
                 {programType === "foundation" && "Foundation and Remedial Studies Program"}
               </h1>
-              <p className="text-gray-600 mt-2">Please upload your required documents below</p>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Please upload your required documents below</p>
             </div>
             <Button
               onClick={handleLogout}
@@ -433,10 +427,7 @@ const DocumentUpload = () => {
           </div>
           
           <div 
-            className="space-y-6"
-            style={{
-              backgroundColor: 'white'
-            }}
+            className="space-y-6 bg-white dark:bg-slate-900"
           >
             {programType === "postgraduate" || programType === "msc" || programType === "phd" ? (
               <PostgraduateForm onPayment={handlePayment} isProcessingPayment={isProcessingPayment} />

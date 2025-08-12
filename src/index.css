@@ -93,14 +93,14 @@
   }
 
   /* Force common utility classes to dark equivalents across the site */
-  .theme-dark .bg-white { background-color: #0f172a !important; }
-  .theme-dark .bg-gray-50 { background-color: #0b1220 !important; }
-  .theme-dark .bg-gray-100 { background-color: #0f172a !important; }
+  .theme-dark .bg-white, .dark .bg-white { background-color: #0f172a !important; }
+  .theme-dark .bg-gray-50, .dark .bg-gray-50 { background-color: #0b1220 !important; }
+  .theme-dark .bg-gray-100, .dark .bg-gray-100 { background-color: #0f172a !important; }
   .theme-dark .bg-gray-200 { background-color: #1f2937 !important; }
   .theme-dark .bg-gray-300 { background-color: #374151 !important; }
-  .theme-dark .bg-white\/80 { background-color: rgba(17,24,39,0.8) !important; }
-  .theme-dark .bg-white\/90 { background-color: rgba(17,24,39,0.9) !important; }
-  .theme-dark .bg-white\/95 { background-color: rgba(17,24,39,0.95) !important; }
+  .theme-dark .bg-white\/80, .dark .bg-white\/80 { background-color: rgba(17,24,39,0.8) !important; }
+  .theme-dark .bg-white\/90, .dark .bg-white\/90 { background-color: rgba(17,24,39,0.9) !important; }
+  .theme-dark .bg-white\/95, .dark .bg-white\/95 { background-color: rgba(17,24,39,0.95) !important; }
   .theme-dark .text-gray-700 { color: #e5e7eb !important; }
   .theme-dark .text-gray-800 { color: #f3f4f6 !important; }
   .theme-dark .text-gray-900 { color: #ffffff !important; }
@@ -126,6 +126,13 @@
   .theme-dark textarea::placeholder { color: #9ca3af !important; }
   .theme-dark .programs-select { background-color: #0b1220 !important; color: #e5e7eb !important; border-color: #374151 !important; }
   .theme-dark .programs-select option { background-color: #111827 !important; color: #e5e7eb !important; }
+
+  /* Ensure all form surfaces darken properly */
+  .theme-dark form .bg-white, .dark form .bg-white { background-color: #0f172a !important; }
+  .theme-dark form .bg-gray-50, .dark form .bg-gray-50 { background-color: #0b1220 !important; }
+  .theme-dark form .bg-gray-100, .dark form .bg-gray-100 { background-color: #0f172a !important; }
+  .theme-dark .rounded-xl.border, .theme-dark .rounded-2xl.border, .dark .rounded-xl.border, .dark .rounded-2xl.border { background-color: #0f172a !important; border-color: #374151 !important; }
+  .theme-dark form, .dark form { color: #e5e7eb; }
 
   /* Softer brand gradients on dark */
   .theme-dark .bg-gradient-to-r { background-image: linear-gradient(to right, rgba(30,41,59,0.5), rgba(17,24,39,0.5)) !important; }
@@ -556,6 +563,18 @@
 
   .alert-warning .alert-message {
     @apply text-amber-700;
+  }
+
+  /* Dark mode for alert-warning */
+  .dark .alert-warning, .theme-dark .alert-warning {
+    background-image: none;
+    background: linear-gradient(90deg, rgba(30,41,59,0.85), rgba(17,24,39,0.85));
+  }
+  .dark .alert-warning .alert-title, .theme-dark .alert-warning .alert-title {
+    color: #fde68a; /* amber-200 */
+  }
+  .dark .alert-warning .alert-message, .theme-dark .alert-warning .alert-message {
+    color: #e5e7eb; /* text-slate-200 */
   }
 
   .alert-info .alert-title {
