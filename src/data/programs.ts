@@ -387,7 +387,7 @@ export const programs: Program[] = [
   },
   {
     id: 'msc-petroleum-engineering',
-    title: "M.Sc. Petroleum Engineering",
+    title: "M.Sc. Petroleum & Energy Resources Engineering",
     duration: "3 semesters/1.5 Years",
     level: "Postgraduate",
     category: 'postgraduate',
@@ -420,7 +420,7 @@ export const programs: Program[] = [
   },
   {
     id: 'phd-petroleum-engineering',
-    title: "Ph.D. Petroleum Engineering",
+    title: "Ph.D. Petroleum & Energy Resources Engineering",
     duration: "6 semesters/3 Years",
     level: "Postgraduate",
     category: 'postgraduate',
@@ -449,6 +449,187 @@ export const programs: Program[] = [
         question: "What is the typical research output?",
         answer: "Students are expected to publish in high-impact journals and present at international conferences during their studies."
       }
+    ]
+  },
+  {
+    id: 'pgd-petroleum-energy-resources-engineering',
+    title: 'Postgraduate Diploma Petroleum & Energy Resources Engineering',
+    duration: '2 semesters/1 Year',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
+    image: imageMap["petroleum-engineering"],
+    description: 'Practice-oriented diploma covering core concepts in petroleum and energy resources engineering.',
+    requirements: [
+      'First degree (minimum Third Class) or HND in Engineering or related field',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'pm-applied-statistics',
+    title: 'Professional Masters Applied Statistics',
+    duration: '2 semesters/1 Year',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
+    image: imageMap["applied-stats"] || imageMap["default"],
+    description: 'Applied statistical methods for data-driven decision making across industries.',
+    requirements: [
+      'First degree in any discipline with quantitative background',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'msc-applied-statistics',
+    title: 'M.Sc. Applied Statistics',
+    duration: '3 semesters/1.5 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
+    image: imageMap["applied-stats"] || imageMap["default"],
+    description: 'Advanced study of statistical theory and applications in science and industry.',
+    requirements: [
+      'First degree in Statistics, Mathematics, Computer Science, or related field',
+      'Minimum CGPA of 2.5/5.0',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'msc-geoinformatics-gis',
+    title: 'M.Sc. Geoinformatics & GIS',
+    duration: '3 semesters/1.5 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
+    image: imageMap["gis"],
+    description: 'Geospatial data acquisition, analysis, and GIS applications for decision support.',
+    requirements: [
+      'First degree in Geography, Geoinformatics, Surveying, Computer Science, or related field',
+      'Minimum CGPA of 2.5/5.0',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'phd-geoinformatics-gis',
+    title: 'Ph.D. Geoinformatics & GIS',
+    duration: '6 semesters/3 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
+    image: imageMap["gis"],
+    description: 'Doctoral research in geospatial science, remote sensing, and spatial analytics.',
+    requirements: [
+      'Masters degree in Geoinformatics, GIS, or related field',
+      'Strong research background',
+      'Academic transcripts',
+      'Research proposal'
+    ]
+  },
+  {
+    id: 'msc-materials-science-engineering',
+    title: 'M.Sc. Materials Science & Engineering',
+    duration: '3 semesters/1.5 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
+    image: imageMap["default"],
+    description: 'Advanced materials characterization, processing, and engineering applications.',
+    requirements: [
+      'First degree in Materials/Metallurgical Engineering or related field',
+      'Minimum CGPA of 2.5/5.0',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'phd-materials-science-engineering',
+    title: 'Ph.D. Materials Science & Engineering',
+    duration: '6 semesters/3 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦853,030 (Nigerian) / $2,000 (International) per semester | Total: ₦5,118,182 / $12,000',
+    image: imageMap["default"],
+    description: 'Doctoral research on materials design, synthesis, and advanced applications.',
+    requirements: [
+      'Masters degree in Materials/Metallurgical Engineering or related field',
+      'Strong research background',
+      'Academic transcripts',
+      'Research proposal'
+    ]
+  },
+  {
+    id: 'pm-mathematical-modeling',
+    title: 'Professional Masters Mathematical Modeling',
+    duration: '2 semesters/1 Year',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
+    image: imageMap["math"] || imageMap["default"],
+    description: 'Practice-oriented program focusing on applied mathematical modeling for real-world problems.',
+    requirements: [
+      'First degree in Mathematics, Engineering, or related field',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'msc-mathematical-modeling',
+    title: 'M.Sc. Mathematical Modeling',
+    duration: '3 semesters/1.5 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
+    image: imageMap["math"] || imageMap["default"],
+    description: 'Mathematical modeling, simulation, and optimization techniques across domains.',
+    requirements: [
+      'First degree in Mathematics, Statistics, Physics, Engineering or related field',
+      'Minimum CGPA of 2.5/5.0',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'pm-management-information-technology',
+    title: 'Professional Masters Management of Information Technology',
+    duration: '2 semesters/1 Year',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦1,812,120 / $2,000',
+    image: imageMap["computer-science"],
+    description: 'Practice-focused program on IT governance, strategy, and digital transformation.',
+    requirements: [
+      'First degree in any discipline',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
+    ]
+  },
+  {
+    id: 'msc-management-information-technology',
+    title: 'M.Sc. Management of Information Technology',
+    duration: '3 semesters/1.5 Years',
+    level: 'Postgraduate',
+    category: 'postgraduate',
+    schoolFees: '₦906,060 (Nigerian) / $1,000 (International) per semester | Total: ₦2,718,182 / $3,000',
+    image: imageMap["computer-science"],
+    description: 'Advanced study of IT management, systems strategy, and enterprise technology leadership.',
+    requirements: [
+      'First degree in IT, Computer Science, Engineering, or related field',
+      'Minimum CGPA of 2.5/5.0',
+      'Academic transcripts',
+      'Reference letters',
+      'Statement of purpose'
     ]
   },
   {
@@ -541,7 +722,7 @@ export const programs: Program[] = [
   },
   {
     id: 'taught-masters-public-admin',
-    title: 'Taught Masters Public Administration',
+    title: 'Professional Masters Public Administration',
     duration: '2 semesters/1 Year',
     level: 'Postgraduate',
     category: 'postgraduate',
@@ -584,7 +765,7 @@ export const programs: Program[] = [
   },
   {
     id: 'taught-masters-public-policy',
-    title: 'Taught Masters Public Policy',
+    title: 'Professional Masters Public Policy',
     duration: '2 semesters/1 Year',
     level: 'Postgraduate',
     category: 'postgraduate',

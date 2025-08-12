@@ -155,33 +155,36 @@ const programs: Record<string, string[]> = {
     "Aerospace Engineering",
     "Applied Statistics",
     "Computer Science",
-    "Energy Resources Engineering",
-    "Geoinformatics and GIS",
+    "Geoinformatics & GIS",
     "Management of Information Technology",
     "Materials Science & Engineering",
     "Mathematical Modeling",
-    "Petroleum Engineering",
+    "Petroleum & Energy Resources Engineering",
     "Public Administration",
     "Public Policy",
-    "Pure and Applied Mathematics",
+    "Pure & Applied Mathematics",
     "Space Physics",
     "Systems Engineering",
-    "Theoretical and Applied Physics"
+    "Theoretical & Applied Physics"
   ].sort(),
   "PhD": [
     "Aerospace Engineering",
     "Computer Science",
-    "Geoinformatics and GIS",
+    "Geoinformatics & GIS",
     "Materials Science & Engineering",
-    "Petroleum Engineering",
-    "Pure and Applied Mathematics",
+    "Petroleum & Energy Resources Engineering",
+    "Pure & Applied Mathematics",
     "Space Physics",
     "Systems Engineering",
-    "Theoretical and Applied Physics"
+    "Theoretical & Applied Physics"
   ].sort(),
   "Postgraduate Diploma/Taught Masters": [
+    "Applied Statistics",
     "Management of Information Technology",
-    "Petroleum Engineering"
+    "Mathematical Modeling",
+    "Public Administration",
+    "Public Policy",
+    "Petroleum & Energy Resources Engineering"
   ].sort()
 };
 

@@ -139,11 +139,11 @@ const Programs: React.FC = () => {
         list = list.filter(p => p.title.startsWith("M.Sc."));
       } else if (filterCategory === "Ph.D.") {
         list = list.filter(p => p.title.startsWith("Ph.D."));
-      } else if (filterCategory === "Taught Masters") {
-        list = list.filter(p => p.title.includes("Taught Masters"));
+      } else if (filterCategory === "Professional Masters") {
+        list = list.filter(p => p.title.includes("Professional Masters") || p.title.includes("Taught Masters"));
       } else {
-      list = list.filter(p => p.category === filterCategory);
-    }
+        list = list.filter(p => p.category === filterCategory);
+      }
     }
     return list;
   }, [search, filterCategory, activeTab]);
@@ -240,7 +240,7 @@ const Programs: React.FC = () => {
               <option value="undergraduate">Undergraduate</option>
               <option value="M.Sc.">M.Sc.</option>
               <option value="Ph.D.">Ph.D.</option>
-              <option value="Taught Masters">Taught Masters</option>
+              <option value="Professional Masters">Professional Masters</option>
               <option value="foundation">Foundation</option>
               <option value="jupeb">JUPEB</option>
             </select>
