@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Upload, X, Check, Search, Building2, CreditCard, FileCheck, User, Camera, AlertCircle } from "lucide-react";
+import MediaPreviewDialog from "@/components/MediaPreviewDialog";
 import { toast } from "sonner";
 import { getCurrentAcademicSession } from "@/utils/academicSession";
 import PhoneInput from 'react-phone-number-input';
@@ -210,6 +211,7 @@ const FileUploadField = ({
   multiple = false 
 }: FileUploadFieldProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   
@@ -315,11 +317,12 @@ const FileUploadField = ({
   };
 
   return (
+    <>
     <div className="space-y-2">
       <Label>{label}</Label>
       <div 
         className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
-          isPdf ? 'border-green-500 bg-green-50' : 'border-blue-500 bg-white'
+          isPdf ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500 bg-white dark:bg-slate-800'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -338,25 +341,23 @@ const FileUploadField = ({
         {hasFiles ? (
           <div className="flex flex-col items-center">
             {isUrl ? (
-              <a
-                href={value}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
-                title={value}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPreviewUrl(value as string); }}
+                className="text-green-700 dark:text-green-300 underline break-all text-sm text-center hover:text-green-900"
+                title={value as string}
               >
-                {getFileNameFromUrl(value)}
-              </a>
+                {getFileNameFromUrl(value as string)}
+              </button>
             ) : hasOriginalPath ? (
-              <a
-                href={originalPath}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
-                title={originalPath}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPreviewUrl(originalPath as string); }}
+                className="text-green-700 dark:text-green-300 underline break-all text-sm text-center hover:text-green-900"
+                title={originalPath as string}
               >
-                {getFileNameFromUrl(originalPath)}
-              </a>
+                {getFileNameFromUrl(originalPath as string)}
+              </button>
             ) : (
               <span className="text-sm text-gray-800 text-center">{fileNames}</span>
             )}
@@ -384,6 +385,10 @@ const FileUploadField = ({
         )}
       </div>
     </div>
+    {previewUrl && (
+      <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title={getFileNameFromUrl(previewUrl)} />
+    )}
+    </>
   );
 };
 

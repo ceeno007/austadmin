@@ -9,6 +9,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import ConditionalNavbar from './components/ConditionalNavbar';
 import ConditionalFooter from './components/ConditionalFooter';
 import PerformanceOptimizer from './components/PerformanceOptimizer';
+import FancyLoader from './components/FancyLoader';
 import AccessibilityFab from './components/AccessibilityFab';
 import { addResourceHints, registerServiceWorker } from './utils/performance';
 import ProgramDetails from "./pages/ProgramDetails";
@@ -43,9 +44,7 @@ const HostelImages = lazy(() => import("./pages/HostelImages"));
 
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center h-screen bg-white">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF5500]"></div>
-  </div>
+  <FancyLoader fullScreen label="Just a sec..." />
 );
 
 // Create a QueryClient instance with optimized settings

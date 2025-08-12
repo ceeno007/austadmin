@@ -466,6 +466,37 @@
     border: 2px solid #000 !important;
   }
 
+  /* High-contrast overrides for form fields */
+  .a11y-high-contrast input:not([type="checkbox"]):not([type="radio"]),
+  .a11y-high-contrast textarea,
+  .a11y-high-contrast select,
+  .a11y-high-contrast .PhoneInputInput {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  .a11y-high-contrast input::placeholder,
+  .a11y-high-contrast textarea::placeholder {
+    color: #111111 !important;
+  }
+  .a11y-high-contrast label,
+  .a11y-high-contrast .text-gray-600,
+  .a11y-high-contrast .text-gray-700,
+  .a11y-high-contrast .text-gray-800,
+  .a11y-high-contrast .text-gray-900 {
+    color: #000000 !important;
+  }
+  .a11y-high-contrast .border-gray-200,
+  .a11y-high-contrast .border-gray-300 {
+    border-color: #000000 !important;
+  }
+  .a11y-high-contrast .focus\:ring-2,
+  .a11y-high-contrast .focus\:ring {
+    --tw-ring-color: #000000 !important;
+  }
+
   .hero-pattern {
     background-color: #ffffff;
     background-image: radial-gradient(#FF5500 0.5px, #ffffff 0.5px);

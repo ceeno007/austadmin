@@ -511,6 +511,7 @@ const autofillFromApplication = (application: any, prev: any) => {
 const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessingPayment, application }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [foundationRemedialData, setFoundationRemedialData] = useState<FoundationRemedialFormData>({
     passportPhoto: null,
