@@ -62,6 +62,7 @@ interface PostgraduateFormData {
     email: string;
     hasDisabilities: string;
     disabilityDescription: string;
+    hearAboutUs?: string;
   };
   academicQualifications: {
     qualification1: PostgraduateDocumentData;
@@ -597,6 +598,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       email: "",
       hasDisabilities: "No",
       disabilityDescription: "",
+      hearAboutUs: "",
     },
     academicQualifications: {
       qualification1: {
@@ -2009,6 +2011,34 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           </div>
         </div>
 
+        {/* How did you hear about us? */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+            <Select
+              value={postgraduateData.personalDetails.hearAboutUs || ''}
+              onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+            >
+              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="google">Google Search</SelectItem>
+                <SelectItem value="facebook">Facebook</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+                <SelectItem value="twitter">Twitter/X</SelectItem>
+                <SelectItem value="tiktok">TikTok</SelectItem>
+                <SelectItem value="youtube">YouTube</SelectItem>
+                <SelectItem value="friend">Friend/Family</SelectItem>
+                <SelectItem value="alumni">Alumni</SelectItem>
+                <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">Other Names</Label>
           <Input
@@ -2271,6 +2301,33 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       </div>
     </div>
 
+    {/* How did you hear about us - at the end */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+        <Select
+          value={postgraduateData.personalDetails.hearAboutUs || ''}
+          onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+        >
+          <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+            <SelectValue placeholder="Select an option" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="google">Google Search</SelectItem>
+            <SelectItem value="facebook">Facebook</SelectItem>
+            <SelectItem value="instagram">Instagram</SelectItem>
+            <SelectItem value="twitter">Twitter/X</SelectItem>
+            <SelectItem value="tiktok">TikTok</SelectItem>
+            <SelectItem value="youtube">YouTube</SelectItem>
+            <SelectItem value="friend">Friend/Family</SelectItem>
+            <SelectItem value="alumni">Alumni</SelectItem>
+            <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+            <SelectItem value="school">School Counselor/Teacher</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
 
         {/* Academic Qualifications Section */}
         <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">

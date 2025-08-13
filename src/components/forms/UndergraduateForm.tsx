@@ -103,6 +103,7 @@ interface UndergraduateFormData {
     email: string;
     hasDisabilities: string;
     disabilityDescription: string;
+    hearAboutUs?: string;
     bloodGroup?: string;
   };
   academicQualifications: {
@@ -1023,6 +1024,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       email: "",
       hasDisabilities: "no",
       disabilityDescription: "",
+      hearAboutUs: "",
     },
     academicQualifications: {
       waecResults: {
@@ -1887,6 +1889,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
           placeholder="Enter phone number"
         />
       </div>
+
                               <div className="space-y-3">
               <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 Email
@@ -2732,6 +2735,33 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
       </div>
 
+      {/* How did you hear about us - at the end */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+          <Select
+            value={undergraduateData.personalDetails.hearAboutUs || ''}
+            onValueChange={(value) => handlePersonalDetailsChange('hearAboutUs', value)}
+          >
+            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+              <SelectValue placeholder="Select an option" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="google">Google Search</SelectItem>
+              <SelectItem value="facebook">Facebook</SelectItem>
+              <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectItem value="twitter">Twitter/X</SelectItem>
+              <SelectItem value="tiktok">TikTok</SelectItem>
+              <SelectItem value="youtube">YouTube</SelectItem>
+              <SelectItem value="friend">Friend/Family</SelectItem>
+              <SelectItem value="alumni">Alumni</SelectItem>
+              <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+              <SelectItem value="school">School Counselor/Teacher</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       {/* Declaration Section */}
             <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
               <div className="flex items-center gap-3 mb-6">
