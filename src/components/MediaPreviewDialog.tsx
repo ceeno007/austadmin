@@ -12,7 +12,7 @@ const isImage = (url: string) => /(\.png|\.jpg|\.jpeg|\.gif|\.webp|\.bmp|\.svg)$
 const isPdf = (url: string) => /\.pdf($|\?)/i.test(url);
 const toViewableUrl = (url: string) => {
   if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url; // already absolute
+  if (/^(https?:|blob:|data:)/i.test(url)) return url; // already absolute or local
   const cleaned = url.startsWith('/') ? url : `/${url}`;
   const base = (import.meta as any).env?.VITE_API_BASE_URL || (window as any)?.API_BASE_URL || '';
   return base ? `${base}${cleaned}` : cleaned;
@@ -53,6 +53,13 @@ const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title })
     // Images can be linked directly
     if (isImage(url)) {
       setDisplayUrl(absoluteUrl);
+      setIsLoading(false);
+      return;
+    }
+
+    // If it's a blob/data URL from a freshly selected file, use it directly
+    if (/^(blob:|data:)/i.test(url)) {
+      setDisplayUrl(url);
       setIsLoading(false);
       return;
     }

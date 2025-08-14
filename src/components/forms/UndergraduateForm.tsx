@@ -2745,14 +2745,14 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       </div>
 
       {/* How did you hear about us - at the end */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="mt-6">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
           <Select
             value={undergraduateData.personalDetails.hearAboutUs || ''}
             onValueChange={(value) => handlePersonalDetailsChange('hearAboutUs', value)}
           >
-            <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+            <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
@@ -2826,18 +2826,18 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
       
             {/* Form Actions */}
             <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div className="text-center lg:text-left">
-                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
-                  <p className="text-gray-600 text-sm md:text-base">Review your information and submit your application</p>
+              <div className="flex flex-col gap-6">
+                <div className="text-center">
+                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ready to Submit?</h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">Review your information and submit your application</p>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
+                <div className="flex flex-col gap-3 w-full">
         <Button
           type="button"
           variant="outline"
           onClick={handleSaveAsDraft}
           disabled={isProcessingPayment || isSaving}
-                    className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                    className="w-full px-6 md:px-8 py-3 rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200"
         >
           {isSaving ? (
             <span className="flex items-center justify-center">
@@ -2853,7 +2853,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </Button>
                   <Button 
                     type="submit" 
-                    className="w-full sm:w-auto px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
+                    className="w-full px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
                     disabled={isSubmitting || isSaving}
                   >
           {isSubmitting ? (

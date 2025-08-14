@@ -3141,42 +3141,38 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
 
       
         {/* Payment Information Section */}
-        <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
-          <h3 className="text-lg font-semibold">Application Fee Payment</h3>
+        <div className="space-y-6 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 bg-white dark:bg-gray-900/70">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Application Fee Payment</h3>
           <div className="space-y-4">
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800 space-y-2">
-                <strong>Application Fees (Non-refundable):</strong>
-                <br />
-                <span className="block mt-2">
-                  <strong>Nigerian Applicants:</strong> ₦20,000
-                </span>
-                <span className="block mt-1">
-                  <strong>International Applicants:</strong> $50
-                </span>
-                <div className="mt-4">
-                  <p className="font-medium">Payment Process:</p>
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Payment will be processed through Squadco</li>
-                    <li>Nigerian applicants will use Squadco NGN payment gateway</li>
-                    <li>International applicants will use Squadco USD payment gateway</li>
-                    <li>The Squadco payment window will open when you click "Proceed to Payment"</li>
-                    <li>A payment receipt will be automatically generated after successful payment</li>
-                  </ul>
-                </div>
+            <div className="p-4 sm:p-5 rounded-xl border border-amber-200/60 dark:border-amber-400/20 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-100">
+              <p className="text-sm">
+                <span className="font-semibold">Application Fees (Non-refundable):</span>
+                <span className="block mt-2"><span className="font-semibold">Nigerian Applicants:</span> ₦20,000</span>
+                <span className="block mt-1"><span className="font-semibold">International Applicants:</span> $50</span>
               </p>
+              <div className="mt-4 text-sm">
+                <p className="font-medium text-amber-800 dark:text-amber-100">Payment Process:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Payment will be processed through Squadco</li>
+                  <li>Nigerian applicants will use Squadco NGN payment gateway</li>
+                  <li>International applicants will use Squadco USD payment gateway</li>
+                  <li>The Squadco payment window will open when you click "Proceed to Payment"</li>
+                  <li>A payment receipt will be automatically generated after successful payment</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Form Buttons */}
         <div className="space-y-4">
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleSaveAsDraft}
               disabled={isProcessingPaymentState || isSaving}
+              className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               {isSaving ? (
                 <span className="flex items-center justify-center">
@@ -3191,6 +3187,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               type="button"
               onClick={handleProceedToPayment}
               disabled={isProcessingPaymentState || isSaving}
+              className="w-full"
             >
               {isProcessingPaymentState ? (
                 <span className="flex items-center justify-center">

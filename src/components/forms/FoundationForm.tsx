@@ -264,6 +264,21 @@ const FileUploadField = ({
                   View previously uploaded
                 </button>
               )}
+              {isFile && !isUrl && !hasOriginalPath && (
+                <button
+                  type="button"
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    const fileObj = Array.isArray(value) ? (value[0] as File) : (value as File);
+                    const blobUrl = URL.createObjectURL(fileObj);
+                    setPreviewUrl(blobUrl);
+                  }}
+                  className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-700 dark:text-blue-200 dark:hover:bg-slate-600 text-xs transition-colors"
+                >
+                  Preview file
+                </button>
+              )}
               <button
                 type="button"
                 onClick={(e) => {
@@ -2347,36 +2362,27 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       </div>
 
       {/* Application Fee Payment Section */}
-      <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-6">
+      <div className="bg-white dark:bg-gray-900/70 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col gap-3 mb-4 sm:mb-6">
           <div className="w-10 h-10 bg-amber-100 dark:bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
             <CreditCard className="h-5 w-5 text-amber-600" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Application Fee Payment</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Application Fee Payment</h3>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Complete your payment to submit your application</p>
           </div>
         </div>
         
         <div className="space-y-4">
-          <div className="payment-info">
-            <div className="content">
-              <div className="flex items-start gap-3">
-                <CreditCard className="alert-icon text-amber-600" />
-                <div className="flex-1">
-                  <h4 className="title">Application Fees (Non-refundable)</h4>
-                  <div className="message">
-                    <div className="space-y-3">
-                      <p><strong>Payment Process:</strong></p>
-                      <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
-                  <li>A payment receipt will be automatically generated after successful payment</li>
-                  <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees will be communicated upon admission (JUPEB: ₦1,500,000; Remedial/NABTEB: ₦1,200,000)</li>
-                </ul>
-              </div>
-                  </div>
-                </div>
-              </div>
+          <div className="p-4 sm:p-5 rounded-xl border border-amber-200/60 dark:border-amber-400/20 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-100">
+            <h4 className="text-base sm:text-lg font-semibold mb-2">Application Fees (Non-refundable)</h4>
+            <div className="text-sm leading-relaxed">
+              <p className="font-medium text-amber-800 dark:text-amber-100">Payment Process:</p>
+              <ul className="list-disc list-inside space-y-1 mt-1">
+                <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
+                <li>A payment receipt will be automatically generated after successful payment</li>
+                <li><span className="font-semibold">Note:</span> This is only the application processing fee. Full tuition fees will be communicated upon admission (JUPEB: ₦1,500,000; Remedial/NABTEB: ₦1,200,000)</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -2384,20 +2390,20 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
           {/* Form Actions */}
           <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
-              <div className="text-center lg:text-left">
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-2">Ready to Submit?</h3>
+            <div className="flex flex-col gap-4 sm:gap-6">
+              <div className="text-center">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ready to Submit?</h3>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Review your information and proceed to payment</p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
+              <div className="flex flex-col gap-3 w-full">
                 {/* How did you hear about us? moved here to be last */}
-                <div className="w-full sm:w-64">
+                <div className="w-full">
                   <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
                   <Select
                     value={foundationRemedialData.personalDetails.hearAboutUs || ''}
                     onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
                   >
-                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                    <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
                       <SelectValue placeholder="Select an option" />
                     </SelectTrigger>
                     <SelectContent>
@@ -2420,7 +2426,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   variant="outline"
                   onClick={handleSaveDraft}
                   disabled={isProceedingToPayment || isSavingDraft}
-                  className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl border-gray-300 hover:bg-gray-50 transition-all duration-200 text-sm sm:text-base"
+                  className="w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 text-sm sm:text-base"
                 >
                   {isSavingDraft ? (
                     <span className="flex items-center justify-center">
@@ -2438,7 +2444,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   type="button"
                   onClick={handleProceedToPayment}
                   disabled={isProceedingToPayment}
-                  className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200 text-sm sm:text-base"
+                  className="w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200 text-sm sm:text-base"
                 >
                  {isProceedingToPayment ? (
                    <span className="flex items-center justify-center">
