@@ -54,7 +54,7 @@ const programs = {
   ],
   foundation: [
     {
-      title: "Foundation and Remedial Studies Foundation Program",
+      title: "School of Foundation & Remedial Studies Program",
       description: "A comprehensive foundation program for university admission",
       image: foundationScienceImg,
       link: "/apply/foundation",
@@ -76,7 +76,7 @@ export default function ProgramsPage() {
         <TabsList className="grid w-full grid-cols-3 md:grid-cols-3 lg:w-auto lg:inline-flex mb-8">
           <TabsTrigger value="undergraduate" className="text-sm md:text-base">Undergraduate</TabsTrigger>
           <TabsTrigger value="postgraduate" className="text-sm md:text-base">Postgraduate</TabsTrigger>
-          <TabsTrigger value="foundation" className="text-sm md:text-base">Foundation and Remedial Studies</TabsTrigger>
+           <TabsTrigger value="foundation" className="text-sm md:text-base">School of Foundation & Remedial Studies</TabsTrigger>
         </TabsList>
 
         <TabsContent value="undergraduate">

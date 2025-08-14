@@ -338,7 +338,7 @@ const SignUp = () => {
                     <SelectContent>
                       <SelectItem value="undergraduate">Undergraduate</SelectItem>
                       <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                      <SelectItem value="foundation">Foundation and Remedial Studies</SelectItem>
+                      <SelectItem value="foundation">School of Foundation & Remedial Studies</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

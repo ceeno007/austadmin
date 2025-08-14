@@ -135,7 +135,7 @@ const ProgramDetails: React.FC = () => {
           <div className="max-w-4xl mx-auto grid gap-10">
             <div className="bg-white/90 rounded-2xl shadow-lg p-6 border border-gray-100">
               <h2 className="text-xl font-bold mb-4 text-[#FF5500]">Program Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-1 text-sm">Duration</h3>
                   <p className="text-gray-700 font-medium">{program.duration}</p>
@@ -144,10 +144,7 @@ const ProgramDetails: React.FC = () => {
                   <h3 className="font-semibold text-gray-900 mb-1 text-sm">Level</h3>
                   <p className="text-gray-700 font-medium">{program.level}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-900 mb-1 text-sm">Category</h3>
-                  <p className="text-gray-700 font-medium capitalize">{program.category.replace('-', ' ')}</p>
-                </div>
+                
                 </div>
                 {program.schoolFees && (
                 <div className="space-y-3">

@@ -257,13 +257,13 @@ export const programs: Program[] = [
   },
   {
     id: 'foundation-science',
-    title: "Foundation Science Program",
+    title: "Remedial/NABTEB O’Level",
     duration: "1 year",
     level: "Foundation",
     category: 'foundation',
-    schoolFees: "₦1,343,000 total",
+    schoolFees: "₦1,200,000 total",
     image: imageMap["foundation-science"],
-    description: "Prepare for undergraduate studies in science and engineering fields. Build strong foundations in mathematics, physics, and chemistry.",
+    description: "Remedial/NABTEB O’Level program under the School of Foundation & Remedial Studies. Prepare for O’Level examinations with structured classes and academic support. Total fees: ₦1,200,000.",
     requirements: [
       "Five O Level credits including English, Mathematics, Physics, Chemistry, Biology",
       "Minimum age of 16 years",
@@ -289,13 +289,13 @@ export const programs: Program[] = [
   },
   {
     id: 'jupeb-science',
-    title: "JUPEB Science Program",
+    title: "JUPEB A Levels",
     duration: "1 year",
     level: "JUPEB",
     category: 'jupeb',
-    schoolFees: "₦1,343,000 total",
+    schoolFees: "₦1,500,000 total",
     image: imageMap["jupeb-science"],
-    description: "Advanced preparation for direct entry into 200 level university programs. Intensive study in science subjects and academic skills.",
+    description: "JUPEB A Levels pathway to 200-level direct entry after successful completion. Intensive study with robust academic support. Total fees: ₦1,500,000.",
     requirements: [
       "Five O Level credits including English, Mathematics, Physics, Chemistry, Biology",
       "Minimum age of 16 years",

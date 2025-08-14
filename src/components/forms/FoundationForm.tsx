@@ -1375,19 +1375,19 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                >
                  {foundationRemedialData.passportPhoto ? (
                    <div className="relative w-full h-full group">
-                      {typeof foundationRemedialData.passportPhoto === 'string' && foundationRemedialData.passportPhoto.startsWith('http') ? (
+                     {typeof foundationRemedialData.passportPhoto === 'string' && foundationRemedialData.passportPhoto.startsWith('http') ? (
                         <button
                           type="button"
-                          className="block w-full h-full"
+                         className="block w-full h-full"
                           onClick={(e) => { e.stopPropagation(); setPreviewUrl(getPassportPhotoUrl()); }}
-                        >
-                          <img
-                            src={getPassportPhotoUrl()}
-                            alt="Passport"
-                            className="w-full h-full object-cover rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
-                          />
+                       >
+                         <img
+                           src={getPassportPhotoUrl()}
+                           alt="Passport"
+                           className="w-full h-full object-cover rounded-2xl shadow-lg cursor-pointer hover:opacity-90 transition-opacity duration-200"
+                         />
                         </button>
-                      ) : (
+                     ) : (
                        <img
                          src={getPassportPhotoUrl()}
                          alt="Passport"
@@ -1406,7 +1406,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                        >
                          <X className="h-4 w-4" />
                        </button>
-    </div>
+                     </div>
     {previewUrl && (
       <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title="Preview" />
     )}
@@ -1817,7 +1817,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   <SelectValue placeholder="Select programme" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="foundation">Foundation and Remedial Studies (A'level)</SelectItem>
+                  <SelectItem value="foundation">School of Foundation & Remedial Studies (A'level)</SelectItem>
                   <SelectItem value="nabteb_olevel">NABTEB (O'level examination only)</SelectItem>
                   <SelectItem value="nabteb_olevel_classes">NABTEB (O'level examination and classes)</SelectItem>
                   <SelectItem value="jupeb">JUPEB (A'level)</SelectItem>
@@ -2421,7 +2421,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                       <ul className="list-disc list-inside space-y-1 ml-4">
                   <li>The Squad payment popup will appear automatically when you click "Proceed to Payment"</li>
                   <li>A payment receipt will be automatically generated after successful payment</li>
-                  <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees (₦1,343,000 total for Foundation) will be communicated upon admission</li>
+                  <li><strong>Note:</strong> This is only the application processing fee. Full tuition fees will be communicated upon admission (JUPEB: ₦1,500,000; Remedial/NABTEB: ₦1,200,000)</li>
                 </ul>
               </div>
                   </div>

@@ -272,7 +272,7 @@ const Programs: React.FC = () => {
                 >
                   {key === 'FOUNDATION' ? (
                     <>
-                      <span className="hidden sm:inline">Foundation and Remedial Studies</span>
+                      <span className="hidden sm:inline">School of Foundation & Remedial Studies</span>
                       <span className="sm:hidden">Foundation</span>
                     </>
                   ) : (

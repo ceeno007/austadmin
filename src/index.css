@@ -134,9 +134,20 @@
   .theme-dark .rounded-xl.border, .theme-dark .rounded-2xl.border, .dark .rounded-xl.border, .dark .rounded-2xl.border { background-color: #0f172a !important; border-color: #374151 !important; }
   .theme-dark form, .dark form { color: #e5e7eb; }
 
+  /* Program Details dark backgrounds */
+  .theme-dark .bg-white { background-color: #0f172a !important; }
+  .theme-dark .from-gray-50 { --tw-gradient-from: rgba(15,23,42,0.85) !important; }
+  .theme-dark .via-white { --tw-gradient-via-position: rgba(2,6,23,0.85) !important; }
+  .theme-dark .to-gray-100 { --tw-gradient-to: rgba(2,6,23,0.9) !important; }
+  .theme-dark .border-gray-100 { border-color: #334155 !important; }
+  .theme-dark .border-gray-200 { border-color: #475569 !important; }
+  .theme-dark .text-gray-700 { color: #e5e7eb !important; }
+  .theme-dark .text-gray-900 { color: #ffffff !important; }
+
   /* Softer brand gradients on dark */
   .theme-dark .bg-gradient-to-r { background-image: linear-gradient(to right, rgba(30,41,59,0.5), rgba(17,24,39,0.5)) !important; }
   .theme-dark .bg-gradient-to-b { background-image: linear-gradient(to bottom, rgba(30,41,59,0.5), rgba(17,24,39,0.5)) !important; }
+  .theme-dark .bg-gradient-to-br { background-image: linear-gradient(to bottom right, rgba(30,41,59,0.6), rgba(17,24,39,0.7)) !important; }
 
   /* Tone down amber backgrounds in dark mode for readability */
   .theme-dark .bg-amber-50 { background-color: #0b1220 !important; }
@@ -374,6 +385,22 @@
     @apply border-[#FF5500]/60;
   }
 
+  /* Radix Select dark-mode visibility improvements */
+  .theme-dark .radix-select-content {
+    background-color: #0b1220 !important;
+    color: #e5e7eb !important;
+    border-color: #374151 !important;
+  }
+  .theme-dark .radix-select-item {
+    color: #e5e7eb !important;
+  }
+  .theme-dark .radix-select-item[data-highlighted],
+  .theme-dark .radix-select-item:focus,
+  .theme-dark .radix-select-item:hover {
+    background-color: #FF5500 !important;
+    color: #0b1220 !important;
+  }
+
   /* Button styles */
   .btn-primary {
     @apply bg-orange-500 text-white hover:bg-orange-600;
@@ -495,6 +522,48 @@
   .a11y-high-contrast .focus\:ring-2,
   .a11y-high-contrast .focus\:ring {
     --tw-ring-color: #000000 !important;
+  }
+
+  /* High-contrast overrides when dark theme is active
+     Ensure anything that would be "black" in HC becomes white for visibility */
+  .theme-dark.a11y-high-contrast body {
+    color: #ffffff !important;
+    background: #0b1220 !important;
+  }
+  .theme-dark.a11y-high-contrast a {
+    color: #93c5fd !important; /* light blue for contrast on dark */
+  }
+  .theme-dark.a11y-high-contrast button,
+  .theme-dark.a11y-high-contrast .btn,
+  .theme-dark.a11y-high-contrast [role="button"] {
+    border: 2px solid #ffffff !important;
+  }
+  .theme-dark.a11y-high-contrast input:not([type="checkbox"]):not([type="radio"]),
+  .theme-dark.a11y-high-contrast textarea,
+  .theme-dark.a11y-high-contrast select,
+  .theme-dark.a11y-high-contrast .PhoneInputInput {
+    background-color: #0b1220 !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+  }
+  .theme-dark.a11y-high-contrast input::placeholder,
+  .theme-dark.a11y-high-contrast textarea::placeholder {
+    color: #e5e7eb !important;
+  }
+  .theme-dark.a11y-high-contrast label,
+  .theme-dark.a11y-high-contrast .text-gray-600,
+  .theme-dark.a11y-high-contrast .text-gray-700,
+  .theme-dark.a11y-high-contrast .text-gray-800,
+  .theme-dark.a11y-high-contrast .text-gray-900 {
+    color: #ffffff !important;
+  }
+  .theme-dark.a11y-high-contrast .border-gray-200,
+  .theme-dark.a11y-high-contrast .border-gray-300 {
+    border-color: #ffffff !important;
+  }
+  .theme-dark.a11y-high-contrast .focus\:ring-2,
+  .theme-dark.a11y-high-contrast .focus\:ring {
+    --tw-ring-color: #ffffff !important;
   }
 
   .hero-pattern {

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 // API Base URL
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://admissions-jcvy.onrender.com';
-const FASTAPI_BASE_URL = 'https://admissions-l9fv.onrender.com';
+// Base URL from env; falls back to production domain
+const FASTAPI_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || process.env.VITE_API_BASE_URL || 'https://api.austinspire.com';
 
 // API Endpoints
 export const API_ENDPOINTS = {
