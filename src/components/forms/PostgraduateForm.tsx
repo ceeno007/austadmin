@@ -577,7 +577,7 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   appendIfFilled('nationality', data.personalDetails.nationality);
   appendIfFilled('qualification_subject', data.academicQualifications.qualification1.subject);
   appendIfFilled('email', data.personalDetails.email);
-  appendIfFilled('how_did_you_hear', data.personalDetails.hearAboutUs);
+  formData.append('how_did_you_hear', data.personalDetails.hearAboutUs ?? '');
   appendIfFilled('year', data.academicQualifications.qualification1.endDate?.year);
   appendIfFilled('academic_session', data.academicSession);
   if (data.academicQualifications.qualification2?.transcript) formData.append('second_degree_transcript', data.academicQualifications.qualification2.transcript);

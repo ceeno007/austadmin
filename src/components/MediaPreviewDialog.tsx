@@ -88,11 +88,11 @@ const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-5xl h-[88vh] p-0 overflow-hidden" aria-label="File preview">
-        <DialogHeader>
+      <DialogContent className="w-[96vw] max-w-5xl h-[88vh] p-0 overflow-hidden flex flex-col" aria-label="File preview">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 text-base sm:text-lg">{title || 'Preview'}</DialogTitle>
         </DialogHeader>
-        <div className="w-full h-full bg-white dark:bg-slate-900">
+        <div className="flex-1 min-h-0 w-full bg-white dark:bg-slate-900">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center text-sm text-gray-500">Loading preview…</div>
           ) : error ? (
@@ -101,9 +101,7 @@ const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title })
               <a href={absoluteUrl} download className="underline text-blue-600">Download</a>
             </div>
           ) : isImage(url) ? (
-            <div className="w-full h-full flex items-center justify-center bg-black/5 dark:bg-black/20">
-              <img src={displayUrl} alt="Preview" className="max-w-full max-h-full object-contain" />
-            </div>
+            <img src={displayUrl} alt="Preview" className="w-full h-full object-contain" />
           ) : isPdf(url) ? (
             <object data={displayUrl} type="application/pdf" className="w-full h-full">
               <iframe title="PDF Preview" src={displayUrl} className="w-full h-full" />

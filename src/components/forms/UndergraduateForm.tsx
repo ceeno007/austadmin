@@ -717,9 +717,7 @@ function buildUndergraduateFormData(data) {
   }
 
   // Marketing source
-  if (data.personalDetails.hearAboutUs) {
-    formData.append('how_did_you_hear', data.personalDetails.hearAboutUs);
-  }
+  formData.append('how_did_you_hear', data.personalDetails.hearAboutUs ?? '');
   
   // Disability
   formData.append('has_disability', data.personalDetails.hasDisabilities === 'yes' ? 'true' : 'false');
