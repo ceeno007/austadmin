@@ -822,9 +822,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
       appendIfFilled('phone_number', pd.phoneNumber);
       appendIfFilled('email', pd.email);
-      // Ensure how_did_you_hear is sent as string or empty string
+      // Ensure how_did_you_hear is sent exactly once as string (or empty string)
       formData.append('how_did_you_hear', pd.hearAboutUs ?? '');
-      appendIfFilled('how_did_you_hear', pd.hearAboutUs);
       if (pd.hasDisabilities === "yes") {
         formData.append('has_disability', "true");
         if (isFilled(pd.disabilityDescription)) {
@@ -2395,29 +2394,29 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       {/* How did you hear about us? - own container before payment */}
       <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-          <Select
-            value={foundationRemedialData.personalDetails.hearAboutUs || ''}
-            onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-          >
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+                  <Select
+                    value={foundationRemedialData.personalDetails.hearAboutUs || ''}
+                    onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+                  >
             <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="google">Google Search</SelectItem>
-              <SelectItem value="facebook">Facebook</SelectItem>
-              <SelectItem value="instagram">Instagram</SelectItem>
-              <SelectItem value="twitter">Twitter/X</SelectItem>
-              <SelectItem value="tiktok">TikTok</SelectItem>
-              <SelectItem value="youtube">YouTube</SelectItem>
-              <SelectItem value="friend">Friend/Family</SelectItem>
-              <SelectItem value="alumni">Alumni</SelectItem>
-              <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-              <SelectItem value="school">School Counselor/Teacher</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google">Google Search</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="twitter">Twitter/X</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="friend">Friend/Family</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                      <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                      <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
       </div>
 
       {/* Application Fee Payment Section */}
