@@ -2468,7 +2468,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
     {previewUrl && (
       <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title={getFileNameFromUrl(previewUrl)} />
     )}
-   );
+    );
  };
 
 export default FoundationForm; 
