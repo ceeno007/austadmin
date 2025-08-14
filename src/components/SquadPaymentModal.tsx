@@ -34,14 +34,14 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
     const programType = localStorage.getItem("programType") || "foundation";
     // Toggle test payments via env var: VITE_TEST_PAYMENTS=1
     const TEST_FORCE_NGN_10 = import.meta.env.VITE_TEST_PAYMENTS === '1' || process.env.VITE_TEST_PAYMENTS === '1';
-    let baseAmount = 20000; // Default ₦20,000
+    let baseAmount = 20000; // Default ₦20,000 (original)
     
     if (programType === "foundation") {
-      baseAmount = 10000; // ₦10,000
+      baseAmount = 10000; // ₦10,000 (original)
     } else if (programType === "undergraduate") {
       baseAmount = 0; // No payment for undergraduate
     } else if (programType === "postgraduate") {
-      baseAmount = 20000; // ₦20,000 (changed from ₦50,000)
+      baseAmount = 20000; // ₦20,000 (original)
     }
 
     if (TEST_FORCE_NGN_10 && (programType === "foundation" || programType === "postgraduate")) {

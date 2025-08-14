@@ -1270,33 +1270,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
           </div>
         </div>
 
-        {/* How did you hear about us - at the end */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-            <Select
-              value={foundationRemedialData.personalDetails.hearAboutUs || ''}
-              onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-            >
-              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-                <SelectValue placeholder="Select an option" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="google">Google Search</SelectItem>
-                <SelectItem value="facebook">Facebook</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="twitter">Twitter/X</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
-                <SelectItem value="youtube">YouTube</SelectItem>
-                <SelectItem value="friend">Friend/Family</SelectItem>
-                <SelectItem value="alumni">Alumni</SelectItem>
-                <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-                <SelectItem value="school">School Counselor/Teacher</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        {/* Moved: How did you hear about us? will be placed at final confirmation block */}
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900/60">
@@ -1947,33 +1921,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
               )}
             </div>
 
-            {/* How did you hear about us? */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-                <Select
-                  value={foundationRemedialData.personalDetails.hearAboutUs || ''}
-                  onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-                >
-                  <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-                    <SelectValue placeholder="Select an option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="google">Google Search</SelectItem>
-                    <SelectItem value="facebook">Facebook</SelectItem>
-                    <SelectItem value="instagram">Instagram</SelectItem>
-                    <SelectItem value="twitter">Twitter/X</SelectItem>
-                    <SelectItem value="tiktok">TikTok</SelectItem>
-                    <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="friend">Friend/Family</SelectItem>
-                    <SelectItem value="alumni">Alumni</SelectItem>
-                    <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-                    <SelectItem value="school">School Counselor/Teacher</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            {/* Moved to final section */}
           </div>
 
           <div className="space-y-4">
@@ -2440,6 +2388,31 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Review your information and proceed to payment</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 w-full lg:w-auto">
+                {/* How did you hear about us? moved here to be last */}
+                <div className="w-full sm:w-64">
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+                  <Select
+                    value={foundationRemedialData.personalDetails.hearAboutUs || ''}
+                    onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+                  >
+                    <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                      <SelectValue placeholder="Select an option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google">Google Search</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="twitter">Twitter/X</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="friend">Friend/Family</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                      <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                      <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
