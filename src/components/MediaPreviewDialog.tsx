@@ -8,7 +8,14 @@ type Props = {
   title?: string;
 };
 
-const isImage = (url: string) => /(\.png|\.jpg|\.jpeg|\.gif|\.webp)$/i.test(url);
+const isImage = (url: string) => /(\.png|\.jpg|\.jpeg|\.gif|\.webp|\.bmp|\.svg)$/i.test(url);
+const toViewableUrl = (url: string) => {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url; // already absolute
+  const cleaned = url.startsWith('/') ? url : `/${url}`;
+  const base = (import.meta as any).env?.VITE_API_BASE_URL || (window as any)?.API_BASE_URL || '';
+  return base ? `${base}${cleaned}` : cleaned;
+};
 
 const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title }) => {
   return (
@@ -19,9 +26,9 @@ const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title })
         </DialogHeader>
         <div className="w-full h-full rounded-lg overflow-hidden bg-white dark:bg-slate-900">
           {isImage(url) ? (
-            <img src={url} alt="Preview" className="w-full h-full object-contain" />
+            <img src={toViewableUrl(url)} alt="Preview" className="w-full h-full object-contain" />
           ) : (
-            <iframe title="Preview" src={url} className="w-full h-full" />
+            <iframe title="Preview" src={toViewableUrl(url)} className="w-full h-full" />
           )}
         </div>
       </DialogContent>

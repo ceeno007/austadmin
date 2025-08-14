@@ -418,11 +418,11 @@ const DocumentUpload = () => {
             </div>
             <Button
               onClick={handleLogout}
-              variant="outline"
+              variant="destructive"
               className="flex items-center gap-2"
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
           

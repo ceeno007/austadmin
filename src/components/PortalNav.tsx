@@ -22,12 +22,12 @@ const PortalNav = ({ userName = "User" }: PortalNavProps) => {
           
           <div className="flex items-center">
             <Button
-              variant="ghost"
+              variant="destructive"
               size="sm"
               onClick={logout}
-              className="text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>

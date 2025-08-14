@@ -1273,16 +1273,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         {/* Moved: How did you hear about us? will be placed at final confirmation block */}
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900/60">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-[#FF5500]/10 flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4m0 4h.01M21 12c0 4.971-4.029 9-9 9s-9-4.029-9-9 4.029-9 9-9 9 4.029 9 9z" stroke="#FF5500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </div>
-              <div className="text-sm sm:text-base text-gray-700 dark:text-gray-200">
-                Pro-tip: One section at a time. Everything is big and easy to tap.
-              </div>
-            </div>
-          </div>
+          {/* Pro-tip removed */}
 
 
           {/* Passport Photo Section */}
