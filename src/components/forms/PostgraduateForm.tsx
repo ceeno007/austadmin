@@ -362,6 +362,15 @@ const FileUploadField = ({
             ) : (
               <span className="text-sm text-gray-800 text-center">{fileNames}</span>
             )}
+            {(isUrl || hasOriginalPath) && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPreviewUrl((isUrl ? (value as string) : (originalPath as string)) as string); }}
+                className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-700 dark:text-blue-200 dark:hover:bg-slate-600 text-xs transition-colors"
+              >
+                View previously uploaded
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => {
