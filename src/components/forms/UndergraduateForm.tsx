@@ -171,7 +171,7 @@ const FileUploadField = ({
   };
 
   // Check if the value is a URL (from backend) or a File object
-  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.includes('cloudinary.com'));
+  const isUrl = typeof value === 'string' && /^(https?:|blob:|data:)/i.test(value);
   const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
   
   // Check if File object has originalPath (URL from backend)
@@ -461,8 +461,8 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   // Create the file object
   const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
   
-  // Construct full URL for the original path
-  const fullUrl = filePath.startsWith('http') || filePath.includes('cloudinary.com') ? filePath : `https://admissions-jcvy.onrender.com/${filePath}`;
+  // Use exactly what backend provided (do not prefix with site/base URL)
+  const fullUrl = filePath;
   
   // Add the original path as a custom property
   Object.defineProperty(placeholderFile, 'originalPath', {

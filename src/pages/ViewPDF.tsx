@@ -12,18 +12,8 @@ const ViewPDF = () => {
 
   useEffect(() => {
     if (pdfSrc) {
-      const base = (import.meta as any).env?.VITE_API_BASE_URL || (window as any)?.API_BASE_URL || "https://api.austinspire.com";
-      let fullPdfUrl = pdfSrc;
-      if (!/^https?:\/\//i.test(pdfSrc)) {
-        // If it already starts with a slash assume absolute path on API base
-        if (pdfSrc.startsWith("/")) {
-          fullPdfUrl = `${base}${pdfSrc}`;
-        } else {
-          // Otherwise assume it's a filename under /uploads
-          fullPdfUrl = `${base}/uploads/${pdfSrc}`;
-        }
-      }
-      setPdfUrl(fullPdfUrl);
+      // Use exactly what was provided (no prefixing)
+      setPdfUrl(pdfSrc);
     }
   }, [pdfSrc]);
 

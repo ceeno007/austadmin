@@ -177,7 +177,7 @@ const FileUploadField = ({
   };
 
   // Check if the value is a URL (from backend) or a File object
-  const isUrl = typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://') || value.includes('cloudinary.com'));
+  const isUrl = typeof value === 'string' && /^(https?:|blob:|data:)/i.test(value);
   const isFile = value instanceof File || (Array.isArray(value) && value.length > 0 && value[0] instanceof File);
   
   // Check if File object has originalPath (URL from backend)
@@ -379,8 +379,8 @@ const createPlaceholderFile = (filePath: string | undefined): File | null => {
   // Create the file object
   const placeholderFile = new File(byteArrays, fileName, { type: mimeType });
   
-  // Construct full URL for the original path
-  const fullUrl = filePath.startsWith('http') || filePath.includes('cloudinary.com') ? filePath : `https://admissions-jcvy.onrender.com/${filePath}`;
+  // Use exactly what backend provided (do not prefix with site/base URL)
+  const fullUrl = filePath;
   
   // Add the original path as a custom property
   Object.defineProperty(placeholderFile, 'originalPath', {
@@ -805,7 +805,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       };
 
       appendIfFilled('academic_session', foundationRemedialData.academicSession);
-      appendIfFilled('program_type', foundationRemedialData.program);
+      appendIfFilled('program_type', foundationRemedialData.programChoice.program);
       appendIfFilled('surname', pd.surname);
       appendIfFilled('first_name', pd.firstName);
       appendIfFilled('other_names', pd.otherNames);
@@ -841,7 +841,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
       // Add program choice
       const programChoiceData = {
-        program: foundationRemedialData.program,
+        program: foundationRemedialData.programChoice.program,
         subjectCombination: pc.subjectCombination,
         firstChoice: {
           university: pc.firstChoice.university,
@@ -993,7 +993,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
       // Add all required form data
       appendIfFilled('academic_session', foundationRemedialData.academicSession);
-      appendIfFilled('program_type', foundationRemedialData.program);
+      appendIfFilled('program_type', foundationRemedialData.programChoice.program);
       appendIfFilled('surname', pd.surname);
       appendIfFilled('first_name', pd.firstName);
       appendIfFilled('other_names', pd.otherNames);
@@ -1028,7 +1028,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
 
       // Add program choice
       const programChoiceData = {
-        program: foundationRemedialData.program,
+        program: foundationRemedialData.programChoice.program,
         subjectCombination: pc.subjectCombination,
         firstChoice: {
           university: pc.firstChoice.university,
@@ -1065,8 +1065,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         // If paid, redirect to success page
         navigate('/application-success');
       } else {
-        // If not paid, set program type for Squad payment and show payment modal
-      localStorage.setItem("programType", "foundation");
+      // If not paid, set program type for Squad payment and show payment modal
+      localStorage.setItem("programType", foundationRemedialData.programChoice.program || "foundation");
       setShowPaymentModal(true);
       }
     } catch (error) {
