@@ -213,9 +213,9 @@ const FileUploadField = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-medium text-gray-700">{label}</Label>
+      <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</Label>
       <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-        isPdf ? 'border-green-500 bg-green-50' : hasFiles ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        isPdf ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : hasFiles ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-300'
       }`}>
         <input
           type="file"
@@ -235,27 +235,25 @@ const FileUploadField = ({
           {hasFiles ? (
             <div className="flex flex-col items-center">
               {isUrl ? (
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
-                  title={value}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewUrl(value as string); }}
+                  className="text-green-700 dark:text-green-300 underline break-all text-sm text-center hover:text-green-900 hover:dark:text-green-200"
+                  title={value as string}
                 >
                   {getFileNameFromUrl(value)}
-                </a>
+                </button>
               ) : hasOriginalPath ? (
-                <a
-                  href={originalPath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-green-700 underline break-all text-sm text-center hover:text-green-900"
-                  title={originalPath}
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewUrl(originalPath as string); }}
+                  className="text-green-700 dark:text-green-300 underline break-all text-sm text-center hover:text-green-900 hover:dark:text-green-200"
+                  title={originalPath as string}
                 >
                   {getFileNameFromUrl(originalPath)}
-                </a>
+                </button>
               ) : (
-                <span className="text-sm text-gray-800 text-center">{fileNames}</span>
+                <span className="text-sm text-gray-800 dark:text-gray-100 text-center">{fileNames}</span>
               )}
               <button
                 type="button"
@@ -1250,7 +1248,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       if (foundationRemedialData.passportPhoto.startsWith('http')) {
         return foundationRemedialData.passportPhoto;
       }
-      return `https://admissions-jcvy.onrender.com/${foundationRemedialData.passportPhoto}`;
+      const base = (import.meta as any).env?.VITE_API_BASE_URL || '';
+      const path = foundationRemedialData.passportPhoto.startsWith('/')
+        ? foundationRemedialData.passportPhoto
+        : `/${foundationRemedialData.passportPhoto}`;
+      return base ? `${base}${path}` : path;
     }
     return '';
   };
@@ -2462,7 +2464,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
            navigate("/payment-success");
          }}
        />
-     </div>
+    </div>
+    {previewUrl && (
+      <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title={getFileNameFromUrl(previewUrl)} />
+    )}
    );
  };
 
