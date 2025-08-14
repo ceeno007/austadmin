@@ -145,7 +145,33 @@ const Programs: React.FC = () => {
         list = list.filter(p => p.category === filterCategory);
       }
     }
-    return list;
+    // Always return alphabetically sorted. For Undergraduate, ignore degree prefixes (e.g., "B.Sc.", "B.Eng.")
+    const normalizeUndergradTitle = (title: string) => {
+      // Remove common degree prefixes at the start
+      const withoutPrefix = title
+        .replace(/^(B\.?\s*Sc\.?|B\.?\s*Eng\.?|BSc\.?|BEng\.?)\s+/i, "")
+        .trim();
+      return withoutPrefix;
+    };
+    const normalizePostgradTitle = (title: string) => {
+      // Remove common postgraduate degree prefixes at the start
+      const withoutPrefix = title
+        .replace(/^(M\.?\s*Sc\.?|MSc\.?|Ph\.?\s*D\.?|PhD\.?|Professional\s+Masters|Taught\s+Masters|Postgraduate\s+Diploma|PGD)\s+/i, "")
+        .trim();
+      return withoutPrefix;
+    };
+
+    const getSortKey = (p: Program) => {
+      if ((p.level || "").toLowerCase() === "undergraduate" || p.category === "undergraduate") {
+        return normalizeUndergradTitle(p.title).toLocaleLowerCase();
+      }
+      if ((p.level || "").toLowerCase() === "postgraduate" || p.category === "postgraduate") {
+        return normalizePostgradTitle(p.title).toLocaleLowerCase();
+      }
+      return p.title.toLocaleLowerCase();
+    };
+
+    return list.slice().sort((a, b) => getSortKey(a).localeCompare(getSortKey(b), undefined, { sensitivity: 'base' }));
   }, [search, filterCategory, activeTab]);
 
   const displayedPrograms = filteredPrograms.slice(0, visibleItems);

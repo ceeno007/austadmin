@@ -2,18 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useParams } from "react-router-dom";
 
 const ViewPDF = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const pdfSrc = queryParams.get("src");
   const title = queryParams.get("title") || "Program Handbook";
-  const { pdfUrl, setPdfUrl } = useParams<{ pdfSrc: string }>();
+  const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
     if (pdfSrc) {
-      const fullPdfUrl = `${API_ENDPOINTS.BASE_URL}/uploads/${pdfSrc}`;
+      const base = (import.meta as any).env?.VITE_API_BASE_URL || (window as any)?.API_BASE_URL || "https://api.austinspire.com";
+      let fullPdfUrl = pdfSrc;
+      if (!/^https?:\/\//i.test(pdfSrc)) {
+        // If it already starts with a slash assume absolute path on API base
+        if (pdfSrc.startsWith("/")) {
+          fullPdfUrl = `${base}${pdfSrc}`;
+        } else {
+          // Otherwise assume it's a filename under /uploads
+          fullPdfUrl = `${base}/uploads/${pdfSrc}`;
+        }
+      }
       setPdfUrl(fullPdfUrl);
     }
   }, [pdfSrc]);
