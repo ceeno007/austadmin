@@ -460,9 +460,8 @@ const autofillFromApplication = (application: any, prev: any) => {
 
   // Helper function to add endpoint to file path
   const addEndpointToPath = (path: string | undefined) => {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    return `https://admissions-jcvy.onrender.com/${path}`;
+    // Use exactly what backend provided
+    return path || null;
   };
 
   // Parse date string to get day, month, year
