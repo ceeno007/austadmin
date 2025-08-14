@@ -519,6 +519,11 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
       formData.append(key, value);
     }
   };
+  const isRealFile = (file: File | null | undefined): boolean => {
+    if (!file) return false;
+    const f: any = file as any;
+    return !(f?.isPlaceholder || f?.originalPath);
+  };
 
   // Add these fields first
   appendIfFilled('academic_session', data.academicSession || '');
@@ -533,14 +538,14 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   }
   appendIfFilled('second_class_of_degree', data.academicQualifications.qualification2?.grade);
   appendIfFilled('qualification_cgpa', data.academicQualifications.qualification1.cgpa);
-  if (data.passportPhoto && !data.passportPhoto.name.includes('http')) {
+  if (data.passportPhoto && isRealFile(data.passportPhoto)) {
     formData.append('passport_photo', data.passportPhoto);
   }
   if (data.academicQualifications.qualification2?.startDate && data.academicQualifications.qualification2.startDate.year && data.academicQualifications.qualification2.startDate.month && data.academicQualifications.qualification2.startDate.day) {
     appendIfFilled('second_qualification_start_date', `${data.academicQualifications.qualification2.startDate.year}-${data.academicQualifications.qualification2.startDate.month}-${data.academicQualifications.qualification2.startDate.day}`);
   }
-  if (data.statementOfPurpose && data.statementOfPurpose[0]) formData.append('statement_of_purpose', data.statementOfPurpose[0]);
-  if (data.academicQualifications.otherQualifications) formData.append('recommendation_letters', data.academicQualifications.otherQualifications);
+  if (data.statementOfPurpose && data.statementOfPurpose[0] && isRealFile(data.statementOfPurpose[0])) formData.append('statement_of_purpose', data.statementOfPurpose[0]);
+  if (data.academicQualifications.otherQualifications && isRealFile(data.academicQualifications.otherQualifications)) formData.append('recommendation_letters', data.academicQualifications.otherQualifications);
   appendIfFilled('second_year', data.academicQualifications.qualification2?.endDate?.year);
   if (data.personalDetails.dateOfBirth && data.personalDetails.dateOfBirth.year && data.personalDetails.dateOfBirth.month && data.personalDetails.dateOfBirth.day) {
     appendIfFilled('date_of_birth', `${data.personalDetails.dateOfBirth.year}-${data.personalDetails.dateOfBirth.month}-${data.personalDetails.dateOfBirth.day}`);
@@ -553,11 +558,11 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   }
   appendIfFilled('second_institution', data.academicQualifications.qualification2?.institution);
   appendIfFilled('first_referee_email', data.references.referee1.email);
-  if (data.academicQualifications.qualification2?.degreeCertificate) formData.append('second_degree_certificate', data.academicQualifications.qualification2.degreeCertificate);
+  if (data.academicQualifications.qualification2?.degreeCertificate && isRealFile(data.academicQualifications.qualification2.degreeCertificate)) formData.append('second_degree_certificate', data.academicQualifications.qualification2.degreeCertificate);
   appendIfFilled('second_qualification_cgpa', data.academicQualifications.qualification2?.cgpa);
   appendIfFilled('second_qualification_subject', data.academicQualifications.qualification2?.subject);
   appendIfFilled('second_referee_email', data.references.referee2.email);
-  if (data.academicQualifications.qualification1.degreeCertificate) formData.append('first_degree_certificate', data.academicQualifications.qualification1.degreeCertificate);
+  if (data.academicQualifications.qualification1.degreeCertificate && isRealFile(data.academicQualifications.qualification1.degreeCertificate)) formData.append('first_degree_certificate', data.academicQualifications.qualification1.degreeCertificate);
   appendIfFilled('applicant_type', data.applicantType);
   appendIfFilled('second_referee_name', data.references.referee2.name);
   appendIfFilled('country', data.personalDetails.country);
@@ -569,7 +574,7 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   appendIfFilled('first_referee_name', data.references.referee1.name);
   appendIfFilled('first_name', data.personalDetails.firstName);
   appendIfFilled('phone_number', data.personalDetails.phoneNumber);
-  if (data.academicQualifications.qualification1.transcript) formData.append('first_degree_transcript', data.academicQualifications.qualification1.transcript);
+  if (data.academicQualifications.qualification1.transcript && isRealFile(data.academicQualifications.qualification1.transcript)) formData.append('first_degree_transcript', data.academicQualifications.qualification1.transcript);
   appendIfFilled('surname', data.personalDetails.surname);
   if (data.academicQualifications.qualification1.startDate && data.academicQualifications.qualification1.startDate.year && data.academicQualifications.qualification1.startDate.month && data.academicQualifications.qualification1.startDate.day) {
     appendIfFilled('qualification_start_date', `${data.academicQualifications.qualification1.startDate.year}-${data.academicQualifications.qualification1.startDate.month}-${data.academicQualifications.qualification1.startDate.day}`);
@@ -580,7 +585,7 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   formData.append('how_did_you_hear', data.personalDetails.hearAboutUs ?? '');
   appendIfFilled('year', data.academicQualifications.qualification1.endDate?.year);
   appendIfFilled('academic_session', data.academicSession);
-  if (data.academicQualifications.qualification2?.transcript) formData.append('second_degree_transcript', data.academicQualifications.qualification2.transcript);
+  if (data.academicQualifications.qualification2?.transcript && isRealFile(data.academicQualifications.qualification2.transcript)) formData.append('second_degree_transcript', data.academicQualifications.qualification2.transcript);
   return formData;
 }
 
@@ -788,8 +793,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         }));
 
         if (applicationData.passport_photo_path) {
-          const fullUrl = `https://admissions-jcvy.onrender.com/${applicationData.passport_photo_path}`;
-          setPassportPhotoUrl(fullUrl);
+          // Use backend-provided path as-is
+          setPassportPhotoUrl(applicationData.passport_photo_path);
         }
       } catch (error) {
         console.error("Error setting form data:", error);

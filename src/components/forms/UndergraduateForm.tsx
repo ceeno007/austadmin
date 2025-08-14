@@ -644,6 +644,11 @@ interface UndergraduateRequestBody {
 
 // Helper function to create a request body for the API
 function buildUndergraduateFormData(data) {
+  const isRealFile = (file: File | null | undefined): boolean => {
+    if (!file) return false;
+    const f: any = file as any;
+    return !(f?.isPlaceholder || f?.originalPath);
+  };
   // Create a FormData object directly
   const formData = new FormData();
   
@@ -764,9 +769,9 @@ function buildUndergraduateFormData(data) {
         formData.append(`subjects_${examNumber}`, subjectsJson);
       }
       
-      // Add document
-      if (examData.documents) {
-        formData.append(`exam_type_${examNumber}_result`, examData.documents);
+      // Add document only if it's a real user-uploaded file
+      if (examData.documents && isRealFile(examData.documents as File)) {
+        formData.append(`exam_type_${examNumber}_result`, examData.documents as File);
       }
       
       // Only process max 2 exams
@@ -804,8 +809,8 @@ function buildUndergraduateFormData(data) {
   }
   
   // Add JAMB results document
-  if (jambResults?.documents) {
-    formData.append('jamb_result', jambResults.documents);
+  if (jambResults?.documents && isRealFile(jambResults.documents as File)) {
+    formData.append('jamb_result', jambResults.documents as File);
   }
   
   return formData;
