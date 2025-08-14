@@ -796,6 +796,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       appendIfFilled('nationality', pd.nationality === "Nigeria" ? "Nigerian" : pd.nationality);
       appendIfFilled('phone_number', pd.phoneNumber);
       appendIfFilled('email', pd.email);
+      appendIfFilled('how_did_you_hear', pd.hearAboutUs);
       if (pd.hasDisabilities === "yes") {
         formData.append('has_disability', "true");
         if (isFilled(pd.disabilityDescription)) {
