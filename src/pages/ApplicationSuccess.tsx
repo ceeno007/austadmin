@@ -47,6 +47,19 @@ const ApplicationSuccess = () => {
     }
   }, []);
 
+  // Lock page scroll to prevent seeing other pages underneath
+  useEffect(() => {
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+    return () => {
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    };
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -143,7 +156,7 @@ const ApplicationSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <motion.div 
         className="max-w-3xl mx-auto"
         initial={{ opacity: 0 }}

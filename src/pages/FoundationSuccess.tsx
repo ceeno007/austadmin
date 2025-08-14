@@ -23,7 +23,7 @@ const FoundationSuccess: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <div className="text-center mb-6">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
