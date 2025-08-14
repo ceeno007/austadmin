@@ -2464,10 +2464,10 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
            navigate("/payment-success");
          }}
        />
-    </div>
-    {previewUrl && (
-      <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title={getFileNameFromUrl(previewUrl)} />
-    )}
+        {previewUrl && (
+          <MediaPreviewDialog url={previewUrl} open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)} title="Preview" />
+        )}
+      </div>
     );
  };
 
