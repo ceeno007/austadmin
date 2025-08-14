@@ -2749,7 +2749,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
       </div>
 
-      {/* How did you hear about us - at the end */}
+      {/* How did you hear about us - own container before payment */}
       <div className="mt-6">
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>

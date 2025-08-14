@@ -2311,15 +2311,15 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       </div>
     </div>
 
-    {/* How did you hear about us - at the end */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    {/* How did you hear about us - own container before payment */}
+    <div className="mt-6">
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
         <Select
           value={postgraduateData.personalDetails.hearAboutUs || ''}
           onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
         >
-          <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+          <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
           <SelectContent>
