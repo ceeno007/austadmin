@@ -259,9 +259,9 @@ const FileUploadField = ({
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewUrl((isUrl ? (value as string) : (originalPath as string)) as string); }}
-                  className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-700 dark:text-blue-200 dark:hover:bg-slate-600 text-xs transition-colors"
+                  className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 text-sm transition-colors"
                 >
-                  View previously uploaded
+                  Preview previously submitted
                 </button>
               )}
               {isFile && !isUrl && !hasOriginalPath && (
@@ -274,7 +274,7 @@ const FileUploadField = ({
                     const blobUrl = URL.createObjectURL(fileObj);
                     setPreviewUrl(blobUrl);
                   }}
-                  className="mt-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-700 dark:text-blue-200 dark:hover:bg-slate-600 text-xs transition-colors"
+                  className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 text-sm transition-colors"
                 >
                   Preview file
                 </button>
@@ -469,18 +469,38 @@ const autofillFromApplication = (application: any, prev: any) => {
     };
   };
 
-  // Create a placeholder file for the exam result
+  // Create a placeholder file for the exam result with original URL attached
   const createExamResultFile = (path: string | undefined) => {
     if (!path) return null;
     const filename = path.split('/').pop() || 'exam_result.pdf';
-    return new File([], filename, { type: 'application/pdf' });
+    // Infer mime type from extension
+    const lower = filename.toLowerCase();
+    let mime: string = 'application/octet-stream';
+    if (lower.endsWith('.pdf')) mime = 'application/pdf';
+    else if (lower.endsWith('.png')) mime = 'image/png';
+    else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) mime = 'image/jpeg';
+    const file = new File([], filename, { type: mime });
+    const fullUrl = addEndpointToPath(path) as string;
+    try {
+      Object.defineProperty(file, 'originalPath', { value: fullUrl, writable: false });
+    } catch {}
+    return file;
   };
 
-  // Create a placeholder file for the passport photo
+  // Create a placeholder file for the passport photo with original URL attached
   const createPassportPhotoFile = (path: string | undefined) => {
     if (!path) return null;
     const filename = path.split('/').pop() || 'passport.jpg';
-    return new File([], filename, { type: 'image/jpeg' });
+    const lower = filename.toLowerCase();
+    let mime: string = 'application/octet-stream';
+    if (lower.endsWith('.png')) mime = 'image/png';
+    else if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) mime = 'image/jpeg';
+    const file = new File([], filename, { type: mime });
+    const fullUrl = addEndpointToPath(path) as string;
+    try {
+      Object.defineProperty(file, 'originalPath', { value: fullUrl, writable: false });
+    } catch {}
+    return file;
   };
 
   return {
