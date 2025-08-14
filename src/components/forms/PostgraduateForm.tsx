@@ -365,7 +365,11 @@ const FileUploadField = ({
             {(isUrl || hasOriginalPath) && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); setPreviewUrl((isUrl ? (value as string) : (originalPath as string)) as string); }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  const targetUrl = (isUrl ? (value as string) : (originalPath as string)) as string;
+                  setPreviewUrl(targetUrl);
+                }}
                 className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 text-sm transition-colors"
               >
                 Preview previously submitted

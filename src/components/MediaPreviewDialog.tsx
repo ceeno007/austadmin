@@ -10,13 +10,7 @@ type Props = {
 
 const isImage = (url: string) => /(\.png|\.jpg|\.jpeg|\.gif|\.webp|\.bmp|\.svg)$/i.test(url);
 const isPdf = (url: string) => /\.pdf($|\?)/i.test(url);
-const toViewableUrl = (url: string) => {
-  if (!url) return '';
-  if (/^(https?:|blob:|data:)/i.test(url)) return url; // already absolute or local
-  const cleaned = url.startsWith('/') ? url : `/${url}`;
-  const base = (import.meta as any).env?.VITE_API_BASE_URL || (window as any)?.API_BASE_URL || '';
-  return base ? `${base}${cleaned}` : cleaned;
-};
+const toViewableUrl = (url: string) => url || '';
 
 const MediaPreviewDialog: React.FC<Props> = ({ url, open, onOpenChange, title }) => {
   const [displayUrl, setDisplayUrl] = useState<string>("");

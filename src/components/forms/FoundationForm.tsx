@@ -149,7 +149,8 @@ const FileUploadField = ({
   onChange, 
   onRemove, 
   maxSize = "10MB",
-  multiple = false 
+  multiple = false,
+  onPreview,
 }: { 
   id: string;
   label: string;
@@ -159,6 +160,7 @@ const FileUploadField = ({
   onRemove: () => void;
   maxSize?: string;
   multiple?: boolean;
+  onPreview?: (url: string) => void;
 }) => {
   const hasFiles = value && (Array.isArray(value) ? value.length > 0 : true);
   
@@ -258,7 +260,12 @@ const FileUploadField = ({
               {(isUrl || hasOriginalPath) && (
                 <button
                   type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPreviewUrl((isUrl ? (value as string) : (originalPath as string)) as string); }}
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    e.stopPropagation(); 
+                    const targetUrl = (isUrl ? (value as string) : (originalPath as string)) as string;
+                    if (onPreview) onPreview(targetUrl); else setPreviewUrl(targetUrl);
+                  }}
                   className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 text-sm transition-colors"
                 >
                   Preview previously submitted
@@ -272,7 +279,7 @@ const FileUploadField = ({
                     e.stopPropagation(); 
                     const fileObj = Array.isArray(value) ? (value[0] as File) : (value as File);
                     const blobUrl = URL.createObjectURL(fileObj);
-                    setPreviewUrl(blobUrl);
+                    if (onPreview) onPreview(blobUrl); else setPreviewUrl(blobUrl);
                   }}
                   className="mt-3 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 text-sm transition-colors"
                 >
@@ -2332,6 +2339,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                     }
                   }
                 }))}
+                onPreview={(url) => setPreviewUrl(url)}
               />
             </div>
           </div>
