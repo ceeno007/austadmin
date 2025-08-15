@@ -170,7 +170,7 @@ const Navbar = () => {
           />
           
           {/* Menu Content */}
-          <div id="primary-navigation" className="fixed top-[72px] left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+          <div id="primary-navigation" className="fixed top-[72px] bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b shadow-lg overflow-y-auto overscroll-contain" role="dialog" aria-modal="true" aria-label="Mobile navigation">
               <div className="container mx-auto px-4 py-6 space-y-4">
               
               {navLinks.map((link) => (
