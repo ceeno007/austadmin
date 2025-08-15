@@ -1924,20 +1924,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                     <img 
                       src={passportPhotoUrl}
                       alt="Passport"
-                      className="w-full h-full object-cover cursor-pointer"
-                      onClick={() => passportPhotoInputRef.current?.click()}
+                      className="w-full h-full object-cover"
                     />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPassportPhotoUrl(null);
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full"
-                    >
-                      <X className="h-4 w-4 text-red-600" />
-                    </button>
-                    {/* Overlay 'Change Photo' button on hover */}
                     <button
                       type="button"
                       onClick={() => passportPhotoInputRef.current?.click()}
@@ -1952,23 +1940,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       src={URL.createObjectURL(postgraduateData.passportPhoto)} 
                       alt="Passport" 
                       className="w-full h-full object-cover"
-                      onClick={() => passportPhotoInputRef.current?.click()}
-                      style={{ cursor: 'pointer' }}
                     />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPostgraduateData(prev => ({
-                          ...prev,
-                          passportPhoto: null
-                        }));
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full"
-                    >
-                      <X className="h-4 w-4 text-red-600" />
-                    </button>
-                    {/* Overlay 'Change Photo' button on hover */}
                     <button
                       type="button"
                       onClick={() => passportPhotoInputRef.current?.click()}
@@ -1981,17 +1953,11 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                   <label
                     htmlFor="passportPhoto"
                     className="flex flex-col items-center justify-center w-full h-full cursor-pointer"
-                    onClick={() => passportPhotoInputRef.current?.click()}
                   >
                     <Upload className="h-8 w-8 text-gray-400" />
-                    <span className="mt-2 text-sm text-gray-600 text-center">
-                      Click to upload passport photo
-                    </span>
+                    <span className="mt-2 text-sm text-gray-500">Click to upload or drag and drop</span>
                     <span className="mt-1 text-xs text-gray-500 text-center">
                       JPG, JPEG, PNG (Max: 1MB)
-                    </span>
-                    <span className="mt-2 text-xs text-gray-500 text-center">
-                      Please upload a recent passport-sized photograph with clear background
                     </span>
                   </label>
                 )}
