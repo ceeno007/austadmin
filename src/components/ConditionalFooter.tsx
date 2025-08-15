@@ -8,7 +8,10 @@ const ConditionalFooter = () => {
   // Don't show footer on document upload page, terms, or privacy pages
   if (location.pathname === '/document-upload' || 
       location.pathname === '/terms' || 
-      location.pathname === '/privacy') {
+      location.pathname === '/privacy' ||
+      location.pathname === '/application-success' ||
+      location.pathname === '/payment-success' ||
+      location.pathname === '/foundation-success') {
     return null;
   }
   
