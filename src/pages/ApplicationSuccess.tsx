@@ -47,18 +47,7 @@ const ApplicationSuccess = () => {
     }
   }, []);
 
-  // Lock page scroll to prevent seeing other pages underneath
-  useEffect(() => {
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-    return () => {
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
-    };
-  }, []);
+  // Removed scroll lock to allow scrolling on this page
 
   const handleLogout = () => {
     logout();
@@ -156,7 +145,7 @@ const ApplicationSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 py-8 px-4 sm:px-6 lg:px-8 overflow-auto">
       <motion.div 
         className="max-w-3xl mx-auto"
         initial={{ opacity: 0 }}
@@ -164,7 +153,7 @@ const ApplicationSuccess = () => {
         transition={{ duration: 0.5 }}
       >
         <motion.div 
-          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
           initial={{ y: 50 }}
           animate={{ y: 0 }}
           transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
@@ -217,34 +206,34 @@ const ApplicationSuccess = () => {
           <div className="p-8">
             {/* Email notification section */}
             <motion.div 
-              className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 shadow-sm border border-amber-100 mb-8"
+              className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 rounded-xl p-6 shadow-sm border border-amber-100 dark:border-gray-700 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.5 }}
             >
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
-                  <Bell className="h-6 w-6 text-amber-600" />
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 dark:bg-slate-700">
+                  <Bell className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-amber-900 mb-2 text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-amber-900 dark:text-gray-100 mb-2 text-center sm:text-left">
                     Important: Check Your Email Regularly
                   </h3>
-                  <p className="text-amber-700 mb-3 text-center sm:text-left">
+                  <p className="text-amber-700 dark:text-gray-300 mb-3 text-center sm:text-left">
                     We will be sending important updates about your application status and next steps to your registered email address.
                   </p>
                   
-                  <ul className="space-y-2 text-sm text-amber-800">
+                  <ul className="space-y-2 text-sm text-amber-800 dark:text-gray-200">
                     <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                       <span>Check your inbox (and spam folder) daily for communications from AUST</span>
                     </li>
                     <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                       <span>Add <strong>admissions@aust.edu.ng</strong> to your contacts to prevent emails going to spam</span>
                     </li>
                     <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-5 w-5 mr-2 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                       <span>Respond promptly to any requests for additional information</span>
                     </li>
                   </ul>
@@ -254,20 +243,20 @@ const ApplicationSuccess = () => {
 
             {/* Next steps section */}
             <motion.div 
-              className="bg-blue-50 rounded-xl p-6 shadow-sm border border-blue-100 mb-8"
+              className="bg-blue-50 dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-blue-100 dark:border-gray-700 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
             >
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-slate-700">
+                  <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-2 text-center sm:text-left">
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-gray-100 mb-2 text-center sm:text-left">
                     What Happens Next
                   </h3>
-                  <ol className="space-y-3 text-sm text-blue-800 list-decimal list-inside">
+                  <ol className="space-y-3 text-sm text-blue-800 dark:text-gray-300 list-decimal list-inside">
                     <li className="pl-2">Our admissions team will review your application</li>
                     <li className="pl-2">You may be contacted for additional documents or information</li>
                     <li className="pl-2">Shortlisted candidates may be invited for an interview</li>
@@ -288,19 +277,19 @@ const ApplicationSuccess = () => {
 
             {/* Contact section */}
             <motion.div 
-              className="mt-8 border-t border-gray-200 pt-6"
+              className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.5 }}
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Need Help?</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Need Help?</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 If you have any questions about your application, please contact our admissions team:
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a 
                   href="mailto:admissions@aust.edu.ng" 
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
+                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-300 dark:bg-slate-800 dark:hover:bg-slate-700"
                 >
                   <Mail className="h-4 w-4 mr-2" />
                   admissions@aust.edu.ng
@@ -327,7 +316,7 @@ const ApplicationSuccess = () => {
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white dark:border-gray-700"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Home

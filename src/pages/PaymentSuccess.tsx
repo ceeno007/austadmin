@@ -7,17 +7,17 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
-      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
+      <div className="max-w-md w-full p-8 bg-white dark:bg-gray-900/60 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 text-center">
         <div className="flex justify-center mb-6">
           <CheckCircle2 className="h-16 w-16 text-green-500" />
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Payment Successful!
         </h1>
         
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
           Your payment has been processed successfully. Please check your email for further updates and instructions.
         </p>
 
@@ -32,7 +32,7 @@ const PaymentSuccess = () => {
           <Button
             onClick={() => navigate('/')}
             variant="outline"
-            className="w-full"
+            className="w-full dark:border-gray-600 dark:text-gray-100"
           >
             Return to Home
           </Button>

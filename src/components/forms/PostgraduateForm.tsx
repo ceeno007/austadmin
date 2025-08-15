@@ -837,6 +837,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         [field]: value
       }
     }));
+    triggerAutoSaveDraft();
   };
 
   const handleDateChange = (field: string, type: "day" | "month" | "year", value: string) => {
@@ -850,6 +851,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         }
       }
     }));
+    triggerAutoSaveDraft();
   };
 
   const handleAcademicDateChange = (
@@ -902,6 +904,46 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           : value // This handles the case where we're setting the entire field (for otherQualifications)
       }
     }));
+    // Auto-save after academic qualification change
+    triggerAutoSaveDraft();
+  };
+
+  // Debounced auto-save draft using refs to always capture latest data
+  const autosaveTimeoutRef = useRef<number | null>(null);
+  const latestDataRef = useRef(postgraduateData);
+  useEffect(() => {
+    latestDataRef.current = postgraduateData;
+    if (autosaveTimeoutRef.current) {
+      window.clearTimeout(autosaveTimeoutRef.current);
+    }
+    autosaveTimeoutRef.current = window.setTimeout(async () => {
+      try {
+        // Save only if there's at least some user-entered content
+        const hasAnyData = Boolean(
+          latestDataRef.current.personalDetails.surname ||
+          latestDataRef.current.personalDetails.firstName ||
+          latestDataRef.current.personalDetails.email ||
+          latestDataRef.current.academicQualifications.qualification1.type ||
+          latestDataRef.current.academicQualifications.qualification1.degreeCertificate ||
+          (latestDataRef.current.statementOfPurpose && latestDataRef.current.statementOfPurpose.length > 0)
+        );
+        if (!hasAnyData) return;
+        const formData = buildPostgraduateFormData(latestDataRef.current);
+        formData.append('is_draft', 'true');
+        await apiService.submitPostgraduateApplication(formData);
+      } catch (e) {
+        // Silent fail for autosave
+      }
+    }, 1000);
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        window.clearTimeout(autosaveTimeoutRef.current);
+      }
+    };
+  }, [postgraduateData]);
+
+  const triggerAutoSaveDraft = () => {
+    // No-op: kept for compatibility with existing calls; useEffect above handles debounced autosave
   };
 
   const isFormValid = () => {
@@ -1297,6 +1339,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       setIsProcessingPaymentState(true);
       const formData = buildPostgraduateFormData(postgraduateData);
       formData.append('is_draft', 'false');
+      formData.append('submitted', 'true');
       
       const response = await apiService.submitPostgraduateApplication(formData) as { applications?: Array<{ has_paid: boolean; referee_1: any; referee_2: any }> };
       
@@ -1305,10 +1348,16 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       
       // Check if user has already paid
       if (response.applications?.[0]?.has_paid) {
-        // If paid, redirect to reference status page
-        navigate('/reference-status');
+        // If paid, redirect to referee status page
+        navigate('/referee-status', {
+          state: {
+            referee1: response.applications[0].referee_1,
+            referee2: response.applications[0].referee_2
+          }
+        });
       } else {
-        // If not paid, show payment modal
+        // If not paid, set program type for Squad payment and show payment modal
+        localStorage.setItem("programType", "postgraduate");
         setShowPaymentModal(true);
       }
     } catch (error) {
@@ -1408,6 +1457,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
     } else {
       setOpenUniversityPopover2(false);
     }
+    triggerAutoSaveDraft();
   };
 
   // Update the CommandInput to show minimum character message and loading state
@@ -1724,6 +1774,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       setIsProcessingPaymentState(true);
       const formData = buildPostgraduateFormData(postgraduateData);
       formData.append('is_draft', 'false');
+      formData.append('submitted', 'true');
       
       const response = await apiService.submitPostgraduateApplication(formData) as { applications?: Array<{ has_paid: boolean; referee_1: any; referee_2: any }> };
       
@@ -2942,6 +2993,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                   ...prev,
                   statementOfPurpose: []
                 }))}
+                onBlur={triggerAutoSaveDraft}
                 maxSize="5MB"
                 multiple
               />
@@ -3017,7 +3069,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               <Input
                 placeholder="Enter referee's full name"
                 value={postgraduateData.references.referee1.name}
-                onChange={(e) => setPostgraduateData(prev => ({
+                onChange={(e) => { setPostgraduateData(prev => ({
                   ...prev,
                   references: {
                     ...prev.references,
@@ -3026,7 +3078,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       name: e.target.value
                     }
                   }
-                }))}
+                })); triggerAutoSaveDraft(); }
                 className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>
@@ -3059,7 +3111,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               <Input
                 placeholder="Enter referee's full name"
                 value={postgraduateData.references.referee2.name}
-                onChange={(e) => setPostgraduateData(prev => ({
+                onChange={(e) => { setPostgraduateData(prev => ({
                   ...prev,
                   references: {
                     ...prev.references,
@@ -3068,7 +3120,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       name: e.target.value
                     }
                   }
-                }))}
+                })); triggerAutoSaveDraft(); }
                 className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>
@@ -3114,10 +3166,10 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 type="checkbox"
                 id="declaration"
                 checked={postgraduateData.declaration === "true"}
-                onChange={(e) => setPostgraduateData(prev => ({ 
+                onChange={(e) => { setPostgraduateData(prev => ({ 
                   ...prev, 
                   declaration: e.target.checked ? "true" : "" 
-                }))}
+                })); triggerAutoSaveDraft(); }}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 required
               />
