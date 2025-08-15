@@ -29,7 +29,6 @@ const Index = () => {
           </div>
 
           <h1 className="mt-6 text-4xl md:text-5xl font-bold tracking-tight">Start your journey</h1>
-          <p className="mt-3 text-gray-600 text-base md:text-lg">AUST Admissions Portal</p>
 
           <div className="mx-auto mt-10 grid w-full max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
             <Button onClick={() => navigate("/signup")} className="h-12 rounded-xl text-base bg-[#FF5500] hover:bg-[#e64d00]">
