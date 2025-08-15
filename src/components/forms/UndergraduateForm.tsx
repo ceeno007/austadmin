@@ -141,7 +141,7 @@ const FileUploadField = ({
   value, 
   onChange, 
   onRemove, 
-  maxSize = "10MB",
+  maxSize = "1MB",
   multiple = false 
 }: { 
   id: string;
@@ -224,6 +224,17 @@ const FileUploadField = ({
   };
 
   const handleFiles = (files: File[]) => {
+    // Check file size for images (1MB limit)
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    if (imageFiles.length > 0) {
+      for (const file of imageFiles) {
+        if (file.size > 1 * 1024 * 1024) { // 1MB limit
+          toast.error("Image file size should be less than 1MB");
+          return;
+        }
+      }
+    }
+    
     if (multiple) {
       onChange(files);
     } else {
@@ -257,7 +268,7 @@ const FileUploadField = ({
       <Label>{label}</Label>
       <div 
         className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
-          isPdf ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500 bg-white dark:bg-slate-800'
+          hasFiles ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500 bg-white dark:bg-slate-800'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -1143,6 +1154,12 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
   };
 
   const handleFileUpload = (fieldId: string, file: File) => {
+    // Check file size for images (1MB limit)
+    if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) {
+      toast.error("Image file size should be less than 1MB");
+      return;
+    }
+    
     setUndergraduateData((prev) => ({
       ...prev,
       passportPhoto: file
@@ -2770,33 +2787,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
       </div>
 
-      {/* How did you hear about us - own container before payment */}
-      <div className="mt-6">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-          <Select
-            value={undergraduateData.personalDetails.hearAboutUs || ''}
-            onValueChange={(value) => handlePersonalDetailsChange('hearAboutUs', value)}
-          >
-            <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="google">Google Search</SelectItem>
-              <SelectItem value="facebook">Facebook</SelectItem>
-              <SelectItem value="instagram">Instagram</SelectItem>
-              <SelectItem value="twitter">Twitter/X</SelectItem>
-              <SelectItem value="tiktok">TikTok</SelectItem>
-              <SelectItem value="youtube">YouTube</SelectItem>
-              <SelectItem value="friend">Friend/Family</SelectItem>
-              <SelectItem value="alumni">Alumni</SelectItem>
-              <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-              <SelectItem value="school">School Counselor/Teacher</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+
       {/* Declaration Section */}
             <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
               <div className="flex items-center gap-3 mb-6">
@@ -2850,6 +2841,34 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </div>
       </div>
       
+            {/* How did you hear about us? - Final field before payment */}
+            <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+                <Select
+                  value={undergraduateData.personalDetails.hearAboutUs || ''}
+                  onValueChange={(value) => handlePersonalDetailsChange('hearAboutUs', value)}
+                >
+                  <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="google">Google Search</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="twitter">Twitter/X</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                    <SelectItem value="youtube">YouTube</SelectItem>
+                    <SelectItem value="friend">Friend/Family</SelectItem>
+                    <SelectItem value="alumni">Alumni</SelectItem>
+                    <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                    <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Form Actions */}
             <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
               <div className="flex flex-col gap-6">
@@ -2857,13 +2876,13 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
                   <h3 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ready to Submit?</h3>
                   <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base">Review your information and submit your application</p>
                 </div>
-                <div className="flex flex-col gap-3 w-full">
+                <div className="flex gap-3 w-full">
         <Button
           type="button"
           variant="outline"
           onClick={handleSaveAsDraft}
           disabled={isProcessingPayment || isSaving}
-                    className="w-full px-6 md:px-8 py-3 rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200"
+                    className="flex-1 px-4 py-2 text-sm rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200"
         >
           {isSaving ? (
             <span className="flex items-center justify-center">
@@ -2879,7 +2898,7 @@ const UndergraduateForm = ({ onPayment, isProcessingPayment }: UndergraduateForm
         </Button>
                   <Button 
                     type="submit" 
-                    className="w-full px-6 md:px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
+                    className="flex-1 px-4 py-2 text-sm rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
                     disabled={isSubmitting || isSaving}
                   >
           {isSubmitting ? (

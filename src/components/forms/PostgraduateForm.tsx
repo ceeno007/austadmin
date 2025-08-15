@@ -130,6 +130,7 @@ interface ApplicationData {
   second_degree_certificate_path?: string;
   second_degree_transcript_path?: string;
   statement_of_purpose_path?: string;
+  research_proposal_path?: string;
   recommendation_letters_paths?: string;
   has_paid?: boolean;
   id?: number;
@@ -323,7 +324,7 @@ const FileUploadField = ({
       <Label>{label}</Label>
       <div 
         className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
-          isPdf ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500 bg-white dark:bg-slate-800'
+          hasFiles ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-blue-500 bg-white dark:bg-slate-800'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -544,7 +545,11 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
   if (data.academicQualifications.qualification2?.startDate && data.academicQualifications.qualification2.startDate.year && data.academicQualifications.qualification2.startDate.month && data.academicQualifications.qualification2.startDate.day) {
     appendIfFilled('second_qualification_start_date', `${data.academicQualifications.qualification2.startDate.year}-${data.academicQualifications.qualification2.startDate.month}-${data.academicQualifications.qualification2.startDate.day}`);
   }
-  if (data.statementOfPurpose && data.statementOfPurpose[0] && isRealFile(data.statementOfPurpose[0])) formData.append('statement_of_purpose', data.statementOfPurpose[0]);
+  // For PhD, submit as research_proposal; for others, submit as statement_of_purpose
+  if (data.statementOfPurpose && data.statementOfPurpose[0] && isRealFile(data.statementOfPurpose[0])) {
+    const isPhD = data.programType === 'PhD';
+    formData.append(isPhD ? 'research_proposal' : 'statement_of_purpose', data.statementOfPurpose[0]);
+  }
   if (data.academicQualifications.otherQualifications && isRealFile(data.academicQualifications.otherQualifications)) formData.append('recommendation_letters', data.academicQualifications.otherQualifications);
   appendIfFilled('second_year', data.academicQualifications.qualification2?.endDate?.year);
   if (data.personalDetails.dateOfBirth && data.personalDetails.dateOfBirth.year && data.personalDetails.dateOfBirth.month && data.personalDetails.dateOfBirth.day) {
@@ -591,6 +596,13 @@ function buildPostgraduateFormData(data: PostgraduateFormData): FormData {
 
 const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProcessingPayment, application }) => {
   const { user } = useAuth();
+  const normalizeProgramType = (value: string | undefined): "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD" => {
+    const v = (value || "").trim().toLowerCase();
+    if (["phd", "ph.d", "ph.d.", "doctor of philosophy"].includes(v)) return "PhD";
+    if (["msc", "m.sc", "m.sc.", "masters", "master", "taught masters", "taught master"].includes(v)) return "MSc";
+    if (["postgraduate diploma", "pgd", "pg.d", "postgraduate diploma/taught masters", "postgraduate diploma / taught masters", "pgd/msc"].includes(v)) return "Postgraduate Diploma/Taught Masters";
+    return "Postgraduate Diploma/Taught Masters";
+  };
   // Get application data from localStorage if available
   const [applicationData, setApplicationData] = useState<ApplicationData>({});
   const [universities, setUniversities] = useState<University[]>([]);
@@ -730,7 +742,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         setPostgraduateData(prev => ({
           ...prev,
           academicSession: applicationData.academic_session || prev.academicSession,
-          programType: (applicationData.program_type as "Postgraduate Diploma/Taught Masters" | "MSc" | "PhD") || prev.programType,
+          programType: normalizeProgramType(applicationData.program_type) || prev.programType,
           program: applicationData.selected_program || prev.program,
           applicantType: (applicationData.applicant_type as "Nigerian" | "International") || prev.applicantType,
           personalDetails: {
@@ -778,7 +790,9 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
             },
             otherQualifications: applicationData.recommendation_letters_paths ? createPlaceholderFile(applicationData.recommendation_letters_paths) : prev.academicQualifications.otherQualifications,
           },
-          statementOfPurpose: applicationData.statement_of_purpose_path ? [createPlaceholderFile(applicationData.statement_of_purpose_path)] : prev.statementOfPurpose,
+          statementOfPurpose: (applicationData.program_type === 'PhD' && applicationData.research_proposal_path)
+            ? [createPlaceholderFile(applicationData.research_proposal_path)]
+            : (applicationData.statement_of_purpose_path ? [createPlaceholderFile(applicationData.statement_of_purpose_path)] : prev.statementOfPurpose),
           references: {
             referee1: {
               name: applicationData.first_referee_name || prev.references.referee1.name,
@@ -1035,9 +1049,9 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         return false;
       }
     }
-    // Validate statement of purpose
+    // Validate Statement of Purpose or Research Proposal depending on program type
     if (postgraduateData.statementOfPurpose.length === 0) {
-      toast.error("Statement of purpose is required");
+      toast.error(postgraduateData.programType === 'PhD' ? "Research proposal is required" : "Statement of purpose is required");
       return false;
     }
     // Validate references
@@ -1243,9 +1257,9 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         return;
       }
 
-      // Statement of purpose validation
+      // Statement of Purpose / Research Proposal validation
       if (postgraduateData.statementOfPurpose.length === 0) {
-        toast.error("Statement of purpose is required");
+        toast.error(postgraduateData.programType === 'PhD' ? "Research proposal is required" : "Statement of purpose is required");
         return;
       }
 
@@ -1669,9 +1683,9 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         }
       }
 
-      // Validate statement of purpose
+      // Validate Statement of Purpose or Research Proposal
       if (postgraduateData.statementOfPurpose.length === 0) {
-        toast.error("Statement of purpose is required");
+        toast.error(postgraduateData.programType === 'PhD' ? "Research proposal is required" : "Statement of purpose is required");
         return;
       }
 
@@ -1829,9 +1843,14 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []);
                     if (files.length > 0) {
+                      const file = files[0];
+                      if (file.size > 1 * 1024 * 1024) { // 1MB limit
+                        toast.error("File size should be less than 1MB");
+                        return;
+                      }
                       setPostgraduateData(prev => ({
                         ...prev,
-                        passportPhoto: files[0]
+                        passportPhoto: file
                       }));
                       setPassportPhotoUrl(null); // Clear the URL if a new file is selected
                     }
@@ -1906,7 +1925,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       Click to upload passport photo
                     </span>
                     <span className="mt-1 text-xs text-gray-500 text-center">
-                      JPG, JPEG, PNG (Max: 5MB)
+                      JPG, JPEG, PNG (Max: 1MB)
                     </span>
                     <span className="mt-2 text-xs text-gray-500 text-center">
                       Please upload a recent passport-sized photograph with clear background
@@ -2041,34 +2060,6 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               required
             />
-          </div>
-        </div>
-
-        {/* How did you hear about us? */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-            <Select
-              value={postgraduateData.personalDetails.hearAboutUs || ''}
-              onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-            >
-              <SelectTrigger className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-                <SelectValue placeholder="Select an option" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="google">Google Search</SelectItem>
-                <SelectItem value="facebook">Facebook</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
-                <SelectItem value="twitter">Twitter/X</SelectItem>
-                <SelectItem value="tiktok">TikTok</SelectItem>
-                <SelectItem value="youtube">YouTube</SelectItem>
-                <SelectItem value="friend">Friend/Family</SelectItem>
-                <SelectItem value="alumni">Alumni</SelectItem>
-                <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-                <SelectItem value="school">School Counselor/Teacher</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
@@ -2334,33 +2325,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
       </div>
     </div>
 
-    {/* How did you hear about us - own container before payment */}
-    <div className="mt-6">
-      <div className="space-y-2">
-        <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-        <Select
-          value={postgraduateData.personalDetails.hearAboutUs || ''}
-          onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-        >
-          <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-            <SelectValue placeholder="Select an option" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="google">Google Search</SelectItem>
-            <SelectItem value="facebook">Facebook</SelectItem>
-            <SelectItem value="instagram">Instagram</SelectItem>
-            <SelectItem value="twitter">Twitter/X</SelectItem>
-            <SelectItem value="tiktok">TikTok</SelectItem>
-            <SelectItem value="youtube">YouTube</SelectItem>
-            <SelectItem value="friend">Friend/Family</SelectItem>
-            <SelectItem value="alumni">Alumni</SelectItem>
-            <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-            <SelectItem value="school">School Counselor/Teacher</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+
 
         {/* Academic Qualifications Section */}
         <div className="space-y-6 rounded-lg border-2 border-dashed border-gray-300 p-6">
@@ -2629,7 +2594,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               id="degreeCertificate"
               label={
                 <>
-                  Degree Certificate <span className="text-red-500 text-xs italic">Required</span>
+                  Degree Certificate <span className="text-red-500 text-xs">*</span>
                 </>
               }
               accept=".pdf,.jpg,.jpeg,.png"
@@ -2642,7 +2607,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               id="academicTranscript"
               label={
                 <>
-                  Academic Transcript <span className="text-red-500 text-xs italic">Required</span>
+                  Academic Transcript <span className="text-red-500 text-xs">*</span>
                 </>
               }
               accept=".pdf,.jpg,.jpeg,.png"
@@ -2656,7 +2621,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           {/* Second Academic Qualification - Only for PhD */}
           {postgraduateData.programType === "PhD" && (
             <div className="space-y-4 mt-8">
-              <h4 className="font-medium"><b>Second Academic Qualification (Required for PhD)</b></h4>
+              <h4 className="font-medium"><b>Second Academic Qualification (<span className="text-red-500">*</span> for PhD)</b></h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <Label className="text-sm font-medium text-gray-700">
@@ -2790,7 +2755,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Start Date <span className="text-red-500">Required</span></Label>
+                  <Label>Start Date <span className="text-red-500">*</span></Label>
                   <div className="grid grid-cols-3 gap-2">
                     <Select
                       value={postgraduateData.academicQualifications.qualification2?.startDate?.day || ""}
@@ -2841,7 +2806,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 </div>
 
                 <div className="space-y-2">
-                  <Label>End Date <span className="text-red-500">Required</span></Label>
+                  <Label>End Date <span className="text-red-500">*</span></Label>
                   <div className="grid grid-cols-3 gap-2">
                     <Select
                       value={postgraduateData.academicQualifications.qualification2?.endDate?.day || ""}
@@ -2896,7 +2861,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 id="qualification2DegreeCertificate"
                 label={
                   <>
-                    Second Degree Certificate <span className="text-red-500 text-xs italic">Required</span>
+                    Second Degree Certificate <span className="text-red-500 text-xs">*</span>
                   </>
                 }
                 accept=".pdf,.jpg,.jpeg,.png"
@@ -2909,7 +2874,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 id="qualification2Transcript"
                 label={
                   <>
-                    Second Degree Transcript <span className="text-red-500 text-xs italic">Required</span>
+                    Second Degree Transcript <span className="text-red-500 text-xs">*</span>
                   </>
                 }
                 accept=".pdf,.jpg,.jpeg,.png"
@@ -2964,7 +2929,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                 id="researchProposal"
                 label={
                   <>
-                    Research Proposal <span className="text-red-500 text-xs italic">Required</span>
+                    Research Proposal <span className="text-red-500 text-xs">*</span>
                   </>
                 }
                 accept=".pdf,.doc,.docx"
@@ -3027,8 +2992,8 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Academic References</h3>
       </div>
       <div className="space-y-4">
-        <div className="alert-info">
-          <p className="text-sm">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+          <p className="text-sm text-gray-700 dark:text-gray-200">
             It is your responsibility to ensure that you provide TWO references to support your application. Your
             referees must be able to comment on your academic suitability for the program. A secure link will be sent to the email address of each referee they must fill it or you cannot proceed with your application.
             <br />
@@ -3188,19 +3153,47 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
           </div>
         </div>
 
+        {/* How did you hear about us? - Final field before payment */}
+        <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+            <Select
+              value={postgraduateData.personalDetails.hearAboutUs || ''}
+              onValueChange={(value) => setPostgraduateData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+            >
+              <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="google">Google Search</SelectItem>
+                <SelectItem value="facebook">Facebook</SelectItem>
+                <SelectItem value="instagram">Instagram</SelectItem>
+                <SelectItem value="twitter">Twitter/X</SelectItem>
+                <SelectItem value="tiktok">TikTok</SelectItem>
+                <SelectItem value="youtube">YouTube</SelectItem>
+                <SelectItem value="friend">Friend/Family</SelectItem>
+                <SelectItem value="alumni">Alumni</SelectItem>
+                <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Form Buttons */}
         <div className="space-y-4">
-          <div className="flex flex-col gap-3">
+          <div className="flex gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={handleSaveAsDraft}
               disabled={isProcessingPaymentState || isSaving}
-              className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700"
+              className="flex-1 px-4 py-2 text-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700"
             >
               {isSaving ? (
                 <span className="flex items-center justify-center">
-                  <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
+                  <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
                   Saving...
                 </span>
               ) : (
@@ -3211,11 +3204,11 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
               type="button"
               onClick={handleProceedToPayment}
               disabled={isProcessingPaymentState || isSaving}
-              className="w-full"
+              className="flex-1 px-4 py-2 text-sm"
             >
               {isProcessingPaymentState ? (
                 <span className="flex items-center justify-center">
-                  <span className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
+                  <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#2563eb] mr-2"></span>
                   Processing...
                 </span>
               ) : (

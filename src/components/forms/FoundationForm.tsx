@@ -217,7 +217,7 @@ const FileUploadField = ({
     <div className="space-y-3">
       <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">{label}</Label>
       <div className={`border-2 border-dashed rounded-lg p-4 transition-colors ${
-        isPdf ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : hasFiles ? 'border-blue-500 bg-blue-50 dark:bg-slate-800' : 'border-gray-300'
+        hasFiles ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-gray-300'
       }`}>
         <input
           type="file"
@@ -1355,8 +1355,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                  onChange={(e) => {
                    const file = e.target.files?.[0];
                    if (file) {
-                     if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                       toast.error("File size should be less than 5MB");
+                     if (file.size > 1 * 1024 * 1024) { // 1MB limit
+                       toast.error("File size should be less than 1MB");
                        return;
                      }
                      handleFileUpload("passportPhoto", file);
@@ -1382,8 +1382,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                    if (files.length > 0) {
                      const file = files[0];
                      if (file.type.startsWith('image/')) {
-                       if (file.size > 5 * 1024 * 1024) {
-                         toast.error("File size should be less than 5MB");
+                       if (file.size > 1 * 1024 * 1024) {
+                         toast.error("File size should be less than 1MB");
                          return;
                        }
                        handleFileUpload("passportPhoto", file);
@@ -1438,7 +1438,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                          <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-amber-600" />
                        </div>
                        <p className="text-xs sm:text-sm text-gray-600 font-medium">Click or drag to upload</p>
-                       <p className="text-xs text-gray-500 mt-1">JPG, PNG (Max: 5MB)</p>
+                       <p className="text-xs text-gray-500 mt-1">JPG, PNG (Max: 1MB)</p>
                      </div>
                    </div>
                  )}
@@ -2391,34 +2391,6 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         </div>
       </div>
 
-      {/* How did you hear about us? - own container before payment */}
-      <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
-        <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
-                  <Select
-                    value={foundationRemedialData.personalDetails.hearAboutUs || ''}
-                    onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
-                  >
-            <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
-                      <SelectValue placeholder="Select an option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="google">Google Search</SelectItem>
-                      <SelectItem value="facebook">Facebook</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
-                      <SelectItem value="twitter">Twitter/X</SelectItem>
-                      <SelectItem value="tiktok">TikTok</SelectItem>
-                      <SelectItem value="youtube">YouTube</SelectItem>
-                      <SelectItem value="friend">Friend/Family</SelectItem>
-                      <SelectItem value="alumni">Alumni</SelectItem>
-                      <SelectItem value="agent">Student Recruitment Agent</SelectItem>
-                      <SelectItem value="school">School Counselor/Teacher</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-      </div>
-
       {/* Application Fee Payment Section */}
       <div className="bg-white dark:bg-gray-900/70 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col gap-3 mb-4 sm:mb-6">
@@ -2446,6 +2418,34 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
         </div>
       </div>
 
+          {/* How did you hear about us? - Final field before payment */}
+          <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-200">How did you hear about us?</Label>
+              <Select
+                value={foundationRemedialData.personalDetails.hearAboutUs || ''}
+                onValueChange={(value) => setFoundationRemedialData(prev => ({ ...prev, personalDetails: { ...prev.personalDetails, hearAboutUs: value } }))}
+              >
+                <SelectTrigger className="h-12 px-4 border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base">
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="google">Google Search</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">Twitter/X</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="friend">Friend/Family</SelectItem>
+                  <SelectItem value="alumni">Alumni</SelectItem>
+                  <SelectItem value="agent">Student Recruitment Agent</SelectItem>
+                  <SelectItem value="school">School Counselor/Teacher</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Form Actions */}
           <div className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col gap-4 sm:gap-6">
@@ -2453,13 +2453,13 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                 <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ready to Submit?</h3>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">Review your information and proceed to payment</p>
               </div>
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex gap-3 w-full">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleSaveDraft}
                   disabled={isProceedingToPayment || isSavingDraft}
-                  className="w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 text-sm sm:text-base"
+                  className="flex-1 px-4 py-2 text-sm rounded-xl border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200"
                 >
                   {isSavingDraft ? (
                     <span className="flex items-center justify-center">
@@ -2477,7 +2477,7 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   type="button"
                   onClick={handleProceedToPayment}
                   disabled={isProceedingToPayment}
-                  className="w-full px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200 text-sm sm:text-base"
+                  className="flex-1 px-4 py-2 text-sm rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all duration-200"
                 >
                  {isProceedingToPayment ? (
                    <span className="flex items-center justify-center">

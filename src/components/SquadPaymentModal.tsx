@@ -33,7 +33,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
   const getPaymentAmounts = () => {
     const programType = localStorage.getItem("programType") || "foundation";
     // Toggle test payments via env var: VITE_TEST_PAYMENTS=1
-    const TEST_FORCE_NGN_TEST = import.meta.env.VITE_TEST_PAYMENTS === '1' || process.env.VITE_TEST_PAYMENTS === '1';
+    const TEST_FORCE_NGN_TEST = import.meta.env.VITE_TEST_PAYMENTS === '1';
     let baseAmount = 20000; // Default ₦20,000 (original)
     
     if (programType === "foundation") {
@@ -60,7 +60,7 @@ const SquadPaymentModal: React.FC<SquadPaymentModalProps> = ({
 
   // Calculate USD payment amounts
   const getUSDAmounts = () => {
-    const TEST_FORCE_USD_TEST = import.meta.env.VITE_TEST_PAYMENTS === '1' || process.env.VITE_TEST_PAYMENTS === '1';
+    const TEST_FORCE_USD_TEST = import.meta.env.VITE_TEST_PAYMENTS === '1';
     if (TEST_FORCE_USD_TEST) {
       return { baseAmountUSD: 10, squadChargeUSD: 0, totalAmountUSD: 10 };
     }

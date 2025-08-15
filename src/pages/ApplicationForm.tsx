@@ -48,9 +48,17 @@ const ApplicationForm = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, fileType: string) => {
     const files = event.target.files;
     if (files && files[0]) {
+      const file = files[0];
+      
+      // Check file size for images (1MB limit)
+      if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) {
+        toast.error("Image file size should be less than 1MB");
+        return;
+      }
+      
       setUploadedFiles({
         ...uploadedFiles,
-        [fileType]: files[0]
+        [fileType]: file
       });
     }
   };
@@ -505,7 +513,7 @@ const ApplicationForm = () => {
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                   <Upload className="h-8 w-8 mb-2 text-gray-400" />
                                   <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-                                  <p className="text-xs text-gray-500">PNG or JPG (MAX. 2MB)</p>
+                                  <p className="text-xs text-gray-500">PNG or JPG (MAX. 1MB)</p>
                                 </div>
                               )}
                               <Input
