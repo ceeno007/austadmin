@@ -1,1 +1,1 @@
-vibes
+# AUST Admissions Portal
