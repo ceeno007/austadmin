@@ -65,16 +65,6 @@ const Navbar = () => {
 
   const navLinks = [
     { path: "/", label: "Home" },
-    { path: "/about", label: "About" },
-    { path: "/programs", label: "Programs" },
-    { path: "/campus", label: "Campus Life" },
-    { path: "/hostels", label: "Hostels" },
-    { path: "/contact", label: "Contact" },
-    { 
-      path: "https://yahvebrand.store/aust-store", 
-      label: "Store",
-      external: true 
-    },
   ];
 
   return (

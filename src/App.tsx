@@ -97,8 +97,8 @@ const AppLayout: React.FC = () => {
       {/* Removed visible skip links per request */}
       {/* Route change announcer for screen readers */}
       <div id="route-announcer" aria-live="polite" aria-atomic="true" className="sr-only">{routeAnnouncement}</div>
-      {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalNavbar />}
-      <main id="main-content" role="main" tabIndex={-1} className={`flex-grow ${!isAuthPage && !isDocumentUpload && !isReferenceStatus && !isApplicationSuccess ? 'pt-[72px]' : ''} bg-white`}>
+      {/* Minimal experience: hide navbar on all pages */}
+      <main id="main-content" role="main" tabIndex={-1} className={`flex-grow bg-white`}>
         <TransitionGroup component={null}>
           <CSSTransition key={location.pathname} classNames="page-fade" timeout={250}>
             <div className="page-fade-wrapper">
@@ -108,15 +108,7 @@ const AppLayout: React.FC = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/programs" element={<Programs />} />
-                <Route path="/campus" element={<CampusLife />} />
-                <Route path="/hostels" element={<Hostels />} />
-                <Route path="/hostel-images" element={<HostelImages />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/sitemap" element={<Sitemap />} />
+                {/* Removed marketing/informational pages for minimal admissions portal */}
                 <Route path="/application-success" element={<ApplicationSuccess />} />
                 <Route path="/reference-status" element={
                   <ProtectedRoute>
@@ -152,7 +144,8 @@ const AppLayout: React.FC = () => {
           </CSSTransition>
         </TransitionGroup>
       </main>
-      {!isAuthPage && !isPaymentPage && !isReferenceStatus && !isApplicationSuccess && <ConditionalFooter />}
+      {/* Keep a minimal footer across pages */}
+      <ConditionalFooter />
     </div>
   );
 };
