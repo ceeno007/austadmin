@@ -227,6 +227,13 @@ const FileUploadField = ({
           multiple={multiple}
           onChange={(e) => {
             const files = Array.from(e.target.files || []);
+            // Enforce 1MB max per file
+            for (const file of files) {
+              if (file.size > 1 * 1024 * 1024) {
+                toast.error("File size should be less than 1MB");
+                return;
+              }
+            }
             onChange(multiple ? files : files[0] ? [files[0]] : null);
           }}
         />

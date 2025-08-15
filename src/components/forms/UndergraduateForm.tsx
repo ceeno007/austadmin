@@ -220,6 +220,12 @@ const FileUploadField = ({
     e.preventDefault();
     setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
+    // Enforce 1MB max for images
+    const oversizeImage = files.find(f => f.type.startsWith('image/') && f.size > 1 * 1024 * 1024);
+    if (oversizeImage) {
+      toast.error("Image file size should be less than 1MB");
+      return;
+    }
     handleFiles(files);
   };
 
@@ -245,6 +251,12 @@ const FileUploadField = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
+      // Enforce 1MB max for images
+      const oversizeImage = files.find(f => f.type.startsWith('image/') && f.size > 1 * 1024 * 1024);
+      if (oversizeImage) {
+        toast.error("Image file size should be less than 1MB");
+        return;
+      }
       handleFiles(files);
     }
   };
