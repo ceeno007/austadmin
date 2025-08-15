@@ -1842,10 +1842,8 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
                   <SelectValue placeholder="Select programme" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="foundation">School of Foundation & Remedial Studies (A'level)</SelectItem>
-                  <SelectItem value="nabteb_olevel">NABTEB (O'level examination only)</SelectItem>
-                  <SelectItem value="nabteb_olevel_classes">NABTEB (O'level examination and classes)</SelectItem>
-                  <SelectItem value="jupeb">JUPEB (A'level)</SelectItem>
+                  <SelectItem value="jupeb">JUPEB A Levels</SelectItem>
+                  <SelectItem value="nabteb_olevel">Remedial/NABTEB O'Level</SelectItem>
                 </SelectContent>
               </Select>
             </div>
