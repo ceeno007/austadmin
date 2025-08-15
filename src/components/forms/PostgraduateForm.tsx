@@ -3078,7 +3078,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       name: e.target.value
                     }
                   }
-                })); triggerAutoSaveDraft(); }
+                })); triggerAutoSaveDraft(); }}
                 className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>
@@ -3120,7 +3120,7 @@ const PostgraduateForm: React.FC<PostgraduateFormProps> = ({ onPayment, isProces
                       name: e.target.value
                     }
                   }
-                })); triggerAutoSaveDraft(); }
+                })); triggerAutoSaveDraft(); }}
                 className="h-12 px-4 border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-base"
               />
             </div>

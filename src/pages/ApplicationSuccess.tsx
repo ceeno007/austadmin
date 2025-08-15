@@ -145,7 +145,7 @@ const ApplicationSuccess = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 py-8 px-4 sm:px-6 lg:px-8 overflow-auto">
+    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 px-4 sm:px-6 lg:px-8 overflow-hidden flex items-center justify-center">
       <motion.div 
         className="max-w-3xl mx-auto"
         initial={{ opacity: 0 }}
@@ -153,7 +153,7 @@ const ApplicationSuccess = () => {
         transition={{ duration: 0.5 }}
       >
         <motion.div 
-          className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-gray-900/60 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700 h-[90vh] flex flex-col"
           initial={{ y: 50 }}
           animate={{ y: 0 }}
           transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 100 }}
@@ -201,9 +201,10 @@ const ApplicationSuccess = () => {
             >
               Thank you for submitting your application to AUST. We're excited to review your qualifications.
             </motion.p>
+            {/* Top action removed per request */}
           </div>
 
-          <div className="p-8">
+          <div className="flex-1 p-8 overflow-y-auto">
             {/* Email notification section */}
             <motion.div 
               className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 rounded-xl p-6 shadow-sm border border-amber-100 dark:border-gray-700 mb-8"

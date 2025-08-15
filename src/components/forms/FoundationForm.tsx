@@ -760,6 +760,11 @@ const FoundationForm: React.FC<FoundationFormProps> = ({ onPayment, isProcessing
       toast.error("Please agree to the declaration before proceeding");
       return false;
     }
+    // Ensure Programme of Choice is selected
+    if (!foundationRemedialData.programChoice.program) {
+      toast.error("Programme of Choice is required");
+      return false;
+    }
     
     return true;
   };
